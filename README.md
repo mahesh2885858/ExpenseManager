@@ -1,4 +1,4 @@
-\*\*\*\* ExpenseManager 💰
+## ExpenseManager 💰
 
 A modern, user-friendly expense management mobile app built with React Native, designed to help users track their finances with ease and efficiency.
 
