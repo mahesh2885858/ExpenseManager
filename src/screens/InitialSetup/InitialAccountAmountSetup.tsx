@@ -19,6 +19,14 @@ const InitialAccountAmountSetup = () => {
   const setIsInitialSetupDone = useAccountStore(
     state => state.setIsInitialSetupDone,
   );
+
+  const onAmountChange = useCallback((value: string) => {
+    // don't allow floats and etc symbols
+    if (value.includes('.') || value.includes(',') || value.includes('-'))
+      return;
+    setAmount(value);
+  }, []);
+
   const saveAccount = useCallback(() => {
     if (route.params?.name) {
       addAccount({
@@ -61,7 +69,8 @@ const InitialAccountAmountSetup = () => {
         placeholder={t('common.amount') + ' (' + t('common.optional') + ')'}
         keyboardType="numeric"
         value={amount}
-        onChangeText={setAmount}
+        onChangeText={onAmountChange}
+        left={<TextInput.Affix text="₹" />}
       />
       <Button
         onPress={saveAccount}
