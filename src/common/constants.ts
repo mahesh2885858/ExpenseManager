@@ -1,0 +1,1 @@
+export const MAX_INITIAL_AMOUNT = 10000000;

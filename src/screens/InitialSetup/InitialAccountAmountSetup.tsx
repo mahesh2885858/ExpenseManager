@@ -5,7 +5,7 @@ import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
-import { gs } from '../../common';
+import { gs, MAX_INITIAL_AMOUNT } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
 
@@ -24,6 +24,8 @@ const InitialAccountAmountSetup = () => {
     // don't allow floats and etc symbols
     if (value.includes('.') || value.includes(',') || value.includes('-'))
       return;
+    const digits = parseInt(value, 10);
+    if (digits > MAX_INITIAL_AMOUNT) return;
     setAmount(value);
   }, []);
 
