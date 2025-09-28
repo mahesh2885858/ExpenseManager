@@ -8,5 +8,7 @@ export default {
     amountPlaceholder: 'Initial amount',
     save: 'Save',
     optional: 'Optional',
+    pickName: 'Pick a name',
+    amount: 'Amount',
   },
 };

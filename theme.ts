@@ -9,14 +9,29 @@ export const spacing = {
   xl: 30,
   xxl: 34,
   xxxl: 40,
-};
+} as const;
 
 export const textSize = {
   xs: 12,
   sm: 14,
   md: 16,
   lg: 20,
-};
+  xl: 24,
+  xxl: 28,
+  xxxl: 32,
+} as const;
+
+export const borderRadius = {
+  none: 0,
+  xs: 2,
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  xxl: 20,
+  round: 50, // for circular elements
+  pill: 999, // for pill-shaped buttons
+} as const;
 
 const CustomLight: MD3Theme = {
   ...MD3LightTheme,

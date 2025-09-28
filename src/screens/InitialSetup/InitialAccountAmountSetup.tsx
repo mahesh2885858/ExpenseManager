@@ -1,11 +1,13 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TRootStackParamList } from '../../types';
+import { borderRadius, spacing, textSize } from '../../../theme';
+import { gs } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
+import { TRootStackParamList } from '../../types';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -29,7 +31,8 @@ const InitialAccountAmountSetup = () => {
     }
   }, [addAccount, amount, route.params?.name, setIsInitialSetupDone]);
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior="padding"
       style={[
         styles.container,
         {
@@ -39,12 +42,23 @@ const InitialAccountAmountSetup = () => {
         },
       ]}
     >
+      <View style={styles.headingContainer}>
+        <Text
+          style={[
+            theme.fonts.displaySmall,
+            gs.fontBold,
+            {
+              color: theme.colors.onBackground,
+            },
+          ]}
+        >
+          {t('common.amountPlaceholder')}
+        </Text>
+      </View>
       <TextInput
         mode="outlined"
         style={[styles.texInput]}
-        placeholder={
-          t('common.amountPlaceholder') + ' (' + t('common.optional') + ')'
-        }
+        placeholder={t('common.amount') + ' (' + t('common.optional') + ')'}
         keyboardType="numeric"
         value={amount}
         onChangeText={setAmount}
@@ -55,9 +69,9 @@ const InitialAccountAmountSetup = () => {
         style={styles.nextButton}
         mode="contained"
       >
-        {t('common.save')}
+        {t('common.next')}
       </Button>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -68,12 +82,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: spacing.lg,
+  },
+  headingContainer: {
+    width: '80%',
   },
   texInput: {
-    borderRadius: 10,
+    borderRadius: borderRadius.lg,
     width: '80%',
-    fontSize: 20,
+    fontSize: textSize.lg,
   },
-  nextButton: { width: '40%', marginTop: 20 },
-  nextButtonLabel: { fontSize: 18 },
+  nextButton: { width: '40%' },
+  nextButtonLabel: { fontSize: textSize.md },
 });

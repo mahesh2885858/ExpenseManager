@@ -1,11 +1,12 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { spacing } from '../../../theme';
+import { borderRadius, spacing, textSize } from '../../../theme';
 import { TRootStackParamList } from '../../types';
+import { gs } from '../../common/';
 
 const InitialAccountNameSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -19,7 +20,8 @@ const InitialAccountNameSetup = () => {
   }, [name, navigate]);
 
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior="padding"
       style={[
         styles.container,
         {
@@ -33,13 +35,13 @@ const InitialAccountNameSetup = () => {
         <Text
           style={[
             theme.fonts.displaySmall,
+            gs.fontBold,
             {
               color: theme.colors.onBackground,
-              fontWeight: 'bold',
             },
           ]}
         >
-          Please enter an account Name
+          {t('common.pickName')}
         </Text>
       </View>
       <TextInput
@@ -60,7 +62,7 @@ const InitialAccountNameSetup = () => {
       >
         {t('common.next')}
       </Button>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -77,10 +79,10 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   texInput: {
-    borderRadius: 10,
+    borderRadius: borderRadius.lg,
     width: '80%',
-    fontSize: 20,
+    fontSize: textSize.lg,
   },
-  nextButton: { width: '40%', marginTop: 20 },
-  nextButtonLabel: { fontSize: 18 },
+  nextButton: { width: '40%' },
+  nextButtonLabel: { fontSize: textSize.md },
 });
