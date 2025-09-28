@@ -1,27 +1,19 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { View } from 'react-native';
-import { Button, Icon } from 'react-native-paper';
-import useAccountStore from '../stores/accountsStore';
+import { Icon } from 'react-native-paper';
 import { TBottomTabParamList } from '../types';
+import HomeScreen from '../screens/HomeScreen';
 const BottomTab = createBottomTabNavigator<TBottomTabParamList>();
-const HomeScreen = () => {
-  const setIsInitialSetupDone = useAccountStore(
-    state => state.setIsInitialSetupDone,
-  );
-  const deleteAllAccounts = useAccountStore(state => state.deleteAllAccounts);
-  return (
-    <View>
-      <Button
-        onPress={() => {
-          setIsInitialSetupDone(false);
-          deleteAllAccounts();
-        }}
-      >
-        Reset stack
-      </Button>
-    </View>
-  );
+
+const tabBarIcon = (
+  props: {
+    focused: boolean;
+    color: string;
+    size: number;
+  },
+  iconName: string,
+) => {
+  return <Icon source={iconName} size={30} color={props.color} />;
 };
 
 const MainBottomTabs = () => {
@@ -31,18 +23,16 @@ const MainBottomTabs = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon(props) {
-            return <Icon source={'home-outline'} size={30} />;
-          },
+          tabBarIcon: props =>
+            tabBarIcon(props, props.focused ? 'home' : 'home-outline'),
+          headerShown: false,
         }}
       />
       <BottomTab.Screen
         name="Transactions"
         component={HomeScreen}
         options={{
-          tabBarIcon(props) {
-            return <Icon source={'history'} size={30} />;
-          },
+          tabBarIcon: props => tabBarIcon(props, 'history'),
         }}
       />
     </BottomTab.Navigator>

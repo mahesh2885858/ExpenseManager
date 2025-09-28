@@ -1,4 +1,14 @@
-import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
+import {
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
+} from '@react-navigation/native';
+import merge from 'deepmerge';
+import {
+  MD3DarkTheme,
+  MD3LightTheme,
+  MD3Theme,
+  adaptNavigationTheme,
+} from 'react-native-paper';
 import MaterialTheme from './theme_one.json';
 
 export const spacing = {
@@ -51,4 +61,12 @@ const CustomDark: MD3Theme = {
   },
 };
 
-export { CustomLight, CustomDark };
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+  reactNavigationLight: NavigationDefaultTheme,
+  reactNavigationDark: NavigationDarkTheme,
+});
+
+const CombinedDefaultTheme = merge(CustomLight, LightTheme);
+const CombinedDarkTheme = merge(CustomDark, DarkTheme);
+
+export { CombinedDefaultTheme, CombinedDarkTheme };
