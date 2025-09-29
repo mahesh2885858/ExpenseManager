@@ -8,6 +8,7 @@ import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs, MAX_INITIAL_AMOUNT } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
+import { v4 as uuid } from 'uuid';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -30,11 +31,12 @@ const InitialAccountAmountSetup = () => {
   }, []);
 
   const saveAccount = useCallback(() => {
+    const id = uuid();
     if (route.params?.name) {
       addAccount({
         name: route.params.name,
         balance: parseInt(amount, 10) || 0,
-        id: Date.now().toString(),
+        id,
         isSelected: true,
       });
       setIsInitialSetupDone(true);

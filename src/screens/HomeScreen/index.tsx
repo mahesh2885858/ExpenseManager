@@ -77,7 +77,57 @@ const HomeScreen = () => {
           </Card.Content>
         </Card>
       </View>
-
+      {/* income and expense section */}
+      <View style={[gs.flexRow, { paddingHorizontal: spacing.lg }]}>
+        <View style={[styles.ieBox]}>
+          <Text
+            style={[
+              styles.ieBanner,
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.md,
+              },
+            ]}
+          >
+            Income
+          </Text>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.xl,
+              },
+            ]}
+          >
+            ₹{formatDigits('3000')}
+          </Text>
+        </View>
+        <View style={[styles.ieBox]}>
+          <Text
+            style={[
+              styles.ieBanner,
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.md,
+              },
+            ]}
+          >
+            Expense
+          </Text>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.xl,
+              },
+            ]}
+          >
+            -₹{formatDigits('200')}
+          </Text>
+        </View>
+      </View>
       {/* <Button
         onPress={() => {
           setIsInitialSetupDone(false);
@@ -102,5 +152,13 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontWeight: '500',
+  },
+  ieBox: {
+    flex: 1,
+    paddingLeft: spacing.lg,
+    gap: spacing.xs,
+  },
+  ieBanner: {
+    fontWeight: 'semibold',
   },
 });
