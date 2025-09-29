@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Card, useTheme } from 'react-native-paper';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Card, Icon, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs } from '../../common';
@@ -17,7 +17,9 @@ const HomeScreen = () => {
   }, [getSelectedAccount]);
 
   return (
-    <View style={{ paddingTop: top + 5, gap: spacing.lg }}>
+    <ScrollView
+      contentContainerStyle={{ paddingTop: top + 5, gap: spacing.lg }}
+    >
       {/* header section */}
       <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
         <Pressable
@@ -128,6 +130,154 @@ const HomeScreen = () => {
           </Text>
         </View>
       </View>
+      {/* recent transactions section */}
+      <View
+        style={{
+          paddingHorizontal: spacing.lg,
+        }}
+      >
+        <Text
+          style={[
+            gs.fontBold,
+            {
+              color: theme.colors.onBackground,
+              fontSize: textSize.lg,
+            },
+          ]}
+        >
+          Recent transactions
+        </Text>
+        <View style={[gs.flexRow, { gap: spacing.md, marginTop: spacing.lg }]}>
+          <View
+            style={[
+              {
+                padding: spacing.sm,
+                paddingHorizontal: spacing.md,
+                borderRadius: borderRadius.lg,
+                backgroundColor: theme.colors.backdrop,
+              },
+              gs.centerItems,
+            ]}
+          >
+            <Text
+              style={[
+                { color: theme.colors.onBackground, fontSize: textSize.md },
+                gs.fontBold,
+              ]}
+            >
+              Feb
+            </Text>
+            <Text
+              style={[
+                { color: theme.colors.onBackground, fontSize: textSize.md },
+                gs.fontBold,
+              ]}
+            >
+              25
+            </Text>
+          </View>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text
+              style={[
+                {
+                  fontSize: textSize.lg,
+                  color: theme.colors.onBackground,
+                },
+              ]}
+            >
+              Food
+            </Text>
+            <Text
+              style={[
+                {
+                  fontSize: textSize.md,
+                  color: theme.colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              some description
+            </Text>
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  fontSize: textSize.lg,
+                  color: theme.colors.onErrorContainer,
+                },
+              ]}
+            >
+              -₹120
+            </Text>
+          </View>
+        </View>
+        <View style={[gs.flexRow, { gap: spacing.md, marginTop: spacing.lg }]}>
+          <View
+            style={[
+              {
+                padding: spacing.sm,
+                paddingHorizontal: spacing.md,
+                borderRadius: borderRadius.lg,
+                backgroundColor: theme.colors.backdrop,
+              },
+              gs.centerItems,
+            ]}
+          >
+            <Text
+              style={[
+                { color: theme.colors.onBackground, fontSize: textSize.md },
+                gs.fontBold,
+              ]}
+            >
+              Feb
+            </Text>
+            <Text
+              style={[
+                { color: theme.colors.onBackground, fontSize: textSize.md },
+                gs.fontBold,
+              ]}
+            >
+              25
+            </Text>
+          </View>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text
+              style={[
+                {
+                  fontSize: textSize.lg,
+                  color: theme.colors.onBackground,
+                },
+              ]}
+            >
+              Food
+            </Text>
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  fontSize: textSize.lg,
+                  color: theme.colors.onTertiaryContainer,
+                },
+              ]}
+            >
+              ₹120
+            </Text>
+          </View>
+        </View>
+      </View>
       {/* <Button
         onPress={() => {
           setIsInitialSetupDone(false);
@@ -136,7 +286,7 @@ const HomeScreen = () => {
       >
         Reset stack
       </Button> */}
-    </View>
+    </ScrollView>
   );
 };
 

@@ -48,7 +48,7 @@ const CustomLight: MD3Theme = {
   version: 3,
   colors: {
     ...MD3LightTheme.colors,
-    ...MaterialTheme.light,
+    ...MaterialTheme.light.colors,
   },
 };
 
@@ -57,7 +57,7 @@ const CustomDark: MD3Theme = {
   version: 3,
   colors: {
     ...MD3DarkTheme.colors,
-    ...MaterialTheme.dark,
+    ...MaterialTheme.dark.colors,
   },
 };
 
