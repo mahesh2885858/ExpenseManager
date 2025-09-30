@@ -1,16 +1,26 @@
+import { formatDigits, getMaxText } from 'commonutil-core';
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Card, Icon, useTheme } from 'react-native-paper';
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, spacing, textSize } from '../../../theme';
+import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
-import { formatDigits } from 'commonutil-core';
+import useTransactionsStore from '../../stores/transactionsStore';
+import { format, getDate } from 'date-fns';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
-  const theme = useTheme();
+  const theme = useAppTheme();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+  const transactions = useTransactionsStore(state => state.transactions);
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();
@@ -18,7 +28,12 @@ const HomeScreen = () => {
 
   return (
     <ScrollView
-      contentContainerStyle={{ paddingTop: top + 5, gap: spacing.lg }}
+      nestedScrollEnabled={true}
+      contentContainerStyle={{
+        paddingTop: top + 5,
+        gap: spacing.lg,
+        paddingBottom: spacing.xxxl,
+      }}
     >
       {/* header section */}
       <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
@@ -44,7 +59,7 @@ const HomeScreen = () => {
       </View>
       {/* Total balance section */}
       <View style={{ paddingHorizontal: spacing.lg }}>
-        <Card mode="elevated" elevation={5}>
+        <Card mode="contained">
           <Card.Content
             style={[
               styles.totalBalance,
@@ -132,9 +147,11 @@ const HomeScreen = () => {
       </View>
       {/* recent transactions section */}
       <View
-        style={{
-          paddingHorizontal: spacing.lg,
-        }}
+        style={[
+          {
+            paddingHorizontal: spacing.lg,
+          },
+        ]}
       >
         <Text
           style={[
@@ -147,145 +164,120 @@ const HomeScreen = () => {
         >
           Recent transactions
         </Text>
-        <View style={[gs.flexRow, { gap: spacing.md, marginTop: spacing.lg }]}>
-          <View
-            style={[
-              {
-                padding: spacing.sm,
-                paddingHorizontal: spacing.md,
-                borderRadius: borderRadius.lg,
-                backgroundColor: theme.colors.backdrop,
-              },
-              gs.centerItems,
-            ]}
-          >
+        <View style={[gs.fullFlex]}>
+          {transactions.length === 0 ? (
             <Text
               style={[
-                { color: theme.colors.onBackground, fontSize: textSize.md },
                 gs.fontBold,
-              ]}
-            >
-              Feb
-            </Text>
-            <Text
-              style={[
-                { color: theme.colors.onBackground, fontSize: textSize.md },
-                gs.fontBold,
-              ]}
-            >
-              25
-            </Text>
-          </View>
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text
-              style={[
+                gs.centerText,
                 {
-                  fontSize: textSize.lg,
-                  color: theme.colors.onBackground,
-                },
-              ]}
-            >
-              Food
-            </Text>
-            <Text
-              style={[
-                {
-                  fontSize: textSize.md,
                   color: theme.colors.onSurfaceDisabled,
-                },
-              ]}
-            >
-              some description
-            </Text>
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text
-              style={[
-                gs.fontBold,
-                {
                   fontSize: textSize.lg,
-                  color: theme.colors.onErrorContainer,
+                  marginTop: spacing.lg,
                 },
               ]}
             >
-              -₹120
+              No transactions yet!!
             </Text>
-          </View>
-        </View>
-        <View style={[gs.flexRow, { gap: spacing.md, marginTop: spacing.lg }]}>
-          <View
-            style={[
-              {
-                padding: spacing.sm,
-                paddingHorizontal: spacing.md,
-                borderRadius: borderRadius.lg,
-                backgroundColor: theme.colors.backdrop,
-              },
-              gs.centerItems,
-            ]}
-          >
-            <Text
-              style={[
-                { color: theme.colors.onBackground, fontSize: textSize.md },
-                gs.fontBold,
-              ]}
-            >
-              Feb
-            </Text>
-            <Text
-              style={[
-                { color: theme.colors.onBackground, fontSize: textSize.md },
-                gs.fontBold,
-              ]}
-            >
-              25
-            </Text>
-          </View>
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text
-              style={[
-                {
-                  fontSize: textSize.lg,
-                  color: theme.colors.onBackground,
-                },
-              ]}
-            >
-              Food
-            </Text>
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text
-              style={[
-                gs.fontBold,
-                {
-                  fontSize: textSize.lg,
-                  color: theme.colors.onTertiaryContainer,
-                },
-              ]}
-            >
-              ₹120
-            </Text>
-          </View>
+          ) : (
+            <FlatList
+              scrollEnabled={false}
+              data={transactions}
+              renderItem={props => (
+                <View
+                  style={[
+                    gs.flexRow,
+                    { gap: spacing.md, marginTop: spacing.lg },
+                  ]}
+                >
+                  <View
+                    style={[
+                      {
+                        padding: spacing.sm,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: borderRadius.lg,
+                        backgroundColor: theme.colors.secondaryContainer,
+                      },
+                      gs.centerItems,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        {
+                          color: theme.colors.onSecondaryContainer,
+                          fontSize: textSize.md,
+                        },
+                        gs.fontBold,
+                      ]}
+                    >
+                      {format(props.item.createdAt, 'MMM')}
+                    </Text>
+                    <Text
+                      style={[
+                        {
+                          color: theme.colors.onSecondaryContainer,
+                          fontSize: textSize.md,
+                        },
+                        gs.fontBold,
+                      ]}
+                    >
+                      {getDate(props.item.createdAt)}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <Text
+                      style={[
+                        {
+                          fontSize: textSize.lg,
+                          color: theme.colors.onBackground,
+                        },
+                      ]}
+                    >
+                      Food
+                    </Text>
+                    {props.item.description && (
+                      <Text
+                        style={[
+                          {
+                            fontSize: textSize.md,
+                            color: theme.colors.onSurfaceDisabled,
+                          },
+                        ]}
+                      >
+                        {getMaxText(props.item.description ?? '', 35)}
+                      </Text>
+                    )}
+                  </View>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Text
+                      style={[
+                        gs.fontBold,
+                        {
+                          fontSize: textSize.lg,
+                          color:
+                            props.item.type === 'expense'
+                              ? theme.colors.error
+                              : theme.colors.success,
+                        },
+                      ]}
+                    >
+                      {props.item.type === 'expense'
+                        ? `-₹${props.item.amount}`
+                        : `₹${props.item.amount}`}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              keyExtractor={item => item.id}
+            />
+          )}
         </View>
       </View>
-      {/* <Button
-        onPress={() => {
-          setIsInitialSetupDone(false);
-          deleteAllAccounts();
-        }}
-      >
-        Reset stack
-      </Button> */}
     </ScrollView>
   );
 };

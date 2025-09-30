@@ -7,6 +7,12 @@ export const gs = StyleSheet.create({
   flexRow: {
     flexDirection: 'row',
   },
+  fullFlex: {
+    flex: 1,
+  },
+  centerText: {
+    textAlign: 'center',
+  },
   centerItems: {
     justifyContent: 'center',
     alignItems: 'center',
