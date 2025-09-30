@@ -40,7 +40,11 @@
       },
       "surfaceDisabled": "rgba(28, 27, 31, 0.12)",
       "onSurfaceDisabled": "rgba(28, 27, 31, 0.38)",
-      "backdrop": "rgba(48, 47, 56, 0.4)"
+      "backdrop": "rgba(48, 47, 56, 0.4)",
+      "success": "rgb(0, 110, 47)",
+      "onSuccess": "rgb(255, 255, 255)",
+      "successContainer": "rgb(107, 255, 143)",
+      "onSuccessContainer": "rgb(0, 33, 9)"
     }
   },
   "dark": {
@@ -84,7 +88,11 @@
       },
       "surfaceDisabled": "rgba(229, 225, 230, 0.12)",
       "onSurfaceDisabled": "rgba(229, 225, 230, 0.38)",
-      "backdrop": "rgba(48, 47, 56, 0.4)"
+      "backdrop": "rgba(48, 47, 56, 0.4)",
+      "success": "rgb(74, 225, 118)",
+      "onSuccess": "rgb(0, 57, 21)",
+      "successContainer": "rgb(0, 83, 33)",
+      "onSuccessContainer": "rgb(107, 255, 143)"
     }
   }
 }

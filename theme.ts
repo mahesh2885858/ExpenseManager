@@ -6,8 +6,8 @@ import merge from 'deepmerge';
 import {
   MD3DarkTheme,
   MD3LightTheme,
-  MD3Theme,
   adaptNavigationTheme,
+  useTheme,
 } from 'react-native-paper';
 import MaterialTheme from './theme_one.json';
 
@@ -43,7 +43,7 @@ export const borderRadius = {
   pill: 999, // for pill-shaped buttons
 } as const;
 
-const CustomLight: MD3Theme = {
+const CustomLight = {
   ...MD3LightTheme,
   version: 3,
   colors: {
@@ -52,7 +52,7 @@ const CustomLight: MD3Theme = {
   },
 };
 
-const CustomDark: MD3Theme = {
+const CustomDark = {
   ...MD3DarkTheme,
   version: 3,
   colors: {
@@ -60,6 +60,8 @@ const CustomDark: MD3Theme = {
     ...MaterialTheme.dark.colors,
   },
 };
+
+export type AppTheme = typeof CustomDark;
 
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
@@ -69,4 +71,6 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 const CombinedDefaultTheme = merge(CustomLight, LightTheme);
 const CombinedDarkTheme = merge(CustomDark, DarkTheme);
 
-export { CombinedDefaultTheme, CombinedDarkTheme };
+export { CombinedDarkTheme, CombinedDefaultTheme };
+
+export const useAppTheme = () => useTheme<AppTheme>();
