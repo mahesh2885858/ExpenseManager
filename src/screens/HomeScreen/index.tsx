@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Card } from 'react-native-paper';
@@ -15,10 +16,13 @@ import { gs } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { format, getDate } from 'date-fns';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { TBottomTabParamList } from '../../types';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
+  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const transactions = useTransactionsStore(state => state.transactions);
 
@@ -184,7 +188,7 @@ const HomeScreen = () => {
           ) : (
             <FlatList
               scrollEnabled={false}
-              data={transactions}
+              data={transactions.slice(0, 10)}
               renderItem={props => (
                 <View
                   style={[
@@ -276,6 +280,29 @@ const HomeScreen = () => {
                 </View>
               )}
               keyExtractor={item => item.id}
+              ListFooterComponent={
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Transactions');
+                  }}
+                  style={{
+                    marginTop: spacing.lg,
+                  }}
+                >
+                  <Text
+                    style={[
+                      gs.fontBold,
+                      gs.centerText,
+                      {
+                        fontSize: textSize.lg,
+                        color: theme.colors.primary,
+                      },
+                    ]}
+                  >
+                    See all
+                  </Text>
+                </TouchableOpacity>
+              }
             />
           )}
         </View>
@@ -288,7 +315,7 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 100,
+    paddingBottom: 200,
   },
   avatar: {
     height: 45,
