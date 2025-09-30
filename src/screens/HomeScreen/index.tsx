@@ -29,11 +29,13 @@ const HomeScreen = () => {
   return (
     <ScrollView
       nestedScrollEnabled={true}
-      contentContainerStyle={{
-        paddingTop: top + 5,
-        gap: spacing.lg,
-        paddingBottom: spacing.xxxl,
-      }}
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingTop: top + 5,
+          gap: spacing.lg,
+        },
+      ]}
     >
       {/* header section */}
       <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
@@ -285,6 +287,9 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 100,
+  },
   avatar: {
     height: 45,
     width: 45,

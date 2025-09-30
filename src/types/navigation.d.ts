@@ -2,6 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type TBottomTabParamList = {
   Home: undefined;
+  CustomButton: undefined;
   Transactions: undefined;
 };
 
