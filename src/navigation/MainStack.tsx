@@ -5,6 +5,7 @@ import InitialAccountNameSetup from '../screens/InitialSetup/InitialAccountNameS
 import useAccountStore from '../stores/accountsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
+import AddTransaction from '../screens/AddTransaction';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -25,13 +26,22 @@ const MainStack = () => {
           />
         </>
       ) : (
-        <Stack.Screen
-          name="MainBottomTabs"
-          component={MainBottomTabs}
-          options={{
-            headerShown: false,
-          }}
-        />
+        <>
+          <Stack.Screen
+            name="MainBottomTabs"
+            component={MainBottomTabs}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="AddTransaction"
+            component={AddTransaction}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

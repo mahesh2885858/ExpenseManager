@@ -12,6 +12,7 @@ export type TRootStackParamList = {
     name: string;
   };
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
+  AddTransaction: undefined;
 };
 
 declare global {
