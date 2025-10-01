@@ -139,7 +139,9 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       </View>
       {/* <View> */}
       <Pressable
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('AddTransaction');
+        }}
         style={({ pressed }) => [
           styles.fab,
           {
