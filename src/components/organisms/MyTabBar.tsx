@@ -1,9 +1,7 @@
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { PlatformPressable } from '@react-navigation/elements';
-import { useLinkBuilder } from '@react-navigation/native';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { FAB, Icon } from 'react-native-paper';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -15,7 +13,6 @@ import { useAppTheme } from '../../../theme';
 
 function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useAppTheme();
-  const { buildHref } = useLinkBuilder();
   const { bottom } = useSafeAreaInsets();
 
   // Filter out 'CustomButton' routes to get actual tabs
@@ -114,15 +111,20 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           }
 
           return (
-            <PlatformPressable
+            <Pressable
               key={route.key}
-              href={buildHref(route.name, route.params)}
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options.tabBarAccessibilityLabel}
               testID={options.tabBarButtonTestID}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={styles.navigationItem}
+              style={({ pressed }) => [
+                styles.navigationItem,
+                {
+                  opacity: pressed ? 0.5 : 1,
+                  transform: [{ scale: pressed ? 0.7 : 1 }],
+                },
+              ]}
             >
               <Icon
                 source={route.name === 'Home' ? 'home' : 'history'}
@@ -131,24 +133,24 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                   isFocused ? colors.primaryContainer : colors.onSurfaceVariant
                 }
               />
-            </PlatformPressable>
+            </Pressable>
           );
         })}
       </View>
-      <View>
-        <FAB
-          icon={'plus'}
-          mode="elevated"
-          color={colors.onSurfaceVariant}
-          size="large"
-          style={[
-            styles.fab,
-            {
-              backgroundColor: colors.surfaceVariant,
-            },
-          ]}
-        />
-      </View>
+      {/* <View> */}
+      <Pressable
+        onPress={() => {}}
+        style={({ pressed }) => [
+          styles.fab,
+          {
+            backgroundColor: colors.surfaceVariant,
+            opacity: pressed ? 0.8 : 1,
+          },
+        ]}
+      >
+        <Icon source={'plus'} color={colors.onSurfaceVariant} size={30} />
+      </Pressable>
+      {/* </View> */}
     </View>
   );
 }
