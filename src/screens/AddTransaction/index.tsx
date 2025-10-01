@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Avatar, Icon } from 'react-native-paper';
+import { Avatar, Icon, TextInput } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
@@ -13,6 +13,8 @@ const AddTransaction = () => {
   const navigation = useNavigation();
   const [transactionType, setTransactionType] =
     useState<TTransactionType>('income');
+
+  const [amountInput, setAmountInput] = useState('');
 
   const changeTransactionType = (type: TTransactionType) => {
     setTransactionType(type);
@@ -61,7 +63,7 @@ const AddTransaction = () => {
           />
         </View>
         {/* transaction type*/}
-        <View style={[gs.flexRow, { gap: spacing.lg }]}>
+        <View style={[gs.flexRow, { gap: spacing.lg, marginTop: spacing.xs }]}>
           <PressableWithFeedback
             onPress={() => changeTransactionType('income')}
             style={[
@@ -123,6 +125,24 @@ const AddTransaction = () => {
             </Text>
           </PressableWithFeedback>
         </View>
+        {/* amount input*/}
+        <View
+          style={[
+            {
+              marginTop: spacing.lg,
+            },
+          ]}
+        >
+          <TextInput
+            onChangeText={setAmountInput}
+            value={amountInput}
+            mode="outlined"
+            placeholder="Amount"
+            keyboardType="numeric"
+            left={<TextInput.Affix text="₹" />}
+            style={style.texInput}
+          />
+        </View>
       </ScrollView>
     </ScreenWithoutHeader>
   );
@@ -139,5 +159,9 @@ const style = StyleSheet.create({
     borderRadius: borderRadius.pill,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
+  },
+  texInput: {
+    borderRadius: borderRadius.lg,
+    fontSize: textSize.lg,
   },
 });
