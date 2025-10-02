@@ -49,6 +49,7 @@ const AddTransaction = () => {
     hours: new Date().getHours(),
     minutes: new Date().getMinutes(),
   });
+  const [desc, setDesc] = useState('');
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -141,11 +142,13 @@ const AddTransaction = () => {
           <TextInput
             onChangeText={setAmountInput}
             value={amountInput}
+            outlineColor={colors.onSurfaceDisabled}
             mode="outlined"
             placeholder="Amount"
             keyboardType="numeric"
             left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
             style={style.textInput}
+            placeholderTextColor={colors.onSurfaceDisabled}
           />
         </View>
 
@@ -247,6 +250,18 @@ const AddTransaction = () => {
             </PressableWithFeedback>
           </Tooltip>
         </View>
+        {/* Todo: Attachments list section */}
+        {/* Description section */}
+        <TextInput
+          mode="outlined"
+          outlineColor={colors.onSurfaceDisabled}
+          style={[{ marginTop: spacing.lg, paddingVertical: spacing.sm }]}
+          placeholder="Description"
+          multiline
+          onChangeText={setDesc}
+          value={desc}
+          placeholderTextColor={colors.onSurfaceDisabled}
+        />
 
         {/* Date Picker Modal */}
         <DatePickerModal
