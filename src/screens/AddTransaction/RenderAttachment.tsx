@@ -72,7 +72,18 @@ const RenderAttachment = ({ attachment, removeFile }: TProps) => {
 
   return (
     <View>
-      <FAB icon="delete" size="small" style={styles.fab} onPress={deleteFile} />
+      <FAB
+        icon="delete"
+        size="small"
+        color={colors.onError}
+        style={[
+          styles.fab,
+          {
+            backgroundColor: colors.error,
+          },
+        ]}
+        onPress={deleteFile}
+      />
       {attachment.extension.includes('image') ? renderImage() : renderPdf()}
     </View>
   );
@@ -86,6 +97,7 @@ const styles = StyleSheet.create({
     right: FAB_POSITION,
     bottom: FAB_POSITION,
     zIndex: 1000,
+    opacity: 0.8,
   },
   pdfContainer: {
     width: ATTACHMENT_SIZE,

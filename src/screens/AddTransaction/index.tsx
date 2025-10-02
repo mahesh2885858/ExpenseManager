@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { Avatar, Icon, TextInput, Tooltip } from 'react-native-paper';
+import { Avatar, FAB, Icon, TextInput, Tooltip } from 'react-native-paper';
 import {
   DatePickerModal,
   DatePickerModalSingleProps,
@@ -329,10 +329,10 @@ const AddTransaction = () => {
           entering={FadeIn}
           style={[
             gs.flexRow,
+            style.categoryInputBox,
             {
               marginTop,
               height: categoryInputHeight,
-              overflow: 'hidden',
               gap: spacing.md,
             },
           ]}
@@ -496,6 +496,11 @@ const AddTransaction = () => {
           minutes={0}
         />
       </ScrollView>
+      <FAB
+        icon="check"
+        style={style.fab}
+        onPress={() => console.log('Pressed')}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -579,5 +584,14 @@ const style = StyleSheet.create({
     marginTop: spacing.xs,
     padding: spacing.sm,
     borderWidth: 1,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 5,
+    bottom: 40,
+  },
+  categoryInputBox: {
+    overflow: 'hidden',
   },
 });
