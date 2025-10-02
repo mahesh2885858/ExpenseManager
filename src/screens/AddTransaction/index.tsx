@@ -1,7 +1,14 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Avatar, Icon, TextInput, Tooltip } from 'react-native-paper';
 import {
@@ -11,11 +18,13 @@ import {
 } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
+import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
-import { TTransactionType } from '../../types';
+import { TAttachment, TTransactionType } from '../../types';
+import RenderAttachment from './RenderAttachment';
 
 // TODO: Replace with actual category data
 const TEMP_CATEGORY_DATA = [
@@ -34,9 +43,15 @@ const CURRENCY_SYMBOL = '₹';
 const AVATAR_SIZE = 40;
 const ICON_SIZE = 30;
 
+const renderAttachment = (
+  prop: TAttachment,
+  removeFile: (filePath: string) => void,
+) => <RenderAttachment attachment={prop} removeFile={removeFile} />;
+
 const AddTransaction = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
+  const { top } = useSafeAreaInsets();
 
   // State
   const [transactionType, setTransactionType] =
@@ -50,6 +65,7 @@ const AddTransaction = () => {
     minutes: new Date().getMinutes(),
   });
   const [desc, setDesc] = useState('');
+  const [attachments, setAttachments] = useState<TAttachment[]>([]);
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -93,9 +109,60 @@ const AddTransaction = () => {
     },
   ];
 
+  const pickFiles = async () => {
+    try {
+      const filesWithLocalUri: TAttachment[] = [];
+      const PickedFiles = await pick({
+        allowMultiSelection: true,
+        type: [types.images, types.pdf],
+      });
+      console.log({ selectedFiles: PickedFiles });
+      const validFiles = PickedFiles.filter(f => !!f.uri);
+      const copied = await keepLocalCopy({
+        destination: 'documentDirectory',
+        files: validFiles.map(f => ({
+          fileName: f.name ?? 'file',
+          uri: f.uri,
+        })),
+      });
+      copied.forEach((file, i) => {
+        if (file.status === 'error') {
+          console.log('error while copying: ', file.copyError);
+        } else {
+          filesWithLocalUri.push({
+            extension: validFiles[i].nativeType ?? '',
+            name: validFiles[i].name ?? '',
+            path: file.localUri,
+            size: validFiles[i].size ?? 0,
+          });
+        }
+      });
+      console.log({ filesWithLocalUri });
+      setAttachments(filesWithLocalUri);
+    } catch (error) {
+      console.log({ errorWhilePickingFiles: error });
+    }
+  };
+
+  const removeFile = (filePath: string) => {
+    const files = attachments.filter(f => f.path !== filePath);
+    setAttachments(files);
+  };
+
   return (
-    <ScreenWithoutHeader>
-      <ScrollView contentContainerStyle={style.scrollViewContent}>
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={[
+        gs.fullFlex,
+        {
+          paddingTop: top,
+        },
+      ]}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps
+        contentContainerStyle={style.scrollViewContent}
+      >
         {/* Header */}
         <View style={[gs.flexRow, gs.itemsCenter, style.header]}>
           <View
@@ -234,6 +301,7 @@ const AddTransaction = () => {
 
           <Tooltip title="Add Bill/invoice etc">
             <PressableWithFeedback
+              onPress={pickFiles}
               style={[
                 gs.flexRow,
                 gs.centerItems,
@@ -251,6 +319,46 @@ const AddTransaction = () => {
           </Tooltip>
         </View>
         {/* Todo: Attachments list section */}
+        {attachments.length > 0 && (
+          <View
+            style={[
+              {
+                marginTop: spacing.lg,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  fontSize: textSize.md,
+                  color: colors.onBackground,
+                },
+              ]}
+            >
+              Attachments
+            </Text>
+            <View
+              style={[
+                style.attachmentContainer,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              <FlatList
+                contentContainerStyle={{
+                  gap: spacing.lg,
+                }}
+                horizontal
+                data={attachments}
+                renderItem={item => renderAttachment(item.item, removeFile)}
+                keyExtractor={item => item.path}
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
+          </View>
+        )}
         {/* Description section */}
         <TextInput
           mode="outlined"
@@ -290,7 +398,7 @@ const AddTransaction = () => {
           minutes={0}
         />
       </ScrollView>
-    </ScreenWithoutHeader>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -299,6 +407,7 @@ export default AddTransaction;
 const style = StyleSheet.create({
   scrollViewContent: {
     paddingHorizontal: spacing.md,
+    paddingBottom: 50,
   },
   header: {
     paddingVertical: spacing.sm,
@@ -367,5 +476,10 @@ const style = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     gap: spacing.sm,
+  },
+  attachmentContainer: {
+    marginTop: spacing.xs,
+    padding: spacing.sm,
+    borderWidth: 1,
   },
 });
