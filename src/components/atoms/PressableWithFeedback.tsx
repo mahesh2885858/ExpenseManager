@@ -7,7 +7,7 @@ const PressableWithFeedback = (props: PressableProps) => {
       {...props}
       style={({ pressed }) => [
         {
-          opacity: pressed ? 0.6 : 1,
+          opacity: pressed ? 0.6 : props.disabled ? 0.5 : 1,
         },
         props.style as any,
       ]}

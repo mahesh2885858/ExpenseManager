@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import zustandStorage from '../storage';
-import { TTransaction } from '../types';
+import { TCategories, TCategory, TTransaction } from '../types';
 
-type TTransactionsStore = { transactions: TTransaction[] };
+type TTransactionsStore = {
+  transactions: TTransaction[];
+  categories: TCategories;
+};
 
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
+  addCategory: (category: TCategory) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -177,8 +181,17 @@ const useTransactionsStore = create<PositionStore>()(
           description: 'Netflix subscription',
         },
       ],
+      categories: [
+        {
+          name: 'General',
+          id: '123-abcd',
+        },
+      ],
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
+      },
+      addCategory: category => {
+        set(state => ({ categories: [...state.categories, category] }));
       },
     }),
     {

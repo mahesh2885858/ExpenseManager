@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -19,24 +19,20 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import { TAttachment, TTransactionType } from '../../types';
 import RenderAttachment from './RenderAttachment';
-
-// TODO: Replace with actual category data
-const TEMP_CATEGORY_DATA = [
-  { label: 'Item 1', value: '1' },
-  { label: 'Item 2', value: '2' },
-  { label: 'Item 3', value: '3' },
-  { label: 'Item 4', value: '4' },
-  { label: 'Item 5', value: '5' },
-  { label: 'Item 6', value: '6' },
-  { label: 'Item 7', value: '7' },
-  { label: 'Item 8', value: '8' },
-];
+import useTransactionsStore from '../../stores/transactionsStore';
+import { v4 as uuid } from 'uuid';
 
 const DATE_FORMAT = 'MMM do hh:mm a';
 const CURRENCY_SYMBOL = '₹';
@@ -53,6 +49,14 @@ const AddTransaction = () => {
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
 
+  const addCategory = useTransactionsStore(state => state.addCategory);
+  const categories = useTransactionsStore(state => state.categories);
+
+  // animatedValues
+  const iconRotation = useSharedValue(0);
+  const categoryInputHeight = useSharedValue(0);
+  const marginTop = useSharedValue(0);
+
   // State
   const [transactionType, setTransactionType] =
     useState<TTransactionType>('income');
@@ -66,6 +70,8 @@ const AddTransaction = () => {
   });
   const [desc, setDesc] = useState('');
   const [attachments, setAttachments] = useState<TAttachment[]>([]);
+  const [openCategoryInput, setOpenCategoryInput] = useState(false);
+  const [categoryInput, setCategoryInput] = useState('');
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -120,6 +126,7 @@ const AddTransaction = () => {
       const validFiles = PickedFiles.filter(f => !!f.uri);
       const copied = await keepLocalCopy({
         destination: 'documentDirectory',
+        // @ts-expect-error: i don't know why it is throwing error
         files: validFiles.map(f => ({
           fileName: f.name ?? 'file',
           uri: f.uri,
@@ -148,6 +155,37 @@ const AddTransaction = () => {
     const files = attachments.filter(f => f.path !== filePath);
     setAttachments(files);
   };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${iconRotation.value}deg` }],
+  }));
+
+  const addNewCategory = () => {
+    const id = uuid();
+    addCategory({
+      id,
+      name: categoryInput.trim(),
+    });
+    setCategoryInput('');
+    setOpenCategoryInput(false);
+  };
+
+  useEffect(() => {
+    if (openCategoryInput) {
+      iconRotation.value = withTiming(45);
+      categoryInputHeight.value = withTiming(60);
+      marginTop.value = withTiming(spacing.lg);
+    } else {
+      iconRotation.value = withTiming(0);
+      categoryInputHeight.value = withTiming(0);
+      marginTop.value = withTiming(0);
+    }
+    return () => {
+      iconRotation.value = withTiming(0);
+      categoryInputHeight.value = withTiming(0);
+      marginTop.value = withTiming(0);
+    };
+  }, [openCategoryInput, iconRotation, categoryInputHeight, marginTop]);
 
   return (
     <KeyboardAvoidingView
@@ -230,10 +268,31 @@ const AddTransaction = () => {
                 borderColor: colors.onSurfaceDisabled,
               },
             ]}
+            inputSearchStyle={{
+              backgroundColor: colors.background,
+              color: colors.onBackground,
+            }}
             placeholderStyle={[
               style.dropdownText,
               { color: colors.onSurfaceDisabled },
             ]}
+            renderInputSearch={e => (
+              <TextInput
+                mode="outlined"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                cursorColor={colors.onBackground}
+                placeholder="Search category"
+                placeholderTextColor={colors.onSurfaceDisabled}
+                style={{
+                  backgroundColor: colors.background,
+                  color: colors.onBackground,
+                }}
+                onChangeText={text => {
+                  e(text);
+                }}
+              />
+            )}
             selectedTextStyle={[
               style.dropdownText,
               { color: colors.onBackground },
@@ -241,27 +300,66 @@ const AddTransaction = () => {
             itemContainerStyle={{ backgroundColor: colors.background }}
             itemTextStyle={{ color: colors.onBackground }}
             placeholder="Select a Category"
-            data={TEMP_CATEGORY_DATA}
-            labelField="label"
-            valueField="value"
+            data={categories}
+            labelField="name"
+            valueField="id"
             search
-            searchField="label"
+            searchField="name"
             onChange={e => {
               console.log({ e });
             }}
           />
           <PressableWithFeedback
+            onPress={() => setOpenCategoryInput(p => !p)}
             style={[
               gs.centerItems,
               style.addCategoryButton,
-              { backgroundColor: colors.primary },
+              {
+                backgroundColor: colors.primary,
+              },
             ]}
           >
-            <Tooltip title="Add a new category">
+            <Animated.View style={animatedStyle}>
               <Icon color={colors.onPrimary} source="plus" size={ICON_SIZE} />
-            </Tooltip>
+            </Animated.View>
           </PressableWithFeedback>
         </View>
+        {/* add category section */}
+        <Animated.View
+          entering={FadeIn}
+          style={[
+            gs.flexRow,
+            {
+              marginTop,
+              height: categoryInputHeight,
+              overflow: 'hidden',
+              gap: spacing.md,
+            },
+          ]}
+        >
+          <TextInput
+            onChangeText={setCategoryInput}
+            value={categoryInput}
+            outlineColor={colors.onSurfaceDisabled}
+            mode="outlined"
+            placeholder="Category name"
+            style={[gs.fullFlex, style.textInput]}
+            placeholderTextColor={colors.onSurfaceDisabled}
+          />
+          <PressableWithFeedback
+            disabled={categoryInput.length === 0}
+            onPress={addNewCategory}
+            style={[
+              gs.centerItems,
+              style.addCategoryButton,
+              {
+                backgroundColor: colors.primary,
+              },
+            ]}
+          >
+            <Icon color={colors.onPrimary} source="check" size={ICON_SIZE} />
+          </PressableWithFeedback>
+        </Animated.View>
 
         {/* Date and Attachment Selection */}
         <View style={[gs.flexRow, style.dateAttachmentContainer]}>
