@@ -20,4 +20,7 @@ export const gs = StyleSheet.create({
   itemsCenter: {
     alignItems: 'center',
   },
+  justifyCenter: {
+    justifyContent: 'center',
+  },
 });

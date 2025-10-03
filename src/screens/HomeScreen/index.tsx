@@ -1,34 +1,29 @@
-import { formatDigits, getMaxText } from 'commonutil-core';
+import { formatDigits } from 'commonutil-core';
 import React, { useMemo } from 'react';
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import RenderTransactions from '../../components/RenderTransactions';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { format, getDate } from 'date-fns';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { TBottomTabParamList } from '../../types';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const transactions = useTransactionsStore(state => state.transactions);
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();
   }, [getSelectedAccount]);
+
+  transactions.sort(
+    (a, b) =>
+      new Date(b.transactionDate).getTime() -
+      new Date(a.transactionDate).getTime(),
+  );
 
   return (
     <ScrollView
@@ -186,123 +181,9 @@ const HomeScreen = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <FlatList
-              scrollEnabled={false}
-              data={transactions.slice(0, 10)}
-              renderItem={props => (
-                <View
-                  style={[
-                    gs.flexRow,
-                    { gap: spacing.md, marginTop: spacing.lg },
-                  ]}
-                >
-                  <View
-                    style={[
-                      {
-                        padding: spacing.sm,
-                        paddingHorizontal: spacing.md,
-                        borderRadius: borderRadius.lg,
-                        backgroundColor: theme.colors.secondaryContainer,
-                      },
-                      gs.centerItems,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        {
-                          color: theme.colors.onSecondaryContainer,
-                          fontSize: textSize.md,
-                        },
-                        gs.fontBold,
-                      ]}
-                    >
-                      {format(props.item.createdAt, 'MMM')}
-                    </Text>
-                    <Text
-                      style={[
-                        {
-                          color: theme.colors.onSecondaryContainer,
-                          fontSize: textSize.md,
-                        },
-                        gs.fontBold,
-                      ]}
-                    >
-                      {getDate(props.item.createdAt)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, justifyContent: 'center' }}>
-                    <Text
-                      style={[
-                        {
-                          fontSize: textSize.lg,
-                          color: theme.colors.onBackground,
-                        },
-                      ]}
-                    >
-                      Food
-                    </Text>
-                    {props.item.description && (
-                      <Text
-                        style={[
-                          {
-                            fontSize: textSize.md,
-                            color: theme.colors.onSurfaceDisabled,
-                          },
-                        ]}
-                      >
-                        {getMaxText(props.item.description ?? '', 35)}
-                      </Text>
-                    )}
-                  </View>
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text
-                      style={[
-                        gs.fontBold,
-                        {
-                          fontSize: textSize.lg,
-                          color:
-                            props.item.type === 'expense'
-                              ? theme.colors.error
-                              : theme.colors.success,
-                        },
-                      ]}
-                    >
-                      {props.item.type === 'expense'
-                        ? `-₹${props.item.amount}`
-                        : `₹${props.item.amount}`}
-                    </Text>
-                  </View>
-                </View>
-              )}
-              keyExtractor={item => item.id}
-              ListFooterComponent={
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('Transactions');
-                  }}
-                  style={{
-                    marginTop: spacing.lg,
-                  }}
-                >
-                  <Text
-                    style={[
-                      gs.fontBold,
-                      gs.centerText,
-                      {
-                        fontSize: textSize.lg,
-                        color: theme.colors.primary,
-                      },
-                    ]}
-                  >
-                    See all
-                  </Text>
-                </TouchableOpacity>
-              }
+            <RenderTransactions
+              transactions={transactions.slice(0, 10)}
+              renderSeeAll
             />
           )}
         </View>

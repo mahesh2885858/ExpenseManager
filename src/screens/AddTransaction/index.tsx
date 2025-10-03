@@ -27,12 +27,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import { TAttachment, TTransactionType } from '../../types';
 import RenderAttachment from './RenderAttachment';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
+import useAccountStore from '../../stores/accountsStore';
 
 const DATE_FORMAT = 'MMM do hh:mm a';
 const CURRENCY_SYMBOL = '₹';
@@ -51,6 +52,8 @@ const AddTransaction = () => {
 
   const addCategory = useTransactionsStore(state => state.addCategory);
   const categories = useTransactionsStore(state => state.categories);
+  const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
 
   // animatedValues
   const iconRotation = useSharedValue(0);
@@ -72,6 +75,8 @@ const AddTransaction = () => {
   const [attachments, setAttachments] = useState<TAttachment[]>([]);
   const [openCategoryInput, setOpenCategoryInput] = useState(false);
   const [categoryInput, setCategoryInput] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState(DEFAULT_CATEGORY_ID);
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -168,6 +173,35 @@ const AddTransaction = () => {
     });
     setCategoryInput('');
     setOpenCategoryInput(false);
+  };
+
+  const addNewTransaction = () => {
+    try {
+      const id = uuid();
+      const dateToAdd = date ?? new Date();
+      dateToAdd?.setHours(time.hours);
+      dateToAdd?.setMinutes(time.minutes);
+      addTransaction({
+        accountId: getSelectedAccount().id,
+        amount: parseInt(amountInput, 10),
+        categoryIds: [selectedCategoryId],
+        createdAt: new Date().toISOString(),
+        transactionDate: dateToAdd.toISOString(),
+        id,
+        type: transactionType,
+        attachments: attachments,
+        description: desc,
+      });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainBottomTabs' }],
+      });
+    } catch (e: any) {
+      console.log(
+        'Error while creating new transaction: ',
+        e?.message ?? String(e),
+      );
+    }
   };
 
   useEffect(() => {
@@ -307,6 +341,7 @@ const AddTransaction = () => {
             searchField="name"
             onChange={e => {
               console.log({ e });
+              setSelectedCategoryId(e.id);
             }}
           />
           <PressableWithFeedback
@@ -496,11 +531,7 @@ const AddTransaction = () => {
           minutes={0}
         />
       </ScrollView>
-      <FAB
-        icon="check"
-        style={style.fab}
-        onPress={() => console.log('Pressed')}
-      />
+      <FAB icon="check" style={style.fab} onPress={addNewTransaction} />
     </KeyboardAvoidingView>
   );
 };

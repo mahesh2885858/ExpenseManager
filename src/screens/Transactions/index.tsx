@@ -1,19 +1,11 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { getMaxText } from 'commonutil-core';
-import { format, getDate } from 'date-fns';
 import React from 'react';
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import RenderTransactions from '../../components/RenderTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TBottomTabParamList } from '../../types';
 
@@ -83,101 +75,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <FlatList
-              scrollEnabled={false}
-              data={transactions}
-              renderItem={props => (
-                <View
-                  style={[
-                    gs.flexRow,
-                    { gap: spacing.md, marginTop: spacing.lg },
-                  ]}
-                >
-                  <View
-                    style={[
-                      {
-                        padding: spacing.sm,
-                        paddingHorizontal: spacing.md,
-                        borderRadius: borderRadius.lg,
-                        backgroundColor: theme.colors.secondaryContainer,
-                      },
-                      gs.centerItems,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        {
-                          color: theme.colors.onSecondaryContainer,
-                          fontSize: textSize.md,
-                        },
-                        gs.fontBold,
-                      ]}
-                    >
-                      {format(props.item.createdAt, 'MMM')}
-                    </Text>
-                    <Text
-                      style={[
-                        {
-                          color: theme.colors.onSecondaryContainer,
-                          fontSize: textSize.md,
-                        },
-                        gs.fontBold,
-                      ]}
-                    >
-                      {getDate(props.item.createdAt)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, justifyContent: 'center' }}>
-                    <Text
-                      style={[
-                        {
-                          fontSize: textSize.lg,
-                          color: theme.colors.onBackground,
-                        },
-                      ]}
-                    >
-                      Food
-                    </Text>
-                    {props.item.description && (
-                      <Text
-                        style={[
-                          {
-                            fontSize: textSize.md,
-                            color: theme.colors.onSurfaceDisabled,
-                          },
-                        ]}
-                      >
-                        {getMaxText(props.item.description ?? '', 35)}
-                      </Text>
-                    )}
-                  </View>
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text
-                      style={[
-                        gs.fontBold,
-                        {
-                          fontSize: textSize.lg,
-                          color:
-                            props.item.type === 'expense'
-                              ? theme.colors.error
-                              : theme.colors.success,
-                        },
-                      ]}
-                    >
-                      {props.item.type === 'expense'
-                        ? `-₹${props.item.amount}`
-                        : `₹${props.item.amount}`}
-                    </Text>
-                  </View>
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
+            <RenderTransactions transactions={transactions} />
           )}
         </View>
       </View>
