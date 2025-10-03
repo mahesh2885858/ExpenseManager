@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import zustandStorage from '../storage';
-import { TAccount } from '../types';
+import { TAccount, TTransactionType } from '../types';
 
 type TAccountsState = { isInitialSetupDone: boolean; accounts: TAccount[] };
 
@@ -11,6 +11,11 @@ type TAccountsStoreActions = {
   deleteAllAccounts: () => void;
   getSelectedAccount: () => TAccount;
   selectAccount: (id: string) => void;
+  updateAccountBalance: (
+    id: string,
+    type: TTransactionType,
+    amount: number,
+  ) => void;
 };
 
 type PositionStore = TAccountsState & TAccountsStoreActions;
@@ -32,6 +37,21 @@ const useAccountStore = create<PositionStore>()(
           else return { ...acc, isSelected: false };
         });
         set({ accounts: newAccounts });
+      },
+      updateAccountBalance: (id, type, amount) => {
+        set(state => ({
+          ...state,
+          accounts: state.accounts.map(acc => {
+            if (acc.id === id) {
+              if (type === 'expense') {
+                return { ...acc, balance: acc.balance - amount };
+              } else {
+                return { ...acc, balance: acc.balance + amount };
+              }
+            }
+            return acc;
+          }),
+        }));
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },

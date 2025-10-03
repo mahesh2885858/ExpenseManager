@@ -54,6 +54,9 @@ const AddTransaction = () => {
   const categories = useTransactionsStore(state => state.categories);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+  const updateAccountBalance = useAccountStore(
+    state => state.updateAccountBalance,
+  );
 
   // animatedValues
   const iconRotation = useSharedValue(0);
@@ -178,12 +181,14 @@ const AddTransaction = () => {
   const addNewTransaction = () => {
     try {
       const id = uuid();
+      const selectedAccountId = getSelectedAccount().id;
+      const amount = parseInt(amountInput);
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
       addTransaction({
-        accountId: getSelectedAccount().id,
-        amount: parseInt(amountInput, 10),
+        accountId: selectedAccountId,
+        amount,
         categoryIds: [selectedCategoryId],
         createdAt: new Date().toISOString(),
         transactionDate: dateToAdd.toISOString(),
@@ -192,6 +197,8 @@ const AddTransaction = () => {
         attachments: attachments,
         description: desc,
       });
+      updateAccountBalance(selectedAccountId, transactionType, amount);
+
       navigation.reset({
         index: 0,
         routes: [{ name: 'MainBottomTabs' }],

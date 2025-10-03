@@ -22,7 +22,7 @@ const RenderTransactions = ({
       renderItem={props => <RenderTransaction item={props.item} />}
       keyExtractor={item => item.id}
       ListFooterComponent={
-        renderSeeAll ? (
+        renderSeeAll && transactions.length > 10 ? (
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('Transactions');
