@@ -54,9 +54,6 @@ const AddTransaction = () => {
   const categories = useTransactionsStore(state => state.categories);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const updateAccountBalance = useAccountStore(
-    state => state.updateAccountBalance,
-  );
 
   // animatedValues
   const iconRotation = useSharedValue(0);
@@ -197,7 +194,6 @@ const AddTransaction = () => {
         attachments: attachments,
         description: desc,
       });
-      updateAccountBalance(selectedAccountId, transactionType, amount);
 
       navigation.reset({
         index: 0,

@@ -111,7 +111,14 @@ const HomeScreen = () => {
                 },
               ]}
             >
-              ₹{formatDigits(selectedAccount.balance.toString())}
+              ₹
+              {formatDigits(
+                (
+                  selectedAccount.balance +
+                  totalIncome -
+                  totalExpenses
+                ).toString(),
+              )}
             </Text>
           </Card.Content>
         </Card>
@@ -139,7 +146,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            ₹{formatDigits(totalIncome.toString())}
+            ₹{formatDigits((selectedAccount.balance + totalIncome).toString())}
           </Text>
         </View>
         <View style={[styles.ieBox]}>
