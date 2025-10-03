@@ -19,6 +19,27 @@ const HomeScreen = () => {
     return getSelectedAccount();
   }, [getSelectedAccount]);
 
+  const totalIncome = useMemo(() => {
+    return transactions.reduce((prev, curr) => {
+      if (curr.type === 'expense') {
+        return prev;
+      } else {
+        return prev + curr.amount;
+      }
+    }, 0);
+  }, [transactions]);
+  const totalExpenses = useMemo(() => {
+    return transactions.reduce((prev, curr) => {
+      if (curr.type === 'expense') {
+        return prev + curr.amount;
+      } else {
+        return prev;
+      }
+    }, 0);
+  }, [transactions]);
+
+  console.log({ totalExpenses });
+
   transactions.sort(
     (a, b) =>
       new Date(b.transactionDate).getTime() -
@@ -118,7 +139,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            ₹{formatDigits('3000')}
+            ₹{formatDigits(totalIncome.toString())}
           </Text>
         </View>
         <View style={[styles.ieBox]}>
@@ -142,7 +163,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            -₹{formatDigits('200')}
+            -₹{formatDigits(totalExpenses.toString())}
           </Text>
         </View>
       </View>
