@@ -534,7 +534,9 @@ const AddTransaction = () => {
           minutes={0}
         />
       </ScrollView>
-      <FAB icon="check" style={style.fab} onPress={addNewTransaction} />
+      {amountInput && !isNaN(parseInt(amountInput, 10)) && (
+        <FAB icon="check" style={style.fab} onPress={addNewTransaction} />
+      )}
     </KeyboardAvoidingView>
   );
 };

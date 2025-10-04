@@ -13,13 +13,14 @@ type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
   addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
+  removeTransaction: (id: string) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
 
 const useTransactionsStore = create<PositionStore>()(
   persist(
-    set => ({
+    (set, get) => ({
       transactions: [],
       categories: [
         {
@@ -42,6 +43,12 @@ const useTransactionsStore = create<PositionStore>()(
               return t;
             }
           }),
+        }));
+      },
+      removeTransaction: id => {
+        const updatedTransactions = get().transactions.filter(t => t.id !== id);
+        set(() => ({
+          transactions: updatedTransactions,
         }));
       },
     }),

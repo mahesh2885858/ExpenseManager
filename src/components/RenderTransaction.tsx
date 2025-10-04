@@ -13,6 +13,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
+  const remove = useTransactionsStore(state => state.removeTransaction);
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
     const category = categories.filter(c => c.id === cId);
@@ -121,6 +122,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         {props.item.isSelected && (
           <View style={[gs.flexRow, { gap: spacing.xs }]}>
             <PressableWithFeedback
+              onPress={() => remove(props.item.id)}
               style={[
                 styles.action,
                 {
