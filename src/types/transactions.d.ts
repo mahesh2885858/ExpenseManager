@@ -17,4 +17,5 @@ export type TTransaction = {
   categoryIds: string[]; // Category IDs (initially single category per transaction)
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
+  isSelected?: boolean;
 };

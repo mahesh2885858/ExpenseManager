@@ -7,10 +7,12 @@ import { formatDigits, getMaxText } from 'commonutil-core';
 import { TTransaction } from '../types';
 import useTransactionsStore from '../stores/transactionsStore';
 import { Icon } from 'react-native-paper';
+import PressableWithFeedback from './atoms/PressableWithFeedback';
 
 const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
   const categories = useTransactionsStore(state => state.categories);
+  const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
     const category = categories.filter(c => c.id === cId);
@@ -18,7 +20,21 @@ const RenderTransaction = (props: { item: TTransaction }) => {
     return category[0]?.name ?? 'General';
   }, [props, categories]);
   return (
-    <View style={[gs.flexRow, { gap: spacing.md, marginTop: spacing.lg }]}>
+    <PressableWithFeedback
+      onLongPress={() => toggleSelection(props.item.id)}
+      onPress={() => {
+        if (props.item.isSelected) {
+          toggleSelection(props.item.id);
+        } else return;
+      }}
+      style={[
+        gs.flexRow,
+        {
+          gap: spacing.md,
+          marginTop: spacing.lg,
+        },
+      ]}
+    >
       <View
         style={[
           {
@@ -83,7 +99,9 @@ const RenderTransaction = (props: { item: TTransaction }) => {
           </Text>
         )}
       </View>
-      <View style={[gs.centerItems]}>
+      <View
+        style={[gs.centerItems, props.item.isSelected && styles.actionsBox]}
+      >
         <Text
           style={[
             gs.fontBold,
@@ -100,8 +118,32 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             ? `-₹${formatDigits(props.item.amount.toString())}`
             : `₹${formatDigits(props.item.amount.toString())}`}
         </Text>
+        {props.item.isSelected && (
+          <View style={[gs.flexRow, { gap: spacing.xs }]}>
+            <PressableWithFeedback
+              style={[
+                styles.action,
+                {
+                  backgroundColor: theme.colors.elevation.level5,
+                },
+              ]}
+            >
+              <Icon source={'delete'} size={25} color={theme.colors.error} />
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              style={[
+                styles.action,
+                {
+                  backgroundColor: theme.colors.elevation.level5,
+                },
+              ]}
+            >
+              <Icon source={'pencil'} size={25} />
+            </PressableWithFeedback>
+          </View>
+        )}
       </View>
-    </View>
+    </PressableWithFeedback>
   );
 };
 
@@ -112,5 +154,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 3,
     left: 3,
+  },
+  actionsBox: {
+    gap: spacing.xs,
+    alignSelf: 'flex-end',
+  },
+  action: {
+    padding: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
 });
