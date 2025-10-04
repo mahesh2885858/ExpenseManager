@@ -179,7 +179,7 @@ const AddTransaction = () => {
     try {
       const id = uuid();
       const selectedAccountId = getSelectedAccount().id;
-      const amount = parseInt(amountInput);
+      const amount = parseFloat(amountInput);
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
@@ -343,7 +343,6 @@ const AddTransaction = () => {
             search
             searchField="name"
             onChange={e => {
-              console.log({ e });
               setSelectedCategoryId(e.id);
             }}
           />
