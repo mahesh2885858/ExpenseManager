@@ -6,14 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import RenderTransactions from '../../components/RenderTransactions';
+import useGetTransactions from '../../hooks/useGetTransactions';
 import useAccountStore from '../../stores/accountsStore';
-import useTransactionsStore from '../../stores/transactionsStore';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const transactions = useTransactionsStore(state => state.transactions);
+  const transactions = useGetTransactions();
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();

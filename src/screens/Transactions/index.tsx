@@ -6,14 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import RenderTransactions from '../../components/RenderTransactions';
-import useTransactionsStore from '../../stores/transactionsStore';
+import useGetTransactions from '../../hooks/useGetTransactions';
 import { TBottomTabParamList } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-  const transactions = useTransactionsStore(state => state.transactions);
+  const transactions = useGetTransactions();
 
   return (
     <ScrollView
