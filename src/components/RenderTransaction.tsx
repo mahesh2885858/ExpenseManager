@@ -15,12 +15,13 @@ const RenderTransaction = (props: { item: TTransaction }) => {
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const remove = useTransactionsStore(state => state.removeTransaction);
+
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
     const category = categories.filter(c => c.id === cId);
-    console.log({ cId, category });
     return category[0]?.name ?? 'General';
   }, [props, categories]);
+
   return (
     <PressableWithFeedback
       onLongPress={() => toggleSelection(props.item.id)}
