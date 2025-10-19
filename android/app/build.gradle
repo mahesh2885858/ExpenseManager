@@ -84,6 +84,22 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++20"
+            }
+        }
+    }
+    //    Enable prefab for React Native C++ dependencies
+    buildFeatures {
+        prefab true
+    }
+
+    //  Optional but recommended for React Native 0.81+
+    externalNativeBuild {
+        cmake {
+            version "3.22.1"
+        }
     }
     
     signingConfigs {
