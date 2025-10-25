@@ -55,7 +55,12 @@ const TransactionDetails = () => {
             <Icon size={24} source={'arrow-left'} />
           </Pressable>
           <Pressable
-            onPress={navigation.goBack}
+            onPress={() => {
+              navigation.navigate('AddTransaction', {
+                mode: 'edit',
+                transaction: transaction,
+              });
+            }}
             style={[
               {
                 backgroundColor: theme.colors.primaryContainer,

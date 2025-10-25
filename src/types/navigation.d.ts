@@ -13,7 +13,14 @@ export type TRootStackParamList = {
     name: string;
   };
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
-  AddTransaction: undefined;
+  AddTransaction:
+    | {
+        mode: 'new';
+      }
+    | {
+        mode: 'edit';
+        transaction: TTransaction;
+      };
   TransactionDetails: {
     transaction: TTransaction;
   };

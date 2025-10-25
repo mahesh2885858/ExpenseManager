@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { format } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -29,7 +29,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { TAttachment, TTransactionType } from '../../types';
+import {
+  TAttachment,
+  TRootStackParamList,
+  TTransactionType,
+} from '../../types';
 import RenderAttachment from './RenderAttachment';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
@@ -49,6 +53,7 @@ const AddTransaction = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
+  const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
 
   const addCategory = useTransactionsStore(state => state.addCategory);
   const categories = useTransactionsStore(state => state.categories);
@@ -60,23 +65,70 @@ const AddTransaction = () => {
   const categoryInputHeight = useSharedValue(0);
   const marginTop = useSharedValue(0);
 
+  const mode = useMemo(() => route.params.mode, [route]);
+
+  const initData: {
+    type: TTransactionType;
+    amountInput: string;
+    date: CalendarDate;
+    desc: string;
+    attachments: TAttachment[];
+    selectedCatId: string;
+    time: {
+      hours: number;
+      minutes: number;
+    };
+  } = useMemo(() => {
+    if (route.params.mode === 'edit') {
+      const tr = route.params.transaction;
+      return {
+        type: tr.type,
+        amountInput: String(tr.amount),
+        date: new Date(tr.transactionDate),
+        desc: tr.description ?? '',
+        attachments: tr.attachments ?? [],
+        selectedCatId: tr.categoryIds[0],
+        time: {
+          hours: new Date(tr.transactionDate).getHours(),
+          minutes: new Date(tr.transactionDate).getMinutes(),
+        },
+      };
+    } else {
+      return {
+        type: 'income',
+        amountInput: '',
+        date: new Date(),
+        desc: '',
+        attachments: [],
+        selectedCatId: DEFAULT_CATEGORY_ID,
+        time: {
+          hours: new Date().getHours(),
+          minutes: new Date().getMinutes(),
+        },
+      };
+    }
+  }, [route]);
+
   // State
-  const [transactionType, setTransactionType] =
-    useState<TTransactionType>('income');
-  const [amountInput, setAmountInput] = useState('');
-  const [date, setDate] = useState<CalendarDate>(new Date());
+  const [transactionType, setTransactionType] = useState<TTransactionType>(
+    initData.type,
+  );
+  const [amountInput, setAmountInput] = useState(initData.amountInput);
+  const [date, setDate] = useState<CalendarDate>(initData.date);
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [openTimePicker, setOpenTimePicker] = useState(false);
-  const [time, setTime] = useState<{ hours: number; minutes: number }>({
-    hours: new Date().getHours(),
-    minutes: new Date().getMinutes(),
-  });
-  const [desc, setDesc] = useState('');
-  const [attachments, setAttachments] = useState<TAttachment[]>([]);
+  const [time, setTime] = useState<{ hours: number; minutes: number }>(
+    initData.time,
+  );
+  const [desc, setDesc] = useState(initData.desc);
+  const [attachments, setAttachments] = useState<TAttachment[]>(
+    initData.attachments,
+  );
   const [openCategoryInput, setOpenCategoryInput] = useState(false);
   const [categoryInput, setCategoryInput] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] =
-    useState(DEFAULT_CATEGORY_ID);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    initData.selectedCatId,
+  );
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {

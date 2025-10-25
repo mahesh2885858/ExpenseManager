@@ -140,7 +140,9 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       {/* <View> */}
       <Pressable
         onPress={() => {
-          navigation.navigate('AddTransaction');
+          navigation.navigate('AddTransaction', {
+            mode: 'new',
+          });
         }}
         style={({ pressed }) => [
           styles.fab,
