@@ -8,6 +8,7 @@ import { borderRadius, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import { TAttachment } from '../../types';
+import { getMaxText } from 'commonutil-core';
 
 type TProps = {
   attachment: TAttachment;
@@ -70,7 +71,7 @@ const RenderAttachment = ({
       >
         <Icon source="file-pdf-box" size={PDF_ICON_SIZE} />
         <Text style={[styles.pdfText, { color: colors.onBackground }]}>
-          {attachment.name}
+          {getMaxText(attachment.name, 20)}
         </Text>
       </PressableWithFeedback>
     );

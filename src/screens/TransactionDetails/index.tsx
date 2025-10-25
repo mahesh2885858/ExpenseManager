@@ -1,15 +1,14 @@
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { formatDigits } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Card, Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TRootStackParamList } from '../../types';
-import useAccountStore from '../../stores/accountsStore';
-import { Card } from 'react-native-paper';
 import RenderAttachment from '../AddTransaction/RenderAttachment';
 
 const TransactionDetails = () => {
@@ -17,12 +16,8 @@ const TransactionDetails = () => {
     useRoute<RouteProp<TRootStackParamList, 'TransactionDetails'>>();
   const transaction = route.params.transaction;
   const theme = useAppTheme();
+  const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
 
   const categoryName = useMemo(() => {
     const category = categories.find(c => c.id === transaction.categoryIds[0]);
@@ -39,8 +34,15 @@ const TransactionDetails = () => {
         ]}
       >
         {/* header section */}
-        <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
+        <View
+          style={[
+            { paddingHorizontal: spacing.lg },
+            gs.flexRow,
+            gs.justifyBetween,
+          ]}
+        >
           <Pressable
+            onPress={navigation.goBack}
             style={[
               {
                 backgroundColor: theme.colors.primaryContainer,
@@ -50,14 +52,20 @@ const TransactionDetails = () => {
               gs.centerItems,
             ]}
           >
-            <Text
-              style={{
-                color: theme.colors.onPrimaryContainer,
-                fontSize: textSize.lg,
-              }}
-            >
-              {selectedAccount.name.charAt(0).toUpperCase()}
-            </Text>
+            <Icon size={24} source={'arrow-left'} />
+          </Pressable>
+          <Pressable
+            onPress={navigation.goBack}
+            style={[
+              {
+                backgroundColor: theme.colors.primaryContainer,
+                borderRadius: borderRadius.round,
+              },
+              styles.avatar,
+              gs.centerItems,
+            ]}
+          >
+            <Icon size={24} source={'pencil'} />
           </Pressable>
         </View>
         {/* amount section */}
@@ -153,6 +161,7 @@ const TransactionDetails = () => {
           <View
             style={{
               paddingHorizontal: spacing.lg,
+              gap: spacing.sm,
             }}
           >
             <Text
@@ -168,9 +177,7 @@ const TransactionDetails = () => {
             </Text>
             <FlatList
               horizontal
-              contentContainerStyle={{
-                padding: spacing.sm,
-              }}
+              contentContainerStyle={[styles.attachmentContainer]}
               showsHorizontalScrollIndicator={false}
               data={transaction.attachments}
               keyExtractor={(item, i) => item.path + item + i}
@@ -214,5 +221,10 @@ const styles = StyleSheet.create({
   },
   ieBanner: {
     fontWeight: 'semibold',
+  },
+  attachmentContainer: {
+    marginTop: spacing.xs,
+    padding: spacing.sm,
+    gap: spacing.sm,
   },
 });
