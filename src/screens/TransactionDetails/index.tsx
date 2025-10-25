@@ -2,19 +2,27 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { formatDigits } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TRootStackParamList } from '../../types';
+import useAccountStore from '../../stores/accountsStore';
+import { Card } from 'react-native-paper';
+import RenderAttachment from '../AddTransaction/RenderAttachment';
 
 const TransactionDetails = () => {
   const route =
     useRoute<RouteProp<TRootStackParamList, 'TransactionDetails'>>();
   const transaction = route.params.transaction;
-  const { colors } = useAppTheme();
+  const theme = useAppTheme();
   const categories = useTransactionsStore(state => state.categories);
+  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+
+  const selectedAccount = useMemo(() => {
+    return getSelectedAccount();
+  }, [getSelectedAccount]);
 
   const categoryName = useMemo(() => {
     const category = categories.find(c => c.id === transaction.categoryIds[0]);
@@ -23,132 +31,161 @@ const TransactionDetails = () => {
 
   return (
     <ScreenWithoutHeader>
-      {/* Header */}
-      {/* <View style={[gs.flexRow, gs.itemsCenter, styles.header]}>
-        <View
-          style={[gs.flexRow, gs.itemsCenter, gs.fullFlex, styles.headerLeft]}
-        >
-          <PressableWithFeedback onPress={navigation.goBack}>
-            <Icon source="arrow-left" size={ICON_SIZE} />
-          </PressableWithFeedback>
-          <Text
+      <View
+        style={[
+          {
+            gap: spacing.lg,
+          },
+        ]}
+      >
+        {/* header section */}
+        <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
+          <Pressable
             style={[
-              gs.fontBold,
-              styles.headerTitle,
-              { color: colors.onBackground },
-            ]}
-          >
-            {transaction.type === 'expense' ? 'Expense' : 'Income'}
-          </Text>
-        </View>
-        <Avatar.Icon
-          icon={'pencil'}
-          size={AVATAR_SIZE}
-          style={{ backgroundColor: colors.primaryContainer }}
-        />
-      </View> */}
-      <View style={styles.screenContainer}>
-        <View>
-          <Text
-            style={[
-              styles.title,
               {
-                color: colors.onSurfaceDisabled,
+                backgroundColor: theme.colors.primaryContainer,
+                borderRadius: borderRadius.round,
               },
+              styles.avatar,
+              gs.centerItems,
             ]}
           >
-            Amount
-          </Text>
-          <Text
-            style={[
-              styles.amountText,
-              {
-                color: colors.success,
-              },
-            ]}
-          >
-            {transaction.type === 'expense'
-              ? `-₹${formatDigits(transaction.amount.toString())}`
-              : `₹${formatDigits(transaction.amount.toString())}`}
-          </Text>
-        </View>
-        <View
-          style={[
-            {
-              gap: spacing.sm,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.title,
-              {
-                color: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
-            Type
-          </Text>
-          <View style={[gs.flexRow]}>
             <Text
+              style={{
+                color: theme.colors.onPrimaryContainer,
+                fontSize: textSize.lg,
+              }}
+            >
+              {selectedAccount.name.charAt(0).toUpperCase()}
+            </Text>
+          </Pressable>
+        </View>
+        {/* amount section */}
+        <View style={{ paddingHorizontal: spacing.lg }}>
+          <Card mode="contained">
+            <Card.Content
               style={[
-                styles.amountText,
+                styles.totalBalance,
                 {
-                  color: colors.onPrimaryContainer,
-                  backgroundColor: colors.primaryContainer,
-                  borderRadius: borderRadius.xxl,
+                  backgroundColor: theme.colors.primaryContainer,
+                  borderRadius: borderRadius.lg,
                   paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.md,
+                  gap: spacing.xs,
                 },
               ]}
             >
-              {transaction.type === 'expense' ? 'Expense' : 'Income'}
+              <Text
+                style={{
+                  color: theme.colors.onPrimaryContainer,
+                  fontSize: textSize.md,
+                }}
+              >
+                Amount
+              </Text>
+              <Text
+                style={[
+                  styles.amountText,
+                  {
+                    color: theme.colors.onPrimaryContainer,
+                    fontSize: textSize.xxxl,
+                  },
+                ]}
+              >
+                ₹{formatDigits(transaction.amount.toString())}
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+        {/* Category and date section */}
+        <View style={[gs.flexRow, { paddingHorizontal: spacing.lg }]}>
+          <View style={[styles.ieBox]}>
+            <Text
+              style={[
+                styles.ieBanner,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Category
+            </Text>
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.xl,
+                },
+              ]}
+            >
+              {categoryName}
+            </Text>
+          </View>
+          <View style={[styles.ieBox]}>
+            <Text
+              style={[
+                styles.ieBanner,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Date
+            </Text>
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.xl,
+                },
+              ]}
+            >
+              {format(transaction.transactionDate, 'MMM dd yyyy')}
             </Text>
           </View>
         </View>
-        <View>
-          <Text
-            style={[
-              styles.title,
-              {
-                color: colors.onSurfaceDisabled,
-              },
-            ]}
+        {/* Attachment section*/}
+        {transaction.attachments && transaction.attachments.length > 0 && (
+          <View
+            style={{
+              paddingHorizontal: spacing.lg,
+            }}
           >
-            Date
-          </Text>
-          <Text
-            style={[
-              styles.amountText,
-              {
-                color: colors.onPrimaryContainer,
-              },
-            ]}
-          >
-            {format(transaction.transactionDate, 'MMM d, yyyy')}
-          </Text>
-        </View>
-        <View>
-          <Text
-            style={[
-              styles.title,
-              {
-                color: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
-            Category
-          </Text>
-          <Text
-            style={[
-              styles.amountText,
-              {
-                color: colors.onPrimaryContainer,
-              },
-            ]}
-          >
-            {categoryName}
-          </Text>
-        </View>
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.lg,
+                },
+              ]}
+            >
+              Attachments
+            </Text>
+            <FlatList
+              horizontal
+              contentContainerStyle={{
+                padding: spacing.sm,
+              }}
+              showsHorizontalScrollIndicator={false}
+              data={transaction.attachments}
+              keyExtractor={(item, i) => item.path + item + i}
+              renderItem={({ item }) => {
+                return (
+                  <RenderAttachment
+                    allowDeletion={false}
+                    attachment={item}
+                    removeFile={() => {}}
+                  />
+                );
+              }}
+            />
+          </View>
+        )}
       </View>
     </ScreenWithoutHeader>
   );
@@ -157,26 +194,25 @@ const TransactionDetails = () => {
 export default TransactionDetails;
 
 const styles = StyleSheet.create({
-  header: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
+  container: {
+    paddingBottom: 200,
   },
-  headerLeft: {
-    gap: spacing.sm,
+  avatar: {
+    height: 45,
+    width: 45,
   },
-  headerTitle: {
-    fontSize: textSize.lg,
-  },
-  screenContainer: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  title: {
-    fontSize: textSize.lg,
-    fontWeight: 'semibold',
+  totalBalance: {
+    width: '100%',
   },
   amountText: {
-    fontSize: textSize.xl,
-    fontWeight: 'bold',
+    fontWeight: '500',
+  },
+  ieBox: {
+    flex: 1,
+    paddingLeft: spacing.lg,
+    gap: spacing.xs,
+  },
+  ieBanner: {
+    fontWeight: 'semibold',
   },
 });

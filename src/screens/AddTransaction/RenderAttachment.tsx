@@ -12,13 +12,18 @@ import { TAttachment } from '../../types';
 type TProps = {
   attachment: TAttachment;
   removeFile: (filePath: string) => void;
+  allowDeletion?: boolean;
 };
 
 const ATTACHMENT_SIZE = 150;
 const PDF_ICON_SIZE = 100;
 const FAB_POSITION = 5;
 
-const RenderAttachment = ({ attachment, removeFile }: TProps) => {
+const RenderAttachment = ({
+  attachment,
+  removeFile,
+  allowDeletion = true,
+}: TProps) => {
   const { colors } = useAppTheme();
 
   const openFile = async () => {
@@ -31,6 +36,7 @@ const RenderAttachment = ({ attachment, removeFile }: TProps) => {
 
   const deleteFile = async () => {
     try {
+      if (!allowDeletion) return;
       await RNFS.unlink(attachment.path);
       removeFile(attachment.path);
     } catch (error) {
@@ -72,18 +78,20 @@ const RenderAttachment = ({ attachment, removeFile }: TProps) => {
 
   return (
     <View>
-      <FAB
-        icon="delete"
-        size="small"
-        color={colors.onError}
-        style={[
-          styles.fab,
-          {
-            backgroundColor: colors.error,
-          },
-        ]}
-        onPress={deleteFile}
-      />
+      {allowDeletion && (
+        <FAB
+          icon="delete"
+          size="small"
+          color={colors.onError}
+          style={[
+            styles.fab,
+            {
+              backgroundColor: colors.error,
+            },
+          ]}
+          onPress={deleteFile}
+        />
+      )}
       {attachment.extension.includes('image') ? renderImage() : renderPdf()}
     </View>
   );
