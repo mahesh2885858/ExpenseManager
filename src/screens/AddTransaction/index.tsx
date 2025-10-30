@@ -58,15 +58,15 @@ const AddTransaction = () => {
   const addCategory = useTransactionsStore(state => state.addCategory);
   const categories = useTransactionsStore(state => state.categories);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const updateTransaction = useTransactionsStore(
+    state => state.updateTransaction,
+  );
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
 
   // animatedValues
   const iconRotation = useSharedValue(0);
   const categoryInputHeight = useSharedValue(0);
   const marginTop = useSharedValue(0);
-
-  const mode = useMemo(() => route.params.mode, [route]);
-
   const initData: {
     type: TTransactionType;
     amountInput: string;
@@ -227,33 +227,45 @@ const AddTransaction = () => {
     setOpenCategoryInput(false);
   };
 
-  const addNewTransaction = () => {
+  const saveTransaction = () => {
     try {
-      const id = uuid();
+      const id =
+        route.params.mode === 'edit' ? route.params.transaction.id : uuid();
       const selectedAccountId = getSelectedAccount().id;
       const amount = parseFloat(amountInput);
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
-      addTransaction({
-        accountId: selectedAccountId,
-        amount,
-        categoryIds: [selectedCategoryId],
-        createdAt: new Date().toISOString(),
-        transactionDate: dateToAdd.toISOString(),
-        id,
-        type: transactionType,
-        attachments: attachments,
-        description: desc,
-      });
-
+      if (route.params.mode === 'edit') {
+        updateTransaction(route.params.transaction.id, {
+          ...route.params.transaction,
+          amount,
+          categoryIds: [selectedCategoryId],
+          transactionDate: dateToAdd.toISOString(),
+          type: transactionType,
+          attachments: attachments,
+          description: desc,
+        });
+      } else {
+        addTransaction({
+          accountId: selectedAccountId,
+          amount,
+          categoryIds: [selectedCategoryId],
+          createdAt: new Date().toISOString(),
+          transactionDate: dateToAdd.toISOString(),
+          id,
+          type: transactionType,
+          attachments: attachments,
+          description: desc,
+        });
+      }
       navigation.reset({
         index: 0,
         routes: [{ name: 'MainBottomTabs' }],
       });
     } catch (e: any) {
       console.log(
-        'Error while creating new transaction: ',
+        'Error while saving a transaction: ',
         e?.message ?? String(e),
       );
     }
@@ -349,6 +361,7 @@ const AddTransaction = () => {
         {/* Category Selection */}
         <View style={[style.categoryContainer, gs.flexRow]}>
           <Dropdown
+            activeColor={colors.surfaceVariant}
             style={[
               gs.fullFlex,
               style.dropdown,
@@ -384,7 +397,9 @@ const AddTransaction = () => {
             )}
             selectedTextStyle={[
               style.dropdownText,
-              { color: colors.onBackground },
+              {
+                color: colors.onBackground,
+              },
             ]}
             itemContainerStyle={{ backgroundColor: colors.background }}
             itemTextStyle={{ color: colors.onBackground }}
@@ -397,6 +412,7 @@ const AddTransaction = () => {
             onChange={e => {
               setSelectedCategoryId(e.id);
             }}
+            value={selectedCategoryId}
           />
           <PressableWithFeedback
             onPress={() => setOpenCategoryInput(p => !p)}
@@ -586,7 +602,7 @@ const AddTransaction = () => {
         />
       </ScrollView>
       {amountInput && !isNaN(parseInt(amountInput, 10)) && (
-        <FAB icon="check" style={style.fab} onPress={addNewTransaction} />
+        <FAB icon="check" style={style.fab} onPress={saveTransaction} />
       )}
     </KeyboardAvoidingView>
   );
