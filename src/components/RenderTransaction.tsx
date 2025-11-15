@@ -17,6 +17,12 @@ const RenderTransaction = (props: { item: TTransaction }) => {
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const remove = useTransactionsStore(state => state.removeTransaction);
+  const transactions = useTransactionsStore(state => state.transactions);
+
+  const selectedTransactions = useMemo(
+    () => transactions.filter(d => d.isSelected),
+    [transactions],
+  );
 
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
@@ -31,6 +37,10 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         if (props.item.isSelected) {
           toggleSelection(props.item.id);
         } else {
+          if (selectedTransactions.length > 0) {
+            toggleSelection(props.item.id);
+            return;
+          }
           navigation.navigate('TransactionDetails', {
             transaction: props.item,
           });
