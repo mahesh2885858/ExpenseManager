@@ -38,6 +38,10 @@ const HomeScreen = () => {
     }, 0);
   }, [transactions]);
 
+  const totalBalance = useMemo(() => {
+    return selectedAccount.balance + totalIncome - totalExpenses;
+  }, [selectedAccount, totalExpenses, totalIncome]);
+
   console.log({ totalExpenses });
 
   transactions.sort(
@@ -111,13 +115,11 @@ const HomeScreen = () => {
                 },
               ]}
             >
-              ₹
+              ₹ {totalBalance < 0 && '-'}
               {formatDigits(
-                (
-                  selectedAccount.balance +
-                  totalIncome -
-                  totalExpenses
-                ).toString(),
+                totalBalance < 0
+                  ? Math.abs(totalBalance).toString()
+                  : totalBalance.toString(),
               )}
             </Text>
           </Card.Content>

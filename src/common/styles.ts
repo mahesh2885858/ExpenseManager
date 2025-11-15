@@ -23,4 +23,7 @@ export const gs = StyleSheet.create({
   justifyCenter: {
     justifyContent: 'center',
   },
+  justifyBetween: {
+    justifyContent: 'space-between',
+  },
 });

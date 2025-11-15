@@ -9,9 +9,11 @@ import { gs } from '../common';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
+import { useNavigation } from '@react-navigation/native';
 
 const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
+  const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const remove = useTransactionsStore(state => state.removeTransaction);
@@ -28,7 +30,11 @@ const RenderTransaction = (props: { item: TTransaction }) => {
       onPress={() => {
         if (props.item.isSelected) {
           toggleSelection(props.item.id);
-        } else return;
+        } else {
+          navigation.navigate('TransactionDetails', {
+            transaction: props.item,
+          });
+        }
       }}
       style={[
         gs.flexRow,

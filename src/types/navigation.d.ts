@@ -1,4 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { TTransaction } from './transactions';
 
 export type TBottomTabParamList = {
   Home: undefined;
@@ -12,7 +13,17 @@ export type TRootStackParamList = {
     name: string;
   };
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
-  AddTransaction: undefined;
+  AddTransaction:
+    | {
+        mode: 'new';
+      }
+    | {
+        mode: 'edit';
+        transaction: TTransaction;
+      };
+  TransactionDetails: {
+    transaction: TTransaction;
+  };
 };
 
 declare global {

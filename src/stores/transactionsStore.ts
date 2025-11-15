@@ -11,6 +11,7 @@ type TTransactionsStore = {
 
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
+  updateTransaction: (id: string, transaction: TTransaction) => void;
   addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
@@ -30,6 +31,15 @@ const useTransactionsStore = create<PositionStore>()(
       ],
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
+      },
+      updateTransaction: (id, transaction) => {
+        set(state => ({
+          ...state,
+          transactions: state.transactions.map(t => {
+            if (t.id === id) return { ...t, ...transaction };
+            return t;
+          }),
+        }));
       },
       addCategory: category => {
         set(state => ({ categories: [...state.categories, category] }));

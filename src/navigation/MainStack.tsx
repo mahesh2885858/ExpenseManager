@@ -6,6 +6,7 @@ import useAccountStore from '../stores/accountsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
 import AddTransaction from '../screens/AddTransaction';
+import TransactionDetails from '../screens/TransactionDetails';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -37,6 +38,13 @@ const MainStack = () => {
           <Stack.Screen
             name="AddTransaction"
             component={AddTransaction}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="TransactionDetails"
+            component={TransactionDetails}
             options={{
               headerShown: false,
             }}
