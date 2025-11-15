@@ -114,7 +114,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               },
             ]}
           >
-            {getMaxText(props.item.description ?? '', 35)}
+            {getMaxText(props.item.description ?? '', 20)}
           </Text>
         )}
       </View>
@@ -155,6 +155,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               <Icon source={'delete'} size={25} color={theme.colors.error} />
             </PressableWithFeedback>
             <PressableWithFeedback
+              onPress={() => {}}
               style={[
                 styles.action,
                 {
