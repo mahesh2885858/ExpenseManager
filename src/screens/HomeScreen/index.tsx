@@ -126,8 +126,19 @@ const HomeScreen = () => {
         </Card>
       </View>
       {/* income and expense section */}
-      <View style={[gs.flexRow, { paddingHorizontal: spacing.lg }]}>
-        <View style={[styles.ieBox]}>
+      <View
+        style={[gs.flexRow, { paddingHorizontal: spacing.lg, gap: spacing.md }]}
+      >
+        <View
+          style={[
+            styles.ieBox,
+            {
+              backgroundColor: theme.colors.surfaceVariant,
+              padding: spacing.sm,
+              borderRadius: borderRadius.md,
+            },
+          ]}
+        >
           <Text
             style={[
               styles.ieBanner,
@@ -143,15 +154,24 @@ const HomeScreen = () => {
             style={[
               gs.fontBold,
               {
-                color: theme.colors.onBackground,
+                color: theme.colors.success,
                 fontSize: textSize.xl,
               },
             ]}
           >
-            ₹{formatDigits((selectedAccount.balance + totalIncome).toString())}
+            ₹ {formatDigits((selectedAccount.balance + totalIncome).toString())}
           </Text>
         </View>
-        <View style={[styles.ieBox]}>
+        <View
+          style={[
+            styles.ieBox,
+            {
+              backgroundColor: theme.colors.surfaceVariant,
+              padding: spacing.sm,
+              borderRadius: borderRadius.md,
+            },
+          ]}
+        >
           <Text
             style={[
               styles.ieBanner,
@@ -167,12 +187,12 @@ const HomeScreen = () => {
             style={[
               gs.fontBold,
               {
-                color: theme.colors.onBackground,
+                color: theme.colors.error,
                 fontSize: textSize.xl,
               },
             ]}
           >
-            -₹{formatDigits(totalExpenses.toString())}
+            -₹ {formatDigits(totalExpenses.toString())}
           </Text>
         </View>
       </View>

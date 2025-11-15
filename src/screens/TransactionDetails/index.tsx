@@ -45,7 +45,6 @@ const TransactionDetails = () => {
             onPress={navigation.goBack}
             style={[
               {
-                backgroundColor: theme.colors.primaryContainer,
                 borderRadius: borderRadius.round,
               },
               styles.avatar,
@@ -63,7 +62,6 @@ const TransactionDetails = () => {
             }}
             style={[
               {
-                backgroundColor: theme.colors.primaryContainer,
                 borderRadius: borderRadius.round,
               },
               styles.avatar,
@@ -80,7 +78,7 @@ const TransactionDetails = () => {
               style={[
                 styles.totalBalance,
                 {
-                  backgroundColor: theme.colors.primaryContainer,
+                  backgroundColor: theme.colors.surfaceVariant,
                   borderRadius: borderRadius.lg,
                   paddingHorizontal: spacing.md,
                   paddingVertical: spacing.md,
@@ -100,18 +98,21 @@ const TransactionDetails = () => {
                 style={[
                   styles.amountText,
                   {
-                    color: theme.colors.onPrimaryContainer,
+                    color:
+                      transaction.type === 'expense'
+                        ? theme.colors.error
+                        : theme.colors.success,
                     fontSize: textSize.xxxl,
                   },
                 ]}
               >
-                ₹{formatDigits(transaction.amount.toString())}
+                ₹ {formatDigits(transaction.amount.toString())}
               </Text>
             </Card.Content>
           </Card>
         </View>
         {/* Category and date section */}
-        <View style={[gs.flexRow, { paddingHorizontal: spacing.lg }]}>
+        <View style={[gs.flexRow, { paddingHorizontal: spacing.md }]}>
           <View style={[styles.ieBox]}>
             <Text
               style={[
@@ -127,9 +128,10 @@ const TransactionDetails = () => {
             <Text
               style={[
                 gs.fontBold,
+                styles.fontSemi,
                 {
                   color: theme.colors.onBackground,
-                  fontSize: textSize.xl,
+                  fontSize: textSize.lg,
                 },
               ]}
             >
@@ -150,10 +152,10 @@ const TransactionDetails = () => {
             </Text>
             <Text
               style={[
-                gs.fontBold,
+                styles.fontSemi,
                 {
                   color: theme.colors.onBackground,
-                  fontSize: textSize.xl,
+                  fontSize: textSize.lg,
                 },
               ]}
             >
@@ -231,5 +233,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     padding: spacing.sm,
     gap: spacing.sm,
+  },
+  fontSemi: {
+    fontWeight: 'semibold',
   },
 });
