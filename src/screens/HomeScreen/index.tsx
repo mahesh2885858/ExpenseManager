@@ -8,6 +8,7 @@ import { gs } from '../../common';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useAccountStore from '../../stores/accountsStore';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -129,7 +130,7 @@ const HomeScreen = () => {
       <View
         style={[gs.flexRow, { paddingHorizontal: spacing.lg, gap: spacing.md }]}
       >
-        <View
+        <PressableWithFeedback
           style={[
             styles.ieBox,
             {
@@ -161,8 +162,8 @@ const HomeScreen = () => {
           >
             ₹ {formatDigits((selectedAccount.balance + totalIncome).toString())}
           </Text>
-        </View>
-        <View
+        </PressableWithFeedback>
+        <PressableWithFeedback
           style={[
             styles.ieBox,
             {
@@ -194,7 +195,7 @@ const HomeScreen = () => {
           >
             -₹ {formatDigits(totalExpenses.toString())}
           </Text>
-        </View>
+        </PressableWithFeedback>
       </View>
       {/* recent transactions section */}
       <View

@@ -1,19 +1,22 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { spacing, textSize, useAppTheme } from '../../../theme';
+import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import { TBottomTabParamList } from '../../types';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const transactions = useGetTransactions();
+  const filters = ['Today', 'This week', 'This month', 'This year', 'All'];
+  const [selectedFilter, setSelectedFilter] = useState('All');
 
   return (
     <ScrollView
@@ -34,22 +37,86 @@ const Transactions = () => {
           },
           gs.flexRow,
           gs.itemsCenter,
+          gs.justifyBetween,
         ]}
       >
-        <Pressable onPress={navigation.goBack}>
-          <Icon size={24} source={'arrow-left'} />
-        </Pressable>
-        <Text
+        <View
           style={[
-            gs.fontBold,
+            gs.flexRow,
+            gs.centerItems,
             {
-              fontSize: textSize.lg,
-              color: theme.colors.onBackground,
+              gap: spacing.md,
             },
           ]}
         >
-          Transactions
-        </Text>
+          <Pressable onPress={navigation.goBack}>
+            <Icon size={24} source={'arrow-left'} />
+          </Pressable>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                fontSize: textSize.lg,
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            Transactions
+          </Text>
+        </View>
+        <PressableWithFeedback
+          style={[
+            {
+              backgroundColor: theme.colors.surfaceVariant,
+              padding: spacing.xs,
+              paddingHorizontal: spacing.md,
+              borderRadius: borderRadius.pill,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.md,
+              },
+            ]}
+          >
+            Filters
+          </Text>
+        </PressableWithFeedback>
+      </View>
+      {/* filters section */}
+      <View style={[styles.filterBox, gs.flexRow]}>
+        {filters.map(item => {
+          const isSelected = selectedFilter === item;
+          return (
+            <PressableWithFeedback
+              onPress={() => setSelectedFilter(item)}
+              style={[
+                styles.filterItem,
+                {
+                  borderColor: isSelected
+                    ? undefined
+                    : theme.colors.onSecondaryContainer,
+                  backgroundColor: isSelected
+                    ? theme.colors.secondaryContainer
+                    : undefined,
+                },
+              ]}
+              key={item}
+            >
+              <Text
+                style={{
+                  color: theme.colors.onPrimaryContainer,
+                  fontSize: textSize.sm,
+                }}
+              >
+                {item}
+              </Text>
+            </PressableWithFeedback>
+          );
+        })}
       </View>
       {/* recent transactions section */}
       <View
@@ -106,5 +173,17 @@ const styles = StyleSheet.create({
   },
   ieBanner: {
     fontWeight: 'semibold',
+  },
+  filterBox: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    marginTop: spacing.md,
+    flexWrap: 'wrap',
+  },
+  filterItem: {
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.pill,
   },
 });
