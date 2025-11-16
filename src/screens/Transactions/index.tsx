@@ -1,5 +1,5 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
@@ -9,7 +9,8 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
-import { TBottomTabParamList } from '../../types';
+import { TBottomTabParamList, TTransaction } from '../../types';
+import { isThisMonth, isThisWeek, isThisYear, isToday } from 'date-fns';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -21,6 +22,37 @@ const Transactions = () => {
   const [renderFilters, setRenderFilters] = useState(false);
   const heightValue = useSharedValue(0);
   const marginTop = useSharedValue(0);
+
+  const transactionsToRender = useMemo(() => {
+    let filtered: TTransaction[] = [];
+    switch (selectedFilter) {
+      case 'All':
+        filtered = transactions;
+        break;
+      case 'Today':
+        filtered = transactions.filter(t => isToday(t.transactionDate));
+
+        break;
+
+      case 'This week':
+        filtered = transactions.filter(t => {
+          return isThisWeek(t.transactionDate);
+        });
+        break;
+
+      case 'This month':
+        filtered = transactions.filter(t => isThisMonth(t.transactionDate));
+        break;
+
+      case 'This year':
+        filtered = transactions.filter(t => isThisYear(t.transactionDate));
+        break;
+      default:
+        filtered = transactions;
+        break;
+    }
+    return filtered;
+  }, [selectedFilter, transactions]);
 
   useEffect(() => {
     if (renderFilters) {
@@ -155,7 +187,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          {transactions.length === 0 ? (
+          {transactionsToRender.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -170,7 +202,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={transactions} />
+            <RenderTransactions transactions={transactionsToRender} />
           )}
         </View>
       </View>
