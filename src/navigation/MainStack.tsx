@@ -7,6 +7,7 @@ import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
 import AddTransaction from '../screens/AddTransaction';
 import TransactionDetails from '../screens/TransactionDetails';
+import TransactionFilters from '../screens/TransactionFilters';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -46,6 +47,15 @@ const MainStack = () => {
             name="TransactionDetails"
             component={TransactionDetails}
             options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="TransactionFilters"
+            component={TransactionFilters}
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
               headerShown: false,
             }}
           />

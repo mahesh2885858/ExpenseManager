@@ -112,7 +112,9 @@ const Transactions = () => {
             </Text>
           </View>
           <PressableWithFeedback
-            onPress={() => setRenderFilters(p => !p)}
+            onPress={() => {
+              navigation.navigate('TransactionFilters');
+            }}
             style={[
               {
                 backgroundColor: theme.colors.surfaceVariant,
