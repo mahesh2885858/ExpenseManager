@@ -19,3 +19,24 @@ export type TTransaction = {
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
   isSelected?: boolean;
 };
+
+export type TFilterTypes = 'date' | 'type' | 'category';
+
+export type TDateFilter = {
+  type: 'date';
+} & (
+  | { isToday: boolean }
+  | { isThisWeek: boolean }
+  | { isThisMonth: boolean }
+  | { isThisYear: boolean }
+  | {
+      range: string[];
+    }
+);
+
+export type TTypeFilter = { type: 'income' | 'expense' };
+
+export type TFilters = {
+  date: TDateFilter | null;
+  type: TTypeFilter | null;
+};

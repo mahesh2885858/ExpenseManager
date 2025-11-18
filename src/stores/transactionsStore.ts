@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import zustandStorage from '../storage';
-import { TCategories, TCategory, TTransaction } from '../types';
+import { TCategories, TCategory, TFilters, TTransaction } from '../types';
 import { DEFAULT_CATEGORY_ID } from '../common';
 
 type TTransactionsStore = {
   transactions: TTransaction[];
   categories: TCategories;
+  filters: TFilters | null;
 };
 
 type TTransactionsStoreActions = {
@@ -15,6 +16,7 @@ type TTransactionsStoreActions = {
   addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
+  setFilters: (filter: TFilters) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -29,6 +31,7 @@ const useTransactionsStore = create<PositionStore>()(
           id: DEFAULT_CATEGORY_ID,
         },
       ],
+      filters: null,
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
       },
@@ -60,6 +63,11 @@ const useTransactionsStore = create<PositionStore>()(
         set(() => ({
           transactions: updatedTransactions,
         }));
+      },
+      setFilters: filter => {
+        if (filter) {
+          set(() => ({ filters: filter }));
+        }
       },
     }),
     {
