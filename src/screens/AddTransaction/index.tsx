@@ -1,9 +1,16 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { format } from 'date-fns';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,23 +33,28 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+} from 'react-native-vision-camera';
+import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import useAccountStore from '../../stores/accountsStore';
+import useTransactionsStore from '../../stores/transactionsStore';
 import {
   TAttachment,
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-import useTransactionsStore from '../../stores/transactionsStore';
-import { v4 as uuid } from 'uuid';
-import useAccountStore from '../../stores/accountsStore';
 
-const DATE_FORMAT = 'MMM do hh:mm a';
+const DATE_FORMAT = 'MMM do';
 const CURRENCY_SYMBOL = '₹';
 const AVATAR_SIZE = 40;
-const ICON_SIZE = 30;
+const ICON_SIZE = 24;
 
 const renderAttachment = (
   prop: TAttachment,
@@ -53,6 +65,10 @@ const AddTransaction = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
+  const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
 
   const addCategory = useTransactionsStore(state => state.addCategory);
@@ -216,6 +232,26 @@ const AddTransaction = () => {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${iconRotation.value}deg` }],
   }));
+
+  const onCameraPress = async () => {
+    if (hasPermission) {
+      if (!device) {
+        console.log('No device found');
+      }
+      setRenderCamera(true);
+    } else {
+      const result = await requestPermission();
+      if (result) {
+        if (!device) {
+          console.log('No device found');
+        }
+        setRenderCamera(true);
+      } else {
+        console.log('Camera permission denied');
+        Linking.openSettings();
+      }
+    }
+  };
 
   const addNewCategory = () => {
     const id = uuid();
@@ -520,6 +556,20 @@ const AddTransaction = () => {
               />
             </PressableWithFeedback>
           </Tooltip>
+          <Tooltip title="Add Bill/invoice etc">
+            <PressableWithFeedback
+              onPress={onCameraPress}
+              style={[
+                gs.flexRow,
+                gs.centerItems,
+                style.attachmentButton,
+                gs.fullFlex,
+                { backgroundColor: colors.primary },
+              ]}
+            >
+              <Icon source="camera" size={ICON_SIZE} color={colors.onPrimary} />
+            </PressableWithFeedback>
+          </Tooltip>
         </View>
         {/* Todo: Attachments list section */}
         {attachments.length > 0 && (
@@ -603,6 +653,55 @@ const AddTransaction = () => {
       </ScrollView>
       {amountInput && !isNaN(parseInt(amountInput, 10)) && (
         <FAB icon="check" style={style.fab} onPress={saveTransaction} />
+      )}
+      {renderCamera && device && (
+        <View style={[StyleSheet.absoluteFill]}>
+          <Camera
+            style={StyleSheet.absoluteFill}
+            ref={camera}
+            photo
+            device={device}
+            isActive={renderCamera}
+          />
+          <View style={style.cameraToolbar}>
+            <PressableWithFeedback
+              onPress={async () => {
+                const file = await camera.current?.takePhoto({});
+                const result = await fetch(`file://${file.path}`);
+                const photo = await result.blob();
+                console.log({ photo, file, result });
+                const copied = await keepLocalCopy({
+                  destination: 'documentDirectory',
+                  files: [
+                    {
+                      fileName: 'file.jpeg',
+                      uri: result.url,
+                    },
+                  ],
+                });
+                copied.forEach(file => {
+                  if (file.status === 'error') {
+                    console.log('error while copying: ', file.copyError);
+                  } else {
+                    console.log({ file });
+                    setAttachments([
+                      {
+                        extension: 'image/jpeg',
+                        name: 'file.jpeg',
+                        path: file.localUri,
+                        size: 100,
+                      },
+                    ]);
+                  }
+                });
+
+                setRenderCamera(false);
+              }}
+            >
+              <Icon source={'radiobox-marked'} size={70} />
+            </PressableWithFeedback>
+          </View>
+        </View>
       )}
     </KeyboardAvoidingView>
   );
@@ -696,5 +795,13 @@ const style = StyleSheet.create({
   },
   categoryInputBox: {
     overflow: 'hidden',
+  },
+  cameraToolbar: {
+    bottom: 0,
+    height: 200,
+    position: 'absolute',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
