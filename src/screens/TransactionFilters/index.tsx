@@ -163,6 +163,9 @@ const TransactionFilters = () => {
             onPress={() => {
               navigation.goBack();
             }}
+            style={{
+              paddingVertical: spacing.sm,
+            }}
           >
             <Icon source={'close'} size={textSize.lg} />
           </PressableWithFeedback>
