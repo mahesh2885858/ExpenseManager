@@ -149,6 +149,11 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           {
             backgroundColor: colors.surfaceVariant,
             opacity: pressed ? 0.8 : 1,
+            transform: [
+              {
+                scale: pressed ? 0.95 : 1,
+              },
+            ],
           },
         ]}
       >

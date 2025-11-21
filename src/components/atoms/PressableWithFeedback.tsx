@@ -1,7 +1,10 @@
 import React from 'react';
 import { Pressable, PressableProps } from 'react-native';
 
-const PressableWithFeedback = (props: PressableProps) => {
+const PressableWithFeedback = (
+  props: PressableProps & { hidden?: boolean },
+) => {
+  if (props.hidden) return null;
   return (
     <Pressable
       {...props}

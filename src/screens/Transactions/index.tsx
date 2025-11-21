@@ -1,19 +1,67 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React from 'react';
+import {
+  isAfter,
+  isBefore,
+  isThisMonth,
+  isThisWeek,
+  isThisYear,
+  isToday,
+} from 'date-fns';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { spacing, textSize, useAppTheme } from '../../../theme';
+import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
-import { TBottomTabParamList } from '../../types';
+import useTransactionsStore from '../../stores/transactionsStore';
+import { TBottomTabParamList, TTransaction } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const transactions = useGetTransactions();
+  const filters = useTransactionsStore(state => state.filters);
+
+  const transactionsToRender = useMemo(() => {
+    let filtered: TTransaction[] = [];
+    // apply date filter
+    if (filters.date) {
+      if (filters.date.isToday) {
+        filtered = transactions.filter(t => isToday(t.transactionDate));
+      } else if (filters.date.isThisWeek) {
+        filtered = transactions.filter(t => isThisWeek(t.transactionDate));
+      } else if (filters.date.isThisMonth) {
+        filtered = transactions.filter(t => isThisMonth(t.transactionDate));
+      } else if (filters.date.isThisYear) {
+        filtered = transactions.filter(t => isThisYear(t.transactionDate));
+      } else if (filters.date.range) {
+        filtered = filters.date.range
+          ? transactions.filter(
+              t =>
+                isBefore(filters.date.range[0], t.transactionDate) &&
+                isAfter(filters.date.range[1], t.transactionDate),
+            )
+          : transactions;
+      } else {
+        filtered = transactions;
+      }
+    } else {
+      filtered = transactions;
+    }
+
+    // apply type filter
+    if (filters.type) {
+      filtered = filtered.filter(
+        t => t.type === (filters.type === 'income' ? 'income' : 'expense'),
+      );
+    }
+
+    return filtered;
+  }, [filters, transactions]);
 
   return (
     <ScrollView
@@ -26,31 +74,69 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
-      <View
-        style={[
-          {
-            paddingHorizontal: spacing.lg,
-            gap: spacing.md,
-          },
-          gs.flexRow,
-          gs.itemsCenter,
-        ]}
-      >
-        <Pressable onPress={navigation.goBack}>
-          <Icon size={24} source={'arrow-left'} />
-        </Pressable>
-        <Text
+      {
+        <View
           style={[
-            gs.fontBold,
             {
-              fontSize: textSize.lg,
-              color: theme.colors.onBackground,
+              paddingHorizontal: spacing.lg,
+              gap: spacing.md,
             },
+            gs.flexRow,
+            gs.itemsCenter,
+            gs.justifyBetween,
           ]}
         >
-          Transactions
-        </Text>
-      </View>
+          <View
+            style={[
+              gs.flexRow,
+              gs.centerItems,
+              {
+                gap: spacing.md,
+              },
+            ]}
+          >
+            <Pressable onPress={navigation.goBack}>
+              <Icon size={24} source={'arrow-left'} />
+            </Pressable>
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  fontSize: textSize.lg,
+                  color: theme.colors.onBackground,
+                },
+              ]}
+            >
+              Transactions
+            </Text>
+          </View>
+          <PressableWithFeedback
+            onPress={() => {
+              navigation.navigate('TransactionFilters');
+            }}
+            style={[
+              {
+                backgroundColor: theme.colors.surfaceVariant,
+                padding: spacing.xs,
+                paddingHorizontal: spacing.md,
+                borderRadius: borderRadius.pill,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Filters
+            </Text>
+          </PressableWithFeedback>
+        </View>
+      }
+
       {/* recent transactions section */}
       <View
         style={[
@@ -60,7 +146,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          {transactions.length === 0 ? (
+          {transactionsToRender.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -75,7 +161,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={transactions} />
+            <RenderTransactions transactions={transactionsToRender} />
           )}
         </View>
       </View>
@@ -106,5 +192,17 @@ const styles = StyleSheet.create({
   },
   ieBanner: {
     fontWeight: 'semibold',
+  },
+  filterBox: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+    overflow: 'hidden',
+  },
+  filterItem: {
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.pill,
   },
 });
