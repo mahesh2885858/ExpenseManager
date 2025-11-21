@@ -1,18 +1,123 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import useTransactionsStore from '../../stores/transactionsStore';
 
 const TransactionFilters = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
-  const filters = ['Today', 'This week', 'This month', 'This year', 'All'];
-  const [selectedFilter, setSelectedFilter] = useState('All');
+  const filters = [
+    'Today',
+    'This week',
+    'This month',
+    'This year',
+    'All',
+  ] as const;
   const transactionType = ['Income', 'Expense', 'All'];
-  const [selectedType, setSelectedType] = useState('All');
+  const dateFilter = useTransactionsStore(state => state.filters.date);
+  const typeFilter = useTransactionsStore(state => state.filters.type);
+
+  const setFilters = useTransactionsStore(state => state.setFilters);
+  const resetFilters = useTransactionsStore(state => state.resetFilters);
+
+  const isAnyFilterApplied = useMemo(() => {
+    return !!dateFilter || !!typeFilter;
+  }, [dateFilter, typeFilter]);
+
+  const selectedFilter = useMemo(() => {
+    if (!dateFilter) return 'All';
+    if (dateFilter.isThisWeek) return 'This week';
+    if (dateFilter.isThisMonth) return 'This month';
+    if (dateFilter.isToday) return 'Today';
+    if (dateFilter.isThisYear) return 'This year';
+    if (dateFilter.range) return 'range';
+    return 'All';
+  }, [dateFilter]);
+
+  const selectedType = useMemo(() => {
+    if (!typeFilter) return 'All';
+    return typeFilter === 'expense' ? 'Expense' : 'Income';
+  }, [typeFilter]);
+
+  const setDateFilter = (item: string) => {
+    switch (item) {
+      case 'Today':
+        setFilters({
+          type: typeFilter,
+          date: {
+            isToday: true,
+          },
+        });
+        break;
+      case 'This week':
+        setFilters({
+          type: typeFilter,
+          date: {
+            isThisWeek: true,
+          },
+        });
+        break;
+      case 'This month':
+        setFilters({
+          type: typeFilter,
+          date: {
+            isThisMonth: true,
+          },
+        });
+        break;
+      case 'This year':
+        setFilters({
+          type: typeFilter,
+          date: {
+            isThisYear: true,
+          },
+        });
+        break;
+      case 'range':
+        setFilters({
+          type: typeFilter,
+          date: {
+            isToday: true,
+          },
+        });
+        break;
+
+      default:
+        setFilters({
+          type: typeFilter,
+          date: null,
+        });
+        break;
+    }
+  };
+
+  const setTypeFilter = (type: string) => {
+    switch (type) {
+      case 'Income':
+        setFilters({
+          date: dateFilter,
+          type: 'income',
+        });
+        break;
+      case 'Expense':
+        setFilters({
+          date: dateFilter,
+          type: 'expense',
+        });
+        break;
+
+      default:
+        setFilters({
+          date: dateFilter,
+          type: null,
+        });
+        break;
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -77,7 +182,7 @@ const TransactionFilters = () => {
             return (
               <PressableWithFeedback
                 onPress={() => {
-                  setSelectedFilter(item);
+                  setDateFilter(item);
                 }}
                 style={[
                   styles.filterItem,
@@ -118,7 +223,7 @@ const TransactionFilters = () => {
             const isSelected = selectedType === item;
             return (
               <PressableWithFeedback
-                onPress={() => setSelectedType(item)}
+                onPress={() => setTypeFilter(item)}
                 style={[
                   styles.filterItem,
                   {
@@ -144,7 +249,26 @@ const TransactionFilters = () => {
             );
           })}
         </View>
-        <View style={[gs.flexRow, gs.centerItems]}>
+        <View style={[gs.flexRow, gs.centerItems, styles.filterButtonBox]}>
+          <PressableWithFeedback
+            hidden={!isAnyFilterApplied}
+            style={[
+              styles.filterButton,
+              {
+                backgroundColor: colors.secondaryContainer,
+              },
+            ]}
+            onPress={resetFilters}
+          >
+            <Text
+              style={{
+                fontSize: textSize.md,
+                color: colors.onSecondaryContainer,
+              }}
+            >
+              Reset
+            </Text>
+          </PressableWithFeedback>
           <PressableWithFeedback
             style={[
               styles.filterButton,
@@ -159,7 +283,7 @@ const TransactionFilters = () => {
                 color: colors.onSecondaryContainer,
               }}
             >
-              Filter
+              Done
             </Text>
           </PressableWithFeedback>
         </View>
@@ -174,18 +298,18 @@ const styles = StyleSheet.create({
   filterBox: {
     position: 'absolute',
     bottom: 0,
-    height: 360,
+    height: 340,
     width: '96%',
     borderTopEndRadius: borderRadius.xxl,
     borderTopStartRadius: borderRadius.xxl,
     padding: spacing.md,
-    gap: spacing.lg,
+    gap: spacing.sm,
   },
   dateFilter: {
     gap: spacing.sm,
     flexWrap: 'wrap',
     overflow: 'hidden',
-    borderWidth: 1,
+    borderBottomWidth: 0,
     padding: spacing.sm,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
@@ -204,6 +328,9 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: textSize.sm,
+  },
+  filterButtonBox: {
+    gap: spacing.md,
   },
   filterButton: {
     padding: spacing.sm,

@@ -23,18 +23,15 @@ export type TTransaction = {
 export type TFilterTypes = 'date' | 'type' | 'category';
 
 export type TDateFilter = {
-  type: 'date';
-} & (
-  | { isToday: boolean }
-  | { isThisWeek: boolean }
-  | { isThisMonth: boolean }
-  | { isThisYear: boolean }
-  | {
-      range: string[];
-    }
-);
+  isToday?: boolean;
+  isThisWeek?: boolean;
+  isThisMonth?: boolean;
+  isThisYear?: boolean;
 
-export type TTypeFilter = { type: 'income' | 'expense' };
+  range?: string[];
+};
+
+export type TTypeFilter = 'income' | 'expense';
 
 export type TFilters = {
   date: TDateFilter | null;

@@ -1,68 +1,67 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useMemo, useState } from 'react';
+import {
+  isAfter,
+  isBefore,
+  isThisMonth,
+  isThisWeek,
+  isThisYear,
+  isToday,
+} from 'date-fns';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
+import useTransactionsStore from '../../stores/transactionsStore';
 import { TBottomTabParamList, TTransaction } from '../../types';
-import { isThisMonth, isThisWeek, isThisYear, isToday } from 'date-fns';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const transactions = useGetTransactions();
-  const filters = ['Today', 'This week', 'This month', 'This year', 'All'];
-  const [selectedFilter, setSelectedFilter] = useState('All');
-  const [renderFilters, setRenderFilters] = useState(false);
-  const heightValue = useSharedValue(0);
-  const marginTop = useSharedValue(0);
+  const filters = useTransactionsStore(state => state.filters);
 
   const transactionsToRender = useMemo(() => {
     let filtered: TTransaction[] = [];
-    switch (selectedFilter) {
-      case 'All':
-        filtered = transactions;
-        break;
-      case 'Today':
+    // apply date filter
+    if (filters.date) {
+      if (filters.date.isToday) {
         filtered = transactions.filter(t => isToday(t.transactionDate));
-
-        break;
-
-      case 'This week':
-        filtered = transactions.filter(t => {
-          return isThisWeek(t.transactionDate);
-        });
-        break;
-
-      case 'This month':
+      } else if (filters.date.isThisWeek) {
+        filtered = transactions.filter(t => isThisWeek(t.transactionDate));
+      } else if (filters.date.isThisMonth) {
         filtered = transactions.filter(t => isThisMonth(t.transactionDate));
-        break;
-
-      case 'This year':
+      } else if (filters.date.isThisYear) {
         filtered = transactions.filter(t => isThisYear(t.transactionDate));
-        break;
-      default:
+      } else if (filters.date.range) {
+        filtered = filters.date.range
+          ? transactions.filter(
+              t =>
+                isBefore(filters.date.range[0], t.transactionDate) &&
+                isAfter(filters.date.range[1], t.transactionDate),
+            )
+          : transactions;
+      } else {
         filtered = transactions;
-        break;
-    }
-    return filtered;
-  }, [selectedFilter, transactions]);
-
-  useEffect(() => {
-    if (renderFilters) {
-      heightValue.value = withTiming(70);
-      marginTop.value = withTiming(spacing.md);
+      }
     } else {
-      heightValue.value = withTiming(0);
-      marginTop.value = withTiming(0);
+      filtered = transactions;
     }
-  }, [renderFilters, heightValue, marginTop]);
+
+    // apply type filter
+    if (filters.type) {
+      filtered = filtered.filter(
+        t => t.type === (filters.type === 'income' ? 'income' : 'expense'),
+      );
+    }
+
+    return filtered;
+  }, [filters, transactions]);
 
   return (
     <ScrollView
@@ -137,48 +136,6 @@ const Transactions = () => {
           </PressableWithFeedback>
         </View>
       }
-      {/* filters section */}
-
-      <Animated.View
-        style={[
-          styles.filterBox,
-          gs.flexRow,
-          {
-            height: heightValue,
-            marginTop,
-          },
-        ]}
-      >
-        {filters.map(item => {
-          const isSelected = selectedFilter === item;
-          return (
-            <PressableWithFeedback
-              onPress={() => setSelectedFilter(item)}
-              style={[
-                styles.filterItem,
-                {
-                  borderColor: isSelected
-                    ? theme.colors.secondaryContainer
-                    : theme.colors.onSecondaryContainer,
-                  backgroundColor: isSelected
-                    ? theme.colors.secondaryContainer
-                    : theme.colors.surface,
-                },
-              ]}
-              key={item}
-            >
-              <Text
-                style={{
-                  color: theme.colors.onPrimaryContainer,
-                  fontSize: textSize.sm,
-                }}
-              >
-                {item}
-              </Text>
-            </PressableWithFeedback>
-          );
-        })}
-      </Animated.View>
 
       {/* recent transactions section */}
       <View
