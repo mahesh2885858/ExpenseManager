@@ -33,6 +33,10 @@ const Transactions = () => {
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
 
+  const isFiltersActive = useMemo(() => {
+    return !!filters.date || !!filters.type;
+  }, [filters]);
+
   const transactionsToRender = useMemo(() => {
     let filtered: TTransaction[] = [];
     // apply date filter
@@ -129,30 +133,52 @@ const Transactions = () => {
               Transactions
             </Text>
           </View>
-          <PressableWithFeedback
-            onPress={() => {
-              navigation.navigate('TransactionFilters');
-            }}
-            style={[
-              {
-                backgroundColor: theme.colors.surfaceVariant,
-                padding: spacing.xs,
-                paddingHorizontal: spacing.md,
-                borderRadius: borderRadius.pill,
-              },
-            ]}
-          >
-            <Text
+          <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+            <PressableWithFeedback
+              onPress={() => {
+                navigation.navigate('TransactionFilters');
+              }}
               style={[
                 {
-                  color: theme.colors.onBackground,
-                  fontSize: textSize.md,
+                  backgroundColor: theme.colors.surfaceVariant,
+                  padding: spacing.xs,
+                  paddingHorizontal: spacing.md,
+                  borderRadius: borderRadius.pill,
                 },
               ]}
             >
-              Filters
-            </Text>
-          </PressableWithFeedback>
+              <Text
+                style={[
+                  {
+                    color: theme.colors.onBackground,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              >
+                Filters
+              </Text>
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              hidden={!isFiltersActive}
+              onPress={() => {
+                resetFilters();
+              }}
+              style={[
+                {
+                  backgroundColor: theme.colors.surfaceVariant,
+                  padding: spacing.xs,
+                  paddingHorizontal: spacing.md,
+                  borderRadius: borderRadius.pill,
+                },
+              ]}
+            >
+              <Icon
+                source={'filter-off'}
+                size={textSize.lg}
+                color={theme.colors.onBackground}
+              />
+            </PressableWithFeedback>
+          </View>
         </View>
       }
 
