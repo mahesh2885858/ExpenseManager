@@ -1,13 +1,19 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
 import {
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import {
+  add,
   isAfter,
   isBefore,
   isThisMonth,
   isThisWeek,
   isThisYear,
   isToday,
+  sub,
 } from 'date-fns';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +31,7 @@ const Transactions = () => {
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const transactions = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
+  const resetFilters = useTransactionsStore(state => state.resetFilters);
 
   const transactionsToRender = useMemo(() => {
     let filtered: TTransaction[] = [];
@@ -40,11 +47,15 @@ const Transactions = () => {
         filtered = transactions.filter(t => isThisYear(t.transactionDate));
       } else if (filters.date.range) {
         filtered = filters.date.range
-          ? transactions.filter(
-              t =>
-                isBefore(filters.date.range[0], t.transactionDate) &&
-                isAfter(filters.date.range[1], t.transactionDate),
-            )
+          ? transactions.filter(t => {
+              // because date-fn excludes the given dates, only gives results from before and after. So, we are offsetting by adding and subtracting one day
+              const startDate = sub(filters.date.range[0], { days: 1 });
+              const endDate = add(filters.date?.range[1], { days: 1 });
+              return (
+                isBefore(startDate, t.transactionDate) &&
+                isAfter(endDate, t.transactionDate)
+              );
+            })
           : transactions;
       } else {
         filtered = transactions;
@@ -62,6 +73,14 @@ const Transactions = () => {
 
     return filtered;
   }, [filters, transactions]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        resetFilters();
+      };
+    }, [resetFilters]),
+  );
 
   return (
     <ScrollView

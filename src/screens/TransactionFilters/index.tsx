@@ -1,7 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
+import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
@@ -11,11 +13,12 @@ const TransactionFilters = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const filters = [
+    'All',
     'Today',
     'This week',
     'This month',
     'This year',
-    'All',
+    'Range',
   ] as const;
   const transactionType = ['Income', 'Expense', 'All'];
   const dateFilter = useTransactionsStore(state => state.filters.date);
@@ -23,6 +26,7 @@ const TransactionFilters = () => {
 
   const setFilters = useTransactionsStore(state => state.setFilters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
 
   const isAnyFilterApplied = useMemo(() => {
     return !!dateFilter || !!typeFilter;
@@ -34,66 +38,75 @@ const TransactionFilters = () => {
     if (dateFilter.isThisMonth) return 'This month';
     if (dateFilter.isToday) return 'Today';
     if (dateFilter.isThisYear) return 'This year';
-    if (dateFilter.range) return 'range';
+    if (dateFilter.range) return 'Range';
     return 'All';
   }, [dateFilter]);
+
+  const range = useMemo(() => {
+    if (selectedFilter === 'Range') {
+      return dateFilter?.range;
+    }
+  }, [selectedFilter, dateFilter]);
 
   const selectedType = useMemo(() => {
     if (!typeFilter) return 'All';
     return typeFilter === 'expense' ? 'Expense' : 'Income';
   }, [typeFilter]);
 
-  const setDateFilter = (item: string) => {
-    switch (item) {
-      case 'Today':
-        setFilters({
-          type: typeFilter,
-          date: {
-            isToday: true,
-          },
-        });
-        break;
-      case 'This week':
-        setFilters({
-          type: typeFilter,
-          date: {
-            isThisWeek: true,
-          },
-        });
-        break;
-      case 'This month':
-        setFilters({
-          type: typeFilter,
-          date: {
-            isThisMonth: true,
-          },
-        });
-        break;
-      case 'This year':
-        setFilters({
-          type: typeFilter,
-          date: {
-            isThisYear: true,
-          },
-        });
-        break;
-      case 'range':
-        setFilters({
-          type: typeFilter,
-          date: {
-            isToday: true,
-          },
-        });
-        break;
+  const setDateFilter = useCallback(
+    (item: string, givenRange?: CalendarDate[]) => {
+      switch (item) {
+        case 'Today':
+          setFilters({
+            type: typeFilter,
+            date: {
+              isToday: true,
+            },
+          });
+          break;
+        case 'This week':
+          setFilters({
+            type: typeFilter,
+            date: {
+              isThisWeek: true,
+            },
+          });
+          break;
+        case 'This month':
+          setFilters({
+            type: typeFilter,
+            date: {
+              isThisMonth: true,
+            },
+          });
+          break;
+        case 'This year':
+          setFilters({
+            type: typeFilter,
+            date: {
+              isThisYear: true,
+            },
+          });
+          break;
+        case 'Range':
+          setFilters({
+            type: typeFilter,
+            date: {
+              range: givenRange,
+            },
+          });
+          break;
 
-      default:
-        setFilters({
-          type: typeFilter,
-          date: null,
-        });
-        break;
-    }
-  };
+        default:
+          setFilters({
+            type: typeFilter,
+            date: null,
+          });
+          break;
+      }
+    },
+    [setFilters, typeFilter],
+  );
 
   const setTypeFilter = (type: string) => {
     switch (type) {
@@ -118,6 +131,20 @@ const TransactionFilters = () => {
         break;
     }
   };
+
+  const onConfirm = useCallback(
+    ({
+      startDate,
+      endDate,
+    }: {
+      startDate: CalendarDate;
+      endDate: CalendarDate;
+    }) => {
+      setRenderCustomDatePicker(false);
+      setDateFilter('Range', [startDate, endDate]);
+    },
+    [setRenderCustomDatePicker, setDateFilter],
+  );
 
   return (
     <KeyboardAvoidingView
@@ -182,10 +209,15 @@ const TransactionFilters = () => {
         >
           {filters.map(item => {
             const isSelected = selectedFilter === item;
+            const isRange = item === 'Range';
             return (
               <PressableWithFeedback
                 onPress={() => {
-                  setDateFilter(item);
+                  if (isRange) {
+                    setRenderCustomDatePicker(true);
+                  } else {
+                    setDateFilter(item);
+                  }
                 }}
                 style={[
                   styles.filterItem,
@@ -273,6 +305,7 @@ const TransactionFilters = () => {
             </Text>
           </PressableWithFeedback>
           <PressableWithFeedback
+            onPress={navigation.goBack}
             style={[
               styles.filterButton,
               {
@@ -291,6 +324,22 @@ const TransactionFilters = () => {
           </PressableWithFeedback>
         </View>
       </View>
+      {renderCustomDatePicker && (
+        <DatePickerModal
+          startDate={range ? range[0] : undefined}
+          label="Select Custom date range"
+          animationType="fade"
+          presentationStyle="pageSheet"
+          locale="en"
+          mode="range"
+          visible={renderCustomDatePicker}
+          endDate={range ? range[0] : undefined}
+          onConfirm={onConfirm}
+          onDismiss={() => {
+            setRenderCustomDatePicker(false);
+          }}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
