@@ -1,3 +1,5 @@
+import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
+
 export type TTransactionType = 'income' | 'expense';
 
 export type TAttachment = {
@@ -28,7 +30,7 @@ export type TDateFilter = {
   isThisMonth?: boolean;
   isThisYear?: boolean;
 
-  range?: string[];
+  range?: CalendarDate[];
 };
 
 export type TTypeFilter = 'income' | 'expense';

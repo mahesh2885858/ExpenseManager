@@ -163,6 +163,22 @@ const TransactionDetails = () => {
             </Text>
           </View>
         </View>
+        {/* description section */}
+        {(transaction.description ?? '').trim().length > 0 && (
+          <View style={[gs.flexRow, { paddingHorizontal: spacing.lg }]}>
+            <Text
+              style={[
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                  padding: spacing.xs,
+                },
+              ]}
+            >
+              {transaction.description}
+            </Text>
+          </View>
+        )}
         {/* Attachment section*/}
         {transaction.attachments && transaction.attachments.length > 0 && (
           <View
