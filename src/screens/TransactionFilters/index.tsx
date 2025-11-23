@@ -29,6 +29,7 @@ const TransactionFilters = () => {
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
 
   const isAnyFilterApplied = useMemo(() => {
+    console.log({ dateFilter, typeFilter });
     return !!dateFilter || !!typeFilter;
   }, [dateFilter, typeFilter]);
 
@@ -55,6 +56,7 @@ const TransactionFilters = () => {
 
   const setDateFilter = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
+      console.log('Date filter is being set here: ', item);
       switch (item) {
         case 'Today':
           setFilters({
@@ -109,6 +111,7 @@ const TransactionFilters = () => {
   );
 
   const setTypeFilter = (type: string) => {
+    console.log('Type filter is being set here: ', type);
     switch (type) {
       case 'Income':
         setFilters({
