@@ -1,3 +1,4 @@
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { formatDigits } from 'commonutil-core';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -5,16 +6,20 @@ import { Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useAccountStore from '../../stores/accountsStore';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import useTransactionsStore from '../../stores/transactionsStore';
+import { TBottomTabParamList } from '../../types';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const transactions = useGetTransactions();
+  const setFilters = useTransactionsStore(state => state.setFilters);
+  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();
@@ -29,6 +34,7 @@ const HomeScreen = () => {
       }
     }, 0);
   }, [transactions]);
+
   const totalExpenses = useMemo(() => {
     return transactions.reduce((prev, curr) => {
       if (curr.type === 'expense') {
@@ -42,8 +48,6 @@ const HomeScreen = () => {
   const totalBalance = useMemo(() => {
     return selectedAccount.balance + totalIncome - totalExpenses;
   }, [selectedAccount, totalExpenses, totalIncome]);
-
-  console.log({ totalExpenses });
 
   transactions.sort(
     (a, b) =>
@@ -131,6 +135,13 @@ const HomeScreen = () => {
         style={[gs.flexRow, { paddingHorizontal: spacing.lg, gap: spacing.md }]}
       >
         <PressableWithFeedback
+          onPress={() => {
+            setFilters({
+              type: 'income',
+              date: null,
+            });
+            navigation.navigate('Transactions');
+          }}
           style={[
             styles.ieBox,
             {
@@ -164,6 +175,13 @@ const HomeScreen = () => {
           </Text>
         </PressableWithFeedback>
         <PressableWithFeedback
+          onPress={() => {
+            setFilters({
+              type: 'expense',
+              date: null,
+            });
+            navigation.navigate('Transactions');
+          }}
           style={[
             styles.ieBox,
             {
