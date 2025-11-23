@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import { Icon, Snackbar } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -27,8 +27,10 @@ const TransactionFilters = () => {
   const setFilters = useTransactionsStore(state => state.setFilters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
+  const [renderSnack, setRenderSnack] = useState(false);
 
   const isAnyFilterApplied = useMemo(() => {
+    console.log({ dateFilter, typeFilter });
     return !!dateFilter || !!typeFilter;
   }, [dateFilter, typeFilter]);
 
@@ -55,6 +57,7 @@ const TransactionFilters = () => {
 
   const setDateFilter = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
+      console.log('Date filter is being set here: ', item);
       switch (item) {
         case 'Today':
           setFilters({
@@ -109,6 +112,7 @@ const TransactionFilters = () => {
   );
 
   const setTypeFilter = (type: string) => {
+    console.log('Type filter is being set here: ', type);
     switch (type) {
       case 'Income':
         setFilters({
@@ -141,9 +145,28 @@ const TransactionFilters = () => {
       endDate: CalendarDate;
     }) => {
       setRenderCustomDatePicker(false);
+      if (!startDate || !endDate) {
+        setRenderSnack(true);
+        return;
+      }
       setDateFilter('Range', [startDate, endDate]);
     },
     [setRenderCustomDatePicker, setDateFilter],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      let t: number;
+      if (renderSnack) {
+        t = setTimeout(() => {
+          setRenderSnack(false);
+          clearTimeout(t);
+        }, 1000);
+      }
+      return () => {
+        clearTimeout(t);
+      };
+    }, [renderSnack]),
   );
 
   return (
@@ -340,6 +363,14 @@ const TransactionFilters = () => {
           }}
         />
       )}
+      <Snackbar
+        visible={renderSnack}
+        onDismiss={() => {
+          setRenderSnack(false);
+        }}
+      >
+        <Text>Please select both start and end date.</Text>
+      </Snackbar>
     </KeyboardAvoidingView>
   );
 };

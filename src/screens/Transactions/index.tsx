@@ -1,8 +1,4 @@
-import {
-  NavigationProp,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import {
   add,
   isAfter,
@@ -13,8 +9,15 @@ import {
   isToday,
   sub,
 } from 'date-fns';
-import React, { useCallback, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import {
+  BackHandler,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -29,7 +32,7 @@ const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-  const transactions = useGetTransactions();
+  const { transactions } = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
 
@@ -78,13 +81,25 @@ const Transactions = () => {
     return filtered;
   }, [filters, transactions]);
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        resetFilters();
-      };
-    }, [resetFilters]),
+  const handleBackPress = useCallback(
+    (isEvent = false) => {
+      resetFilters();
+      if (isEvent) {
+        return false;
+      } else {
+        navigation.goBack();
+      }
+    },
+    [navigation, resetFilters],
   );
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
+      handleBackPress(true),
+    );
+
+    return () => backHandler.remove();
+  }, [handleBackPress]);
 
   return (
     <ScrollView
@@ -118,7 +133,7 @@ const Transactions = () => {
               },
             ]}
           >
-            <Pressable onPress={navigation.goBack}>
+            <Pressable onPress={() => handleBackPress()}>
               <Icon size={24} source={'arrow-left'} />
             </Pressable>
             <Text
