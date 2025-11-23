@@ -111,7 +111,7 @@ const AddTransaction = () => {
       };
     } else {
       return {
-        type: 'income',
+        type: 'expense',
         amountInput: '',
         date: new Date(),
         desc: '',
@@ -366,16 +366,16 @@ const AddTransaction = () => {
         {/* Transaction Type */}
         <View style={style.transactionTypeContainer}>
           <PressableWithFeedback
-            onPress={() => changeTransactionType('income')}
-            style={getTransactionTypeButtonStyle('income')}
-          >
-            <Text style={getTransactionTypeTextStyle('income')}>Income</Text>
-          </PressableWithFeedback>
-          <PressableWithFeedback
             onPress={() => changeTransactionType('expense')}
             style={getTransactionTypeButtonStyle('expense')}
           >
             <Text style={getTransactionTypeTextStyle('expense')}>Expense</Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={() => changeTransactionType('income')}
+            style={getTransactionTypeButtonStyle('income')}
+          >
+            <Text style={getTransactionTypeTextStyle('income')}>Income</Text>
           </PressableWithFeedback>
         </View>
 
