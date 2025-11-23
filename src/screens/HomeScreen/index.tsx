@@ -17,33 +17,13 @@ const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const transactions = useGetTransactions();
+  const { transactions, totalExpenses, totalIncome } = useGetTransactions();
   const setFilters = useTransactionsStore(state => state.setFilters);
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();
   }, [getSelectedAccount]);
-
-  const totalIncome = useMemo(() => {
-    return transactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
-        return prev;
-      } else {
-        return prev + curr.amount;
-      }
-    }, 0);
-  }, [transactions]);
-
-  const totalExpenses = useMemo(() => {
-    return transactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
-        return prev + curr.amount;
-      } else {
-        return prev;
-      }
-    }, 0);
-  }, [transactions]);
 
   const totalBalance = useMemo(() => {
     return selectedAccount.balance + totalIncome - totalExpenses;

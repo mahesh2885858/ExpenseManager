@@ -29,7 +29,7 @@ const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-  const transactions = useGetTransactions();
+  const { transactions } = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
 
