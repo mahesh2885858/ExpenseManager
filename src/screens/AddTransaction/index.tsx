@@ -382,6 +382,7 @@ const AddTransaction = () => {
         {/* Amount Input */}
         <View style={style.amountInputContainer}>
           <TextInput
+            autoFocus
             onChangeText={setAmountInput}
             value={amountInput}
             outlineColor={colors.onSurfaceDisabled}
