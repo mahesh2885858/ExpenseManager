@@ -82,10 +82,10 @@ android {
         applicationId "com.expensemanager"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "0.4"
+        versionCode 4
+        versionName "0.5"
     }
-    
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -123,6 +123,9 @@ android {
             universalApk true
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 

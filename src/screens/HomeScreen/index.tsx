@@ -191,7 +191,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            -₹ {formatDigits(totalExpenses.toString())}
+            ₹ {formatDigits(totalExpenses.toString())}
           </Text>
         </PressableWithFeedback>
       </View>

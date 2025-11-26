@@ -114,7 +114,10 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               },
             ]}
           >
-            {getMaxText(props.item.description ?? '', 20)}
+            {getMaxText(
+              props.item.description.replace(/[\r\n]+/g, ' ') ?? '',
+              20,
+            )}
           </Text>
         )}
       </View>
@@ -134,7 +137,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
           ]}
         >
           {props.item.type === 'expense'
-            ? `-₹${formatDigits(props.item.amount.toString())}`
+            ? `₹${formatDigits(props.item.amount.toString())}`
             : `₹${formatDigits(props.item.amount.toString())}`}
         </Text>
         {props.item.isSelected && (
