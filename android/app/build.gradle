@@ -82,8 +82,8 @@ android {
         applicationId "com.expensemanager"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "0.4"
+        versionCode 4
+        versionName "0.5"
     }
 
     signingConfigs {
@@ -93,12 +93,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        // release {
-        //     storeFile file(System.getenv("RELEASE_STORE_FILE"))
-        //     storePassword System.getenv("RELEASE_STORE_PASSWORD")
-        //     keyAlias System.getenv("RELEASE_KEY_ALIAS")
-        //     keyPassword System.getenv("RELEASE_KEY_PASSWORD")
-        // }
+        release {
+            storeFile file(System.getenv("RELEASE_STORE_FILE"))
+            storePassword System.getenv("RELEASE_STORE_PASSWORD")
+            keyAlias System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+        }
     }
     buildTypes {
         debug {
