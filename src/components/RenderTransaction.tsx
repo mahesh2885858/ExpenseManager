@@ -114,7 +114,10 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               },
             ]}
           >
-            {getMaxText(props.item.description ?? '', 20)}
+            {getMaxText(
+              props.item.description.replace(/[\r\n]+/g, ' ') ?? '',
+              20,
+            )}
           </Text>
         )}
       </View>
