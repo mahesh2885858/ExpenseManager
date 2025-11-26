@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import {
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Linking,
   ScrollView,
@@ -70,7 +71,6 @@ const AddTransaction = () => {
   const camera = useRef<Camera>(null);
   const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-
   const addCategory = useTransactionsStore(state => state.addCategory);
   const categories = useTransactionsStore(state => state.categories);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
@@ -111,7 +111,11 @@ const AddTransaction = () => {
       };
     } else {
       return {
-        type: 'expense',
+        type: route.params.type
+          ? route.params.type === 'EXPENSE'
+            ? 'expense'
+            : 'income'
+          : 'expense',
         amountInput: '',
         date: new Date(),
         desc: '',
@@ -145,6 +149,7 @@ const AddTransaction = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
+  const [kbHeight, setKbHeight] = useState(0);
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -324,6 +329,19 @@ const AddTransaction = () => {
     };
   }, [openCategoryInput, iconRotation, categoryInputHeight, marginTop]);
 
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', e => {
+      setKbHeight(e.endCoordinates.height);
+    });
+    const hide = Keyboard.addListener('keyboardDidHide', () => {
+      setKbHeight(0);
+    });
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -386,6 +404,7 @@ const AddTransaction = () => {
             value={amountInput}
             outlineColor={colors.onSurfaceDisabled}
             mode="outlined"
+            autoFocus
             placeholder="Amount"
             keyboardType="numeric"
             left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
@@ -652,7 +671,16 @@ const AddTransaction = () => {
         />
       </ScrollView>
       {amountInput && !isNaN(parseInt(amountInput, 10)) && (
-        <FAB icon="check" style={style.fab} onPress={saveTransaction} />
+        <FAB
+          icon="check"
+          style={[
+            style.fab,
+            {
+              bottom: kbHeight + 20,
+            },
+          ]}
+          onPress={saveTransaction}
+        />
       )}
       {renderCamera && device && (
         <View style={[StyleSheet.absoluteFill]}>
