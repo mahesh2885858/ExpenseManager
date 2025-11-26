@@ -137,7 +137,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
           ]}
         >
           {props.item.type === 'expense'
-            ? `-₹${formatDigits(props.item.amount.toString())}`
+            ? `₹${formatDigits(props.item.amount.toString())}`
             : `₹${formatDigits(props.item.amount.toString())}`}
         </Text>
         {props.item.isSelected && (
