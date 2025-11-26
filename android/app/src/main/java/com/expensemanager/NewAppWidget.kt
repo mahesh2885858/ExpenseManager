@@ -4,6 +4,10 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.widget.RemoteViews
+import android.content.Intent
+import android.app.PendingIntent
+import androidx.core.net.toUri
+
 
 /**
  * Implementation of App Widget functionality.
@@ -34,11 +38,31 @@ internal fun updateAppWidget(
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int
 ) {
-    val widgetText = context.getString(R.string.appwidget_text)
-    // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.new_app_widget)
 
+    // ----- INCOME BUTTON -----
+    val incomeUri = "myapp://add-transaction/INCOME".toUri()
+    val incomeIntent = Intent(Intent.ACTION_VIEW, incomeUri).apply {
+        setPackage(context.packageName)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val pendingIncome = PendingIntent.getActivity(
+        context, 100, incomeIntent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    views.setOnClickPendingIntent(R.id.btnModeIncome, pendingIncome)
 
-    // Instruct the widget manager to update the widget
+    val expenseUri = "myapp://add-transaction/EXPENSE".toUri()
+    val expenseIntent = Intent(Intent.ACTION_VIEW, expenseUri).apply {
+        setPackage(context.packageName)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val pendingExpense = PendingIntent.getActivity(
+        context, 101, expenseIntent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    views.setOnClickPendingIntent(R.id.btnModeExpense, pendingExpense)
+
+    // Update widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }
