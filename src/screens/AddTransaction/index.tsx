@@ -17,7 +17,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
 import { Avatar, FAB, Icon, TextInput, Tooltip } from 'react-native-paper';
 import {
   DatePickerModal,
@@ -27,12 +26,6 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera,
@@ -43,6 +36,7 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -71,7 +65,6 @@ const AddTransaction = () => {
   const camera = useRef<Camera>(null);
   const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-  const addCategory = useTransactionsStore(state => state.addCategory);
   const categories = useTransactionsStore(state => state.categories);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const updateTransaction = useTransactionsStore(
@@ -79,10 +72,6 @@ const AddTransaction = () => {
   );
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
 
-  // animatedValues
-  const iconRotation = useSharedValue(0);
-  const categoryInputHeight = useSharedValue(0);
-  const marginTop = useSharedValue(0);
   const initData: {
     type: TTransactionType;
     amountInput: string;
@@ -144,12 +133,11 @@ const AddTransaction = () => {
   const [attachments, setAttachments] = useState<TAttachment[]>(
     initData.attachments,
   );
-  const [openCategoryInput, setOpenCategoryInput] = useState(false);
-  const [categoryInput, setCategoryInput] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
   const [kbHeight, setKbHeight] = useState(0);
+  const [categoryModal, setCategoryModal] = useState(false);
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -234,10 +222,6 @@ const AddTransaction = () => {
     setAttachments(files);
   };
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${iconRotation.value}deg` }],
-  }));
-
   const onCameraPress = async () => {
     if (hasPermission) {
       if (!device) {
@@ -256,16 +240,6 @@ const AddTransaction = () => {
         Linking.openSettings();
       }
     }
-  };
-
-  const addNewCategory = () => {
-    const id = uuid();
-    addCategory({
-      id,
-      name: categoryInput.trim(),
-    });
-    setCategoryInput('');
-    setOpenCategoryInput(false);
   };
 
   const saveTransaction = () => {
@@ -311,23 +285,6 @@ const AddTransaction = () => {
       );
     }
   };
-
-  useEffect(() => {
-    if (openCategoryInput) {
-      iconRotation.value = withTiming(45);
-      categoryInputHeight.value = withTiming(60);
-      marginTop.value = withTiming(spacing.lg);
-    } else {
-      iconRotation.value = withTiming(0);
-      categoryInputHeight.value = withTiming(0);
-      marginTop.value = withTiming(0);
-    }
-    return () => {
-      iconRotation.value = withTiming(0);
-      categoryInputHeight.value = withTiming(0);
-      marginTop.value = withTiming(0);
-    };
-  }, [openCategoryInput, iconRotation, categoryInputHeight, marginTop]);
 
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', e => {
@@ -414,112 +371,30 @@ const AddTransaction = () => {
         </View>
 
         {/* Category Selection */}
-        <View style={[style.categoryContainer, gs.flexRow]}>
-          <Dropdown
-            activeColor={colors.surfaceVariant}
+        <PressableWithFeedback
+          style={[
+            style.categoryContainer,
+            gs.flexRow,
+            gs.itemsCenter,
+            gs.justifyBetween,
+            {
+              borderColor: colors.onSurfaceDisabled,
+            },
+          ]}
+          onPress={() => setCategoryModal(true)}
+        >
+          <Text
             style={[
-              gs.fullFlex,
-              style.dropdown,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.onSurfaceDisabled,
-              },
-            ]}
-            inputSearchStyle={{
-              backgroundColor: colors.background,
-              color: colors.onBackground,
-            }}
-            placeholderStyle={[
-              style.dropdownText,
-              { color: colors.onSurfaceDisabled },
-            ]}
-            renderInputSearch={e => (
-              <TextInput
-                mode="outlined"
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-                cursorColor={colors.onBackground}
-                placeholder="Search category"
-                placeholderTextColor={colors.onSurfaceDisabled}
-                style={{
-                  backgroundColor: colors.background,
-                  color: colors.onBackground,
-                }}
-                onChangeText={text => {
-                  e(text);
-                }}
-              />
-            )}
-            selectedTextStyle={[
-              style.dropdownText,
+              style.categoryText,
               {
                 color: colors.onBackground,
               },
             ]}
-            itemContainerStyle={{ backgroundColor: colors.background }}
-            itemTextStyle={{ color: colors.onBackground }}
-            placeholder="Select a Category"
-            data={categories}
-            labelField="name"
-            valueField="id"
-            search
-            searchField="name"
-            onChange={e => {
-              setSelectedCategoryId(e.id);
-            }}
-            value={selectedCategoryId}
-          />
-          <PressableWithFeedback
-            onPress={() => setOpenCategoryInput(p => !p)}
-            style={[
-              gs.centerItems,
-              style.addCategoryButton,
-              {
-                backgroundColor: colors.primary,
-              },
-            ]}
           >
-            <Animated.View style={animatedStyle}>
-              <Icon color={colors.onPrimary} source="plus" size={ICON_SIZE} />
-            </Animated.View>
-          </PressableWithFeedback>
-        </View>
-        {/* add category section */}
-        <Animated.View
-          entering={FadeIn}
-          style={[
-            gs.flexRow,
-            style.categoryInputBox,
-            {
-              marginTop,
-              height: categoryInputHeight,
-              gap: spacing.md,
-            },
-          ]}
-        >
-          <TextInput
-            onChangeText={setCategoryInput}
-            value={categoryInput}
-            outlineColor={colors.onSurfaceDisabled}
-            mode="outlined"
-            placeholder="Category name"
-            style={[gs.fullFlex, style.textInput]}
-            placeholderTextColor={colors.onSurfaceDisabled}
-          />
-          <PressableWithFeedback
-            disabled={categoryInput.length === 0}
-            onPress={addNewCategory}
-            style={[
-              gs.centerItems,
-              style.addCategoryButton,
-              {
-                backgroundColor: colors.primary,
-              },
-            ]}
-          >
-            <Icon color={colors.onPrimary} source="check" size={ICON_SIZE} />
-          </PressableWithFeedback>
-        </Animated.View>
+            {categories.filter(c => c.id === selectedCategoryId)[0].name ?? ''}
+          </Text>
+          <Icon size={textSize.lg} source="chevron-down" />
+        </PressableWithFeedback>
 
         {/* Date and Attachment Selection */}
         <View style={[gs.flexRow, style.dateAttachmentContainer]}>
@@ -731,6 +606,16 @@ const AddTransaction = () => {
           </View>
         </View>
       )}
+      {categoryModal && (
+        <CategorySelectionModal
+          visible={categoryModal}
+          onClose={() => setCategoryModal(false)}
+          selectCategory={id => {
+            setSelectedCategoryId(id);
+          }}
+          selectedCategory={selectedCategoryId}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -770,22 +655,17 @@ const style = StyleSheet.create({
     fontSize: textSize.lg,
   },
   categoryContainer: {
-    marginTop: spacing.lg,
     gap: spacing.md,
-  },
-  dropdown: {
-    padding: spacing.sm,
-    paddingVertical: spacing.md,
     borderWidth: 1,
-    borderRadius: 2,
+    paddingVertical: spacing.md,
+    marginTop: spacing.md,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
   },
-  dropdownText: {
+  categoryText: {
     fontSize: textSize.lg,
   },
-  addCategoryButton: {
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.xs,
-  },
+
   dateAttachmentContainer: {
     gap: spacing.lg,
   },
@@ -821,9 +701,7 @@ const style = StyleSheet.create({
     right: 5,
     bottom: 40,
   },
-  categoryInputBox: {
-    overflow: 'hidden',
-  },
+
   cameraToolbar: {
     bottom: 0,
     height: 200,
