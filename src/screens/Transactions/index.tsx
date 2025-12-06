@@ -212,7 +212,13 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={filteredTransactions} />
+            <RenderTransactions
+              transactions={filteredTransactions.sort(
+                (a, b) =>
+                  new Date(b.transactionDate).getTime() -
+                  new Date(a.transactionDate).getTime(),
+              )}
+            />
           )}
         </View>
       </View>

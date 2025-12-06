@@ -105,7 +105,7 @@ const CategorySelectionModal = (props: TProps) => {
                 ) : null
               }
               showsVerticalScrollIndicator={false}
-              data={categories}
+              data={categories.sort((a, b) => a.name.localeCompare(b.name))}
               contentContainerStyle={[styles.listContainer]}
               renderItem={info => {
                 return (
