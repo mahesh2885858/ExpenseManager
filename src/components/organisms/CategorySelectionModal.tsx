@@ -38,12 +38,7 @@ const CategorySelectionModal = (props: TProps) => {
   };
 
   const onNewPress = () => {
-    listRef.current?.scrollToEnd({
-      animated: true,
-    });
-    setTimeout(() => {
-      setRenderInputForNew(true);
-    }, 0);
+    setRenderInputForNew(true);
   };
 
   const onSave = () => {
@@ -58,7 +53,12 @@ const CategorySelectionModal = (props: TProps) => {
     setInput('');
   };
   return (
-    <Modal visible={props.visible} transparent onRequestClose={props.onClose}>
+    <Modal
+      animationType="fade"
+      visible={props.visible}
+      transparent
+      onRequestClose={props.onClose}
+    >
       <View style={[styles.container]}>
         <View
           style={[styles.content, { backgroundColor: colors.surfaceVariant }]}
@@ -71,7 +71,14 @@ const CategorySelectionModal = (props: TProps) => {
               ref={listRef}
               ListFooterComponent={
                 renderInputForNew ? (
-                  <View style={[styles.inputBox]}>
+                  <View
+                    onLayout={() => {
+                      listRef.current?.scrollToEnd({
+                        animated: true,
+                      });
+                    }}
+                    style={[styles.inputBox]}
+                  >
                     <TextInput
                       autoFocus
                       ref={inputRef}
