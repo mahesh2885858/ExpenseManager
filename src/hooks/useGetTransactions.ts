@@ -99,7 +99,6 @@ const useGetTransactions = () => {
 
   const filteredTransactions = useMemo(() => {
     const filtered: TTransaction[] = [];
-    // we assume at least one of them is true otherwise don't call this function
     const isSearchActive = search.trim().length > 0;
     const isDateFilterActive = !!filters.date;
     const isTypeFilterActive = !!filters.type;
