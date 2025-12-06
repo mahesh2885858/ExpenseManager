@@ -9,13 +9,14 @@ import {
   isToday,
   sub,
 } from 'date-fns';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BackHandler,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { Icon } from 'react-native-paper';
@@ -35,6 +36,7 @@ const Transactions = () => {
   const { transactions } = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const [renderSearch, setRenderSearch] = useState(false);
 
   const isFiltersActive = useMemo(() => {
     return !!filters.date || !!filters.type;
@@ -124,76 +126,110 @@ const Transactions = () => {
             gs.justifyBetween,
           ]}
         >
-          <View
-            style={[
-              gs.flexRow,
-              gs.centerItems,
-              {
-                gap: spacing.md,
-              },
-            ]}
-          >
-            <Pressable onPress={() => handleBackPress()}>
-              <Icon size={24} source={'arrow-left'} />
-            </Pressable>
-            <Text
-              style={[
-                gs.fontBold,
-                {
-                  fontSize: textSize.lg,
-                  color: theme.colors.onBackground,
-                },
-              ]}
-            >
-              Transactions
-            </Text>
-          </View>
-          <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-            <PressableWithFeedback
-              onPress={() => {
-                navigation.navigate('TransactionFilters');
-              }}
-              style={[
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  padding: spacing.xs,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: borderRadius.pill,
-                },
-              ]}
-            >
-              <Text
+          <>
+            {renderSearch ? (
+              <View
                 style={[
+                  gs.flexRow,
+                  gs.fullFlex,
+                  gs.itemsCenter,
+                  gs.justifyBetween,
+
                   {
-                    color: theme.colors.onBackground,
-                    fontSize: textSize.md,
+                    backgroundColor: theme.colors.surfaceVariant,
+                    borderRadius: borderRadius.pill,
                   },
                 ]}
               >
-                Filters
-              </Text>
-            </PressableWithFeedback>
-            <PressableWithFeedback
-              hidden={!isFiltersActive}
-              onPress={() => {
-                resetFilters();
-              }}
-              style={[
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  padding: spacing.xs,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: borderRadius.pill,
-                },
-              ]}
-            >
-              <Icon
-                source={'filter-off'}
-                size={textSize.lg}
-                color={theme.colors.onBackground}
-              />
-            </PressableWithFeedback>
-          </View>
+                <TextInput
+                  autoFocus
+                  placeholder="Search.."
+                  style={[
+                    gs.fullFlex,
+                    {
+                      paddingHorizontal: spacing.md,
+                    },
+                  ]}
+                />
+                <PressableWithFeedback
+                  hidden={isFiltersActive}
+                  onPress={() => {
+                    setRenderSearch(false);
+                  }}
+                  style={[
+                    {
+                      padding: spacing.xs,
+                      paddingRight: spacing.md,
+                    },
+                  ]}
+                >
+                  <Icon source={'close'} size={textSize.md} />
+                </PressableWithFeedback>
+              </View>
+            ) : (
+              <>
+                <View
+                  style={[
+                    gs.flexRow,
+                    gs.centerItems,
+                    {
+                      gap: spacing.md,
+                    },
+                  ]}
+                >
+                  <Pressable onPress={() => handleBackPress()}>
+                    <Icon size={24} source={'arrow-left'} />
+                  </Pressable>
+                  <Text
+                    style={[
+                      gs.fontBold,
+                      {
+                        fontSize: textSize.lg,
+                        color: theme.colors.onBackground,
+                      },
+                    ]}
+                  >
+                    Transactions
+                  </Text>
+                </View>
+                <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+                  <PressableWithFeedback
+                    onPress={() => {
+                      setRenderSearch(true);
+                    }}
+                    style={[
+                      {
+                        backgroundColor: theme.colors.surfaceVariant,
+                        padding: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: borderRadius.xxl,
+                      },
+                    ]}
+                  >
+                    <Icon source={'magnify'} size={textSize.md} />
+                  </PressableWithFeedback>
+                  <PressableWithFeedback
+                    onPress={() => {
+                      navigation.navigate('TransactionFilters');
+                    }}
+                    style={[
+                      {
+                        backgroundColor: theme.colors.surfaceVariant,
+                        padding: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: borderRadius.xxl,
+                      },
+                    ]}
+                  >
+                    <Icon
+                      source={isFiltersActive ? 'filter-off' : 'filter'}
+                      size={textSize.md}
+                    />
+                  </PressableWithFeedback>
+                </View>
+              </>
+            )}
+          </>
         </View>
       }
 
