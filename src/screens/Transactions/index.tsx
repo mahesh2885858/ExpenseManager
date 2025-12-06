@@ -1,14 +1,4 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import {
-  add,
-  isAfter,
-  isBefore,
-  isThisMonth,
-  isThisWeek,
-  isThisYear,
-  isToday,
-  sub,
-} from 'date-fns';
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BackHandler,
@@ -27,13 +17,12 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { TBottomTabParamList, TTransaction } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-  const { transactions } = useGetTransactions();
+  const navigation = useNavigation();
+  const { search, setSearch, filteredTransactions } = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
   const [renderSearch, setRenderSearch] = useState(false);
@@ -41,47 +30,6 @@ const Transactions = () => {
   const isFiltersActive = useMemo(() => {
     return !!filters.date || !!filters.type;
   }, [filters]);
-
-  const transactionsToRender = useMemo(() => {
-    let filtered: TTransaction[] = [];
-    // apply date filter
-    if (filters.date) {
-      if (filters.date.isToday) {
-        filtered = transactions.filter(t => isToday(t.transactionDate));
-      } else if (filters.date.isThisWeek) {
-        filtered = transactions.filter(t => isThisWeek(t.transactionDate));
-      } else if (filters.date.isThisMonth) {
-        filtered = transactions.filter(t => isThisMonth(t.transactionDate));
-      } else if (filters.date.isThisYear) {
-        filtered = transactions.filter(t => isThisYear(t.transactionDate));
-      } else if (filters.date.range) {
-        filtered = filters.date.range
-          ? transactions.filter(t => {
-              // because date-fn excludes the given dates, only gives results from before and after. So, we are offsetting by adding and subtracting one day
-              const startDate = sub(filters.date.range[0], { days: 1 });
-              const endDate = add(filters.date?.range[1], { days: 1 });
-              return (
-                isBefore(startDate, t.transactionDate) &&
-                isAfter(endDate, t.transactionDate)
-              );
-            })
-          : transactions;
-      } else {
-        filtered = transactions;
-      }
-    } else {
-      filtered = transactions;
-    }
-
-    // apply type filter
-    if (filters.type) {
-      filtered = filtered.filter(
-        t => t.type === (filters.type === 'income' ? 'income' : 'expense'),
-      );
-    }
-
-    return filtered;
-  }, [filters, transactions]);
 
   const handleBackPress = useCallback(
     (isEvent = false) => {
@@ -94,6 +42,11 @@ const Transactions = () => {
     },
     [navigation, resetFilters],
   );
+
+  const onSearchClose = () => {
+    setSearch('');
+    setRenderSearch(false);
+  };
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
@@ -142,19 +95,21 @@ const Transactions = () => {
                 ]}
               >
                 <TextInput
+                  value={search}
+                  onChangeText={setSearch}
                   autoFocus
-                  placeholder="Search.."
+                  placeholder="Search here.."
                   style={[
                     gs.fullFlex,
                     {
                       paddingHorizontal: spacing.md,
+                      color: theme.colors.onBackground,
                     },
                   ]}
                 />
                 <PressableWithFeedback
-                  hidden={isFiltersActive}
                   onPress={() => {
-                    setRenderSearch(false);
+                    onSearchClose();
                   }}
                   style={[
                     {
@@ -242,7 +197,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          {transactionsToRender.length === 0 ? (
+          {filteredTransactions.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -257,7 +212,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={transactionsToRender} />
+            <RenderTransactions transactions={filteredTransactions} />
           )}
         </View>
       </View>
