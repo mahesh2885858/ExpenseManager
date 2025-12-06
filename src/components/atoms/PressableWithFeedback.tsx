@@ -1,8 +1,8 @@
 import React from 'react';
-import { Pressable, PressableProps } from 'react-native';
+import { ColorValue, Pressable, PressableProps } from 'react-native';
 
 const PressableWithFeedback = (
-  props: PressableProps & { hidden?: boolean },
+  props: PressableProps & { hidden?: boolean; feedbackColor?: ColorValue },
 ) => {
   if (props.hidden) return null;
   return (
@@ -16,6 +16,8 @@ const PressableWithFeedback = (
               scale: pressed ? 0.99 : 1,
             },
           ],
+          backgroundColor:
+            pressed && props.feedbackColor ? props.feedbackColor : undefined,
         },
         props.style as any,
       ]}

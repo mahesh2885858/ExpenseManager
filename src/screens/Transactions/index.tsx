@@ -1,21 +1,12 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import {
-  add,
-  isAfter,
-  isBefore,
-  isThisMonth,
-  isThisWeek,
-  isThisYear,
-  isToday,
-  sub,
-} from 'date-fns';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BackHandler,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { Icon } from 'react-native-paper';
@@ -26,60 +17,19 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { TBottomTabParamList, TTransaction } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-  const { transactions } = useGetTransactions();
+  const navigation = useNavigation();
+  const { search, setSearch, filteredTransactions } = useGetTransactions();
   const filters = useTransactionsStore(state => state.filters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const [renderSearch, setRenderSearch] = useState(false);
 
   const isFiltersActive = useMemo(() => {
     return !!filters.date || !!filters.type;
   }, [filters]);
-
-  const transactionsToRender = useMemo(() => {
-    let filtered: TTransaction[] = [];
-    // apply date filter
-    if (filters.date) {
-      if (filters.date.isToday) {
-        filtered = transactions.filter(t => isToday(t.transactionDate));
-      } else if (filters.date.isThisWeek) {
-        filtered = transactions.filter(t => isThisWeek(t.transactionDate));
-      } else if (filters.date.isThisMonth) {
-        filtered = transactions.filter(t => isThisMonth(t.transactionDate));
-      } else if (filters.date.isThisYear) {
-        filtered = transactions.filter(t => isThisYear(t.transactionDate));
-      } else if (filters.date.range) {
-        filtered = filters.date.range
-          ? transactions.filter(t => {
-              // because date-fn excludes the given dates, only gives results from before and after. So, we are offsetting by adding and subtracting one day
-              const startDate = sub(filters.date.range[0], { days: 1 });
-              const endDate = add(filters.date?.range[1], { days: 1 });
-              return (
-                isBefore(startDate, t.transactionDate) &&
-                isAfter(endDate, t.transactionDate)
-              );
-            })
-          : transactions;
-      } else {
-        filtered = transactions;
-      }
-    } else {
-      filtered = transactions;
-    }
-
-    // apply type filter
-    if (filters.type) {
-      filtered = filtered.filter(
-        t => t.type === (filters.type === 'income' ? 'income' : 'expense'),
-      );
-    }
-
-    return filtered;
-  }, [filters, transactions]);
 
   const handleBackPress = useCallback(
     (isEvent = false) => {
@@ -92,6 +42,11 @@ const Transactions = () => {
     },
     [navigation, resetFilters],
   );
+
+  const onSearchClose = () => {
+    setSearch('');
+    setRenderSearch(false);
+  };
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
@@ -124,76 +79,112 @@ const Transactions = () => {
             gs.justifyBetween,
           ]}
         >
-          <View
-            style={[
-              gs.flexRow,
-              gs.centerItems,
-              {
-                gap: spacing.md,
-              },
-            ]}
-          >
-            <Pressable onPress={() => handleBackPress()}>
-              <Icon size={24} source={'arrow-left'} />
-            </Pressable>
-            <Text
-              style={[
-                gs.fontBold,
-                {
-                  fontSize: textSize.lg,
-                  color: theme.colors.onBackground,
-                },
-              ]}
-            >
-              Transactions
-            </Text>
-          </View>
-          <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-            <PressableWithFeedback
-              onPress={() => {
-                navigation.navigate('TransactionFilters');
-              }}
-              style={[
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  padding: spacing.xs,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: borderRadius.pill,
-                },
-              ]}
-            >
-              <Text
+          <>
+            {renderSearch ? (
+              <View
                 style={[
+                  gs.flexRow,
+                  gs.fullFlex,
+                  gs.itemsCenter,
+                  gs.justifyBetween,
+
                   {
-                    color: theme.colors.onBackground,
-                    fontSize: textSize.md,
+                    backgroundColor: theme.colors.surfaceVariant,
+                    borderRadius: borderRadius.pill,
                   },
                 ]}
               >
-                Filters
-              </Text>
-            </PressableWithFeedback>
-            <PressableWithFeedback
-              hidden={!isFiltersActive}
-              onPress={() => {
-                resetFilters();
-              }}
-              style={[
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  padding: spacing.xs,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: borderRadius.pill,
-                },
-              ]}
-            >
-              <Icon
-                source={'filter-off'}
-                size={textSize.lg}
-                color={theme.colors.onBackground}
-              />
-            </PressableWithFeedback>
-          </View>
+                <TextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  autoFocus
+                  placeholder="Search here.."
+                  style={[
+                    gs.fullFlex,
+                    {
+                      paddingHorizontal: spacing.md,
+                      color: theme.colors.onBackground,
+                    },
+                  ]}
+                />
+                <PressableWithFeedback
+                  onPress={() => {
+                    onSearchClose();
+                  }}
+                  style={[
+                    {
+                      padding: spacing.xs,
+                      paddingRight: spacing.md,
+                    },
+                  ]}
+                >
+                  <Icon source={'close'} size={textSize.md} />
+                </PressableWithFeedback>
+              </View>
+            ) : (
+              <>
+                <View
+                  style={[
+                    gs.flexRow,
+                    gs.centerItems,
+                    {
+                      gap: spacing.md,
+                    },
+                  ]}
+                >
+                  <Pressable onPress={() => handleBackPress()}>
+                    <Icon size={24} source={'arrow-left'} />
+                  </Pressable>
+                  <Text
+                    style={[
+                      gs.fontBold,
+                      {
+                        fontSize: textSize.lg,
+                        color: theme.colors.onBackground,
+                      },
+                    ]}
+                  >
+                    Transactions
+                  </Text>
+                </View>
+                <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+                  <PressableWithFeedback
+                    onPress={() => {
+                      setRenderSearch(true);
+                    }}
+                    style={[
+                      {
+                        backgroundColor: theme.colors.surfaceVariant,
+                        padding: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: borderRadius.xxl,
+                      },
+                    ]}
+                  >
+                    <Icon source={'magnify'} size={textSize.md} />
+                  </PressableWithFeedback>
+                  <PressableWithFeedback
+                    onPress={() => {
+                      navigation.navigate('TransactionFilters');
+                    }}
+                    style={[
+                      {
+                        backgroundColor: theme.colors.surfaceVariant,
+                        padding: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: borderRadius.xxl,
+                      },
+                    ]}
+                  >
+                    <Icon
+                      source={isFiltersActive ? 'filter-off' : 'filter'}
+                      size={textSize.md}
+                    />
+                  </PressableWithFeedback>
+                </View>
+              </>
+            )}
+          </>
         </View>
       }
 
@@ -206,7 +197,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          {transactionsToRender.length === 0 ? (
+          {filteredTransactions.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -221,7 +212,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={transactionsToRender} />
+            <RenderTransactions transactions={filteredTransactions} />
           )}
         </View>
       </View>
