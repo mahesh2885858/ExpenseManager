@@ -7,6 +7,8 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import useCategories from '../../hooks/useCategories';
 import useTransactionsStore from '../../stores/transactionsStore';
 
 const TransactionFilters = () => {
@@ -23,16 +25,22 @@ const TransactionFilters = () => {
   const transactionType = ['Income', 'Expense', 'All'];
   const dateFilter = useTransactionsStore(state => state.filters.date);
   const typeFilter = useTransactionsStore(state => state.filters.type);
-
+  const categoryFilter = useTransactionsStore(
+    state => state.filters.categoryId,
+  );
+  const filtersStore = useTransactionsStore(state => state);
+  console.log({ filtersStore });
   const setFilters = useTransactionsStore(state => state.setFilters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const { categories } = useCategories();
+
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
   const [renderSnack, setRenderSnack] = useState(false);
+  const [renderCategoryModal, setRenderCategoryModal] = useState(false);
 
   const isAnyFilterApplied = useMemo(() => {
-    console.log({ dateFilter, typeFilter });
-    return !!dateFilter || !!typeFilter;
-  }, [dateFilter, typeFilter]);
+    return !!dateFilter || !!typeFilter || !!categoryFilter;
+  }, [dateFilter, typeFilter, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
     if (!dateFilter) return 'All';
@@ -61,7 +69,6 @@ const TransactionFilters = () => {
       switch (item) {
         case 'Today':
           setFilters({
-            type: typeFilter,
             date: {
               isToday: true,
             },
@@ -69,7 +76,6 @@ const TransactionFilters = () => {
           break;
         case 'This week':
           setFilters({
-            type: typeFilter,
             date: {
               isThisWeek: true,
             },
@@ -77,7 +83,6 @@ const TransactionFilters = () => {
           break;
         case 'This month':
           setFilters({
-            type: typeFilter,
             date: {
               isThisMonth: true,
             },
@@ -85,7 +90,6 @@ const TransactionFilters = () => {
           break;
         case 'This year':
           setFilters({
-            type: typeFilter,
             date: {
               isThisYear: true,
             },
@@ -93,7 +97,6 @@ const TransactionFilters = () => {
           break;
         case 'Range':
           setFilters({
-            type: typeFilter,
             date: {
               range: givenRange,
             },
@@ -102,38 +105,44 @@ const TransactionFilters = () => {
 
         default:
           setFilters({
-            type: typeFilter,
             date: null,
           });
           break;
       }
     },
-    [setFilters, typeFilter],
+    [setFilters],
   );
 
   const setTypeFilter = (type: string) => {
-    console.log('Type filter is being set here: ', type);
     switch (type) {
       case 'Income':
         setFilters({
-          date: dateFilter,
           type: 'income',
         });
         break;
       case 'Expense':
         setFilters({
-          date: dateFilter,
           type: 'expense',
         });
         break;
 
       default:
         setFilters({
-          date: dateFilter,
           type: null,
         });
         break;
     }
+  };
+
+  const resetCategoryFilter = useCallback(() => {
+    setFilters({ categoryId: null });
+  }, [setFilters]);
+
+  const setCatFilter = (categoryId: string) => {
+    console.log('Category filter is being set here: ', categoryId);
+    setFilters({
+      categoryId: categoryId,
+    });
   };
 
   const onConfirm = useCallback(
@@ -307,6 +316,52 @@ const TransactionFilters = () => {
             );
           })}
         </View>
+        {/* category filter */}
+        <View
+          style={[
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.categoryBox,
+              gs.fullFlex,
+
+              {
+                borderColor: colors.onPrimaryContainer,
+              },
+            ]}
+          >
+            <PressableWithFeedback
+              onPress={() => setRenderCategoryModal(true)}
+              style={[gs.flexRow, gs.justifyBetween, gs.itemsCenter]}
+            >
+              <Text
+                style={[
+                  {
+                    color: colors.onPrimaryContainer,
+                  },
+                ]}
+              >
+                {categoryFilter === null
+                  ? 'All'
+                  : categories.filter(c => c.id === categoryFilter)[0]?.name ??
+                    ''}
+              </Text>
+              <Icon source={'chevron-down'} size={spacing.md} />
+            </PressableWithFeedback>
+          </View>
+          <PressableWithFeedback
+            onPress={resetCategoryFilter}
+            hidden={categoryFilter === null}
+          >
+            <Icon source={'restart'} size={textSize.xl} />
+          </PressableWithFeedback>
+        </View>
         <View style={[gs.flexRow, gs.centerItems, styles.filterButtonBox]}>
           <PressableWithFeedback
             hidden={!isAnyFilterApplied}
@@ -363,6 +418,17 @@ const TransactionFilters = () => {
           }}
         />
       )}
+      {renderCategoryModal && (
+        <CategorySelectionModal
+          visible={renderCategoryModal}
+          onClose={() => setRenderCategoryModal(false)}
+          selectCategory={id => {
+            setCatFilter(id);
+          }}
+          selectedCategory={categoryFilter}
+          forFilter
+        />
+      )}
       <Snackbar
         visible={renderSnack}
         onDismiss={() => {
@@ -381,7 +447,7 @@ const styles = StyleSheet.create({
   filterBox: {
     position: 'absolute',
     bottom: 0,
-    height: 340,
+    height: 400,
     width: '96%',
     borderTopEndRadius: borderRadius.xxl,
     borderTopStartRadius: borderRadius.xxl,
@@ -411,6 +477,14 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: textSize.sm,
+  },
+  categoryBox: {
+    marginVertical: spacing.sm,
+    marginHorizontal: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
   },
   filterButtonBox: {
     gap: spacing.md,

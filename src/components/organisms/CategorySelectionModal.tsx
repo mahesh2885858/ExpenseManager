@@ -1,24 +1,26 @@
+import React, { useMemo, useRef, useState } from 'react';
 import {
-  Text,
-  Modal,
-  View,
   FlatList,
-  TextInput,
+  Modal,
   StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
-import useCategories from '../../hooks/useCategories';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { DEFAULT_CATEGORY_ID, gs } from '../../common';
+import useCategories from '../../hooks/useCategories';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
 type TProps = {
   visible: boolean;
   onClose: () => void;
   selectCategory: (id: string) => void;
-  selectedCategory?: string;
+  selectedCategory?: string | null;
+  forFilter?: boolean;
 };
 const CategorySelectionModal = (props: TProps) => {
+  console.log({ props });
   const { categories, selectCategory, addCategory } = useCategories();
   const [renderInputForNew, setRenderInputForNew] = useState(false);
   const { selectedCategory = DEFAULT_CATEGORY_ID } = props;
@@ -52,6 +54,9 @@ const CategorySelectionModal = (props: TProps) => {
     setRenderInputForNew(false);
     setInput('');
   };
+  const sortedCategories = useMemo(() => {
+    return categories.sort((a, b) => a.name.localeCompare(b.name));
+  }, [categories]);
   return (
     <Modal
       animationType="fade"
@@ -105,7 +110,7 @@ const CategorySelectionModal = (props: TProps) => {
                 ) : null
               }
               showsVerticalScrollIndicator={false}
-              data={categories.sort((a, b) => a.name.localeCompare(b.name))}
+              data={sortedCategories}
               contentContainerStyle={[styles.listContainer]}
               renderItem={info => {
                 return (

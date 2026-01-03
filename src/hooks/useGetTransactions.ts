@@ -1,12 +1,10 @@
 import {
-  add,
   isAfter,
   isBefore,
   isThisMonth,
   isThisWeek,
   isThisYear,
   isToday,
-  sub,
 } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
@@ -86,11 +84,23 @@ const useGetTransactions = () => {
     [filters.date],
   );
 
+  const matchesCategory = useCallback(
+    (t: TTransaction) => {
+      if (!filters.categoryId) return true;
+      return t.categoryIds.includes(filters.categoryId);
+    },
+    [filters],
+  );
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter(
-      t => matchesType(t) && matchesDate(t) && matchesSearch(t),
+      t =>
+        matchesType(t) &&
+        matchesDate(t) &&
+        matchesSearch(t) &&
+        matchesCategory(t),
     );
-  }, [transactions, matchesType, matchesDate, matchesSearch]);
+  }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
 
   return {
     transactions: transactions.filter(t => t.accountId === selectedAccount.id),
