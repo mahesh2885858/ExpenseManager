@@ -28,7 +28,7 @@ const Transactions = () => {
   const [renderSearch, setRenderSearch] = useState(false);
 
   const isFiltersActive = useMemo(() => {
-    return !!filters.date || !!filters.type;
+    return !!filters.date || !!filters.type || !!filters.categoryId;
   }, [filters]);
 
   const handleBackPress = useCallback(
