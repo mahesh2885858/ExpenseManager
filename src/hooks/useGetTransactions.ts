@@ -22,26 +22,6 @@ const useGetTransactions = () => {
     return getSelectedAccount();
   }, [getSelectedAccount]);
 
-  const totalIncome = useMemo(() => {
-    return transactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
-        return prev;
-      } else {
-        return prev + curr.amount;
-      }
-    }, 0);
-  }, [transactions]);
-
-  const totalExpenses = useMemo(() => {
-    return transactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
-        return prev + curr.amount;
-      } else {
-        return prev;
-      }
-    }, 0);
-  }, [transactions]);
-
   const matchesType = useCallback(
     (t: TTransaction) => {
       if (!filters.type) return true;
@@ -101,6 +81,26 @@ const useGetTransactions = () => {
         matchesCategory(t),
     );
   }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
+
+  const totalIncome = useMemo(() => {
+    return filteredTransactions.reduce((prev, curr) => {
+      if (curr.type === 'expense') {
+        return prev;
+      } else {
+        return prev + curr.amount;
+      }
+    }, 0);
+  }, [filteredTransactions]);
+
+  const totalExpenses = useMemo(() => {
+    return filteredTransactions.reduce((prev, curr) => {
+      if (curr.type === 'expense') {
+        return prev + curr.amount;
+      } else {
+        return prev;
+      }
+    }, 0);
+  }, [filteredTransactions]);
 
   return {
     transactions: transactions.filter(t => t.accountId === selectedAccount.id),

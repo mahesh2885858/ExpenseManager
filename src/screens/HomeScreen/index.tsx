@@ -1,25 +1,27 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { formatDigits } from 'commonutil-core';
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useAccountStore from '../../stores/accountsStore';
-import useTransactionsStore from '../../stores/transactionsStore';
-import { TBottomTabParamList } from '../../types';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const { transactions, totalExpenses, totalIncome } = useGetTransactions();
-  const setFilters = useTransactionsStore(state => state.setFilters);
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
+  const {
+    totalExpenses,
+    totalIncome,
+    filteredTransactions,
+    search,
+    setSearch,
+  } = useGetTransactions();
 
   const selectedAccount = useMemo(() => {
     return getSelectedAccount();
@@ -29,7 +31,7 @@ const HomeScreen = () => {
     return selectedAccount.balance + totalIncome - totalExpenses;
   }, [selectedAccount, totalExpenses, totalIncome]);
 
-  transactions.sort(
+  filteredTransactions.sort(
     (a, b) =>
       new Date(b.transactionDate).getTime() -
       new Date(a.transactionDate).getTime(),
@@ -47,27 +49,7 @@ const HomeScreen = () => {
       ]}
     >
       {/* header section */}
-      <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
-        <Pressable
-          style={[
-            {
-              backgroundColor: theme.colors.primaryContainer,
-              borderRadius: borderRadius.round,
-            },
-            styles.avatar,
-            gs.centerItems,
-          ]}
-        >
-          <Text
-            style={{
-              color: theme.colors.onPrimaryContainer,
-              fontSize: textSize.lg,
-            }}
-          >
-            {selectedAccount.name.charAt(0).toUpperCase()}
-          </Text>
-        </Pressable>
-      </View>
+      <CommonHeader search={search} setSearch={setSearch} />
       {/* Total balance section */}
       <View style={{ paddingHorizontal: spacing.lg }}>
         <Card mode="contained">
@@ -115,13 +97,6 @@ const HomeScreen = () => {
         style={[gs.flexRow, { paddingHorizontal: spacing.lg, gap: spacing.md }]}
       >
         <PressableWithFeedback
-          onPress={() => {
-            setFilters({
-              type: 'income',
-              date: null,
-            });
-            navigation.navigate('Transactions');
-          }}
           style={[
             styles.ieBox,
             {
@@ -155,13 +130,6 @@ const HomeScreen = () => {
           </Text>
         </PressableWithFeedback>
         <PressableWithFeedback
-          onPress={() => {
-            setFilters({
-              type: 'expense',
-              date: null,
-            });
-            navigation.navigate('Transactions');
-          }}
           style={[
             styles.ieBox,
             {
@@ -212,10 +180,10 @@ const HomeScreen = () => {
             },
           ]}
         >
-          Recent transactions
+          Transactions
         </Text>
         <View style={[gs.fullFlex]}>
-          {transactions.length === 0 ? (
+          {filteredTransactions.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -230,10 +198,7 @@ const HomeScreen = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions
-              transactions={transactions.slice(0, 10)}
-              renderSeeAll
-            />
+            <RenderTransactions transactions={filteredTransactions} />
           )}
         </View>
       </View>
@@ -251,8 +216,10 @@ const styles = StyleSheet.create({
     height: 45,
     width: 45,
   },
+
   totalBalance: {
     width: '100%',
+    marginTop: -10,
   },
   amountText: {
     fontWeight: '500',
