@@ -1,12 +1,10 @@
 import {
-  add,
   isAfter,
   isBefore,
   isThisMonth,
   isThisWeek,
   isThisYear,
   isToday,
-  sub,
 } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
@@ -44,146 +42,65 @@ const useGetTransactions = () => {
     }, 0);
   }, [transactions]);
 
-  const checkTypeFilter = useCallback(
+  const matchesType = useCallback(
     (t: TTransaction) => {
-      if (!filters.type) return false;
-      return t.type === (filters.type === 'expense' ? 'expense' : 'income');
+      if (!filters.type) return true;
+      return t.type === filters.type;
     },
-    [filters],
+    [filters.type],
   );
 
-  const checkDateFilter = useCallback(
+  const matchesSearch = useCallback(
     (t: TTransaction) => {
-      let filterMatch = false;
-      if (filters.date?.isToday && isToday(t.transactionDate)) {
-        filterMatch = true;
-      } else if (filters.date?.isThisWeek && isThisWeek(t.transactionDate)) {
-        filterMatch = true;
-      } else if (filters.date?.isThisMonth && isThisMonth(t.transactionDate)) {
-        filterMatch = true;
-      } else if (filters.date?.isThisYear && isThisYear(t.transactionDate)) {
-        filterMatch = true;
-      } else if (
-        filters.date?.range &&
-        filters.date.range[0] &&
-        filters.date.range[1]
-      ) {
-        // because date-fn excludes the given dates, only gives results from before and after. So, we are offsetting by adding and subtracting one day
-        const startDate = sub(filters.date?.range[0], { days: 1 });
-        const endDate = add(filters.date?.range[1], { days: 1 });
-        if (
-          isBefore(startDate, t.transactionDate) &&
-          isAfter(endDate, t.transactionDate)
-        ) {
-          filterMatch = true;
-        }
-      }
-      return filterMatch;
-    },
-    [filters],
-  );
-
-  const checkSearchFilter = useCallback(
-    (t: TTransaction) => {
-      if (
+      if (!search.trim()) return true;
+      return (
         t.amount.toString().includes(search) ||
         t.description?.toLowerCase().includes(search.toLowerCase())
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+      );
     },
     [search],
   );
 
-  const filteredTransactions = useMemo(() => {
-    const filtered: TTransaction[] = [];
-    const isSearchActive = search.trim().length > 0;
-    const isDateFilterActive = !!filters.date;
-    const isTypeFilterActive = !!filters.type;
+  const matchesDate = useCallback(
+    (t: TTransaction) => {
+      if (!filters.date) return true;
 
-    if (!isSearchActive && !isDateFilterActive && !isTypeFilterActive) {
-      return transactions;
-    }
+      if (filters.date.isToday) return isToday(t.transactionDate);
+      if (filters.date.isThisWeek) return isThisWeek(t.transactionDate);
+      if (filters.date.isThisMonth) return isThisMonth(t.transactionDate);
+      if (filters.date.isThisYear) return isThisYear(t.transactionDate);
 
-    for (const t of transactions) {
-      // check for transaction type filter
-      if (isTypeFilterActive) {
-        const isTypeMatch = checkTypeFilter(t);
-        if (isTypeMatch) {
-          if (isDateFilterActive) {
-            const isDateMatch = checkDateFilter(t);
-            if (isDateMatch) {
-              if (isSearchActive) {
-                const isSearchMatch = checkSearchFilter(t);
-                if (isSearchMatch) {
-                  filtered.push(t);
-                } else {
-                  continue;
-                }
-              } else {
-                filtered.push(t);
-              }
-            } else {
-              continue;
-            }
-          } else {
-            if (isSearchActive) {
-              const isSearchMatch = checkSearchFilter(t);
-              if (isSearchMatch) {
-                filtered.push(t);
-              } else {
-                continue;
-              }
-            } else {
-              filtered.push(t);
-            }
-          }
-        } else {
-          continue;
-        }
-      } else {
-        if (isDateFilterActive) {
-          const isDateMatch = checkDateFilter(t);
-          if (isDateMatch) {
-            if (isSearchActive) {
-              const isSearchMatch = checkSearchFilter(t);
-              if (isSearchMatch) {
-                filtered.push(t);
-              } else {
-                continue;
-              }
-            } else {
-              filtered.push(t);
-            }
-          } else {
-            continue;
-          }
-        } else {
-          if (isSearchActive) {
-            const isSearchMatch = checkSearchFilter(t);
-            if (isSearchMatch) {
-              filtered.push(t);
-            } else {
-              continue;
-            }
-          } else {
-            filtered.push(t);
-          }
-        }
+      if (filters.date.range?.[0] && filters.date.range?.[1]) {
+        const start = filters.date.range[0];
+        const end = filters.date.range[1];
+        return (
+          !isBefore(t.transactionDate, start) &&
+          !isAfter(t.transactionDate, end)
+        );
       }
-    }
 
-    return filtered;
-  }, [
-    filters,
-    search,
-    transactions,
-    checkTypeFilter,
-    checkSearchFilter,
-    checkDateFilter,
-  ]);
+      return true;
+    },
+    [filters.date],
+  );
+
+  const matchesCategory = useCallback(
+    (t: TTransaction) => {
+      if (!filters.categoryId) return true;
+      return t.categoryIds.includes(filters.categoryId);
+    },
+    [filters],
+  );
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(
+      t =>
+        matchesType(t) &&
+        matchesDate(t) &&
+        matchesSearch(t) &&
+        matchesCategory(t),
+    );
+  }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
 
   return {
     transactions: transactions.filter(t => t.accountId === selectedAccount.id),

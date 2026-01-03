@@ -16,7 +16,7 @@ type TTransactionsStoreActions = {
   addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
-  setFilters: (filter: TFilters) => void;
+  setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
 };
 
@@ -35,6 +35,7 @@ const useTransactionsStore = create<PositionStore>()(
       filters: {
         date: null,
         type: null,
+        categoryId: null,
       },
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
@@ -70,7 +71,7 @@ const useTransactionsStore = create<PositionStore>()(
       },
       setFilters: filter => {
         if (filter) {
-          set(() => ({ filters: filter }));
+          set(state => ({ filters: { ...state.filters, ...filter } }));
         }
       },
       resetFilters: () => {
@@ -78,6 +79,7 @@ const useTransactionsStore = create<PositionStore>()(
           filters: {
             date: null,
             type: null,
+            categoryId: null,
           },
         }));
       },
