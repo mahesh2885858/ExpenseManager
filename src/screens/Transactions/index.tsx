@@ -1,14 +1,29 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react/no-unstable-nested-components */
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect } from 'react';
-import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { format } from 'date-fns';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import {
+  BackHandler,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {
+  CurveType,
+  LineChart,
+  lineDataItem,
+  Pointer,
+} from 'react-native-gifted-charts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import CommonHeader from '../../components/organisms/CommonHeader';
-import useTransactionsStore from '../../stores/transactionsStore';
-import useGetTransactions from '../../hooks/useGetTransactions';
+import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import { LineChart } from 'react-native-gifted-charts';
-
+import CommonHeader from '../../components/organisms/CommonHeader';
+import useGetTransactions from '../../hooks/useGetTransactions';
+import useTransactionsStore from '../../stores/transactionsStore';
+const { width } = Dimensions.get('window');
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const { colors } = useAppTheme();
@@ -28,6 +43,30 @@ const Transactions = () => {
     [navigation, resetFilters],
   );
 
+  const expenseGraphData: Array<lineDataItem> = useMemo(() => {
+    const expenseData = filteredTransactions.filter(t => t.type === 'expense');
+
+    return expenseData.map(e => {
+      return {
+        value: e.amount,
+        transactionDate: e.transactionDate,
+        type: e.type,
+      } as lineDataItem;
+    });
+  }, [filteredTransactions]);
+
+  const incomeGraphData: Array<lineDataItem> = useMemo(() => {
+    const incomeData = filteredTransactions.filter(t => t.type === 'income');
+
+    return incomeData.map(e => {
+      return {
+        value: e.amount,
+        transactionDate: e.transactionDate,
+        type: e.type,
+      } as lineDataItem;
+    });
+  }, [filteredTransactions]);
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
       handleBackPress(true),
@@ -36,9 +75,32 @@ const Transactions = () => {
     return () => backHandler.remove();
   }, [handleBackPress]);
 
+  const pointer: Pointer = {
+    // autoAdjustPointerLabelPosition: true,
+    pointerLabelComponent: items => {
+      console.log({ items });
+      return (
+        <View
+          style={{
+            zIndex: 100,
+            height: 120,
+            width: 100,
+            backgroundColor: colors.surfaceVariant,
+            borderRadius: 4,
+          }}
+        >
+          <Text>{items[0].type}</Text>
+          <Text>{'Amount: ' + (items[0].value ?? '')}</Text>
+          <Text>
+            {'Date: ' + format(new Date(items[0].transactionDate), 'MMM dd')}
+          </Text>
+        </View>
+      );
+    },
+  };
+
   return (
     <ScrollView
-      nestedScrollEnabled={true}
       contentContainerStyle={[
         styles.container,
         {
@@ -74,20 +136,21 @@ const Transactions = () => {
             </Text>
           </View>
         ) : (
-          <View>
+          <View
+            style={{
+              marginTop: spacing.md,
+            }}
+          >
             <LineChart
-              data={filteredTransactions
-                .filter(d => d.type === 'expense')
-                .map(t => ({ value: t.amount }))}
-              data2={filteredTransactions
-                .filter(d => d.type === 'income')
-                .map(t => ({ value: t.amount }))}
-              areaChart
-              color="skyblue"
-              color2="orange"
-              startFillColor="skyblue"
-              startFillColor2="orange"
+              hideDataPoints
               curved
+              curveType={CurveType.QUADRATIC}
+              adjustToWidth
+              hideRules
+              data2={expenseGraphData}
+              data={incomeGraphData}
+              pointerConfig={pointer}
+              noOfSections={4}
             />
           </View>
         )}
@@ -101,35 +164,5 @@ export default Transactions;
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 200,
-  },
-  avatar: {
-    height: 45,
-    width: 45,
-  },
-  totalBalance: {
-    width: '100%',
-  },
-  amountText: {
-    fontWeight: '500',
-  },
-  ieBox: {
-    flex: 1,
-    paddingLeft: spacing.lg,
-    gap: spacing.xs,
-  },
-  ieBanner: {
-    fontWeight: 'semibold',
-  },
-  filterBox: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-    flexWrap: 'wrap',
-    overflow: 'hidden',
-  },
-  filterItem: {
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.pill,
   },
 });
