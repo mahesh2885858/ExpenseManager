@@ -1,7 +1,27 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 import { useNavigation } from '@react-navigation/native';
-import { format } from 'date-fns';
+import { formatDigits, uCFirst } from 'commonutil-core';
+import {
+  addMonths,
+  addWeeks,
+  addYears,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  format,
+  isAfter,
+  isBefore,
+  isThisMonth,
+  isThisWeek,
+  isThisYear,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  subMonths,
+  subWeeks,
+  subYears,
+} from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BackHandler,
@@ -11,37 +31,114 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
-  CurveType,
-  LineChart,
-  lineDataItem,
-  Pointer,
-} from 'react-native-gifted-charts';
+import { Icon } from 'react-native-paper';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import CommonHeader from '../../components/organisms/CommonHeader';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import Graph from '../../components/organisms/Graph';
 import useGetTransactions from '../../hooks/useGetTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { TTransactionType } from '../../types';
-import { VictoryChart, VictoryArea } from 'victory-native';
+import { TGroupBy } from '../../types';
+
 const { width } = Dimensions.get('window');
 console.log({ width });
+
+const start: Record<TGroupBy, Function> = {
+  month: startOfMonth,
+  week: startOfWeek,
+  year: startOfYear,
+};
+const end: Record<TGroupBy, Function> = {
+  month: endOfMonth,
+  week: endOfWeek,
+  year: endOfYear,
+};
+
+const add: Record<TGroupBy, Function> = {
+  month: addMonths,
+  week: addWeeks,
+  year: addYears,
+};
+
+const sub: Record<TGroupBy, Function> = {
+  month: subMonths,
+  week: subWeeks,
+  year: subYears,
+};
+
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
   const { filteredTransactions } = useGetTransactions();
-  const [type, setType] = useState<TTransactionType>('income');
-
   // sort
   filteredTransactions.sort(
     (a, b) =>
       new Date(a.transactionDate).getTime() -
       new Date(b.transactionDate).getTime(),
   );
+
+  // filter states
+  const [groupBy, setGroupBy] = useState<TGroupBy>('week');
+
+  const [currentRange, setCurrentRange] = useState<Array<Date>>([
+    startOfWeek(new Date()),
+    endOfWeek(new Date()),
+  ]);
+
+  const resetRange = () => {
+    setCurrentRange([start[groupBy](new Date()), end[groupBy](new Date())]);
+  };
+
+  const increaseRangeByOne = () => {
+    setCurrentRange(p => {
+      return [add[groupBy](p[0], 1), add[groupBy](p[1], 1)];
+    });
+  };
+
+  const decreaseRangeByOne = () => {
+    setCurrentRange(p => {
+      return [sub[groupBy](p[0], 1), sub[groupBy](p[1], 1)];
+    });
+  };
+
+  const formattedText = useMemo(() => {
+    let text = '';
+    if (!currentRange[0] || !currentRange[1]) return text;
+    switch (groupBy) {
+      case 'month':
+        if (isThisMonth(currentRange[0])) {
+          text = 'This month';
+        } else {
+          text = format(currentRange[0], 'MMMM yyyy');
+        }
+        break;
+      case 'week':
+        if (isThisWeek(currentRange[0])) {
+          text = 'This week';
+        } else {
+          text =
+            format(currentRange[0], 'MMM dd') +
+            ' - ' +
+            format(currentRange[1], 'MMM dd');
+        }
+        break;
+      case 'year':
+        if (isThisYear(currentRange[0])) {
+          text = 'This year';
+        } else {
+          text = format(currentRange[0], 'yyyy');
+        }
+        break;
+      default:
+        text = '';
+        break;
+    }
+    return text;
+  }, [groupBy, currentRange]);
 
   const handleBackPress = useCallback(
     (isEvent = false) => {
@@ -55,29 +152,21 @@ const Transactions = () => {
     [navigation, resetFilters],
   );
 
-  const expenseGraphData: Array<lineDataItem> = useMemo(() => {
-    const expenseData = filteredTransactions.filter(t => t.type === 'expense');
-
-    return expenseData.map(e => {
-      return {
-        value: e.amount,
-        transactionDate: e.transactionDate,
-        type: e.type,
-      } as lineDataItem;
-    });
-  }, [filteredTransactions]);
-
-  const incomeGraphData: Array<lineDataItem> = useMemo(() => {
-    const incomeData = filteredTransactions.filter(t => t.type === 'income');
-
-    return incomeData.map(e => {
-      return {
-        value: e.amount,
-        transactionDate: e.transactionDate,
-        type: e.type,
-      } as lineDataItem;
-    });
-  }, [filteredTransactions]);
+  const changeFilter = (filter: TGroupBy) => {
+    const date = new Date();
+    setGroupBy(filter);
+    switch (filter) {
+      case 'month':
+        setCurrentRange([startOfMonth(date), endOfMonth(date)]);
+        break;
+      case 'year':
+        setCurrentRange([startOfYear(date), endOfYear(date)]);
+        break;
+      case 'week':
+      default:
+        setCurrentRange([startOfWeek(date), endOfWeek(date)]);
+    }
+  };
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
@@ -87,26 +176,33 @@ const Transactions = () => {
     return () => backHandler.remove();
   }, [handleBackPress]);
 
-  const pointer: Pointer = {
-    pointerLabelComponent: (items: Array<any>) => {
-      return (
-        <View
-          style={{
-            height: 120,
-            width: 100,
-            backgroundColor: colors.surfaceVariant,
-            borderRadius: 4,
-          }}
-        >
-          <Text>{items[0].type}</Text>
-          <Text>{'Amount: ' + (items[0].value ?? '')}</Text>
-          <Text>
-            {'Date: ' + format(new Date(items[0].transactionDate), 'MMM dd')}
-          </Text>
-        </View>
-      );
-    },
-  };
+  const graphData = useMemo(() => {
+    const start = currentRange[0];
+    const end = currentRange[1];
+    const result = filteredTransactions.filter(
+      t =>
+        !isBefore(t.transactionDate, start) && !isAfter(t.transactionDate, end),
+    );
+    const t = result.reduce(
+      (prev, item) => {
+        return {
+          ...prev,
+          expense:
+            item.type === 'expense' ? prev.expense + item.amount : prev.expense,
+          income:
+            item.type === 'income' ? prev.income + item.amount : prev.income,
+        };
+      },
+      {
+        expense: 0,
+        income: 0,
+      } as Record<'income' | 'expense', number>,
+    );
+    return {
+      result,
+      summary: t,
+    };
+  }, [currentRange, filteredTransactions]);
 
   return (
     <ScrollView
@@ -118,142 +214,297 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
+      <View
+        style={[
+          gs.flexRow,
+          gs.itemsCenter,
+          gs.justifyBetween,
 
-      <CommonHeader />
+          {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.sm,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            gs.fontBold,
+            {
+              fontSize: textSize.lg,
 
-      {/* recent transactions section */}
+              color: colors.onBackground,
+            },
+          ]}
+        >
+          Reports
+        </Text>
+        <PressableWithFeedback
+          hidden
+          style={[
+            {
+              paddingHorizontal: spacing.md,
+              borderRadius: borderRadius.pill,
+              backgroundColor: colors.inversePrimary,
+              paddingVertical: spacing.xs,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              gs.centerText,
+              {
+                color: colors.onPrimaryContainer,
+                fontSize: textSize.md,
+              },
+            ]}
+          >
+            {uCFirst(groupBy)}
+          </Text>
+        </PressableWithFeedback>
+      </View>
+      {/* select group by filter */}
+      <Animated.View
+        style={[gs.flexRow, gs.itemsCenter, styles.groupByContainer]}
+      >
+        <PressableWithFeedback
+          onPress={() => {
+            changeFilter('week');
+          }}
+          style={[
+            gs.fullFlex,
+            styles.groupByBtn,
+
+            {
+              borderColor:
+                groupBy === 'week' ? 'transparent' : colors.surfaceDisabled,
+              backgroundColor:
+                groupBy === 'week' ? colors.inversePrimary : 'transparent',
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.groupByText,
+              {
+                color: colors.onPrimaryContainer,
+              },
+            ]}
+          >
+            Week
+          </Text>
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={() => {
+            changeFilter('month');
+          }}
+          style={[
+            gs.fullFlex,
+            styles.groupByBtn,
+
+            {
+              borderColor:
+                groupBy === 'month' ? 'transparent' : colors.surfaceDisabled,
+              backgroundColor:
+                groupBy === 'month' ? colors.inversePrimary : 'transparent',
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.groupByText,
+              {
+                color: colors.onPrimaryContainer,
+              },
+            ]}
+          >
+            Month
+          </Text>
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={() => {
+            changeFilter('year');
+          }}
+          style={[
+            gs.fullFlex,
+            styles.groupByBtn,
+
+            {
+              borderColor:
+                groupBy === 'year' ? 'transparent' : colors.surfaceDisabled,
+              backgroundColor:
+                groupBy === 'year' ? colors.inversePrimary : 'transparent',
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.groupByText,
+              {
+                color: colors.onPrimaryContainer,
+              },
+            ]}
+          >
+            Year
+          </Text>
+        </PressableWithFeedback>
+      </Animated.View>
+
       <View style={[gs.fullFlex]}>
-        {filteredTransactions.length < 2 ? (
-          <View style={[gs.fullFlex, gs.centerItems]}>
+        {/* navigate dates */}
+        <View style={[gs.flexRow, gs.itemsCenter, styles.navigateDateBox]}>
+          <View
+            style={[styles.rangeBox, gs.flexRow, gs.itemsCenter, gs.fullFlex]}
+          >
             <Text
               style={[
-                gs.fontBold,
+                styles.rangeText,
                 {
-                  color: colors.onSurfaceVariant,
-                  fontSize: textSize.lg,
+                  color: colors.onPrimaryContainer,
                 },
               ]}
             >
-              Not enough transactions!!
+              {formattedText}
             </Text>
+            <PressableWithFeedback
+              style={[gs.centerItems]}
+              onPress={resetRange}
+            >
+              <Icon size={textSize.md} source={'reload'} />
+            </PressableWithFeedback>
           </View>
-        ) : (
-          <View
-            style={{
-              marginTop: spacing.md,
-            }}
+          <View style={[styles.navBtnBox, gs.flexRow, gs.itemsCenter]}>
+            <PressableWithFeedback
+              onPress={decreaseRangeByOne}
+              style={[
+                styles.navBtn,
+                {
+                  backgroundColor: colors.surfaceVariant,
+                },
+              ]}
+            >
+              <Icon source={'chevron-left'} size={textSize.xl} />
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              onPress={increaseRangeByOne}
+              style={[
+                styles.navBtn,
+                {
+                  backgroundColor: colors.surfaceVariant,
+                },
+              ]}
+            >
+              <Icon source={'chevron-right'} size={textSize.xl} />
+            </PressableWithFeedback>
+          </View>
+        </View>
+        {/* summary */}
+        <View
+          style={[
+            styles.summary,
+            {
+              backgroundColor: colors.inverseOnSurface,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.summaryText,
+              {
+                color: colors.onPrimaryContainer,
+              },
+            ]}
           >
+            Summary
+          </Text>
+          <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
             <View
               style={[
+                gs.fullFlex,
+                styles.tType,
                 {
-                  paddingHorizontal: spacing.md,
-                  marginBottom: spacing.md,
-                  gap: spacing.lg,
+                  backgroundColor: colors.surfaceVariant,
                 },
-                gs.flexRow,
-                gs.itemsCenter,
               ]}
             >
-              <PressableWithFeedback
+              <Text
                 style={[
-                  gs.fullFlex,
-                  styles.typeButton,
                   {
-                    backgroundColor:
-                      type === 'income' ? colors.inversePrimary : 'transparent',
-                    borderWidth: 0.5,
-                    borderColor:
-                      type === 'income'
-                        ? 'transparent'
-                        : colors.onSurfaceDisabled,
+                    color: colors.onSurfaceVariant,
                   },
                 ]}
-                onPress={() => setType('income')}
               >
-                <Text
-                  style={[
-                    gs.centerText,
-                    {
-                      color: colors.onPrimaryContainer,
-                    },
-                  ]}
-                >
-                  Income
-                </Text>
-              </PressableWithFeedback>
-              <PressableWithFeedback
+                Income
+              </Text>
+              <Text
                 style={[
-                  gs.fullFlex,
-                  styles.typeButton,
                   {
-                    backgroundColor:
-                      type === 'expense'
-                        ? colors.inversePrimary
-                        : 'transparent',
-                    borderWidth: 0.5,
-                    borderColor:
-                      type === 'expense'
-                        ? 'transparent'
-                        : colors.onSurfaceDisabled,
+                    color: colors.onPrimaryContainer,
+                    fontSize: textSize.md,
+                    fontWeight: '700',
                   },
                 ]}
-                onPress={() => setType('expense')}
               >
-                <Text
-                  style={[
-                    gs.centerText,
-                    {
-                      color: colors.onPrimaryContainer,
-                    },
-                  ]}
-                >
-                  Expense
-                </Text>
-              </PressableWithFeedback>
+                {'₹' + formatDigits(graphData.summary.income.toString())}
+              </Text>
             </View>
             <View
-              style={{
-                paddingLeft: spacing.sm,
-              }}
+              style={[
+                gs.fullFlex,
+                styles.tType,
+                {
+                  backgroundColor: colors.surfaceVariant,
+                },
+              ]}
             >
-              <LineChart
-                renderDataPointsAfterAnimationEnds
-                curved
-                areaChart
-                dataPointsColor={
-                  type === 'income' ? colors.success : colors.error
-                }
-                isAnimated
-                animateOnDataChange
-                animationDuration={1000}
-                curveType={CurveType.QUADRATIC}
-                hideRules
-                data={type === 'expense' ? expenseGraphData : incomeGraphData}
-                pointerConfig={pointer}
-                adjustToWidth
-                noOfSections={4}
-                yAxisColor={colors.onSurfaceDisabled}
-                yAxisThickness={1}
-                yAxisTextStyle={{
-                  fontSize: textSize.xs,
-                  color: colors.onSurfaceDisabled,
-                }}
-                width={330}
-                xAxisColor={colors.onSurfaceDisabled}
-                startFillColor={
-                  type === 'expense' ? colors.error : colors.success
-                }
-                endFillColor={
-                  type === 'expense' ? colors.error : colors.success
-                }
-                startOpacity={0.5}
-                endOpacity={0.2}
-                color="transparent"
-                initialSpacing={0}
-              />
+              <Text
+                style={[
+                  {
+                    color: colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                Expense
+              </Text>
+              <Text
+                style={[
+                  {
+                    color: colors.onPrimaryContainer,
+                    fontSize: textSize.md,
+                    fontWeight: '700',
+                  },
+                ]}
+              >
+                {'₹' + formatDigits(graphData.summary.expense.toString())}
+              </Text>
             </View>
           </View>
-        )}
+        </View>
+        {/* Graph container */}
+        <View
+          style={[
+            styles.summary,
+            {
+              backgroundColor: colors.inverseOnSurface,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              {
+                color: colors.onPrimaryContainer,
+                fontSize: textSize.lg,
+                fontWeight: '500',
+              },
+            ]}
+          >
+            January 4 - January 11
+          </Text>
+          <Graph
+            data={graphData.result}
+            selectedRange={currentRange}
+            filter={groupBy}
+          />
+        </View>
       </View>
     </ScrollView>
   );
@@ -268,5 +519,57 @@ const styles = StyleSheet.create({
   typeButton: {
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.pill,
+  },
+  groupByBtn: {
+    borderRadius: borderRadius.pill,
+    borderWidth: 0.5,
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  groupByContainer: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginVertical: spacing.md,
+  },
+  groupByText: {
+    fontSize: textSize.sm,
+  },
+  navigateDateBox: {
+    paddingHorizontal: spacing.md,
+  },
+  rangeBox: {
+    gap: spacing.sm,
+  },
+  rangeText: {
+    fontSize: textSize.lg,
+  },
+  navBtnBox: {
+    gap: spacing.md,
+  },
+  navBtn: {
+    borderRadius: borderRadius.round,
+    padding: spacing.sm,
+  },
+  summary: {
+    marginHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+  },
+  summaryText: {
+    fontSize: textSize.lg,
+  },
+  tTypeBox: {
+    borderRadius: borderRadius.md,
+    gap: spacing.md,
+  },
+  tType: {
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.xs,
   },
 });

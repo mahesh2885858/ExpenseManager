@@ -17,6 +17,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/native-stack": "^7.3.25",
+    "@shopify/react-native-skia": "^2.4.14",
     "commonutil-core": "^1.0.8",
     "date-fns": "^4.1.0",
     "deepmerge": "^4.3.1",
@@ -28,6 +29,7 @@
     "react-native-element-dropdown": "^2.12.4",
     "react-native-file-viewer": "^2.1.5",
     "react-native-fs": "^2.20.0",
+    "react-native-gesture-handler": "^2.30.0",
     "react-native-get-random-values": "^1.11.0",
     "react-native-gifted-charts": "^1.4.70",
     "react-native-linear-gradient": "^2.8.3",
@@ -41,7 +43,7 @@
     "react-native-vision-camera": "^4.7.2",
     "react-native-worklets": "^0.5.1",
     "uuid": "^13.0.0",
-    "victory-native": "^37.3.6",
+    "victory-native": "^41.20.2",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

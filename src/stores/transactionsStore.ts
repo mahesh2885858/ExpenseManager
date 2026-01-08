@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
 import { TCategories, TCategory, TFilters, TTransaction } from '../types';
+import { generateDummyTransactions } from '../utils/dummyDataGenerator';
 
 type TTransactionsStore = {
   transactions: TTransaction[];
@@ -25,7 +26,7 @@ type PositionStore = TTransactionsStore & TTransactionsStoreActions;
 const useTransactionsStore = create<PositionStore>()(
   persist(
     (set, get) => ({
-      transactions: [],
+      transactions: [...generateDummyTransactions(600)],
       categories: [
         {
           name: 'General',

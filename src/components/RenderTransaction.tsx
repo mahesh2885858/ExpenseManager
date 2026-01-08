@@ -132,7 +132,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               color:
                 props.item.type === 'expense'
                   ? theme.colors.error
-                  : theme.colors.success,
+                  : theme.colors.tertiary,
             },
           ]}
         >

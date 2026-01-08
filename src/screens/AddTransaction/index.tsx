@@ -46,7 +46,7 @@ import {
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
 
-const DATE_FORMAT = 'MMM do';
+const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const AVATAR_SIZE = 40;
 const ICON_SIZE = 24;
@@ -167,17 +167,21 @@ const AddTransaction = () => {
     gs.fullFlex,
     style.pill,
     {
-      borderColor: colors.onBackground,
+      borderColor:
+        transactionType === type ? 'transparent' : colors.onSurfaceDisabled,
       backgroundColor:
-        transactionType === type ? colors.primary : colors.background,
+        transactionType === type ? colors.inversePrimary : colors.background,
+      borderWidth: 0.5,
     },
   ];
 
   const getTransactionTypeTextStyle = (type: TTransactionType) => [
-    gs.fontBold,
     {
-      fontSize: textSize.lg,
-      color: transactionType === type ? colors.onPrimary : colors.onBackground,
+      fontSize: textSize.md,
+      color:
+        transactionType === type
+          ? colors.onPrimaryContainer
+          : colors.onBackground,
     },
   ];
 
@@ -366,6 +370,7 @@ const AddTransaction = () => {
             keyboardType="numeric"
             left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
             style={style.textInput}
+            activeOutlineColor={colors.onSurfaceDisabled}
             placeholderTextColor={colors.onSurfaceDisabled}
           />
         </View>
@@ -404,13 +409,13 @@ const AddTransaction = () => {
               gs.flexRow,
               gs.centerItems,
               style.dateButton,
-              { backgroundColor: colors.primary },
+              { backgroundColor: colors.inversePrimary },
             ]}
           >
             <Icon
               source="calendar-range"
               size={ICON_SIZE}
-              color={colors.onPrimary}
+              color={colors.onPrimaryContainer}
             />
             <View
               style={[
@@ -424,10 +429,10 @@ const AddTransaction = () => {
                 style={[
                   gs.fontBold,
                   style.dateText,
-                  { color: colors.onPrimary },
+                  { color: colors.onPrimaryContainer },
                 ]}
               >
-                {format(dateToRender ?? new Date(), DATE_FORMAT)}
+                {format(dateToRender ?? new Date(), DATE_FORMAT).toUpperCase()}
               </Text>
             </View>
           </PressableWithFeedback>
@@ -440,13 +445,13 @@ const AddTransaction = () => {
                 gs.centerItems,
                 style.attachmentButton,
                 gs.fullFlex,
-                { backgroundColor: colors.primary },
+                { backgroundColor: colors.inversePrimary },
               ]}
             >
               <Icon
                 source="paperclip"
                 size={ICON_SIZE}
-                color={colors.onPrimary}
+                color={colors.onPrimaryContainer}
               />
             </PressableWithFeedback>
           </Tooltip>
@@ -458,10 +463,14 @@ const AddTransaction = () => {
                 gs.centerItems,
                 style.attachmentButton,
                 gs.fullFlex,
-                { backgroundColor: colors.primary },
+                { backgroundColor: colors.inversePrimary },
               ]}
             >
-              <Icon source="camera" size={ICON_SIZE} color={colors.onPrimary} />
+              <Icon
+                source="camera"
+                size={ICON_SIZE}
+                color={colors.onPrimaryContainer}
+              />
             </PressableWithFeedback>
           </Tooltip>
         </View>
@@ -485,17 +494,10 @@ const AddTransaction = () => {
             >
               Attachments
             </Text>
-            <View
-              style={[
-                style.attachmentContainer,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                },
-              ]}
-            >
+            <View style={[style.attachmentContainer]}>
               <FlatList
                 contentContainerStyle={{
-                  gap: spacing.lg,
+                  gap: spacing.md,
                 }}
                 horizontal
                 data={attachments}
@@ -510,6 +512,7 @@ const AddTransaction = () => {
         <TextInput
           mode="outlined"
           outlineColor={colors.onSurfaceDisabled}
+          activeOutlineColor={colors.onSurfaceDisabled}
           style={[{ marginTop: spacing.lg, paddingVertical: spacing.sm }]}
           placeholder="Description"
           multiline
@@ -639,7 +642,7 @@ const style = StyleSheet.create({
   transactionTypeContainer: {
     flexDirection: 'row',
     gap: spacing.lg,
-    marginTop: spacing.xs,
+    marginTop: spacing.md,
   },
   pill: {
     borderWidth: 1,
@@ -692,8 +695,7 @@ const style = StyleSheet.create({
   },
   attachmentContainer: {
     marginTop: spacing.xs,
-    padding: spacing.sm,
-    borderWidth: 1,
+    paddingVertical: spacing.sm,
   },
   fab: {
     position: 'absolute',
@@ -701,7 +703,6 @@ const style = StyleSheet.create({
     right: 5,
     bottom: 40,
   },
-
   cameraToolbar: {
     bottom: 0,
     height: 200,
