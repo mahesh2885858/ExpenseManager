@@ -28,6 +28,7 @@ const Bar = (props: TBarProps) => {
   const centeredX = info.x + info.width / 2 - (textWidth?.width ?? 0) / 2;
 
   const animatedHeight = useSharedValue(0);
+  const animatedWidth = useSharedValue(0);
 
   const animatedY = useDerivedValue(() => {
     return bar.y + bar.height - animatedHeight.value;
@@ -40,6 +41,17 @@ const Bar = (props: TBarProps) => {
     });
   }, [bar, animatedHeight]);
 
+  useEffect(() => {
+    if (isFocused) {
+      animatedWidth.value = withTiming(info.width, {
+        duration: 200,
+        easing: Easing.ease,
+      });
+    } else {
+      animatedWidth.value = 0;
+    }
+  }, [isFocused, animatedWidth, info]);
+
   return (
     <Fragment>
       <RoundedRect
@@ -48,7 +60,16 @@ const Bar = (props: TBarProps) => {
         height={info.height}
         r={8}
         width={info.width}
-        color={isFocused ? colors.onSurfaceVariant : colors.onSurfaceDisabled}
+        color={colors.onSurfaceDisabled}
+      />
+      {/* to animate the highlighting of info bar */}
+      <RoundedRect
+        x={info.x}
+        y={info.y}
+        height={info.height}
+        r={8}
+        width={animatedWidth}
+        color={colors.onSurfaceVariant}
       />
 
       <RoundedRect
