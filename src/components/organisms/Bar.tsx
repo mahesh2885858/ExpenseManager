@@ -6,7 +6,12 @@ import {
   vec,
 } from '@shopify/react-native-skia';
 import React, { Fragment, useEffect } from 'react';
-import { Easing, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  Easing,
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { AppTheme } from '../../../theme';
 type TBarProps = {
   item: any;
@@ -19,17 +24,21 @@ const Bar = (props: TBarProps) => {
   const { colors } = props;
   const font1 = useFont(require('../../../assets/fonts/Inter-Medium.ttf'));
 
-  const textWidth = font1?.measureText(props.item.xAxisLabel.text);
+  const textWidth = font1?.measureText(String(props.item.xAxisLabel.text));
   const centeredX = info.x + info.width / 2 - (textWidth?.width ?? 0) / 2;
 
-  const barHeight = useSharedValue(0);
+  const animatedHeight = useSharedValue(0);
+
+  const animatedY = useDerivedValue(() => {
+    return bar.y + bar.height - animatedHeight.value;
+  });
 
   useEffect(() => {
-    barHeight.value = withTiming(bar.height, {
+    animatedHeight.value = withTiming(bar.height, {
       duration: 500,
       easing: Easing.cubic,
     });
-  }, [bar, barHeight]);
+  }, [bar, animatedHeight]);
 
   return (
     <Fragment>
@@ -44,8 +53,8 @@ const Bar = (props: TBarProps) => {
 
       <RoundedRect
         x={bar.x}
-        y={bar.y}
-        height={barHeight}
+        y={animatedY}
+        height={animatedHeight}
         r={8}
         width={bar.width}
         color={colors.onSurfaceVariant}
