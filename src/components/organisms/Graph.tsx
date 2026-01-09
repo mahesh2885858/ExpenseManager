@@ -1,9 +1,6 @@
-import {
-  Canvas,
-  LinearGradient,
-  RoundedRect,
-  vec,
-} from '@shopify/react-native-skia';
+import { Canvas } from '@shopify/react-native-skia';
+import { max, scaleLinear } from 'd3';
+import { isSameDay } from 'date-fns';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import {
   Dimensions,
@@ -16,11 +13,13 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import { TGroupBy, TTransaction } from '../../types';
+import { getDatesOfWeek, getNetForGivenTransactions } from '../../utils';
 import Bar from './Bar';
 const { width } = Dimensions.get('screen');
 const CHART_HEIGHT = 270;
 const X_AXIS_ITEM_HEIGHT = 5;
 const CHART_WIDTH = width - spacing.md * 4;
+const spacingBetweenBarAndIndicator = 20;
 
 type TProps = {
   data: TTransaction[];
@@ -56,6 +55,73 @@ const Graph = (props: TProps) => {
     [],
   );
 
+  const realData = useMemo(() => {
+    switch (props.filter) {
+      case 'week':
+        const dates = getDatesOfWeek(props.selectedRange[0]);
+        const trns = [];
+        const data = dates.map(date => {
+          const dataForThisDay = props.data.filter(d =>
+            isSameDay(d.transactionDate, date),
+          );
+          const expense = getNetForGivenTransactions(
+            dataForThisDay.filter(d => d.type === 'expense'),
+          );
+          const income = getNetForGivenTransactions(
+            dataForThisDay.filter(d => d.type === 'income'),
+          );
+          return {
+            total: getNetForGivenTransactions(dataForThisDay),
+            expense,
+            income,
+          };
+        });
+
+        const maxValue = max(data.map(d => d.total));
+        const hScale = scaleLinear(
+          [0, maxValue ?? 0],
+          [0, CHART_HEIGHT - spacingBetweenBarAndIndicator],
+        );
+
+        const barWidth = (CHART_WIDTH - (data.length - 1) * 5) / data.length;
+        const spacingBetweenBars = 5; // Need to be changed based on provided data
+
+        const d = data.map((d, i) => {
+          const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
+          const barHeight = hScale(d.total);
+          let ratio = 0;
+          if (d.total > 0) {
+            ratio = d.expense / (d.income + d.expense);
+          }
+
+          return {
+            id: uuid(),
+            bar: {
+              height: barHeight,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator,
+              ratio,
+              income: d.income,
+              expense: d.expense,
+            },
+            info: {
+              height: X_AXIS_ITEM_HEIGHT,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT,
+            },
+          };
+        });
+
+        return d;
+      default:
+        return [];
+    }
+  }, [props]);
+
+  console.log({ realData });
+
   const xAxisData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const barWidth =
     (CHART_WIDTH - (xAxisData.length - 1) * 5) / xAxisData.length;
@@ -73,7 +139,6 @@ const Graph = (props: TProps) => {
 
   const data = useMemo(() => {
     const spacingBetweenBars = 5; // Need to be changed based on provided data
-    const spacingBetweenBarAndIndicator = 20;
 
     return yAxisData.map((t, i) => {
       const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
@@ -103,7 +168,7 @@ const Graph = (props: TProps) => {
     e.persist();
     console.log({ e: e.nativeEvent, data });
     const touchX = e.nativeEvent.locationX;
-    const itemsInTheRange = data.filter(item => {
+    const itemsInTheRange = realData.filter(item => {
       if (item.bar.x < touchX) return true;
       return false;
     });
@@ -119,7 +184,7 @@ const Graph = (props: TProps) => {
           height: CHART_HEIGHT,
         }}
       >
-        {data.map(({ id, bar, info }) => {
+        {realData.map(({ id, bar, info }) => {
           return (
             <Fragment key={id}>
               <Bar
