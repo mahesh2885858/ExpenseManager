@@ -16,6 +16,7 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import { TGroupBy, TTransaction } from '../../types';
+import Bar from './Bar';
 const { width } = Dimensions.get('screen');
 const CHART_HEIGHT = 270;
 const X_AXIS_ITEM_HEIGHT = 5;
@@ -121,39 +122,11 @@ const Graph = (props: TProps) => {
         {data.map(({ id, bar, info }) => {
           return (
             <Fragment key={id}>
-              <RoundedRect
-                x={info.x}
-                y={info.y}
-                height={info.height}
-                r={8}
-                width={info.width}
-                color={
-                  focusedItem?.id === id
-                    ? colors.onSurfaceVariant
-                    : colors.onSurfaceDisabled
-                }
+              <Bar
+                colors={colors}
+                isFocused={focusedItem?.id === id}
+                item={{ bar, info }}
               />
-
-              <RoundedRect
-                x={bar.x}
-                y={bar.y}
-                height={bar.height}
-                r={8}
-                width={bar.width}
-                color={colors.onSurfaceVariant}
-              >
-                <LinearGradient
-                  colors={[
-                    colors.error,
-                    colors.error,
-                    colors.tertiary,
-                    colors.tertiary,
-                  ]}
-                  end={vec(bar.x, bar.y + bar.height)}
-                  start={vec(bar.x, bar.y)}
-                  positions={[0, bar.ratio, bar.ratio, 1]}
-                />
-              </RoundedRect>
             </Fragment>
           );
         })}
