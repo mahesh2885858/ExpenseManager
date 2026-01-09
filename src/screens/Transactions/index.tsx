@@ -488,17 +488,6 @@ const Transactions = () => {
             },
           ]}
         >
-          <Text
-            style={[
-              {
-                color: colors.onPrimaryContainer,
-                fontSize: textSize.lg,
-                fontWeight: '500',
-              },
-            ]}
-          >
-            January 4 - January 11
-          </Text>
           <Graph
             data={graphData.result}
             selectedRange={currentRange}

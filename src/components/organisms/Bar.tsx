@@ -1,16 +1,26 @@
-import { LinearGradient, RoundedRect, vec } from '@shopify/react-native-skia';
+import {
+  LinearGradient,
+  RoundedRect,
+  Text,
+  useFont,
+  vec,
+} from '@shopify/react-native-skia';
 import React, { Fragment, useEffect } from 'react';
-import { AppTheme } from '../../../theme';
 import { Easing, useSharedValue, withTiming } from 'react-native-reanimated';
+import { AppTheme } from '../../../theme';
 type TBarProps = {
   item: any;
   isFocused: boolean;
   colors: AppTheme['colors'];
 };
 const Bar = (props: TBarProps) => {
-  const { info, bar } = props.item;
+  const { info, bar, xAxisLabel } = props.item;
   const isFocused = props.isFocused;
   const { colors } = props;
+  const font1 = useFont(require('../../../assets/fonts/Inter-Medium.ttf'));
+
+  const textWidth = font1?.measureText(props.item.xAxisLabel.text);
+  const centeredX = info.x + info.width / 2 - (textWidth?.width ?? 0) / 2;
 
   const barHeight = useSharedValue(0);
 
@@ -52,6 +62,13 @@ const Bar = (props: TBarProps) => {
           positions={[0, bar.ratio, bar.ratio, 1]}
         />
       </RoundedRect>
+      <Text
+        text={xAxisLabel.text}
+        x={centeredX}
+        y={xAxisLabel.y}
+        font={font1}
+        color={isFocused ? colors.onSurfaceVariant : colors.onSurfaceDisabled}
+      />
     </Fragment>
   );
 };

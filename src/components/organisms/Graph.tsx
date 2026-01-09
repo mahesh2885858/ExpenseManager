@@ -1,7 +1,7 @@
 import { Canvas } from '@shopify/react-native-skia';
 import { max, scaleLinear } from 'd3';
-import { isSameDay } from 'date-fns';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { format, isAfter, isBefore, isSameDay } from 'date-fns';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   Dimensions,
   GestureResponderEvent,
@@ -13,7 +13,12 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import { TGroupBy, TTransaction } from '../../types';
-import { getDatesOfWeek, getNetForGivenTransactions } from '../../utils';
+import {
+  getDatesOfWeek,
+  getMonthRangesOfYear,
+  getNetForGivenTransactions,
+  getWeekRangesOfMonth,
+} from '../../utils';
 import Bar from './Bar';
 const { width } = Dimensions.get('screen');
 const CHART_HEIGHT = 270;
@@ -37,29 +42,10 @@ const Graph = (props: TProps) => {
     null,
   );
 
-  const yAxisData = useMemo(
-    () => [
-      { income: 1200, expense: 3400 },
-      { income: 1800, expense: 2200 },
-      { income: 2500, expense: 1900 },
-      { income: 900, expense: 1500 },
-      { income: 3200, expense: 2800 },
-      { income: 4100, expense: 3600 },
-      { income: 1500, expense: 1700 },
-      { income: 2700, expense: 2300 },
-      { income: 3600, expense: 4200 },
-      { income: 5000, expense: 3100 },
-      { income: 2200, expense: 2600 },
-      { income: 3900, expense: 3400 },
-    ],
-    [],
-  );
-
-  const realData = useMemo(() => {
+  const graphData = useMemo(() => {
     switch (props.filter) {
-      case 'week':
+      case 'week': {
         const dates = getDatesOfWeek(props.selectedRange[0]);
-        const trns = [];
         const data = dates.map(date => {
           const dataForThisDay = props.data.filter(d =>
             isSameDay(d.transactionDate, date),
@@ -74,19 +60,19 @@ const Graph = (props: TProps) => {
             total: getNetForGivenTransactions(dataForThisDay),
             expense,
             income,
+            date,
           };
         });
 
         const maxValue = max(data.map(d => d.total));
         const hScale = scaleLinear(
           [0, maxValue ?? 0],
-          [0, CHART_HEIGHT - spacingBetweenBarAndIndicator],
+          [0, CHART_HEIGHT - spacingBetweenBarAndIndicator - 10],
         );
 
         const barWidth = (CHART_WIDTH - (data.length - 1) * 5) / data.length;
         const spacingBetweenBars = 5; // Need to be changed based on provided data
-
-        const d = data.map((d, i) => {
+        const dataByDays = data.map((d, i) => {
           const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
           const barHeight = hScale(d.total);
           let ratio = 0;
@@ -96,11 +82,12 @@ const Graph = (props: TProps) => {
 
           return {
             id: uuid(),
+            focusTex: format(d.date, 'MMMM dd'),
             bar: {
-              height: barHeight,
+              height: d.total > 0 ? barHeight : 0,
               width: barWidth,
               x,
-              y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator,
+              y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator - 10,
               ratio,
               income: d.income,
               expense: d.expense,
@@ -109,66 +96,171 @@ const Graph = (props: TProps) => {
               height: X_AXIS_ITEM_HEIGHT,
               width: barWidth,
               x,
-              y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT,
+              y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT - 20,
+            },
+            xAxisLabel: {
+              text: format(d.date, 'EEE'),
+              height: 10,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT,
+            },
+          };
+        });
+        return dataByDays;
+      }
+      case 'month': {
+        const weeks = getWeekRangesOfMonth(props.selectedRange[0]);
+        const dataByWeeks = weeks.map(week => {
+          const start = week[0];
+          const end = week[1];
+          const trnsForWeek = props.data.filter(tr => {
+            return (
+              !isBefore(tr.transactionDate, start) &&
+              !isAfter(tr.transactionDate, end)
+            );
+          });
+          const expense = trnsForWeek.filter(d => d.type === 'expense');
+          const income = trnsForWeek.filter(d => d.type === 'income');
+
+          return {
+            total: getNetForGivenTransactions(trnsForWeek),
+            expense: getNetForGivenTransactions(expense),
+            income: getNetForGivenTransactions(income),
+            week,
+          };
+        });
+
+        const maxValue = max(dataByWeeks.map(d => d.total));
+        const hScale = scaleLinear(
+          [0, maxValue ?? 0],
+          [0, CHART_HEIGHT - spacingBetweenBarAndIndicator - 10],
+        );
+
+        const barWidth =
+          (CHART_WIDTH - (dataByWeeks.length - 1) * 5) / dataByWeeks.length;
+        const spacingBetweenBars = 5;
+
+        const data = dataByWeeks.map((d, i) => {
+          const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
+          const barHeight = hScale(d.total);
+          let ratio = 0;
+          if (d.total > 0) {
+            ratio = d.expense / (d.income + d.expense);
+          }
+
+          return {
+            id: uuid(),
+            focusTex:
+              format(d.week[0], 'MMMM dd') + '-' + format(d.week[1], 'MMMM dd'),
+            bar: {
+              height: d.total > 0 ? barHeight : 0,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator - 10,
+              ratio,
+              income: d.income,
+              expense: d.expense,
+            },
+            info: {
+              height: X_AXIS_ITEM_HEIGHT,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT - 20,
+            },
+            xAxisLabel: {
+              text: 'week' + (i + 1),
+              height: 10,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT,
             },
           };
         });
 
-        return d;
+        return data;
+      }
+      case 'year': {
+        const months = getMonthRangesOfYear(props.selectedRange[0]);
+        const dataByMonths = months.map(month => {
+          const start = month[0];
+          const end = month[1];
+          const trnsForMonth = props.data.filter(tr => {
+            return (
+              !isBefore(tr.transactionDate, start) &&
+              !isAfter(tr.transactionDate, end)
+            );
+          });
+          const expense = trnsForMonth.filter(d => d.type === 'expense');
+          const income = trnsForMonth.filter(d => d.type === 'income');
+
+          return {
+            total: getNetForGivenTransactions(trnsForMonth),
+            expense: getNetForGivenTransactions(expense),
+            income: getNetForGivenTransactions(income),
+            month: month,
+          };
+        });
+
+        const maxValue = max(dataByMonths.map(d => d.total));
+
+        const hScale = scaleLinear(
+          [0, maxValue ?? 0],
+          [0, CHART_HEIGHT - spacingBetweenBarAndIndicator - 10],
+        );
+
+        const barWidth =
+          (CHART_WIDTH - (dataByMonths.length - 1) * 5) / dataByMonths.length;
+        const spacingBetweenBars = 5;
+
+        const data = dataByMonths.map((d, i) => {
+          const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
+          const barHeight = hScale(d.total);
+          let ratio = 0;
+          if (d.total > 0) {
+            ratio = d.expense / (d.income + d.expense);
+          }
+
+          return {
+            id: uuid(),
+            focusTex: format(d.month[0], 'MMM yyyy'),
+            bar: {
+              height: d.total > 0 ? barHeight : 0,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator - 10,
+              ratio,
+              income: d.income,
+              expense: d.expense,
+            },
+            info: {
+              height: X_AXIS_ITEM_HEIGHT,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT - 20,
+            },
+            xAxisLabel: {
+              text: (i + 1).toString(),
+              height: 10,
+              width: barWidth,
+              x,
+              y: CHART_HEIGHT,
+            },
+          };
+        });
+        return data;
+      }
       default:
         return [];
     }
   }, [props]);
 
-  console.log({ realData });
-
-  const xAxisData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  const barWidth =
-    (CHART_WIDTH - (xAxisData.length - 1) * 5) / xAxisData.length;
-
-  const maxValue = yAxisData.reduce((max, item) => {
-    return Math.max(max, item.income + item.expense);
-  }, 0);
-
-  const renderHeightForBar = useCallback(
-    (value: number) => {
-      return Math.round((value * (CHART_HEIGHT - 20)) / maxValue);
-    },
-    [maxValue],
-  );
-
-  const data = useMemo(() => {
-    const spacingBetweenBars = 5; // Need to be changed based on provided data
-
-    return yAxisData.map((t, i) => {
-      const x = i === 0 ? i : i * barWidth + i * spacingBetweenBars;
-      const barHeight = renderHeightForBar(t.expense + t.income);
-      return {
-        id: uuid(), //internal id for various operations
-        bar: {
-          x,
-          y: CHART_HEIGHT - barHeight - spacingBetweenBarAndIndicator,
-          width: barWidth,
-          height: barHeight,
-          ratio: t.expense / (t.income + t.expense),
-          income: t.income,
-          expense: t.expense,
-        },
-        info: {
-          x,
-          y: CHART_HEIGHT - X_AXIS_ITEM_HEIGHT,
-          width: barWidth,
-          height: X_AXIS_ITEM_HEIGHT,
-        },
-      };
-    });
-  }, [barWidth, renderHeightForBar, yAxisData]);
+  console.log({ graphData });
 
   const onGraphTouch = (e: GestureResponderEvent) => {
     e.persist();
-    console.log({ e: e.nativeEvent, data });
     const touchX = e.nativeEvent.locationX;
-    const itemsInTheRange = realData.filter(item => {
+    const itemsInTheRange = graphData.filter(item => {
       if (item.bar.x < touchX) return true;
       return false;
     });
@@ -176,21 +268,35 @@ const Graph = (props: TProps) => {
     setFocusedItem(intendedItem);
   };
 
+  useEffect(() => {
+    setFocusedItem(null);
+  }, [props.filter, props.selectedRange]);
+
   return (
     <>
+      <Text
+        style={[
+          {
+            color: colors.onPrimaryContainer,
+            fontSize: textSize.lg,
+          },
+        ]}
+      >
+        {focusedItem?.focusTex}
+      </Text>
       <Canvas
         onTouchEnd={onGraphTouch}
         style={{
           height: CHART_HEIGHT,
         }}
       >
-        {realData.map(({ id, bar, info }) => {
+        {graphData.map(({ id, bar, info, xAxisLabel }) => {
           return (
             <Fragment key={id}>
               <Bar
                 colors={colors}
                 isFocused={focusedItem?.id === id}
-                item={{ bar, info }}
+                item={{ bar, info, xAxisLabel }}
               />
             </Fragment>
           );
