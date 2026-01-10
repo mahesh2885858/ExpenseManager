@@ -5,6 +5,7 @@ import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import useTransactionsStore from '../../stores/transactionsStore';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import useAccountStore from '../../stores/accountsStore';
 
 type TProps = {
   search?: string;
@@ -18,6 +19,7 @@ const CommonHeader = (props: TProps) => {
 
   const { colors } = useAppTheme();
   const filters = useTransactionsStore(state => state.filters);
+  const reset = useAccountStore(state => state.setIsInitialSetupDone);
 
   const isFiltersActive = useMemo(() => {
     return !!filters.date || !!filters.type || !!filters.categoryId;
@@ -66,7 +68,11 @@ const CommonHeader = (props: TProps) => {
               },
             ]}
           >
-            <PressableWithFeedback>
+            <PressableWithFeedback
+              onPress={() => {
+                reset(false);
+              }}
+            >
               <Text
                 style={[
                   styles.avatarText,
