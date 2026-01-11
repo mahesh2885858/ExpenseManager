@@ -8,6 +8,8 @@ import React, {
   useState,
 } from 'react';
 import {
+  BackHandler,
+  Button,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
@@ -27,6 +29,7 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   Camera,
   useCameraDevice,
@@ -45,7 +48,12 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-
+import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const AVATAR_SIZE = 40;
@@ -138,6 +146,7 @@ const AddTransaction = () => {
   );
   const [kbHeight, setKbHeight] = useState(0);
   const [categoryModal, setCategoryModal] = useState(false);
+  const [accountId, setAccountId] = useState('');
 
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
@@ -290,6 +299,17 @@ const AddTransaction = () => {
     }
   };
 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [bottomSheetOpen, setBottomSheetOpen] = useState<boolean>(false);
+
+  const handlePresentModalPress = useCallback(() => {
+    console.log(bottomSheetModalRef);
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    setBottomSheetOpen(index >= 0);
+  }, []);
+
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', e => {
       setKbHeight(e.endCoordinates.height);
@@ -303,323 +323,387 @@ const AddTransaction = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (bottomSheetOpen) {
+        bottomSheetModalRef.current?.dismiss();
+
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return () => sub.remove();
+  }, [bottomSheetOpen]);
+
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      style={[
-        gs.fullFlex,
-        {
-          paddingTop: top,
-        },
-      ]}
-    >
-      <ScrollView
-        keyboardShouldPersistTaps
-        contentContainerStyle={style.scrollViewContent}
-      >
-        {/* Header */}
-        <View style={[gs.flexRow, gs.itemsCenter, style.header]}>
-          <View
-            style={[gs.flexRow, gs.itemsCenter, gs.fullFlex, style.headerLeft]}
-          >
-            <PressableWithFeedback onPress={navigation.goBack}>
-              <Icon source="arrow-left" size={ICON_SIZE} />
-            </PressableWithFeedback>
-            <Text
-              style={[
-                gs.fontBold,
-                style.headerTitle,
-                { color: colors.onBackground },
-              ]}
-            >
-              Add Transaction
-            </Text>
-          </View>
-          <Avatar.Text
-            label="M"
-            size={AVATAR_SIZE}
-            style={{ backgroundColor: colors.primaryContainer }}
-          />
-        </View>
-
-        {/* Transaction Type */}
-        <View style={style.transactionTypeContainer}>
-          <PressableWithFeedback
-            onPress={() => changeTransactionType('expense')}
-            style={getTransactionTypeButtonStyle('expense')}
-          >
-            <Text style={getTransactionTypeTextStyle('expense')}>Expense</Text>
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            onPress={() => changeTransactionType('income')}
-            style={getTransactionTypeButtonStyle('income')}
-          >
-            <Text style={getTransactionTypeTextStyle('income')}>Income</Text>
-          </PressableWithFeedback>
-        </View>
-
-        {/* Amount Input */}
-        <View style={style.amountInputContainer}>
-          <TextInput
-            onChangeText={setAmountInput}
-            value={amountInput}
-            outlineColor={colors.onSurfaceDisabled}
-            mode="outlined"
-            autoFocus
-            placeholder="Amount"
-            keyboardType="numeric"
-            left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
-            style={style.textInput}
-            activeOutlineColor={colors.onSurfaceDisabled}
-            placeholderTextColor={colors.onSurfaceDisabled}
-          />
-        </View>
-
-        {/* Category Selection */}
-        <PressableWithFeedback
+    <GestureHandlerRootView style={[gs.fullFlex]}>
+      <BottomSheetModalProvider>
+        <KeyboardAvoidingView
+          behavior="padding"
           style={[
-            style.categoryContainer,
-            gs.flexRow,
-            gs.itemsCenter,
-            gs.justifyBetween,
+            gs.fullFlex,
             {
-              borderColor: colors.onSurfaceDisabled,
+              paddingTop: top,
             },
           ]}
-          onPress={() => setCategoryModal(true)}
         >
-          <Text
-            style={[
-              style.categoryText,
-              {
-                color: colors.onBackground,
-              },
-            ]}
+          <ScrollView
+            keyboardShouldPersistTaps
+            contentContainerStyle={style.scrollViewContent}
           >
-            {categories.filter(c => c.id === selectedCategoryId)[0].name ?? ''}
-          </Text>
-          <Icon size={textSize.lg} source="chevron-down" />
-        </PressableWithFeedback>
+            {/* Header */}
+            <View style={[gs.flexRow, gs.itemsCenter, style.header]}>
+              <View
+                style={[
+                  gs.flexRow,
+                  gs.itemsCenter,
+                  gs.fullFlex,
+                  style.headerLeft,
+                ]}
+              >
+                <PressableWithFeedback onPress={navigation.goBack}>
+                  <Icon source="arrow-left" size={ICON_SIZE} />
+                </PressableWithFeedback>
+                <Text
+                  style={[
+                    gs.fontBold,
+                    style.headerTitle,
+                    { color: colors.onBackground },
+                  ]}
+                >
+                  Add Transaction
+                </Text>
+              </View>
+              <Avatar.Text
+                label="M"
+                size={AVATAR_SIZE}
+                style={{ backgroundColor: colors.primaryContainer }}
+              />
+            </View>
 
-        {/* Date and Attachment Selection */}
-        <View style={[gs.flexRow, style.dateAttachmentContainer]}>
-          <PressableWithFeedback
-            onPress={() => setOpenDatePicker(true)}
-            style={[
-              gs.flexRow,
-              gs.centerItems,
-              style.dateButton,
-              { backgroundColor: colors.inversePrimary },
-            ]}
-          >
-            <Icon
-              source="calendar-range"
-              size={ICON_SIZE}
-              color={colors.onPrimaryContainer}
-            />
-            <View
+            {/* Transaction Type */}
+            <View style={style.transactionTypeContainer}>
+              <PressableWithFeedback
+                onPress={() => changeTransactionType('expense')}
+                style={getTransactionTypeButtonStyle('expense')}
+              >
+                <Text style={getTransactionTypeTextStyle('expense')}>
+                  Expense
+                </Text>
+              </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => changeTransactionType('income')}
+                style={getTransactionTypeButtonStyle('income')}
+              >
+                <Text style={getTransactionTypeTextStyle('income')}>
+                  Income
+                </Text>
+              </PressableWithFeedback>
+            </View>
+
+            {/* Amount Input */}
+            <View style={style.amountInputContainer}>
+              <TextInput
+                onChangeText={setAmountInput}
+                value={amountInput}
+                outlineColor={colors.onSurfaceDisabled}
+                mode="outlined"
+                autoFocus
+                placeholder="Amount"
+                keyboardType="numeric"
+                left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
+                style={style.textInput}
+                activeOutlineColor={colors.onSurfaceDisabled}
+                placeholderTextColor={colors.onSurfaceDisabled}
+              />
+            </View>
+
+            {/* Category Selection */}
+            <PressableWithFeedback
               style={[
-                gs.centerItems,
-                gs.fullFlex,
+                style.categoryContainer,
                 gs.flexRow,
-                style.dateTextContainer,
+                gs.itemsCenter,
+                gs.justifyBetween,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                },
               ]}
+              onPress={() => setCategoryModal(true)}
             >
               <Text
                 style={[
-                  gs.fontBold,
-                  style.dateText,
-                  { color: colors.onPrimaryContainer },
+                  style.categoryText,
+                  {
+                    color: colors.onBackground,
+                  },
                 ]}
               >
-                {format(dateToRender ?? new Date(), DATE_FORMAT).toUpperCase()}
+                {categories.filter(c => c.id === selectedCategoryId)[0].name ??
+                  ''}
               </Text>
-            </View>
-          </PressableWithFeedback>
+              <Icon size={textSize.lg} source="chevron-down" />
+            </PressableWithFeedback>
 
-          <Tooltip title="Add Bill/invoice etc">
+            {/* Account Selection */}
             <PressableWithFeedback
-              onPress={pickFiles}
               style={[
+                style.categoryContainer,
                 gs.flexRow,
-                gs.centerItems,
-                style.attachmentButton,
-                gs.fullFlex,
-                { backgroundColor: colors.inversePrimary },
-              ]}
-            >
-              <Icon
-                source="paperclip"
-                size={ICON_SIZE}
-                color={colors.onPrimaryContainer}
-              />
-            </PressableWithFeedback>
-          </Tooltip>
-          <Tooltip title="Add Bill/invoice etc">
-            <PressableWithFeedback
-              onPress={onCameraPress}
-              style={[
-                gs.flexRow,
-                gs.centerItems,
-                style.attachmentButton,
-                gs.fullFlex,
-                { backgroundColor: colors.inversePrimary },
-              ]}
-            >
-              <Icon
-                source="camera"
-                size={ICON_SIZE}
-                color={colors.onPrimaryContainer}
-              />
-            </PressableWithFeedback>
-          </Tooltip>
-        </View>
-        {/* Todo: Attachments list section */}
-        {attachments.length > 0 && (
-          <View
-            style={[
-              {
-                marginTop: spacing.lg,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                gs.fontBold,
+                gs.itemsCenter,
+                gs.justifyBetween,
                 {
-                  fontSize: textSize.md,
-                  color: colors.onBackground,
+                  borderColor: colors.onSurfaceDisabled,
                 },
               ]}
+              onPress={() => handlePresentModalPress()}
             >
-              Attachments
-            </Text>
-            <View style={[style.attachmentContainer]}>
-              <FlatList
-                contentContainerStyle={{
-                  gap: spacing.md,
-                }}
-                horizontal
-                data={attachments}
-                renderItem={item => renderAttachment(item.item, removeFile)}
-                keyExtractor={item => item.path}
-                showsHorizontalScrollIndicator={false}
-              />
-            </View>
-          </View>
-        )}
-        {/* Description section */}
-        <TextInput
-          mode="outlined"
-          outlineColor={colors.onSurfaceDisabled}
-          activeOutlineColor={colors.onSurfaceDisabled}
-          style={[{ marginTop: spacing.lg, paddingVertical: spacing.sm }]}
-          placeholder="Description"
-          multiline
-          onChangeText={setDesc}
-          value={desc}
-          placeholderTextColor={colors.onSurfaceDisabled}
-        />
-
-        {/* Date Picker Modal */}
-        <DatePickerModal
-          label="Select transaction date"
-          animationType="fade"
-          presentationStyle="pageSheet"
-          locale="en"
-          mode="single"
-          visible={openDatePicker}
-          onDismiss={onDismissSingle}
-          date={date}
-          onConfirm={onConfirmSingle}
-          saveLabel="Next"
-        />
-
-        {/* Time Picker Modal */}
-        <TimePickerModal
-          visible={openTimePicker}
-          onDismiss={() => setOpenTimePicker(false)}
-          onConfirm={value => {
-            setTime(value);
-            setOpenTimePicker(false);
-            setOpenDatePicker(false);
-          }}
-          hours={12}
-          minutes={0}
-        />
-      </ScrollView>
-      {amountInput && !isNaN(parseInt(amountInput, 10)) && (
-        <FAB
-          icon="check"
-          style={[
-            style.fab,
-            {
-              bottom: kbHeight + 20,
-            },
-          ]}
-          onPress={saveTransaction}
-        />
-      )}
-      {renderCamera && device && (
-        <View style={[StyleSheet.absoluteFill]}>
-          <Camera
-            style={StyleSheet.absoluteFill}
-            ref={camera}
-            photo
-            device={device}
-            isActive={renderCamera}
-          />
-          <View style={style.cameraToolbar}>
-            <PressableWithFeedback
-              onPress={async () => {
-                const file = await camera.current?.takePhoto({});
-                const result = await fetch(`file://${file.path}`);
-                const photo = await result.blob();
-                console.log({ photo, file, result });
-                const copied = await keepLocalCopy({
-                  destination: 'documentDirectory',
-                  files: [
-                    {
-                      fileName: 'file.jpeg',
-                      uri: result.url,
-                    },
-                  ],
-                });
-                copied.forEach(file => {
-                  if (file.status === 'error') {
-                    console.log('error while copying: ', file.copyError);
-                  } else {
-                    console.log({ file });
-                    setAttachments([
-                      {
-                        extension: 'image/jpeg',
-                        name: 'file.jpeg',
-                        path: file.localUri,
-                        size: 100,
-                      },
-                    ]);
-                  }
-                });
-
-                setRenderCamera(false);
-              }}
-            >
-              <Icon source={'radiobox-marked'} size={70} />
+              <Text
+                style={[
+                  style.categoryText,
+                  {
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
+                Select an account
+              </Text>
+              <Icon size={textSize.lg} source="chevron-down" />
             </PressableWithFeedback>
-          </View>
-        </View>
-      )}
-      {categoryModal && (
-        <CategorySelectionModal
-          visible={categoryModal}
-          onClose={() => setCategoryModal(false)}
-          selectCategory={id => {
-            setSelectedCategoryId(id);
-          }}
-          selectedCategory={selectedCategoryId}
-        />
-      )}
-    </KeyboardAvoidingView>
+
+            {/* Date and Attachment Selection */}
+            <View style={[gs.flexRow, style.dateAttachmentContainer]}>
+              <PressableWithFeedback
+                onPress={() => setOpenDatePicker(true)}
+                style={[
+                  gs.flexRow,
+                  gs.centerItems,
+                  style.dateButton,
+                  { backgroundColor: colors.inversePrimary },
+                ]}
+              >
+                <Icon
+                  source="calendar-range"
+                  size={ICON_SIZE}
+                  color={colors.onPrimaryContainer}
+                />
+                <View
+                  style={[
+                    gs.centerItems,
+                    gs.fullFlex,
+                    gs.flexRow,
+                    style.dateTextContainer,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      gs.fontBold,
+                      style.dateText,
+                      { color: colors.onPrimaryContainer },
+                    ]}
+                  >
+                    {format(
+                      dateToRender ?? new Date(),
+                      DATE_FORMAT,
+                    ).toUpperCase()}
+                  </Text>
+                </View>
+              </PressableWithFeedback>
+
+              <Tooltip title="Add Bill/invoice etc">
+                <PressableWithFeedback
+                  onPress={pickFiles}
+                  style={[
+                    gs.flexRow,
+                    gs.centerItems,
+                    style.attachmentButton,
+                    gs.fullFlex,
+                    { backgroundColor: colors.inversePrimary },
+                  ]}
+                >
+                  <Icon
+                    source="paperclip"
+                    size={ICON_SIZE}
+                    color={colors.onPrimaryContainer}
+                  />
+                </PressableWithFeedback>
+              </Tooltip>
+              <Tooltip title="Add Bill/invoice etc">
+                <PressableWithFeedback
+                  onPress={onCameraPress}
+                  style={[
+                    gs.flexRow,
+                    gs.centerItems,
+                    style.attachmentButton,
+                    gs.fullFlex,
+                    { backgroundColor: colors.inversePrimary },
+                  ]}
+                >
+                  <Icon
+                    source="camera"
+                    size={ICON_SIZE}
+                    color={colors.onPrimaryContainer}
+                  />
+                </PressableWithFeedback>
+              </Tooltip>
+            </View>
+            {/* Todo: Attachments list section */}
+            {attachments.length > 0 && (
+              <View
+                style={[
+                  {
+                    marginTop: spacing.lg,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    gs.fontBold,
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onBackground,
+                    },
+                  ]}
+                >
+                  Attachments
+                </Text>
+                <View style={[style.attachmentContainer]}>
+                  <FlatList
+                    contentContainerStyle={{
+                      gap: spacing.md,
+                    }}
+                    horizontal
+                    data={attachments}
+                    renderItem={item => renderAttachment(item.item, removeFile)}
+                    keyExtractor={item => item.path}
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </View>
+              </View>
+            )}
+            {/* Description section */}
+            <TextInput
+              mode="outlined"
+              outlineColor={colors.onSurfaceDisabled}
+              activeOutlineColor={colors.onSurfaceDisabled}
+              style={[{ marginTop: spacing.lg, paddingVertical: spacing.sm }]}
+              placeholder="Description"
+              multiline
+              onChangeText={setDesc}
+              value={desc}
+              placeholderTextColor={colors.onSurfaceDisabled}
+            />
+
+            {/* Date Picker Modal */}
+            <DatePickerModal
+              label="Select transaction date"
+              animationType="fade"
+              presentationStyle="pageSheet"
+              locale="en"
+              mode="single"
+              visible={openDatePicker}
+              onDismiss={onDismissSingle}
+              date={date}
+              onConfirm={onConfirmSingle}
+              saveLabel="Next"
+            />
+
+            {/* Time Picker Modal */}
+            <TimePickerModal
+              visible={openTimePicker}
+              onDismiss={() => setOpenTimePicker(false)}
+              onConfirm={value => {
+                setTime(value);
+                setOpenTimePicker(false);
+                setOpenDatePicker(false);
+              }}
+              hours={12}
+              minutes={0}
+            />
+          </ScrollView>
+          {amountInput && !isNaN(parseInt(amountInput, 10)) && (
+            <FAB
+              icon="check"
+              style={[
+                style.fab,
+                {
+                  bottom: kbHeight + 20,
+                },
+              ]}
+              onPress={saveTransaction}
+            />
+          )}
+          {renderCamera && device && (
+            <View style={[StyleSheet.absoluteFill]}>
+              <Camera
+                style={StyleSheet.absoluteFill}
+                ref={camera}
+                photo
+                device={device}
+                isActive={renderCamera}
+              />
+              <View style={style.cameraToolbar}>
+                <PressableWithFeedback
+                  onPress={async () => {
+                    const file = await camera.current?.takePhoto({});
+                    const result = await fetch(`file://${file.path}`);
+                    const photo = await result.blob();
+                    console.log({ photo, file, result });
+                    const copied = await keepLocalCopy({
+                      destination: 'documentDirectory',
+                      files: [
+                        {
+                          fileName: 'file.jpeg',
+                          uri: result.url,
+                        },
+                      ],
+                    });
+                    copied.forEach(file => {
+                      if (file.status === 'error') {
+                        console.log('error while copying: ', file.copyError);
+                      } else {
+                        console.log({ file });
+                        setAttachments([
+                          {
+                            extension: 'image/jpeg',
+                            name: 'file.jpeg',
+                            path: file.localUri,
+                            size: 100,
+                          },
+                        ]);
+                      }
+                    });
+
+                    setRenderCamera(false);
+                  }}
+                >
+                  <Icon source={'radiobox-marked'} size={70} />
+                </PressableWithFeedback>
+              </View>
+            </View>
+          )}
+          {categoryModal && (
+            <CategorySelectionModal
+              visible={categoryModal}
+              onClose={() => setCategoryModal(false)}
+              selectCategory={id => {
+                setSelectedCategoryId(id);
+              }}
+              selectedCategory={selectedCategoryId}
+            />
+          )}
+          <AccountSelectionModal
+            onAccountChange={id => {
+              setAccountId(id);
+            }}
+            handleSheetChanges={handleSheetChanges}
+            ref={bottomSheetModalRef}
+            selectedAccountId={accountId}
+          />
+        </KeyboardAvoidingView>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 };
 
@@ -709,6 +793,10 @@ const style = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainer: {
+    flex: 1,
     alignItems: 'center',
   },
 });
