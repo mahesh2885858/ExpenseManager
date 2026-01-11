@@ -50,7 +50,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         gs.flexRow,
         {
           gap: spacing.md,
-          marginTop: spacing.lg,
+          marginBottom: spacing.lg,
         },
       ]}
     >
@@ -60,7 +60,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             padding: spacing.sm,
             paddingHorizontal: spacing.md,
             borderRadius: borderRadius.lg,
-            backgroundColor: theme.colors.secondaryContainer,
+            backgroundColor: theme.colors.primaryContainer,
           },
           gs.centerItems,
         ]}
@@ -74,7 +74,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onSecondaryContainer,
+              color: theme.colors.onPrimaryContainer,
               fontSize: textSize.md,
             },
             gs.fontBold,
@@ -85,7 +85,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onSecondaryContainer,
+              color: theme.colors.onPrimaryContainer,
               fontSize: textSize.md,
             },
             gs.fontBold,

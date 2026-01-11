@@ -39,7 +39,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const translateX = interpolate(
       sliderPosition.value,
       [0, filteredRoutes.length - 1],
-      [0, (filteredRoutes.length - 1) * (200 / filteredRoutes.length)],
+      [0, (filteredRoutes.length - 1) * (300 / filteredRoutes.length)],
     );
 
     return {
@@ -104,6 +104,13 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             return null;
           }
 
+          const routeIcon =
+            route.name === 'Home'
+              ? 'home'
+              : route.name === 'Transactions'
+              ? 'history'
+              : 'chart-arc';
+
           return (
             <Pressable
               key={route.key}
@@ -121,7 +128,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               ]}
             >
               <Icon
-                source={route.name === 'Home' ? 'home' : 'chart-arc'}
+                source={routeIcon}
                 size={30}
                 color={
                   isFocused ? colors.primaryContainer : colors.onSurfaceVariant
@@ -172,7 +179,7 @@ const styles = StyleSheet.create({
   box: {
     flexDirection: 'row',
     borderRadius: 25,
-    width: '50%',
+    width: '60%',
     gap: 10,
     position: 'relative',
   },

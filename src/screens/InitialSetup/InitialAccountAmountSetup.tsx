@@ -1,7 +1,13 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
@@ -42,6 +48,7 @@ const InitialAccountAmountSetup = () => {
         id,
         isSelected: true,
       });
+      Keyboard.dismiss();
       setIsInitialSetupDone(true);
     }
   }, [

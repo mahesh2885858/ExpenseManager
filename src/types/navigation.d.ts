@@ -5,6 +5,7 @@ export type TBottomTabParamList = {
   Home: undefined;
   CustomButton: undefined;
   Transactions: undefined;
+  Reports: undefined;
 };
 
 export type TRootStackParamList = {

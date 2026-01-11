@@ -6,6 +6,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import useTransactionsStore from '../../stores/transactionsStore';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import useAccountStore from '../../stores/accountsStore';
+import { gs } from '../../common';
 
 type TProps = {
   search?: string;
@@ -19,7 +20,8 @@ const CommonHeader = (props: TProps) => {
 
   const { colors } = useAppTheme();
   const filters = useTransactionsStore(state => state.filters);
-  const reset = useAccountStore(state => state.setIsInitialSetupDone);
+  // const reset = useAccountStore(state => state.setIsInitialSetupDone);
+  const userName = useAccountStore(state => state.userName);
 
   const isFiltersActive = useMemo(() => {
     return !!filters.date || !!filters.type || !!filters.categoryId;
@@ -60,39 +62,50 @@ const CommonHeader = (props: TProps) => {
         </View>
       ) : (
         <View style={[styles.header]}>
-          <View
-            style={[
-              styles.headerLeft,
-              {
-                backgroundColor: colors.primaryContainer,
-              },
-            ]}
-          >
-            <PressableWithFeedback
-              onPress={() => {
-                reset(false);
-              }}
+          {route.name === 'Home' ? (
+            <View
+              style={[
+                styles.headerLeft,
+                {
+                  backgroundColor: colors.primaryContainer,
+                },
+              ]}
             >
-              <Text
-                style={[
-                  styles.avatarText,
-                  {
-                    color: colors.onPrimaryContainer,
-                  },
-                ]}
-              >
-                M
-              </Text>
-            </PressableWithFeedback>
-          </View>
+              <PressableWithFeedback hidden={route.name !== 'Home'}>
+                <Text
+                  style={[
+                    styles.avatarText,
+                    {
+                      color: colors.onPrimaryContainer,
+                    },
+                  ]}
+                >
+                  {userName.split('')[0]?.toUpperCase() ?? 'U'}
+                </Text>
+              </PressableWithFeedback>
+            </View>
+          ) : (
+            <Text
+              style={[
+                gs.fontBold,
+                {
+                  color: colors.onBackground,
+                  fontSize: textSize.lg,
+                },
+              ]}
+            >
+              Transactions
+            </Text>
+          )}
           <View style={styles.headerRight}>
             <PressableWithFeedback
-              hidden={route.name === 'Transactions'}
+              hidden={route.name === 'Home'}
               onPress={() => setRenderSearch(true)}
             >
               <Icon source={'magnify'} size={spacing.xl} />
             </PressableWithFeedback>
             <PressableWithFeedback
+              hidden={route.name === 'Home'}
               onPress={() => {
                 navigation.navigate('TransactionFilters');
               }}
@@ -101,6 +114,9 @@ const CommonHeader = (props: TProps) => {
                 source={isFiltersActive ? 'filter-off' : 'filter-outline'}
                 size={spacing.xl}
               />
+            </PressableWithFeedback>
+            <PressableWithFeedback hidden={route.name !== 'Home'}>
+              <Icon source={'cog'} size={spacing.xl} />
             </PressableWithFeedback>
           </View>
         </View>
