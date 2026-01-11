@@ -27,6 +27,7 @@ export type TRootStackParamList = {
     transaction: TTransaction;
   };
   TransactionFilters: undefined;
+  ManageAccounts: undefined;
 };
 
 declare global {

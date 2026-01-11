@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import {
   BackHandler,
-  Button,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
@@ -17,9 +16,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
-import { Avatar, FAB, Icon, TextInput, Tooltip } from 'react-native-paper';
+import { FAB, Icon, Tooltip } from 'react-native-paper';
 import {
   DatePickerModal,
   DatePickerModalSingleProps,
@@ -27,9 +27,22 @@ import {
 } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { uCFirst } from 'commonutil-core';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  interpolateColor,
+  SlideInDown,
+  SlideOutUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera,
   useCameraDevice,
@@ -39,6 +52,7 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
@@ -48,15 +62,9 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
+import { color } from 'd3';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
-const AVATAR_SIZE = 40;
 const ICON_SIZE = 24;
 
 const renderAttachment = (
@@ -78,7 +86,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+  const accounts = useAccountStore(state => state.accounts);
 
   const initData: {
     type: TTransactionType;
@@ -147,11 +155,20 @@ const AddTransaction = () => {
   const [kbHeight, setKbHeight] = useState(0);
   const [categoryModal, setCategoryModal] = useState(false);
   const [accountId, setAccountId] = useState('');
-
+  const progress = useSharedValue(0);
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {
     setTransactionType(type);
   };
+
+  const selectedAcc = useMemo(() => {
+    if (accountId.trim().length <= 0) {
+      return null;
+    } else {
+      const selectedAccount = accounts.filter(acc => acc.id === accountId);
+      return selectedAccount[0] ?? null;
+    }
+  }, [accountId, accounts]);
 
   const onDismissSingle = useCallback(() => {
     setOpenDatePicker(false);
@@ -170,29 +187,6 @@ const AddTransaction = () => {
     date?.setMinutes(time.minutes);
     return date;
   }, [date, time]);
-
-  const getTransactionTypeButtonStyle = (type: TTransactionType) => [
-    gs.centerItems,
-    gs.fullFlex,
-    style.pill,
-    {
-      borderColor:
-        transactionType === type ? 'transparent' : colors.onSurfaceDisabled,
-      backgroundColor:
-        transactionType === type ? colors.inversePrimary : colors.background,
-      borderWidth: 0.5,
-    },
-  ];
-
-  const getTransactionTypeTextStyle = (type: TTransactionType) => [
-    {
-      fontSize: textSize.md,
-      color:
-        transactionType === type
-          ? colors.onPrimaryContainer
-          : colors.onBackground,
-    },
-  ];
 
   const pickFiles = async () => {
     try {
@@ -259,7 +253,11 @@ const AddTransaction = () => {
     try {
       const id =
         route.params.mode === 'edit' ? route.params.transaction.id : uuid();
-      const selectedAccountId = getSelectedAccount().id;
+      if (!selectedAcc) {
+        console.log('No account selected');
+        return;
+      }
+      const selectedAccountId = selectedAcc.id;
       const amount = parseFloat(amountInput);
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
@@ -303,12 +301,32 @@ const AddTransaction = () => {
   const [bottomSheetOpen, setBottomSheetOpen] = useState<boolean>(false);
 
   const handlePresentModalPress = useCallback(() => {
-    console.log(bottomSheetModalRef);
+    Keyboard.dismiss();
     bottomSheetModalRef.current?.present();
   }, []);
+
   const handleSheetChanges = useCallback((index: number) => {
     setBottomSheetOpen(index >= 0);
   }, []);
+
+  const animatedBgStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        [colors.error, colors.success],
+      ),
+    };
+  });
+  const animatedTextStyle = useAnimatedStyle(() => {
+    return {
+      color: interpolateColor(
+        progress.value,
+        [0, 1],
+        [colors.onError, colors.onSuccess],
+      ),
+    };
+  });
 
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', e => {
@@ -335,6 +353,12 @@ const AddTransaction = () => {
     });
     return () => sub.remove();
   }, [bottomSheetOpen]);
+
+  useEffect(() => {
+    progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {
+      duration: 250,
+    });
+  }, [transactionType, progress]);
 
   return (
     <GestureHandlerRootView style={[gs.fullFlex]}>
@@ -375,101 +399,138 @@ const AddTransaction = () => {
                   Add Transaction
                 </Text>
               </View>
-              <Avatar.Text
-                label="M"
-                size={AVATAR_SIZE}
-                style={{ backgroundColor: colors.primaryContainer }}
-              />
-            </View>
-
-            {/* Transaction Type */}
-            <View style={style.transactionTypeContainer}>
-              <PressableWithFeedback
-                onPress={() => changeTransactionType('expense')}
-                style={getTransactionTypeButtonStyle('expense')}
+              <Animated.View
+                style={[style.tractionTypeButton, animatedBgStyle]}
               >
-                <Text style={getTransactionTypeTextStyle('expense')}>
-                  Expense
-                </Text>
-              </PressableWithFeedback>
-              <PressableWithFeedback
-                onPress={() => changeTransactionType('income')}
-                style={getTransactionTypeButtonStyle('income')}
-              >
-                <Text style={getTransactionTypeTextStyle('income')}>
-                  Income
-                </Text>
-              </PressableWithFeedback>
+                <PressableWithFeedback
+                  onPress={() =>
+                    changeTransactionType(
+                      transactionType === 'expense' ? 'income' : 'expense',
+                    )
+                  }
+                  style={[gs.overflowHide]}
+                >
+                  <Animated.Text
+                    key={transactionType}
+                    entering={SlideInDown.duration(300)}
+                    exiting={SlideOutUp.duration(1000)}
+                    style={[
+                      {
+                        fontSize: textSize.md,
+                      },
+                      gs.centerText,
+                      animatedTextStyle,
+                    ]}
+                  >
+                    {uCFirst(transactionType)}
+                  </Animated.Text>
+                </PressableWithFeedback>
+              </Animated.View>
             </View>
 
             {/* Amount Input */}
-            <View style={style.amountInputContainer}>
+            <View
+              style={[
+                style.amountInputContainer,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: colors.onSurfaceDisabled,
+                  },
+                ]}
+              >
+                Amount
+              </Text>
               <TextInput
                 onChangeText={setAmountInput}
                 value={amountInput}
-                outlineColor={colors.onSurfaceDisabled}
-                mode="outlined"
                 autoFocus
-                placeholder="Amount"
+                placeholder={CURRENCY_SYMBOL + '0.00'}
                 keyboardType="numeric"
-                left={<TextInput.Affix text={CURRENCY_SYMBOL} />}
-                style={style.textInput}
-                activeOutlineColor={colors.onSurfaceDisabled}
+                style={[
+                  style.textInput,
+                  {
+                    color: colors.onBackground,
+                  },
+                ]}
                 placeholderTextColor={colors.onSurfaceDisabled}
               />
             </View>
 
             {/* Category Selection */}
-            <PressableWithFeedback
-              style={[
-                style.categoryContainer,
-                gs.flexRow,
-                gs.itemsCenter,
-                gs.justifyBetween,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                },
-              ]}
-              onPress={() => setCategoryModal(true)}
-            >
-              <Text
+            <PressableWithFeedback onPress={() => setCategoryModal(true)}>
+              <View
                 style={[
-                  style.categoryText,
                   {
-                    color: colors.onBackground,
-                  },
-                ]}
-              >
-                {categories.filter(c => c.id === selectedCategoryId)[0].name ??
-                  ''}
-              </Text>
-              <Icon size={textSize.lg} source="chevron-down" />
-            </PressableWithFeedback>
+                    marginTop: spacing.md,
 
-            {/* Account Selection */}
-            <PressableWithFeedback
-              style={[
-                style.categoryContainer,
-                gs.flexRow,
-                gs.itemsCenter,
-                gs.justifyBetween,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                },
-              ]}
-              onPress={() => handlePresentModalPress()}
-            >
-              <Text
-                style={[
-                  style.categoryText,
-                  {
-                    color: colors.onBackground,
+                    borderColor: colors.onSurfaceDisabled,
                   },
+                  style.categoryContainer,
                 ]}
               >
-                Select an account
-              </Text>
-              <Icon size={textSize.lg} source="chevron-down" />
+                <Text
+                  style={[
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onSurfaceDisabled,
+                    },
+                  ]}
+                >
+                  Category
+                </Text>
+                <Text
+                  style={[
+                    style.categoryText,
+                    {
+                      color: colors.onBackground,
+                    },
+                  ]}
+                >
+                  {categories.filter(c => c.id === selectedCategoryId)[0]
+                    .name ?? ''}
+                </Text>
+              </View>
+            </PressableWithFeedback>
+            {/* Account section */}
+            <PressableWithFeedback onPress={() => handlePresentModalPress()}>
+              <View
+                style={[
+                  {
+                    marginTop: spacing.md,
+
+                    borderColor: colors.onSurfaceDisabled,
+                  },
+                  style.categoryContainer,
+                ]}
+              >
+                <Text
+                  style={[
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onSurfaceDisabled,
+                    },
+                  ]}
+                >
+                  Account
+                </Text>
+                <Text
+                  style={[
+                    style.categoryText,
+                    {
+                      color: colors.onBackground,
+                    },
+                  ]}
+                >
+                  {selectedAcc?.name ?? 'Select an account'}
+                </Text>
+              </View>
             </PressableWithFeedback>
 
             {/* Date and Attachment Selection */}
@@ -548,6 +609,7 @@ const AddTransaction = () => {
                 </PressableWithFeedback>
               </Tooltip>
             </View>
+
             {/* Todo: Attachments list section */}
             {attachments.length > 0 && (
               <View
@@ -582,13 +644,17 @@ const AddTransaction = () => {
                 </View>
               </View>
             )}
+
             {/* Description section */}
             <TextInput
-              mode="outlined"
-              outlineColor={colors.onSurfaceDisabled}
-              activeOutlineColor={colors.onSurfaceDisabled}
-              style={[{ marginTop: spacing.lg, paddingVertical: spacing.sm }]}
-              placeholder="Description"
+              style={[
+                style.descBox,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                  color: colors.onBackground,
+                },
+              ]}
+              placeholder="Additional details"
               multiline
               onChangeText={setDesc}
               value={desc}
@@ -622,18 +688,20 @@ const AddTransaction = () => {
               minutes={0}
             />
           </ScrollView>
-          {amountInput && !isNaN(parseInt(amountInput, 10)) && (
-            <FAB
-              icon="check"
-              style={[
-                style.fab,
-                {
-                  bottom: kbHeight + 20,
-                },
-              ]}
-              onPress={saveTransaction}
-            />
-          )}
+          {amountInput &&
+            !isNaN(parseInt(amountInput, 10)) &&
+            !!selectedAcc && (
+              <FAB
+                icon="check"
+                style={[
+                  style.fab,
+                  {
+                    bottom: kbHeight + 20,
+                  },
+                ]}
+                onPress={saveTransaction}
+              />
+            )}
           {renderCamera && device && (
             <View style={[StyleSheet.absoluteFill]}>
               <Camera
@@ -728,6 +796,12 @@ const style = StyleSheet.create({
     gap: spacing.lg,
     marginTop: spacing.md,
   },
+  tractionTypeButton: {
+    width: 100,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+  },
   pill: {
     borderWidth: 1,
     borderRadius: borderRadius.pill,
@@ -736,17 +810,19 @@ const style = StyleSheet.create({
   },
   amountInputContainer: {
     marginTop: spacing.lg,
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
+    paddingLeft: spacing.sm,
+    paddingTop: spacing.sm,
   },
   textInput: {
-    borderRadius: borderRadius.lg,
     fontSize: textSize.lg,
   },
   categoryContainer: {
-    gap: spacing.md,
+    gap: spacing.sm,
     borderWidth: 1,
-    paddingVertical: spacing.md,
-    marginTop: spacing.md,
-    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,
   },
   categoryText: {
@@ -780,6 +856,16 @@ const style = StyleSheet.create({
   attachmentContainer: {
     marginTop: spacing.xs,
     paddingVertical: spacing.sm,
+  },
+  descBox: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+    minHeight: 100,
+    borderWidth: 1,
+    textAlignVertical: 'top',
+    borderRadius: borderRadius.md,
+    paddingLeft: spacing.sm,
+    fontSize: textSize.md,
   },
   fab: {
     position: 'absolute',

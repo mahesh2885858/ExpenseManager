@@ -26,4 +26,7 @@ export const gs = StyleSheet.create({
   justifyBetween: {
     justifyContent: 'space-between',
   },
+  overflowHide: {
+    overflow: 'hidden',
+  },
 });

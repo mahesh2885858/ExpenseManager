@@ -1,9 +1,9 @@
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetProps,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -27,28 +27,26 @@ const AccountSelectionModal = (props: TProps) => {
   const accounts = useAccountStore(state => state.accounts);
   return (
     <BottomSheetModal
-      enableDismissOnClose
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
         backgroundColor: colors.inverseOnSurface,
       }}
       ref={props.ref}
       onChange={props.handleSheetChanges}
+      maxDynamicContentSize={500}
     >
-      <BottomSheetView
+      <View
         style={[
-          gs.fullFlex,
           {
-            paddingBottom: spacing.lg,
+            paddingHorizontal: spacing.md,
           },
         ]}
       >
         <View
           style={[
-            styles.bottomSheet,
-            gs.fullFlex,
             {
-              backgroundColor: colors.inverseOnSurface,
+              marginBottom: spacing.md,
+              marginTop: spacing.md,
             },
           ]}
         >
@@ -56,63 +54,61 @@ const AccountSelectionModal = (props: TProps) => {
             style={[
               gs.fontBold,
               {
-                color: colors.onBackground,
                 fontSize: textSize.lg,
+                color: colors.onBackground,
               },
             ]}
           >
             Select an account
           </Text>
-          <View
-            style={[
-              {
-                marginTop: spacing.md,
-              },
-            ]}
-          >
-            {[...accounts].map(acc => {
-              const isSelected = props.selectedAccountId === acc.id;
-              return (
-                <PressableWithFeedback
-                  onPress={() => {
-                    props.onAccountChange(acc.id);
-                  }}
+        </View>
+        <BottomSheetFlatList
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          data={accounts}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => {
+            const isSelected = props.selectedAccountId === item.id;
+            return (
+              <PressableWithFeedback
+                onPress={() => {
+                  props.onAccountChange(item.id);
+                }}
+                style={[
+                  gs.flexRow,
+                  gs.itemsCenter,
+                  {
+                    borderColor: isSelected
+                      ? colors.inversePrimary
+                      : colors.onSurfaceDisabled,
+                    borderWidth: 1,
+                    borderRadius: borderRadius.lg,
+                    marginBottom: spacing.md,
+                    paddingVertical: spacing.md,
+                  },
+                ]}
+                key={item.id}
+              >
+                <RadioButton.Android
+                  status={isSelected ? 'checked' : 'unchecked'}
+                  color={colors.inversePrimary}
+                  value={item.name}
+                />
+                <Text
                   style={[
-                    gs.flexRow,
-                    gs.itemsCenter,
                     {
-                      borderColor: isSelected
-                        ? colors.inversePrimary
-                        : colors.onSurfaceDisabled,
-                      borderWidth: 1,
-                      borderRadius: borderRadius.lg,
-                      marginBottom: spacing.md,
-                      paddingVertical: spacing.md,
+                      color: colors.onSurface,
+                      fontSize: textSize.md,
                     },
                   ]}
-                  key={acc.id}
                 >
-                  <RadioButton.Android
-                    status={isSelected ? 'checked' : 'unchecked'}
-                    color={colors.inversePrimary}
-                    value={acc.name}
-                  />
-                  <Text
-                    style={[
-                      {
-                        color: colors.onSurface,
-                        fontSize: textSize.md,
-                      },
-                    ]}
-                  >
-                    {acc.name}
-                  </Text>
-                </PressableWithFeedback>
-              );
-            })}
-          </View>
-        </View>
-      </BottomSheetView>
+                  {item.name}
+                </Text>
+              </PressableWithFeedback>
+            );
+          }}
+        />
+      </View>
     </BottomSheetModal>
   );
 };
@@ -121,7 +117,7 @@ export default AccountSelectionModal;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#00000010',
+    paddingBottom: 100,
   },
   bottomSheet: {
     paddingHorizontal: spacing.md,
