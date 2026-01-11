@@ -1,12 +1,20 @@
-## ExpenseManager 💰
+## ExpenseManager
 
 A modern, user-friendly expense management mobile app built with React Native, designed to help users track their finances with ease and efficiency.
 
-## 📱 Overview
+## Overview
 
 ExpenseManager is a cross-platform mobile application that allows users to manage their accounts and track expenses. The app features a clean, intuitive interface with dark/light theme support and internationalization capabilities.
 
-## ✨ Features
+## Screenshots
+
+<p align="center">
+<img src="assets/images/screenshots/Screenshot_20260111_220902.jpg" width="30%">
+<img src="assets/images/screenshots/Screenshot_20260111_220915.jpg" width="30%">
+<img src="assets/images/screenshots/Screenshot_20260111_220827.jpg" width="30%">
+<p>
+
+## Features
 
 - **Account Management**: Create and manage multiple accounts with initial balances
 - **Initial Setup Flow**: Guided onboarding process for first-time users
@@ -17,7 +25,7 @@ ExpenseManager is a cross-platform mobile application that allows users to manag
 - **State Management**: Efficient state management with Zustand
 - **Navigation**: Smooth navigation experience with React Navigation
 
-## 🏗️ Architecture
+## Architecture
 
 The app follows a modular architecture with the following structure:
 
