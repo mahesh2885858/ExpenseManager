@@ -8,7 +8,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  BackHandler,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
@@ -19,7 +18,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { FAB, Icon, Tooltip } from 'react-native-paper';
+import { FAB, Icon } from 'react-native-paper';
 import {
   DatePickerModal,
   DatePickerModalSingleProps,
@@ -27,10 +26,7 @@ import {
 } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
 import { uCFirst } from 'commonutil-core';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -54,6 +50,7 @@ import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -62,7 +59,6 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-import { color } from 'd3';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
@@ -153,7 +149,6 @@ const AddTransaction = () => {
     initData.selectedCatId,
   );
   const [kbHeight, setKbHeight] = useState(0);
-  const [categoryModal, setCategoryModal] = useState(false);
   const [accountId, setAccountId] = useState('');
   const progress = useSharedValue(0);
   // Handlers
@@ -177,9 +172,9 @@ const AddTransaction = () => {
   const onConfirmSingle: DatePickerModalSingleProps['onConfirm'] = useCallback(
     params => {
       setDate(params.date);
-      setOpenTimePicker(true);
+      setOpenDatePicker(false);
     },
-    [setOpenTimePicker, setDate],
+    [setDate],
   );
 
   const dateToRender = useMemo(() => {
@@ -297,17 +292,16 @@ const AddTransaction = () => {
     }
   };
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [bottomSheetOpen, setBottomSheetOpen] = useState<boolean>(false);
-
-  const handlePresentModalPress = useCallback(() => {
-    Keyboard.dismiss();
-    bottomSheetModalRef.current?.present();
-  }, []);
-
-  const handleSheetChanges = useCallback((index: number) => {
-    setBottomSheetOpen(index >= 0);
-  }, []);
+  const {
+    btmShtRef: bottomSheetModalRef,
+    handlePresent: handlePresentModalPress,
+    handleSheetChange: handleSheetChanges,
+  } = useBottomSheetModal();
+  const {
+    btmShtRef: categoryBtmSheet,
+    handlePresent: handlePresentCategories,
+    handleSheetChange: handleCategorySheetChanges,
+  } = useBottomSheetModal();
 
   const animatedBgStyle = useAnimatedStyle(() => {
     return {
@@ -340,19 +334,6 @@ const AddTransaction = () => {
       hide.remove();
     };
   }, []);
-
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (bottomSheetOpen) {
-        bottomSheetModalRef.current?.dismiss();
-
-        return true;
-      } else {
-        return false;
-      }
-    });
-    return () => sub.remove();
-  }, [bottomSheetOpen]);
 
   useEffect(() => {
     progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {
@@ -464,7 +445,7 @@ const AddTransaction = () => {
             </View>
 
             {/* Category Selection */}
-            <PressableWithFeedback onPress={() => setCategoryModal(true)}>
+            <PressableWithFeedback onPress={() => handlePresentCategories()}>
               <View
                 style={[
                   {
@@ -533,45 +514,86 @@ const AddTransaction = () => {
               </View>
             </PressableWithFeedback>
 
-            {/* Date and Attachment Selection */}
-            <View style={[gs.flexRow, style.dateAttachmentContainer]}>
+            {/* Date and time selection */}
+            <View
+              style={[
+                gs.flexRow,
+                gs.itemsCenter,
+                {
+                  marginTop: spacing.md,
+                  gap: spacing.md,
+                },
+              ]}
+            >
               <PressableWithFeedback
                 onPress={() => setOpenDatePicker(true)}
                 style={[
-                  gs.flexRow,
-                  gs.centerItems,
-                  style.dateButton,
-                  { backgroundColor: colors.inversePrimary },
+                  gs.fullFlex,
+                  {
+                    borderColor: colors.onSurfaceDisabled,
+                  },
+                  style.categoryContainer,
                 ]}
               >
-                <Icon
-                  source="calendar-range"
-                  size={ICON_SIZE}
-                  color={colors.onPrimaryContainer}
-                />
-                <View
+                <Text
                   style={[
-                    gs.centerItems,
-                    gs.fullFlex,
-                    gs.flexRow,
-                    style.dateTextContainer,
+                    {
+                      color: colors.onSurfaceDisabled,
+                      fontSize: textSize.md,
+                    },
                   ]}
                 >
-                  <Text
-                    style={[
-                      gs.fontBold,
-                      style.dateText,
-                      { color: colors.onPrimaryContainer },
-                    ]}
-                  >
-                    {format(
-                      dateToRender ?? new Date(),
-                      DATE_FORMAT,
-                    ).toUpperCase()}
-                  </Text>
-                </View>
+                  Date
+                </Text>
+                <Text
+                  style={[
+                    {
+                      color: colors.onBackground,
+                      fontSize: textSize.md,
+                    },
+                  ]}
+                >
+                  {format(
+                    dateToRender ?? new Date(),
+                    DATE_FORMAT,
+                  ).toUpperCase()}
+                </Text>
               </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => setOpenTimePicker(true)}
+                style={[
+                  gs.fullFlex,
+                  {
+                    borderColor: colors.onSurfaceDisabled,
+                  },
+                  style.categoryContainer,
+                ]}
+              >
+                <Text
+                  style={[
+                    {
+                      color: colors.onSurfaceDisabled,
+                      fontSize: textSize.md,
+                    },
+                  ]}
+                >
+                  Time
+                </Text>
+                <Text
+                  style={[
+                    {
+                      color: colors.onBackground,
+                      fontSize: textSize.md,
+                    },
+                  ]}
+                >
+                  {format(dateToRender ?? new Date(), 'hh:mm aa').toUpperCase()}
+                </Text>
+              </PressableWithFeedback>
+            </View>
 
+            {/* Date and Attachment Selection */}
+            {/* <View style={[gs.flexRow, style.dateAttachmentContainer]}>
               <Tooltip title="Add Bill/invoice etc">
                 <PressableWithFeedback
                   onPress={pickFiles}
@@ -608,7 +630,7 @@ const AddTransaction = () => {
                   />
                 </PressableWithFeedback>
               </Tooltip>
-            </View>
+            </View> */}
 
             {/* Todo: Attachments list section */}
             {attachments.length > 0 && (
@@ -672,7 +694,7 @@ const AddTransaction = () => {
               onDismiss={onDismissSingle}
               date={date}
               onConfirm={onConfirmSingle}
-              saveLabel="Next"
+              saveLabel="Save"
             />
 
             {/* Time Picker Modal */}
@@ -682,7 +704,6 @@ const AddTransaction = () => {
               onConfirm={value => {
                 setTime(value);
                 setOpenTimePicker(false);
-                setOpenDatePicker(false);
               }}
               hours={12}
               minutes={0}
@@ -751,16 +772,14 @@ const AddTransaction = () => {
               </View>
             </View>
           )}
-          {categoryModal && (
-            <CategorySelectionModal
-              visible={categoryModal}
-              onClose={() => setCategoryModal(false)}
-              selectCategory={id => {
-                setSelectedCategoryId(id);
-              }}
-              selectedCategory={selectedCategoryId}
-            />
-          )}
+          <CategorySelectionModal
+            handleSheetChanges={handleCategorySheetChanges}
+            ref={categoryBtmSheet}
+            selectCategory={id => {
+              setSelectedCategoryId(id);
+            }}
+            selectedCategory={selectedCategoryId}
+          />
           <AccountSelectionModal
             onAccountChange={id => {
               setAccountId(id);

@@ -12,6 +12,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import { TAccount } from '../../types';
 
 type TProps = {
   ref: any;
@@ -66,8 +67,8 @@ const AccountSelectionModal = (props: TProps) => {
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           data={accounts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => {
+          keyExtractor={(item: TAccount) => item.id}
+          renderItem={({ item }: { item: TAccount }) => {
             const isSelected = props.selectedAccountId === item.id;
             return (
               <PressableWithFeedback
@@ -77,14 +78,11 @@ const AccountSelectionModal = (props: TProps) => {
                 style={[
                   gs.flexRow,
                   gs.itemsCenter,
+                  styles.item,
                   {
                     borderColor: isSelected
                       ? colors.inversePrimary
                       : colors.onSurfaceDisabled,
-                    borderWidth: 1,
-                    borderRadius: borderRadius.lg,
-                    marginBottom: spacing.md,
-                    paddingVertical: spacing.md,
                   },
                 ]}
                 key={item.id}
@@ -121,5 +119,11 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     paddingHorizontal: spacing.md,
+  },
+  item: {
+    borderWidth: 1,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.md,
+    paddingVertical: spacing.md,
   },
 });
