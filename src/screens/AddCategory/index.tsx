@@ -10,10 +10,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import Switch from '../../components/atoms/Switch';
 import { gs } from '../../common';
-import { FAB } from 'react-native-paper';
+import { FAB, Icon } from 'react-native-paper';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useCategories from '../../hooks/useCategories';
 import { useNavigation } from '@react-navigation/native';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 
 const AddCategory = () => {
   const { top } = useSafeAreaInsets();
@@ -42,7 +43,19 @@ const AddCategory = () => {
         },
       ]}
     >
-      <View style={[styles.header]}>
+      <View
+        style={[
+          styles.header,
+          gs.flexRow,
+          gs.itemsCenter,
+          {
+            gap: spacing.md,
+          },
+        ]}
+      >
+        <PressableWithFeedback onPress={navigation.goBack}>
+          <Icon source="arrow-left" size={24} />
+        </PressableWithFeedback>
         <Text
           style={[
             styles.headerText,
