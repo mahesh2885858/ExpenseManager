@@ -31,6 +31,7 @@ const useTransactionsStore = create<PositionStore>()(
         {
           name: 'General',
           id: DEFAULT_CATEGORY_ID,
+          isDefault: true,
         },
       ],
       filters: {

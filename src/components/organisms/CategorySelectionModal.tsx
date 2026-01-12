@@ -50,9 +50,25 @@ const CategorySelectionModal = (props: TProps) => {
       <View style={[styles.container]}>
         <View style={[styles.content]}>
           <View>
-            <Text style={[styles.headerText, coloredText]}>
-              Select a category
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter]}>
+              <Text style={[styles.headerText, coloredText, gs.fullFlex]}>
+                Select a category
+              </Text>
+              <PressableWithFeedback>
+                <Text
+                  style={[
+                    styles.manageText,
+                    {
+                      fontSize: textSize.md,
+
+                      color: colors.onTertiaryContainer,
+                    },
+                  ]}
+                >
+                  Add new
+                </Text>
+              </PressableWithFeedback>
+            </View>
             <BottomSheetFlatList
               keyExtractor={(item: TCategory) => item.id}
               showsVerticalScrollIndicator={false}
@@ -123,7 +139,7 @@ const styles = StyleSheet.create({
     fontSize: textSize.lg,
   },
   listContainer: {
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
     paddingBottom: 100,
   },
   item: {
@@ -131,5 +147,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     paddingVertical: spacing.md,
+  },
+  manageText: {
+    fontWeight: '600',
   },
 });

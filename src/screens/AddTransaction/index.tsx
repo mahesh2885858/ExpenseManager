@@ -46,11 +46,12 @@ import {
 } from 'react-native-vision-camera';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { DEFAULT_CATEGORY_ID, gs } from '../../common';
+import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -77,7 +78,7 @@ const AddTransaction = () => {
   const camera = useRef<Camera>(null);
   const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-  const categories = useTransactionsStore(state => state.categories);
+  const { categories, defaultCategoryId } = useCategories();
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
@@ -121,14 +122,14 @@ const AddTransaction = () => {
         date: new Date(),
         desc: '',
         attachments: [],
-        selectedCatId: DEFAULT_CATEGORY_ID,
+        selectedCatId: defaultCategoryId,
         time: {
           hours: new Date().getHours(),
           minutes: new Date().getMinutes(),
         },
       };
     }
-  }, [route]);
+  }, [route, defaultCategoryId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -297,6 +298,7 @@ const AddTransaction = () => {
     handlePresent: handlePresentModalPress,
     handleSheetChange: handleSheetChanges,
   } = useBottomSheetModal();
+
   const {
     btmShtRef: categoryBtmSheet,
     handlePresent: handlePresentCategories,
@@ -475,7 +477,7 @@ const AddTransaction = () => {
                   ]}
                 >
                   {categories.filter(c => c.id === selectedCategoryId)[0]
-                    .name ?? ''}
+                    ?.name ?? ''}
                 </Text>
               </View>
             </PressableWithFeedback>
