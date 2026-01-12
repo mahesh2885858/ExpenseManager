@@ -60,6 +60,7 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
+import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
@@ -149,7 +150,7 @@ const AddTransaction = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
-  const [kbHeight, setKbHeight] = useState(0);
+  const { kbHeight } = useGetKeyboardHeight();
   const [accountId, setAccountId] = useState('');
   const progress = useSharedValue(0);
   // Handlers
@@ -323,19 +324,6 @@ const AddTransaction = () => {
       ),
     };
   });
-
-  useEffect(() => {
-    const show = Keyboard.addListener('keyboardDidShow', e => {
-      setKbHeight(e.endCoordinates.height);
-    });
-    const hide = Keyboard.addListener('keyboardDidHide', () => {
-      setKbHeight(0);
-    });
-    return () => {
-      show.remove();
-      hide.remove();
-    };
-  }, []);
 
   useEffect(() => {
     progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {

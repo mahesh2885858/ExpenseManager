@@ -5,7 +5,7 @@ import {
   BottomSheetModal,
   BottomSheetProps,
 } from '@gorhom/bottom-sheet';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -13,6 +13,7 @@ import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { TCategory } from '../../types';
+import { useNavigation } from '@react-navigation/native';
 
 type TProps = {
   ref: any;
@@ -29,6 +30,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const CategorySelectionModal = (props: TProps) => {
   const { categories } = useCategories();
   const { colors } = useAppTheme();
+  const navigation = useNavigation();
 
   const coloredText = {
     color: colors.onSurfaceVariant,
@@ -37,6 +39,11 @@ const CategorySelectionModal = (props: TProps) => {
   const sortedCategories = useMemo(() => {
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
+
+  const navigateToAddCategoryScreen = useCallback(() => {
+    navigation.navigate('AddCategory');
+  }, [navigation]);
+
   return (
     <BottomSheetModal
       backdropComponent={pr => BottomCBackdrop(pr)}
@@ -54,7 +61,7 @@ const CategorySelectionModal = (props: TProps) => {
               <Text style={[styles.headerText, coloredText, gs.fullFlex]}>
                 Select a category
               </Text>
-              <PressableWithFeedback>
+              <PressableWithFeedback onPress={navigateToAddCategoryScreen}>
                 <Text
                   style={[
                     styles.manageText,

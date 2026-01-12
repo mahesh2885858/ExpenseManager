@@ -14,7 +14,7 @@ type TTransactionsStore = {
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
   updateTransaction: (id: string, transaction: TTransaction) => void;
-  addCategory: (category: TCategory) => void;
+  addCategory: (category: TCategory, makeDefault: boolean) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
   setFilters: (filter: Partial<TFilters>) => void;
@@ -32,6 +32,13 @@ const useTransactionsStore = create<PositionStore>()(
           name: 'General',
           id: DEFAULT_CATEGORY_ID,
           isDefault: true,
+          type: 'expense',
+        },
+        {
+          name: 'General',
+          id: DEFAULT_CATEGORY_ID,
+          isDefault: true,
+          type: 'income',
         },
       ],
       filters: {
@@ -51,8 +58,19 @@ const useTransactionsStore = create<PositionStore>()(
           }),
         }));
       },
-      addCategory: category => {
-        set(state => ({ categories: [...state.categories, category] }));
+      addCategory: (category, makeDefault) => {
+        set(state => {
+          if (makeDefault) {
+            return {
+              categories: [
+                ...state.categories.map(cat => ({ ...cat, isDefault: false })),
+                { ...category, isDefault: true },
+              ],
+            };
+          } else {
+            return { categories: [...state.categories, category] };
+          }
+        });
       },
       toggleSelection: id => {
         set(state => ({

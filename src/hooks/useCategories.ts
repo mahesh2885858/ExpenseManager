@@ -16,12 +16,16 @@ const useCategories = () => {
     setSelectedCategory(id);
   };
 
-  const addNewCategory = (name: string) => {
+  const addNewCategory = (name: string, makeDefault = false) => {
     const id = uuid();
-    addCategory({
-      id,
-      name,
-    });
+
+    addCategory(
+      {
+        id,
+        name,
+      },
+      makeDefault,
+    );
   };
 
   return {
