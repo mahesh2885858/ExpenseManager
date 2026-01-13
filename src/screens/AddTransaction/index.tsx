@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import {
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Linking,
   ScrollView,
@@ -52,6 +51,7 @@ import AccountSelectionModal from '../../components/organisms/AccountSelectionMo
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
+import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -60,7 +60,6 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
