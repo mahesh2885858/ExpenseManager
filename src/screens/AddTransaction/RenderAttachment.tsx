@@ -47,7 +47,7 @@ const RenderAttachment = ({
 
   const renderImage = () => {
     return (
-      <PressableWithFeedback onPress={openFile}>
+      <PressableWithFeedback style={styles.attachmentBox} onPress={openFile}>
         <Image
           source={{ uri: attachment.path }}
           width={ATTACHMENT_SIZE}
@@ -108,11 +108,15 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     opacity: 0.8,
   },
+  attachmentBox: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+  },
   pdfContainer: {
     width: ATTACHMENT_SIZE,
     height: ATTACHMENT_SIZE,
     borderWidth: 1,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.lg,
   },
   pdfText: {
     fontSize: textSize.sm,

@@ -40,3 +40,5 @@ export type TFilters = {
   type: TTypeFilter | null;
   categoryId?: null | string;
 };
+
+export type TGroupBy = 'week' | 'month' | 'year';

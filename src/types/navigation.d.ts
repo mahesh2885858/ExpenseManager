@@ -5,12 +5,13 @@ export type TBottomTabParamList = {
   Home: undefined;
   CustomButton: undefined;
   Transactions: undefined;
+  Reports: undefined;
 };
 
 export type TRootStackParamList = {
   NameInput: undefined;
   AmountInput: {
-    name: string;
+    userName: string;
   };
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
   AddTransaction:
@@ -26,6 +27,8 @@ export type TRootStackParamList = {
     transaction: TTransaction;
   };
   TransactionFilters: undefined;
+  ManageAccounts: undefined;
+  AddCategory: undefined;
 };
 
 declare global {

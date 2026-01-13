@@ -1,197 +1,129 @@
-import React, { useMemo, useRef, useState } from 'react';
 import {
-  FlatList,
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { Icon } from 'react-native-paper';
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetFlatList,
+  BottomSheetModal,
+  BottomSheetProps,
+} from '@gorhom/bottom-sheet';
+import React, { useCallback, useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { DEFAULT_CATEGORY_ID, gs } from '../../common';
+import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import { TCategory } from '../../types';
+import { useNavigation } from '@react-navigation/native';
+
 type TProps = {
-  visible: boolean;
-  onClose: () => void;
+  ref: any;
+  handleSheetChanges: BottomSheetProps['onChange'];
   selectCategory: (id: string) => void;
   selectedCategory?: string | null;
   forFilter?: boolean;
 };
+
+const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
+  return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
+};
+
 const CategorySelectionModal = (props: TProps) => {
-  console.log({ props });
-  const { categories, selectCategory, addCategory } = useCategories();
-  const [renderInputForNew, setRenderInputForNew] = useState(false);
-  const { selectedCategory = DEFAULT_CATEGORY_ID } = props;
+  const { categories } = useCategories();
   const { colors } = useAppTheme();
-  const [input, setInput] = useState('');
-  const listRef = useRef<FlatList>(null);
-  const inputRef = useRef<TextInput>(null);
+  const navigation = useNavigation();
 
   const coloredText = {
     color: colors.onSurfaceVariant,
   };
 
-  const onCategoryPress = (id: string) => {
-    props.selectCategory(id);
-    selectCategory(id);
-    props.onClose();
-  };
-
-  const onNewPress = () => {
-    setRenderInputForNew(true);
-  };
-
-  const onSave = () => {
-    if (input.trim().length === 0) return;
-    addCategory(input);
-    setInput('');
-    setRenderInputForNew(false);
-  };
-
-  const onInputClose = () => {
-    setRenderInputForNew(false);
-    setInput('');
-  };
   const sortedCategories = useMemo(() => {
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
+
+  const navigateToAddCategoryScreen = useCallback(() => {
+    navigation.navigate('AddCategory');
+  }, [navigation]);
+
   return (
-    <Modal
-      animationType="fade"
-      visible={props.visible}
-      transparent
-      onRequestClose={props.onClose}
+    <BottomSheetModal
+      backdropComponent={pr => BottomCBackdrop(pr)}
+      backgroundStyle={{
+        backgroundColor: colors.inverseOnSurface,
+      }}
+      ref={props.ref}
+      onChange={props.handleSheetChanges}
+      maxDynamicContentSize={500}
     >
       <View style={[styles.container]}>
-        <View
-          style={[styles.content, { backgroundColor: colors.surfaceVariant }]}
-        >
-          <View style={[styles.contentBox]}>
-            <Text style={[styles.headerText, coloredText]}>
-              Select a category
-            </Text>
-            <FlatList
-              ref={listRef}
-              ListFooterComponent={
-                renderInputForNew ? (
-                  <View
-                    onLayout={() => {
-                      listRef.current?.scrollToEnd({
-                        animated: true,
-                      });
-                    }}
-                    style={[styles.inputBox]}
-                  >
-                    <TextInput
-                      autoFocus
-                      ref={inputRef}
-                      style={[
-                        styles.input,
-                        {
-                          color: colors.onSecondaryContainer,
+        <View style={[styles.content]}>
+          <View>
+            <View style={[gs.flexRow, gs.itemsCenter]}>
+              <Text style={[styles.headerText, coloredText, gs.fullFlex]}>
+                Select a category
+              </Text>
+              <PressableWithFeedback onPress={navigateToAddCategoryScreen}>
+                <Text
+                  style={[
+                    styles.manageText,
+                    {
+                      fontSize: textSize.md,
 
-                          backgroundColor: colors.backdrop,
-                        },
-                      ]}
-                      value={input}
-                      onChangeText={setInput}
-                      placeholder="Category name"
-                    />
-                    <PressableWithFeedback onPress={onInputClose}>
-                      <Icon
-                        size={textSize.lg}
-                        color={colors.onSecondaryContainer}
-                        source={'close'}
-                      />
-                    </PressableWithFeedback>
-                  </View>
-                ) : null
-              }
+                      color: colors.onTertiaryContainer,
+                    },
+                  ]}
+                >
+                  Add new
+                </Text>
+              </PressableWithFeedback>
+            </View>
+            <BottomSheetFlatList
+              keyExtractor={(item: TCategory) => item.id}
               showsVerticalScrollIndicator={false}
               data={sortedCategories}
               contentContainerStyle={[styles.listContainer]}
-              renderItem={info => {
+              renderItem={({ item }: { item: TCategory }) => {
+                const isSelected = props.selectedCategory === item.id;
+
                 return (
                   <PressableWithFeedback
-                    feedbackColor={colors.backdrop}
+                    onPress={() => {
+                      props.selectCategory(item.id);
+                    }}
                     style={[
-                      {
-                        paddingVertical: spacing.sm,
-                        borderRadius: borderRadius.sm,
-                        paddingHorizontal: spacing.sm,
-                      },
                       gs.flexRow,
-                      gs.justifyBetween,
                       gs.itemsCenter,
+                      styles.item,
+                      {
+                        borderColor: isSelected
+                          ? colors.inversePrimary
+                          : colors.onSurfaceDisabled,
+                      },
                     ]}
-                    onPress={() => onCategoryPress(info.item.id)}
+                    key={item.id}
                   >
+                    <RadioButton.Android
+                      status={isSelected ? 'checked' : 'unchecked'}
+                      color={colors.inversePrimary}
+                      value={item.name}
+                    />
                     <Text
                       style={[
-                        styles.categoryText,
-                        { color: colors.onSecondaryContainer },
+                        {
+                          color: colors.onSurface,
+                          fontSize: textSize.md,
+                        },
                       ]}
                     >
-                      {info.item.name}
+                      {item.name}
                     </Text>
-                    {selectedCategory === info.item.id && (
-                      <Icon
-                        source={'check'}
-                        color={colors.onSecondaryContainer}
-                        size={textSize.lg}
-                      />
-                    )}
                   </PressableWithFeedback>
                 );
               }}
             />
-            <View style={[styles.buttons]}>
-              <PressableWithFeedback
-                style={[
-                  styles.button,
-                  {
-                    backgroundColor: colors.onBackground,
-                    paddingHorizontal: spacing.md,
-                  },
-                ]}
-                onPress={props.onClose}
-              >
-                <Text>Close</Text>
-              </PressableWithFeedback>
-              <PressableWithFeedback
-                hidden={renderInputForNew}
-                disabled={renderInputForNew}
-                style={[
-                  styles.button,
-                  {
-                    backgroundColor: colors.onBackground,
-                  },
-                ]}
-                onPress={() => onNewPress()}
-              >
-                <Text>Add new</Text>
-              </PressableWithFeedback>
-              <PressableWithFeedback
-                hidden={!renderInputForNew}
-                disabled={!renderInputForNew || input.trim().length === 0}
-                style={[
-                  styles.button,
-                  {
-                    backgroundColor: colors.onBackground,
-                    paddingHorizontal: spacing.md,
-                  },
-                ]}
-                onPress={() => onSave()}
-              >
-                <Text>Save</Text>
-              </PressableWithFeedback>
-            </View>
           </View>
         </View>
       </View>
-    </Modal>
+    </BottomSheetModal>
   );
 };
 
@@ -200,50 +132,30 @@ export default CategorySelectionModal;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#00000010',
   },
   content: {
     padding: spacing.md,
     borderRadius: borderRadius.md,
-    maxHeight: 500,
-    flexDirection: 'row',
   },
-  contentBox: {
-    width: '80%',
-  },
+
   headerText: {
     fontSize: textSize.lg,
   },
-  inputBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  input: {
-    fontSize: textSize.md,
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    flex: 1,
-  },
+
   categoryText: {
     fontSize: textSize.lg,
   },
   listContainer: {
-    marginTop: spacing.sm,
-    paddingBottom: 50,
+    marginTop: spacing.md,
+    paddingBottom: 100,
   },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginVertical: spacing.md,
+  item: {
+    borderWidth: 1,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.md,
+    paddingVertical: spacing.md,
   },
-  button: {
-    padding: spacing.sm,
-    backgroundColor: 'red',
-    borderRadius: borderRadius.md,
+  manageText: {
+    fontWeight: '600',
   },
 });

@@ -1,25 +1,31 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
-import { DEFAULT_CATEGORY_ID } from '../common';
 
 const useCategories = () => {
   const categories = useTransactionsStore(state => state.categories);
   const addCategory = useTransactionsStore(state => state.addCategory);
+  const defaultCategoryId = useMemo(() => {
+    return categories.filter(c => c.isDefault)[0]?.id ?? '';
+  }, [categories]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    DEFAULT_CATEGORY_ID,
+    defaultCategoryId,
   );
 
   const selectCategory = (id: string) => {
     setSelectedCategory(id);
   };
 
-  const addNewCategory = (name: string) => {
+  const addNewCategory = (name: string, makeDefault = false) => {
     const id = uuid();
-    addCategory({
-      id,
-      name,
-    });
+
+    addCategory(
+      {
+        id,
+        name,
+      },
+      makeDefault,
+    );
   };
 
   return {
@@ -27,6 +33,7 @@ const useCategories = () => {
     selectCategory,
     selectedCategory,
     addCategory: addNewCategory,
+    defaultCategoryId,
   };
 };
 
