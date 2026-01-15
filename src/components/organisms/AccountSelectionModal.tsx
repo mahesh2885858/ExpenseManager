@@ -5,15 +5,16 @@ import {
   BottomSheetModal,
   BottomSheetProps,
 } from '@gorhom/bottom-sheet';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useAccountStore from '../../stores/accountsStore';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { TAccount } from '../../types';
-import { useNavigation } from '@react-navigation/native';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import CreateNewAccount from './CreateNewAccount';
 
 type TProps = {
   ref: any;
@@ -27,11 +28,13 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AccountSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
   const accounts = useAccountStore(state => state.accounts);
-  const navigation = useNavigation();
 
-  const navigateToManageAccScreen = useCallback(() => {
-    navigation.navigate('ManageAccounts');
-  }, [navigation]);
+  const {
+    btmShtRef: newAccBtmSheet,
+    handlePresent: handlePresentNewAccBtmSheet,
+    handleSheetChange: handleNewAccSheetChanges,
+  } = useBottomSheetModal();
+
   return (
     <BottomSheetModal
       backdropComponent={pr => BottomCBackdrop(pr)}
@@ -71,7 +74,7 @@ const AccountSelectionModal = (props: TProps) => {
           >
             Select an account
           </Text>
-          <PressableWithFeedback onPress={navigateToManageAccScreen}>
+          <PressableWithFeedback onPress={handlePresentNewAccBtmSheet}>
             <Text
               style={[
                 styles.manageText,
@@ -82,7 +85,7 @@ const AccountSelectionModal = (props: TProps) => {
                 },
               ]}
             >
-              Manage
+              Add new
             </Text>
           </PressableWithFeedback>
         </View>
@@ -130,6 +133,10 @@ const AccountSelectionModal = (props: TProps) => {
           }}
         />
       </View>
+      <CreateNewAccount
+        handleSheetChanges={handleNewAccSheetChanges}
+        ref={newAccBtmSheet}
+      />
     </BottomSheetModal>
   );
 };
