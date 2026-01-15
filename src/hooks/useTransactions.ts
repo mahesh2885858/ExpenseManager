@@ -9,7 +9,7 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TTransaction } from '../types';
+import { TAccount, TTransaction } from '../types';
 
 const useTransactions = () => {
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
@@ -17,9 +17,7 @@ const useTransactions = () => {
   const filters = useTransactionsStore(state => state.filters);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const accounts = useAccountStore(state => state.accounts);
-  const updateAccountBalance = useAccountStore(
-    state => state.updateAccountBalance,
-  );
+  const updateAccountBalance = useAccountStore(state => state.updateAccount);
 
   const [search, setSearch] = useState('');
 
@@ -117,14 +115,21 @@ const useTransactions = () => {
   const addNewTransaction = (transaction: TTransaction) => {
     const { accountId, amount, type } = transaction;
 
-    const currentBal = accounts.filter(item => item.id === accountId)[0]
-      ?.balance;
+    const acc = accounts.filter(item => item.id === accountId)[0];
+    const currentBal = acc?.balance;
 
     const updatedBal =
       type === 'expense' ? currentBal - amount : currentBal + amount;
 
+    const updatedAcc: TAccount = {
+      ...acc,
+      balance: updatedBal,
+      expense: type === 'expense' ? acc.expense ?? 0 + amount : acc.expense,
+      income: type === 'income' ? acc.income ?? 0 + amount : acc.income,
+    };
+
     addTransaction(transaction);
-    updateAccountBalance(accountId, updatedBal);
+    updateAccountBalance(updatedAcc);
   };
 
   return {

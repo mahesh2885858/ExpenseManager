@@ -1,4 +1,5 @@
-import { formatDigits, getMaxText } from 'commonutil-core';
+import { useNavigation } from '@react-navigation/native';
+import { getMaxText } from 'commonutil-core';
 import { format, getDate } from 'date-fns';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -8,8 +9,8 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
+import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
-import { useNavigation } from '@react-navigation/native';
 
 const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
@@ -136,9 +137,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             },
           ]}
         >
-          {props.item.type === 'expense'
-            ? `₹${formatDigits(props.item.amount.toString())}`
-            : `₹${formatDigits(props.item.amount.toString())}`}
+          {formatAmount(props.item.amount)}
         </Text>
         {props.item.isSelected && (
           <Animated.View

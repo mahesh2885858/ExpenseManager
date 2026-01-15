@@ -1,4 +1,3 @@
-import { formatDigits } from 'commonutil-core';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +6,7 @@ import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
+import { formatAmount } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -80,7 +80,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              ₹ {formatDigits(totalIncome.toString())}
+              {formatAmount(totalIncome)}
             </Text>
           </View>
           <View
@@ -110,7 +110,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              ₹ {formatDigits(totalExpenses.toString())}
+              {formatAmount(totalExpenses)}
             </Text>
           </View>
         </View>

@@ -4,4 +4,6 @@ export type TAccount = {
   balance: number;
   isSelected?: boolean;
   isDefault?: boolean;
+  expense?: number;
+  income?: number;
 };

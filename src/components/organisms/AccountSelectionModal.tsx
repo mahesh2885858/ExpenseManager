@@ -100,6 +100,7 @@ const AccountSelectionModal = (props: TProps) => {
               <PressableWithFeedback
                 onPress={() => {
                   props.onAccountChange(item.id);
+                  props.ref.current?.dismiss();
                 }}
                 style={[
                   gs.flexRow,

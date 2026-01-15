@@ -1,13 +1,13 @@
-import { formatDigits } from 'commonutil-core';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { CURRENCY_SYMBOL, gs } from '../../common';
+import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useAccounts from '../../hooks/useAccounts';
 import useTransactions from '../../hooks/useTransactions';
+import { formatAmount } from '../../utils';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -60,10 +60,11 @@ const HomeScreen = () => {
             style={[
               {
                 color: colors.onPrimaryContainer,
+                fontSize: textSize.md,
               },
             ]}
           >
-            {CURRENCY_SYMBOL + totalBalance}
+            {formatAmount(totalBalance)}
           </Text>
         </View>
 
@@ -95,8 +96,7 @@ const HomeScreen = () => {
                 },
               ]}
             >
-              {CURRENCY_SYMBOL}
-              {formatDigits(totalIncome.toString())}
+              {formatAmount(totalIncome)}
             </Text>
           </View>
           <View
@@ -126,7 +126,7 @@ const HomeScreen = () => {
                 },
               ]}
             >
-              ₹ {formatDigits(totalExpenses.toString())}
+              {formatAmount(totalExpenses)}
             </Text>
           </View>
         </View>

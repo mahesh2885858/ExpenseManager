@@ -6,14 +6,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FAB, Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { spacing, textSize, useAppTheme } from '../../../theme';
-import { CURRENCY_SYMBOL, gs } from '../../common';
+import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CreateNewAccount from '../../components/organisms/CreateNewAccount';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useAccountStore from '../../stores/accountsStore';
-import { formatDigits } from 'commonutil-core';
+import { formatAmount } from '../../utils';
 
 const ManageAccounts = () => {
   const { top } = useSafeAreaInsets();
@@ -103,9 +103,70 @@ const ManageAccounts = () => {
                           },
                         ]}
                       >
-                        Balance:{CURRENCY_SYMBOL}
-                        {formatDigits(String(item.balance ?? 0) ?? 0)}
+                        Balance: {formatAmount(item.balance)}
                       </Text>
+                    </View>
+                    <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
+                      <View
+                        style={[
+                          gs.fullFlex,
+                          styles.tType,
+                          {
+                            backgroundColor: colors.surface,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            {
+                              color: colors.onSurfaceVariant,
+                            },
+                          ]}
+                        >
+                          Income
+                        </Text>
+                        <Text
+                          style={[
+                            styles.amountText,
+                            {
+                              color: colors.onPrimaryContainer,
+                              fontSize: textSize.md,
+                            },
+                          ]}
+                        >
+                          {formatAmount(item.income ?? 0)}
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          gs.fullFlex,
+                          styles.tType,
+                          {
+                            backgroundColor: colors.surface,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            {
+                              color: colors.onSurfaceVariant,
+                            },
+                          ]}
+                        >
+                          Expense
+                        </Text>
+                        <Text
+                          style={[
+                            styles.amountText,
+                            {
+                              color: colors.onPrimaryContainer,
+                              fontSize: textSize.md,
+                            },
+                          ]}
+                        >
+                          {formatAmount(item.expense ?? 0)}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 );
@@ -155,5 +216,18 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 5,
     bottom: 40,
+  },
+  tTypeBox: {
+    borderRadius: borderRadius.md,
+    gap: spacing.md,
+  },
+  tType: {
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.xs,
+  },
+  amountText: {
+    fontWeight: '700',
   },
 });

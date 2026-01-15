@@ -85,6 +85,7 @@ const CategorySelectionModal = (props: TProps) => {
                   <PressableWithFeedback
                     onPress={() => {
                       props.selectCategory(item.id);
+                      props.ref.current?.dismiss();
                     }}
                     style={[
                       gs.flexRow,

@@ -45,10 +45,13 @@ const CreateNewAccount = (props: TProps) => {
       return;
     } else {
       const id = v4();
+      const amount = parseFloat(balance.trim().length > 0 ? balance : '0');
       addAccount({
         balance: parseFloat(balance.trim().length > 0 ? balance : '0'),
         id,
         name: accName,
+        expense: amount < 0 ? amount : 0,
+        income: amount > 0 ? amount : 0,
       });
       setAccName('');
       setBalance('');
