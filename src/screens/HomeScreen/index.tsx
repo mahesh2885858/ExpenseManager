@@ -1,6 +1,6 @@
 import { formatDigits } from 'commonutil-core';
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
@@ -14,7 +14,6 @@ const HomeScreen = () => {
   const theme = useAppTheme();
   const { colors } = theme;
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const accounts = useAccountStore(state => state.accounts);
   const {
     totalExpenses,
     totalIncome,
@@ -34,9 +33,9 @@ const HomeScreen = () => {
   );
 
   return (
-    <ScrollView
-      nestedScrollEnabled={true}
-      contentContainerStyle={[
+    <View
+      style={[
+        gs.fullFlex,
         styles.container,
         {
           paddingTop: top + 5,
@@ -146,6 +145,7 @@ const HomeScreen = () => {
       {/* recent transactions section */}
       <View
         style={[
+          gs.fullFlex,
           {
             paddingHorizontal: spacing.lg,
             marginTop: spacing.md,
@@ -185,7 +185,7 @@ const HomeScreen = () => {
           )}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -193,7 +193,7 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
   },
   avatar: {
     height: 45,

@@ -1,6 +1,7 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
 import React from 'react';
-import { FlatList, Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import { TBottomTabParamList, TTransaction } from '../types';
@@ -16,9 +17,12 @@ const RenderTransactions = ({
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   return (
-    <FlatList
-      scrollEnabled={false}
+    <FlashList
+      contentContainerStyle={{
+        paddingBottom: 100,
+      }}
       data={transactions}
+      showsVerticalScrollIndicator={false}
       renderItem={props => <RenderTransaction item={props.item} />}
       keyExtractor={item => item.id}
       ListFooterComponent={

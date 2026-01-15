@@ -20,6 +20,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/native-stack": "^7.3.25",
+    "@shopify/flash-list": "^2.2.0",
     "@shopify/react-native-skia": "^2.4.14",
     "commonutil-core": "^1.0.8",
     "d3": "^7.9.0",

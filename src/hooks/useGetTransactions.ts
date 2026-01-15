@@ -73,12 +73,19 @@ const useGetTransactions = () => {
   );
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(
+    const filtered = transactions.filter(
       t =>
         matchesType(t) &&
         matchesDate(t) &&
         matchesSearch(t) &&
         matchesCategory(t),
+    );
+
+    // Sort once
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.transactionDate).getTime() -
+        new Date(a.transactionDate).getTime(),
     );
   }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
 

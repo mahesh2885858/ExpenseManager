@@ -1,6 +1,6 @@
 import { formatDigits } from 'commonutil-core';
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
@@ -26,16 +26,9 @@ const Transactions = () => {
     return getSelectedAccount();
   }, [getSelectedAccount]);
 
-  filteredTransactions.sort(
-    (a, b) =>
-      new Date(b.transactionDate).getTime() -
-      new Date(a.transactionDate).getTime(),
-  );
-
   return (
-    <ScrollView
-      nestedScrollEnabled={true}
-      contentContainerStyle={[
+    <View
+      style={[
         styles.container,
         {
           paddingTop: top + 5,
@@ -131,9 +124,10 @@ const Transactions = () => {
       </View>
       {/* summary */}
 
-      {/* recent transactions section */}
+      {/* transactions section */}
       <View
         style={[
+          gs.fullFlex,
           {
             paddingHorizontal: spacing.lg,
           },
@@ -166,7 +160,7 @@ const Transactions = () => {
           )}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -174,7 +168,8 @@ export default Transactions;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
+    flex: 1,
   },
   avatar: {
     height: 45,
