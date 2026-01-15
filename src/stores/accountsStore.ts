@@ -13,6 +13,7 @@ type TAccountsStoreActions = {
   setIsInitialSetupDone: (isInitialSetupDone: boolean) => void;
   setUsername: (name: string) => void;
   addAccount: (account: TAccount) => void;
+  updateAccountBalance: (id: string, amount: number) => void;
   deleteAllAccounts: () => void;
   getSelectedAccount: () => TAccount;
   selectAccount: (id: string) => void;
@@ -41,6 +42,13 @@ const useAccountStore = create<PositionStore>()(
       },
       setUsername: name => {
         return set({ userName: name });
+      },
+      updateAccountBalance: (id, amount) => {
+        const updatedAccounts = get().accounts.map(item => {
+          if (item.id === id) return { ...item, balance: amount };
+          else return item;
+        });
+        set({ accounts: updatedAccounts });
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },

@@ -15,6 +15,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import useUIStore from '../../stores/uiStore';
 import { TTheme } from '../../types';
 import { uCFirst } from 'commonutil-core';
+import { useNavigation } from '@react-navigation/native';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -27,6 +28,7 @@ const { width } = Dimensions.get('screen');
 const themeOptionSpacing = (width - 2 * spacing.md - 3 * themeOptionWidth) / 4; // gap between options
 
 const Settings = () => {
+  const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
   const { colors } = useAppTheme();
   const animHeight = useSharedValue(themeOptionHeightCollapsed);
@@ -154,6 +156,9 @@ const Settings = () => {
           </View>
         </AnimatedPressable>
         <PressableWithFeedback
+          onPress={() => {
+            navigation.navigate('ManageAccounts');
+          }}
           style={[
             styles.setting,
             {

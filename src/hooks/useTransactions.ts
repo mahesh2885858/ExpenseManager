@@ -11,10 +11,15 @@ import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 
-const useGetTransactions = () => {
+const useTransactions = () => {
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const transactions = useTransactionsStore(state => state.transactions);
   const filters = useTransactionsStore(state => state.filters);
+  const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const accounts = useAccountStore(state => state.accounts);
+  const updateAccountBalance = useAccountStore(
+    state => state.updateAccountBalance,
+  );
 
   const [search, setSearch] = useState('');
 
@@ -109,6 +114,19 @@ const useGetTransactions = () => {
     }, 0);
   }, [filteredTransactions]);
 
+  const addNewTransaction = (transaction: TTransaction) => {
+    const { accountId, amount, type } = transaction;
+
+    const currentBal = accounts.filter(item => item.id === accountId)[0]
+      ?.balance;
+
+    const updatedBal =
+      type === 'expense' ? currentBal - amount : currentBal + amount;
+
+    addTransaction(transaction);
+    updateAccountBalance(accountId, updatedBal);
+  };
+
   return {
     transactions: transactions.filter(t => t.accountId === selectedAccount.id),
     totalExpenses,
@@ -116,7 +134,8 @@ const useGetTransactions = () => {
     filteredTransactions,
     search,
     setSearch,
+    addNewTransaction,
   };
 };
 
-export default useGetTransactions;
+export default useTransactions;

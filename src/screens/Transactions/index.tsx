@@ -1,30 +1,24 @@
 import { formatDigits } from 'commonutil-core';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useGetTransactions from '../../hooks/useGetTransactions';
-import useAccountStore from '../../stores/accountsStore';
+import useTransactions from '../../hooks/useTransactions';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const { colors } = theme;
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const {
     totalExpenses,
     totalIncome,
     filteredTransactions,
     search,
     setSearch,
-  } = useGetTransactions();
-
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
+  } = useTransactions();
 
   return (
     <View
@@ -86,8 +80,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              ₹{' '}
-              {formatDigits((selectedAccount.balance + totalIncome).toString())}
+              ₹ {formatDigits(totalIncome.toString())}
             </Text>
           </View>
           <View

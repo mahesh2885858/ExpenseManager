@@ -1,18 +1,19 @@
-import { View, Text, StyleSheet, FlatList } from 'react-native';
-import React from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { gs } from '../../common';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { FAB, Icon } from 'react-native-paper';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { FAB, Icon } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, textSize, useAppTheme } from '../../../theme';
+import { CURRENCY_SYMBOL, gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CreateNewAccount from '../../components/organisms/CreateNewAccount';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useAccountStore from '../../stores/accountsStore';
 import { formatDigits } from 'commonutil-core';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import CreateNewAccount from '../../components/organisms/CreateNewAccount';
-import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const ManageAccounts = () => {
   const { top } = useSafeAreaInsets();
@@ -50,11 +51,27 @@ const ManageAccounts = () => {
               Manage Accounts
             </Text>
           </View>
-          <View style={[styles.listWrapper]}>
-            <FlatList
+          <View style={[gs.fullFlex, styles.listWrapper]}>
+            <FlashList
+              ListEmptyComponent={
+                <View>
+                  <Text
+                    style={[
+                      gs.fontBold,
+                      {
+                        color: colors.onBackground,
+                        fontSize: textSize.lg,
+                      },
+                    ]}
+                  >
+                    No accounts yet. Start by creating one.
+                  </Text>
+                </View>
+              }
               data={accounts}
               keyExtractor={item => item.id}
               renderItem={({ item }) => {
+                console.log({ item });
                 return (
                   <View
                     style={[
@@ -63,7 +80,7 @@ const ManageAccounts = () => {
                         marginTop: spacing.md,
                         paddingHorizontal: spacing.md,
                         paddingVertical: spacing.sm,
-                        borderRadius: spacing.md,
+                        borderRadius: spacing.sm,
                       },
                     ]}
                   >
@@ -86,7 +103,8 @@ const ManageAccounts = () => {
                           },
                         ]}
                       >
-                        Balance: {formatDigits(item.balance.toString())}
+                        Balance:{CURRENCY_SYMBOL}
+                        {formatDigits(String(item.balance ?? 0) ?? 0)}
                       </Text>
                     </View>
                   </View>

@@ -6,7 +6,6 @@ import merge from 'deepmerge';
 import {
   MD3DarkTheme,
   MD3LightTheme,
-  MD3Theme,
   adaptNavigationTheme,
   useTheme,
 } from 'react-native-paper';
@@ -44,7 +43,7 @@ export const borderRadius = {
   pill: 999, // for pill-shaped buttons
 } as const;
 
-const CustomLight: MD3Theme = {
+const CustomLight = {
   ...MD3LightTheme,
   version: 3,
   colors: {
@@ -53,7 +52,7 @@ const CustomLight: MD3Theme = {
   },
 };
 
-const CustomDark: MD3Theme = {
+const CustomDark = {
   ...MD3DarkTheme,
   version: 3,
   colors: {

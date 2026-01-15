@@ -1,36 +1,26 @@
 import { formatDigits } from 'commonutil-core';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { CURRENCY_SYMBOL, gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useGetTransactions from '../../hooks/useGetTransactions';
-import useAccountStore from '../../stores/accountsStore';
+import useAccounts from '../../hooks/useAccounts';
+import useTransactions from '../../hooks/useTransactions';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const { colors } = theme;
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const {
     totalExpenses,
     totalIncome,
     filteredTransactions,
     search,
     setSearch,
-  } = useGetTransactions();
-
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
-
-  filteredTransactions.sort(
-    (a, b) =>
-      new Date(b.transactionDate).getTime() -
-      new Date(a.transactionDate).getTime(),
-  );
+  } = useTransactions();
+  const { totalBalance } = useAccounts();
 
   return (
     <View
@@ -73,7 +63,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            Balance
+            {CURRENCY_SYMBOL + totalBalance}
           </Text>
         </View>
 
@@ -105,8 +95,8 @@ const HomeScreen = () => {
                 },
               ]}
             >
-              ₹
-              {formatDigits((selectedAccount.balance + totalIncome).toString())}
+              {CURRENCY_SYMBOL}
+              {formatDigits(totalIncome.toString())}
             </Text>
           </View>
           <View
