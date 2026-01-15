@@ -8,7 +8,6 @@ import MainBottomTabs from './MainBottomTabs';
 import AddTransaction from '../screens/AddTransaction';
 import TransactionDetails from '../screens/TransactionDetails';
 import TransactionFilters from '../screens/TransactionFilters';
-import AddCategory from '../screens/AddCategory';
 import ManageAccounts from '../screens/ManageAccounts';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
@@ -61,13 +60,7 @@ const MainStack = () => {
               headerShown: false,
             }}
           />
-          <Stack.Screen
-            name="AddCategory"
-            component={AddCategory}
-            options={{
-              headerShown: false,
-            }}
-          />
+
           <Stack.Screen
             name="ManageAccounts"
             component={ManageAccounts}
