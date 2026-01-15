@@ -9,11 +9,11 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { CURRENCY_SYMBOL } from '../../common';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import useAccountStore from '../../stores/accountsStore';
+import Switch from '../atoms/Switch';
+import { gs } from '../../common';
+import useCategories from '../../hooks/useCategories';
 import { Toast } from 'toastify-react-native';
-import { v4 } from 'uuid';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -24,37 +24,30 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
   return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
 };
 
-const CreateNewAccount = (props: TProps) => {
+const CreateNewCategory = (props: TProps) => {
   const { colors } = useAppTheme();
-  const [accName, setAccName] = useState('');
-  const [balance, setBalance] = useState('');
-  const accounts = useAccountStore(state => state.accounts);
-  const addAccount = useAccountStore(state => state.addAccount);
+  const [makeDefault, setMakeDefault] = useState(false);
+  const [catName, setCatName] = useState('');
+  const { addCategory, categories } = useCategories();
 
   const renderSaveButton = useMemo(() => {
-    return accName.trim().length > 0;
-  }, [accName]);
+    return catName.trim().length > 0;
+  }, [catName]);
 
-  const addNewAcc = useCallback(() => {
-    // check for existing acc name
-    const isExist = accounts.some(
-      item => item.name.toLowerCase().trim() === accName.trim().toLowerCase(),
+  const addNew = useCallback(() => {
+    const isExist = categories.some(
+      cat => cat.name.trim().toLowerCase() === catName.trim().toLowerCase(),
     );
     if (isExist) {
-      Toast.info('Account exist. choose different name!!', 'top');
+      Toast.info('Category exist. choose different name!!', 'top');
       return;
     } else {
-      const id = v4();
-      addAccount({
-        balance: parseFloat(balance),
-        id,
-        name: accName,
-      });
-      setAccName('');
-      setBalance('');
+      addCategory(catName, makeDefault);
+      setCatName('');
+      setMakeDefault(false);
       props.ref.current?.dismiss();
     }
-  }, [accName, accounts, addAccount, balance, props]);
+  }, [catName, makeDefault, addCategory, props, categories]);
 
   return (
     <BottomSheetModal
@@ -79,11 +72,11 @@ const CreateNewAccount = (props: TProps) => {
               },
             ]}
           >
-            Add new account
+            Add new category
           </Text>
           <View
             style={[
-              styles.accNameBox,
+              styles.catNameBox,
               {
                 borderColor: colors.onSurfaceDisabled,
               },
@@ -97,12 +90,12 @@ const CreateNewAccount = (props: TProps) => {
                 },
               ]}
             >
-              Account name
+              Category name
             </Text>
             <BottomSheetTextInput
-              value={accName}
-              onChangeText={setAccName}
-              placeholder="My Account"
+              value={catName}
+              onChangeText={setCatName}
+              placeholder="Choose your category name"
               placeholderTextColor={colors.onSurfaceDisabled}
               style={[
                 {
@@ -112,41 +105,25 @@ const CreateNewAccount = (props: TProps) => {
               ]}
             />
           </View>
-          <View
-            style={[
-              styles.accNameBox,
-              {
-                borderColor: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
+          <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
             <Text
               style={[
+                gs.fullFlex,
                 {
-                  color: colors.onSurfaceDisabled,
-                  fontSize: textSize.md,
+                  color: colors.onBackground,
                 },
               ]}
             >
-              Balance
+              Make this as default
             </Text>
-            <BottomSheetTextInput
-              keyboardType="numeric"
-              value={balance}
-              onChangeText={setBalance}
-              placeholder={CURRENCY_SYMBOL + '0.00'}
-              placeholderTextColor={colors.onSurfaceDisabled}
-              style={[
-                {
-                  color: colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
+            <Switch
+              isOn={makeDefault}
+              onStateChange={state => setMakeDefault(state)}
             />
           </View>
           {renderSaveButton && (
             <PressableWithFeedback
-              onPress={addNewAcc}
+              onPress={addNew}
               style={[
                 styles.button,
                 {
@@ -172,7 +149,7 @@ const CreateNewAccount = (props: TProps) => {
   );
 };
 
-export default CreateNewAccount;
+export default CreateNewCategory;
 
 const styles = StyleSheet.create({
   container: {
@@ -201,5 +178,20 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: textSize.md,
     fontWeight: '600',
+  },
+  catNameBox: {
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    paddingLeft: spacing.sm,
+  },
+  switchBox: {
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+  },
+  switchText: {
+    fontSize: textSize.md,
   },
 });
