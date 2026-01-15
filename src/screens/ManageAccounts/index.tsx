@@ -53,6 +53,8 @@ const ManageAccounts = () => {
           </View>
           <View style={[gs.fullFlex, styles.listWrapper]}>
             <FlashList
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[styles.listBox]}
               ListEmptyComponent={
                 <View>
                   <Text
@@ -220,6 +222,7 @@ const styles = StyleSheet.create({
   tTypeBox: {
     borderRadius: borderRadius.md,
     gap: spacing.md,
+    marginTop: spacing.sm,
   },
   tType: {
     paddingLeft: spacing.md,
@@ -229,5 +232,8 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontWeight: '700',
+  },
+  listBox: {
+    paddingBottom: 100,
   },
 });
