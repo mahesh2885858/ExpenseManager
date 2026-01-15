@@ -15,7 +15,7 @@ type PositionStore = TUIStore & TUIStoreActions;
 
 const useUIStore = create<PositionStore>()(
   persist(
-    (set, get) => ({
+    set => ({
       theme: 'system',
       setThem(theme) {
         set(() => ({

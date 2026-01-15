@@ -104,7 +104,7 @@ const Settings = () => {
               },
             ]}
           >
-            {theme.charAt(0).toUpperCase() + theme.slice(1)}
+            {uCFirst(theme)}
           </Text>
           <View style={[styles.themeOptContainer]}>
             {/* Animated sliding highlight box */}
@@ -153,6 +153,64 @@ const Settings = () => {
             ))}
           </View>
         </AnimatedPressable>
+        <PressableWithFeedback
+          style={[
+            styles.setting,
+            {
+              borderColor: colors.onSurfaceDisabled,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.settingTitle,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+          >
+            Accounts
+          </Text>
+          <Text
+            style={[
+              styles.settingDesc,
+              {
+                color: colors.onSurfaceDisabled,
+              },
+            ]}
+          >
+            Manage your accounts here
+          </Text>
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          style={[
+            styles.setting,
+            {
+              borderColor: colors.onSurfaceDisabled,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.settingTitle,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+          >
+            Categories
+          </Text>
+          <Text
+            style={[
+              styles.settingDesc,
+              {
+                color: colors.onSurfaceDisabled,
+              },
+            ]}
+          >
+            Manage your categories here
+          </Text>
+        </PressableWithFeedback>
       </View>
     </View>
   );
@@ -171,6 +229,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: spacing.sm,
     overflow: 'hidden',
+    height: 75,
   },
   settingTitle: {
     fontSize: textSize.lg,
