@@ -1,7 +1,7 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FAB, Icon } from 'react-native-paper';
@@ -10,10 +10,10 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CreateNewAccount from '../../components/organisms/CreateNewAccount';
+import RenderAccountCard from '../../components/organisms/RenderAccountCard';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useAccountStore from '../../stores/accountsStore';
-import { formatAmount } from '../../utils';
 
 const ManageAccounts = () => {
   const { top } = useSafeAreaInsets();
@@ -21,8 +21,12 @@ const ManageAccounts = () => {
   const { colors } = useAppTheme();
   const accounts = useAccountStore(state => state.accounts);
   const { kbHeight } = useGetKeyboardHeight();
-
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const [focusedId, setFocusedId] = useState('');
+
+  const changeFocusId = useCallback((id: string) => {
+    setFocusedId(id);
+  }, []);
 
   return (
     <GestureHandlerRootView style={[gs.fullFlex]}>
@@ -71,108 +75,15 @@ const ManageAccounts = () => {
                 </View>
               }
               data={accounts}
+              extraData={focusedId}
               keyExtractor={item => item.id}
-              renderItem={({ item }) => {
-                console.log({ item });
-                return (
-                  <View
-                    style={[
-                      {
-                        backgroundColor: colors.surfaceDisabled,
-                        marginTop: spacing.md,
-                        paddingHorizontal: spacing.md,
-                        paddingVertical: spacing.sm,
-                        borderRadius: spacing.sm,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.text,
-                        {
-                          color: colors.onBackground,
-                        },
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                    <View>
-                      <Text
-                        style={[
-                          styles.text,
-                          {
-                            color: colors.onBackground,
-                          },
-                        ]}
-                      >
-                        Balance: {formatAmount(item.balance)}
-                      </Text>
-                    </View>
-                    <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
-                      <View
-                        style={[
-                          gs.fullFlex,
-                          styles.tType,
-                          {
-                            backgroundColor: colors.surface,
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            {
-                              color: colors.onSurfaceVariant,
-                            },
-                          ]}
-                        >
-                          Income
-                        </Text>
-                        <Text
-                          style={[
-                            styles.amountText,
-                            {
-                              color: colors.onPrimaryContainer,
-                              fontSize: textSize.md,
-                            },
-                          ]}
-                        >
-                          {formatAmount(item.income ?? 0)}
-                        </Text>
-                      </View>
-                      <View
-                        style={[
-                          gs.fullFlex,
-                          styles.tType,
-                          {
-                            backgroundColor: colors.surface,
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            {
-                              color: colors.onSurfaceVariant,
-                            },
-                          ]}
-                        >
-                          Expense
-                        </Text>
-                        <Text
-                          style={[
-                            styles.amountText,
-                            {
-                              color: colors.onPrimaryContainer,
-                              fontSize: textSize.md,
-                            },
-                          ]}
-                        >
-                          {formatAmount(item.expense ?? 0)}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                );
-              }}
+              renderItem={({ item }) => (
+                <RenderAccountCard
+                  isFocused={focusedId === item.id}
+                  changeFocusId={changeFocusId}
+                  item={item}
+                />
+              )}
             />
           </View>
           <FAB
