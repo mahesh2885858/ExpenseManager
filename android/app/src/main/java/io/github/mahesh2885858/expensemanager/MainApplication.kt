@@ -1,4 +1,4 @@
-package com.expensemanager
+package io.github.mahesh2885858.expensemanager
 
 import android.app.Application
 import com.facebook.react.PackageList

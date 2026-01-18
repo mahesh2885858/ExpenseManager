@@ -1,4 +1,4 @@
-package com.expensemanager
+package io.github.mahesh2885858.expensemanager
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
