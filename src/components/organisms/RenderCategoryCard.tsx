@@ -171,7 +171,7 @@ const RenderCategoryCard = (props: TProps) => {
           onPress={() => {
             navigation.navigate('FilteredTransactions', {
               id: props.item.id,
-              type: 'account',
+              type: 'category',
             });
           }}
         >
