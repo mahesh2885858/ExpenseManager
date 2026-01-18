@@ -35,7 +35,7 @@ const RenderAccountCard = (props: TProps) => {
   const navigation = useNavigation();
   const { deleteAcc } = useAccounts();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
-
+  console.log({ props });
   useEffect(() => {
     if (props.isFocused) {
       animH.value = withTiming(cardHeightExpanded);

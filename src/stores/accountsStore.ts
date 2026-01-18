@@ -47,6 +47,7 @@ const useAccountStore = create<PositionStore>()(
       updateAccount: acc => {
         const updatedAccounts = get().accounts.map(item => {
           if (item.id === acc.id) {
+            console.log({ acc, item });
             return { ...acc };
           } else return item;
         });

@@ -137,9 +137,11 @@ const useTransactions = (props: { filter?: TFilters }) => {
     const updatedAcc: TAccount = {
       ...acc,
       balance: updatedBal,
-      expense: type === 'expense' ? acc.expense ?? 0 + amount : acc.expense,
-      income: type === 'income' ? acc.income ?? 0 + amount : acc.income,
+      expense: type === 'expense' ? (acc.expense ?? 0) + amount : acc.expense,
+      income: type === 'income' ? (acc.income ?? 0) + amount : acc.income,
     };
+
+    console.log({ updatedAcc });
 
     addTransaction(transaction);
     updateAccountBalance(updatedAcc);
