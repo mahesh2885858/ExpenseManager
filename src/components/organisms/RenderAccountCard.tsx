@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
@@ -13,6 +13,7 @@ import { formatAmount } from '../../utils';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CreateNewAccount from './CreateNewAccount';
+import useAccounts from '../../hooks/useAccounts';
 
 type TProps = {
   item: TAccount;
@@ -23,10 +24,14 @@ type TProps = {
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const cardHeightCollapsed = 130;
 const cardHeightExpanded = 200;
+const cardHeightDeleteExpanded = 330;
+
 const RenderAccountCard = (props: TProps) => {
   const { item } = props;
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
+  const [openDelDesc, setOpenDelDesc] = useState(false);
+  const { deleteAcc } = useAccounts();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
   useEffect(() => {
@@ -34,8 +39,21 @@ const RenderAccountCard = (props: TProps) => {
       animH.value = withTiming(cardHeightExpanded);
     } else {
       animH.value = withTiming(cardHeightCollapsed);
+      setOpenDelDesc(false);
     }
   }, [props, animH]);
+
+  useEffect(() => {
+    if (!props.isFocused) return;
+    if (openDelDesc) {
+      animH.value = withTiming(cardHeightDeleteExpanded);
+    } else if (props.isFocused) {
+      animH.value = withTiming(cardHeightExpanded);
+    } else {
+      animH.value = withTiming(cardHeightCollapsed);
+    }
+  }, [openDelDesc, animH, props]);
+
   return (
     <AnimatedPressable
       onPress={() => props.changeFocusId(props.isFocused ? '' : item.id)}
@@ -133,6 +151,7 @@ const RenderAccountCard = (props: TProps) => {
       </View>
       <View style={[styles.actionBox]}>
         <PressableWithFeedback
+          onPress={() => setOpenDelDesc(true)}
           feedbackColor={colors.background}
           style={[styles.action]}
         >
@@ -151,6 +170,69 @@ const RenderAccountCard = (props: TProps) => {
         >
           <Icon source={'eye'} size={textSize.xl} />
         </PressableWithFeedback>
+      </View>
+      <View
+        style={{
+          marginTop: spacing.md,
+        }}
+      >
+        <Text
+          style={[
+            gs.centerText,
+            {
+              color: colors.onBackground,
+            },
+          ]}
+        >
+          Deleting this account will also delete all transactions associated
+          with this account. Are you sure you want to continue?
+        </Text>
+        <View style={[gs.flexRow, styles.btnContainer]}>
+          <PressableWithFeedback
+            onPress={() => deleteAcc(props.item.id)}
+            style={[
+              {
+                backgroundColor: colors.errorContainer,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: borderRadius.sm,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onErrorContainer,
+                },
+              ]}
+            >
+              Delete
+            </Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            style={[
+              {
+                backgroundColor: colors.secondary,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: borderRadius.sm,
+              },
+            ]}
+            onPress={() => {
+              setOpenDelDesc(false);
+            }}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSecondary,
+                },
+              ]}
+            >
+              Cancel
+            </Text>
+          </PressableWithFeedback>
+        </View>
       </View>
       <CreateNewAccount
         accToEdit={props.item}
@@ -203,5 +285,10 @@ const styles = StyleSheet.create({
   action: {
     padding: spacing.md,
     borderRadius: borderRadius.sm,
+  },
+  btnContainer: {
+    justifyContent: 'center',
+    gap: spacing.xl,
+    marginTop: spacing.md,
   },
 });

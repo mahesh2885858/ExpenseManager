@@ -18,6 +18,7 @@ type TTransactionsStoreActions = {
   removeTransaction: (id: string) => void;
   setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
+  deleteForAnAcc: (accId: string) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -94,6 +95,14 @@ const useTransactionsStore = create<PositionStore>()(
             categoryId: null,
           },
         }));
+      },
+      deleteForAnAcc: accId => {
+        const updatedTransaction = get().transactions.filter(
+          t => t.accountId !== accId,
+        );
+        set({
+          transactions: updatedTransaction,
+        });
       },
     }),
     {
