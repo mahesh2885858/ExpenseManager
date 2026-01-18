@@ -124,7 +124,12 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         )}
       </View>
       <View
-        style={[gs.centerItems, props.item.isSelected && styles.actionsBox]}
+        style={[
+          gs.flexRow,
+          // gs.centerItems,
+          gs.itemsCenter,
+          props.item.isSelected && styles.actionsBox,
+        ]}
       >
         <Text
           style={[
@@ -157,17 +162,6 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             >
               <Icon source={'delete'} size={25} color={theme.colors.error} />
             </PressableWithFeedback>
-            <PressableWithFeedback
-              onPress={() => {}}
-              style={[
-                styles.action,
-                {
-                  backgroundColor: theme.colors.elevation.level5,
-                },
-              ]}
-            >
-              <Icon source={'pencil'} size={25} />
-            </PressableWithFeedback>
           </Animated.View>
         )}
       </View>
@@ -185,10 +179,10 @@ const styles = StyleSheet.create({
   },
   actionsBox: {
     gap: spacing.xs,
-    alignSelf: 'flex-end',
   },
   action: {
-    padding: spacing.xs,
+    padding: spacing.sm,
     borderRadius: borderRadius.sm,
+    marginLeft: spacing.sm,
   },
 });
