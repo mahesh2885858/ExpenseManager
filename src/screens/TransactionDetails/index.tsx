@@ -10,6 +10,7 @@ import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader'
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TRootStackParamList } from '../../types';
 import RenderAttachment from '../AddTransaction/RenderAttachment';
+import useAccountStore from '../../stores/accountsStore';
 
 const TransactionDetails = () => {
   const route =
@@ -18,11 +19,16 @@ const TransactionDetails = () => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
+  const accounts = useAccountStore(state => state.accounts);
 
   const categoryName = useMemo(() => {
     const category = categories.find(c => c.id === transaction.categoryIds[0]);
     return category?.name ?? 'General';
   }, [categories, transaction]);
+
+  const accountName = useMemo(() => {
+    return accounts.find(acc => acc.id === transaction.accountId)?.name ?? '';
+  }, [transaction, accounts]);
 
   return (
     <ScreenWithoutHeader>
@@ -72,7 +78,7 @@ const TransactionDetails = () => {
           </Pressable>
         </View>
         {/* amount section */}
-        <View style={{ paddingHorizontal: spacing.lg }}>
+        <View style={{ paddingHorizontal: spacing.md }}>
           <Card mode="contained">
             <Card.Content
               style={[
@@ -111,9 +117,21 @@ const TransactionDetails = () => {
             </Card.Content>
           </Card>
         </View>
-        {/* Category and date section */}
-        <View style={[gs.flexRow, { paddingHorizontal: spacing.md }]}>
-          <View style={[styles.ieBox]}>
+        {/* Category and account section */}
+        <View
+          style={[
+            gs.flexRow,
+            { paddingHorizontal: spacing.md, gap: spacing.md },
+          ]}
+        >
+          <View
+            style={[
+              styles.ieBox,
+              {
+                backgroundColor: theme.colors.backdrop,
+              },
+            ]}
+          >
             <Text
               style={[
                 styles.ieBanner,
@@ -138,7 +156,53 @@ const TransactionDetails = () => {
               {categoryName}
             </Text>
           </View>
-          <View style={[styles.ieBox]}>
+          <View
+            style={[
+              styles.ieBox,
+              {
+                backgroundColor: theme.colors.backdrop,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.ieBanner,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Account
+            </Text>
+            <Text
+              style={[
+                styles.fontSemi,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.lg,
+                },
+              ]}
+            >
+              {accountName}
+            </Text>
+          </View>
+        </View>
+        {/* date and time section */}
+        <View
+          style={[
+            gs.flexRow,
+            { paddingHorizontal: spacing.md, gap: spacing.md },
+          ]}
+        >
+          <View
+            style={[
+              styles.ieBox,
+              {
+                backgroundColor: theme.colors.backdrop,
+              },
+            ]}
+          >
             <Text
               style={[
                 styles.ieBanner,
@@ -152,6 +216,7 @@ const TransactionDetails = () => {
             </Text>
             <Text
               style={[
+                gs.fontBold,
                 styles.fontSemi,
                 {
                   color: theme.colors.onBackground,
@@ -160,6 +225,37 @@ const TransactionDetails = () => {
               ]}
             >
               {format(transaction.transactionDate, 'MMM dd yyyy')}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.ieBox,
+              {
+                backgroundColor: theme.colors.backdrop,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.ieBanner,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Time
+            </Text>
+            <Text
+              style={[
+                styles.fontSemi,
+                {
+                  color: theme.colors.onBackground,
+                  fontSize: textSize.lg,
+                },
+              ]}
+            >
+              {format(transaction.transactionDate, 'HH:mm a')}
             </Text>
           </View>
         </View>
@@ -239,8 +335,10 @@ const styles = StyleSheet.create({
   },
   ieBox: {
     flex: 1,
-    paddingLeft: spacing.lg,
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
     gap: spacing.xs,
+    borderRadius: borderRadius.lg,
   },
   ieBanner: {
     fontWeight: 'semibold',

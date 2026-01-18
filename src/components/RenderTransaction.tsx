@@ -11,13 +11,14 @@ import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
+import useTransactions from '../hooks/useTransactions';
 
 const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
-  const remove = useTransactionsStore(state => state.removeTransaction);
+  const { deleteTransaction } = useTransactions({});
   const transactions = useTransactionsStore(state => state.transactions);
 
   const selectedTransactions = useMemo(
@@ -146,7 +147,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             style={[gs.flexRow, { gap: spacing.xs }]}
           >
             <PressableWithFeedback
-              onPress={() => remove(props.item.id)}
+              onPress={() => deleteTransaction(props.item.id)}
               style={[
                 styles.action,
                 {

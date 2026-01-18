@@ -17,6 +17,9 @@ const useTransactions = (props: { filter?: TFilters }) => {
   const filters = props?.filter ?? undefined;
   const accounts = useAccountStore(state => state.accounts);
   const updateAccountBalance = useAccountStore(state => state.updateAccount);
+  const removeTransaction = useTransactionsStore(
+    state => state.removeTransaction,
+  );
 
   const [search, setSearch] = useState('');
 
@@ -107,6 +110,30 @@ const useTransactions = (props: { filter?: TFilters }) => {
     filters,
   ]);
 
+  const deleteTransaction = useCallback(
+    (transactionId: string) => {
+      const transaction = transactions.find(t => t.id === transactionId);
+      if (!transaction) return;
+      const { type, amount } = transaction;
+      const acc = accounts.find(acc => acc.id === transaction.accountId);
+      if (!acc) return;
+      const currentBal = acc?.balance;
+
+      const updatedBal =
+        type === 'expense' ? currentBal + amount : currentBal - amount;
+
+      const updatedAcc: TAccount = {
+        ...acc,
+        balance: updatedBal,
+        expense: type === 'expense' ? (acc.expense ?? 0) - amount : acc.expense,
+        income: type === 'income' ? (acc.income ?? 0) - amount : acc.income,
+      };
+      updateAccountBalance(updatedAcc);
+      removeTransaction(transaction.id);
+    },
+    [transactions, accounts, updateAccountBalance, removeTransaction],
+  );
+
   const totalIncome = useMemo(() => {
     return filteredTransactions.reduce((prev, curr) => {
       if (curr.type === 'expense') {
@@ -156,6 +183,7 @@ const useTransactions = (props: { filter?: TFilters }) => {
     search,
     setSearch,
     addNewTransaction,
+    deleteTransaction,
   };
 };
 
