@@ -11,6 +11,8 @@ import { gs } from '../../common';
 type TProps = {
   search?: string;
   setSearch?: (text: string) => void;
+  hideFilterIcon?: boolean;
+  hideBackButton?: boolean;
 };
 
 const CommonHeader = (props: TProps) => {
@@ -20,7 +22,6 @@ const CommonHeader = (props: TProps) => {
 
   const { colors } = useAppTheme();
   const filters = useTransactionsStore(state => state.filters);
-  // const reset = useAccountStore(state => state.setIsInitialSetupDone);
   const userName = useAccountStore(state => state.userName);
 
   const isFiltersActive = useMemo(() => {
@@ -85,17 +86,25 @@ const CommonHeader = (props: TProps) => {
               </PressableWithFeedback>
             </View>
           ) : (
-            <Text
-              style={[
-                gs.fontBold,
-                {
-                  color: colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
-            >
-              Transactions
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <PressableWithFeedback
+                hidden={props.hideBackButton}
+                onPress={navigation.goBack}
+              >
+                <Icon source="arrow-left" size={24} />
+              </PressableWithFeedback>
+              <Text
+                style={[
+                  gs.fontBold,
+                  {
+                    color: colors.onBackground,
+                    fontSize: textSize.lg,
+                  },
+                ]}
+              >
+                Transactions
+              </Text>
+            </View>
           )}
           <View style={styles.headerRight}>
             <PressableWithFeedback
@@ -105,7 +114,7 @@ const CommonHeader = (props: TProps) => {
               <Icon source={'magnify'} size={spacing.xl} />
             </PressableWithFeedback>
             <PressableWithFeedback
-              hidden={route.name === 'Home'}
+              hidden={route.name === 'Home' || props.hideFilterIcon}
               onPress={() => {
                 navigation.navigate('TransactionFilters');
               }}

@@ -9,28 +9,31 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TAccount, TTransaction } from '../types';
+import { TAccount, TFilters, TTransaction } from '../types';
 
-const useTransactions = () => {
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+const useTransactions = (props: { filter?: TFilters }) => {
   const transactions = useTransactionsStore(state => state.transactions);
-  const filters = useTransactionsStore(state => state.filters);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const filters = props?.filter ?? undefined;
   const accounts = useAccountStore(state => state.accounts);
   const updateAccountBalance = useAccountStore(state => state.updateAccount);
 
   const [search, setSearch] = useState('');
 
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
+  const matchesAcc = useCallback(
+    (t: TTransaction) => {
+      if (!filters || !filters.accId) return true;
+      return t.accountId === filters.accId;
+    },
+    [filters],
+  );
 
   const matchesType = useCallback(
     (t: TTransaction) => {
-      if (!filters.type) return true;
+      if (!filters || !filters.type) return true;
       return t.type === filters.type;
     },
-    [filters.type],
+    [filters],
   );
 
   const matchesSearch = useCallback(
@@ -46,7 +49,7 @@ const useTransactions = () => {
 
   const matchesDate = useCallback(
     (t: TTransaction) => {
-      if (!filters.date) return true;
+      if (!filters || !filters.date) return true;
 
       if (filters.date.isToday) return isToday(t.transactionDate);
       if (filters.date.isThisWeek) return isThisWeek(t.transactionDate);
@@ -64,24 +67,26 @@ const useTransactions = () => {
 
       return true;
     },
-    [filters.date],
+    [filters],
   );
 
   const matchesCategory = useCallback(
     (t: TTransaction) => {
-      if (!filters.categoryId) return true;
+      if (!filters || !filters.categoryId) return true;
       return t.categoryIds.includes(filters.categoryId);
     },
     [filters],
   );
 
   const filteredTransactions = useMemo(() => {
+    if (!filters) return transactions;
     const filtered = transactions.filter(
       t =>
         matchesType(t) &&
         matchesDate(t) &&
         matchesSearch(t) &&
-        matchesCategory(t),
+        matchesCategory(t) &&
+        matchesAcc(t),
     );
 
     // Sort once
@@ -90,7 +95,15 @@ const useTransactions = () => {
         new Date(b.transactionDate).getTime() -
         new Date(a.transactionDate).getTime(),
     );
-  }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
+  }, [
+    transactions,
+    matchesType,
+    matchesDate,
+    matchesSearch,
+    matchesCategory,
+    matchesAcc,
+    filters,
+  ]);
 
   const totalIncome = useMemo(() => {
     return filteredTransactions.reduce((prev, curr) => {
@@ -133,7 +146,6 @@ const useTransactions = () => {
   };
 
   return {
-    transactions: transactions.filter(t => t.accountId === selectedAccount.id),
     totalExpenses,
     totalIncome,
     filteredTransactions,

@@ -60,13 +60,15 @@ const ManageAccounts = () => {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={[styles.listBox]}
               ListEmptyComponent={
-                <View>
+                <View style={[gs.fullFlex, gs.centerItems]}>
                   <Text
                     style={[
                       gs.fontBold,
+                      gs.centerText,
                       {
-                        color: colors.onBackground,
+                        color: colors.onSurfaceDisabled,
                         fontSize: textSize.lg,
+                        marginTop: spacing.xxxl,
                       },
                     ]}
                   >

@@ -80,7 +80,7 @@ const AddTransaction = () => {
   const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
-  const { addNewTransaction } = useTransactions();
+  const { addNewTransaction } = useTransactions({});
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
@@ -92,6 +92,7 @@ const AddTransaction = () => {
     date: CalendarDate;
     desc: string;
     attachments: TAttachment[];
+    accountId: string;
     selectedCatId: string;
     time: {
       hours: number;
@@ -107,6 +108,7 @@ const AddTransaction = () => {
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
         selectedCatId: tr.categoryIds[0],
+        accountId: tr.accountId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
           minutes: new Date(tr.transactionDate).getMinutes(),
@@ -122,6 +124,8 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
+        accountId: '',
+
         attachments: [],
         selectedCatId: defaultCategoryId,
         time: {
@@ -151,7 +155,7 @@ const AddTransaction = () => {
     initData.selectedCatId,
   );
   const { kbHeight } = useGetKeyboardHeight();
-  const [accountId, setAccountId] = useState('');
+  const [accountId, setAccountId] = useState(initData.accountId);
   const progress = useSharedValue(0);
   // Handlers
   const changeTransactionType = (type: TTransactionType) => {

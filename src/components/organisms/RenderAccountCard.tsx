@@ -14,6 +14,7 @@ import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CreateNewAccount from './CreateNewAccount';
 import useAccounts from '../../hooks/useAccounts';
+import { useNavigation } from '@react-navigation/native';
 
 type TProps = {
   item: TAccount;
@@ -31,6 +32,7 @@ const RenderAccountCard = (props: TProps) => {
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
+  const navigation = useNavigation();
   const { deleteAcc } = useAccounts();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
@@ -167,6 +169,12 @@ const RenderAccountCard = (props: TProps) => {
         <PressableWithFeedback
           feedbackColor={colors.background}
           style={[styles.action]}
+          onPress={() => {
+            navigation.navigate('FilteredTransactions', {
+              id: props.item.id,
+              type: 'account',
+            });
+          }}
         >
           <Icon source={'eye'} size={textSize.xl} />
         </PressableWithFeedback>

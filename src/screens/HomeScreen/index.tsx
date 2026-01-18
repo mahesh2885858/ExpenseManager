@@ -19,7 +19,7 @@ const HomeScreen = () => {
     filteredTransactions,
     search,
     setSearch,
-  } = useTransactions();
+  } = useTransactions({});
   const { totalBalance } = useAccounts();
 
   return (
