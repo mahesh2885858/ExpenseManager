@@ -252,8 +252,6 @@ const Graph = (props: TProps) => {
     }
   }, [props]);
 
-  console.log({ graphData });
-
   const onGraphTouch = (e: GestureResponderEvent) => {
     e.persist();
     const touchX = e.nativeEvent.locationX;
