@@ -188,6 +188,9 @@ const Settings = () => {
           </Text>
         </PressableWithFeedback>
         <PressableWithFeedback
+          onPress={() => {
+            navigation.navigate('ManageCategories');
+          }}
           style={[
             styles.setting,
             {

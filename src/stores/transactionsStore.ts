@@ -19,6 +19,8 @@ type TTransactionsStoreActions = {
   setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
   deleteForAnAcc: (accId: string) => void;
+  updateCategory: (cat: TCategory) => void;
+  removeCategory: (catId: string) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -103,6 +105,20 @@ const useTransactionsStore = create<PositionStore>()(
         set({
           transactions: updatedTransaction,
         });
+      },
+      updateCategory: cat => {
+        const updatedCats = get().categories.map(c => {
+          if (c.id === cat.id) {
+            return { ...cat };
+          } else return c;
+        });
+        set({ categories: updatedCats });
+      },
+
+      removeCategory: catId => {
+        set(state => ({
+          categories: state.categories.filter(c => c.id !== catId),
+        }));
       },
     }),
     {

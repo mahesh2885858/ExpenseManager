@@ -79,15 +79,17 @@ const useTransactions = (props: { filter?: TFilters }) => {
   );
 
   const filteredTransactions = useMemo(() => {
-    if (!filters) return transactions;
-    const filtered = transactions.filter(
-      t =>
-        matchesType(t) &&
-        matchesDate(t) &&
-        matchesSearch(t) &&
-        matchesCategory(t) &&
-        matchesAcc(t),
-    );
+    let filtered = transactions;
+    if (filters) {
+      filtered = transactions.filter(
+        t =>
+          matchesType(t) &&
+          matchesDate(t) &&
+          matchesSearch(t) &&
+          matchesCategory(t) &&
+          matchesAcc(t),
+      );
+    }
 
     // Sort once
     return filtered.sort(

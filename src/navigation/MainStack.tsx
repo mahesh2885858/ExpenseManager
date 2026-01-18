@@ -11,6 +11,7 @@ import TransactionFilters from '../screens/TransactionFilters';
 import ManageAccounts from '../screens/ManageAccounts';
 import Settings from '../screens/Settings';
 import FilteredTransactions from '../screens/FilteredTransactions';
+import ManageCategories from '../screens/ManageCategories';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -66,6 +67,13 @@ const MainStack = () => {
           <Stack.Screen
             name="ManageAccounts"
             component={ManageAccounts}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ManageCategories"
+            component={ManageCategories}
             options={{
               headerShown: false,
             }}

@@ -170,7 +170,7 @@ const HomeScreen = () => {
             </Text>
           ) : (
             <RenderTransactions
-              transactions={filteredTransactions.slice(undefined, 10)}
+              transactions={filteredTransactions.slice(0, 10)}
             />
           )}
         </View>

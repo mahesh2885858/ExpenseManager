@@ -27,8 +27,8 @@ const RenderTransaction = (props: { item: TTransaction }) => {
 
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
-    const category = categories.filter(c => c.id === cId);
-    return category[0]?.name ?? 'General';
+    const category = categories.find(c => c.id === cId);
+    return category?.name ?? 'Unknown';
   }, [props, categories]);
 
   return (

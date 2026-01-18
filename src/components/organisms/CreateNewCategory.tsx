@@ -14,10 +14,12 @@ import Switch from '../atoms/Switch';
 import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import { Toast } from 'toastify-react-native';
+import { TCategorySummary } from '../../types';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
+  catToEdit: TCategorySummary;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
@@ -27,8 +29,10 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const CreateNewCategory = (props: TProps) => {
   const { colors } = useAppTheme();
   const [makeDefault, setMakeDefault] = useState(false);
-  const [catName, setCatName] = useState('');
-  const { addCategory, categories } = useCategories();
+  const [catName, setCatName] = useState(
+    props.catToEdit ? props.catToEdit.name : '',
+  );
+  const { addCategory, categories, updateCategory } = useCategories();
 
   const renderSaveButton = useMemo(() => {
     return catName.trim().length > 0;
@@ -48,6 +52,20 @@ const CreateNewCategory = (props: TProps) => {
       props.ref.current?.dismiss();
     }
   }, [catName, makeDefault, addCategory, props, categories]);
+
+  const editCategory = useCallback(() => {
+    if (!props.catToEdit) return;
+    updateCategory({
+      ...props.catToEdit,
+      name: catName,
+    });
+    setCatName('');
+    props.ref.current?.dismiss();
+  }, [props, catName, updateCategory]);
+
+  const isEditModeOn = useMemo(() => {
+    return !!props.catToEdit;
+  }, [props]);
 
   return (
     <BottomSheetModal
@@ -72,7 +90,7 @@ const CreateNewCategory = (props: TProps) => {
               },
             ]}
           >
-            Add new category
+            {isEditModeOn ? 'Edit category' : 'Add new category'}
           </Text>
           <View
             style={[
@@ -105,25 +123,33 @@ const CreateNewCategory = (props: TProps) => {
               ]}
             />
           </View>
-          <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
-            <Text
-              style={[
-                gs.fullFlex,
-                {
-                  color: colors.onBackground,
-                },
-              ]}
-            >
-              Make this as default
-            </Text>
-            <Switch
-              isOn={makeDefault}
-              onStateChange={state => setMakeDefault(state)}
-            />
-          </View>
+          {!isEditModeOn && (
+            <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
+              <Text
+                style={[
+                  gs.fullFlex,
+                  {
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
+                Make this as default
+              </Text>
+              <Switch
+                isOn={makeDefault}
+                onStateChange={state => setMakeDefault(state)}
+              />
+            </View>
+          )}
           {renderSaveButton && (
             <PressableWithFeedback
-              onPress={addNew}
+              onPress={() => {
+                if (isEditModeOn) {
+                  editCategory();
+                } else {
+                  addNew();
+                }
+              }}
               style={[
                 styles.button,
                 {
@@ -139,7 +165,7 @@ const CreateNewCategory = (props: TProps) => {
                   },
                 ]}
               >
-                Add
+                {isEditModeOn ? 'Save' : 'Add'}
               </Text>
             </PressableWithFeedback>
           )}
