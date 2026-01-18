@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 import { useNavigation } from '@react-navigation/native';
-import { formatDigits, uCFirst } from 'commonutil-core';
+import { uCFirst } from 'commonutil-core';
 import {
   addMonths,
   addWeeks,
@@ -38,9 +38,10 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import Graph from '../../components/organisms/Graph';
-import useGetTransactions from '../../hooks/useGetTransactions';
+import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TGroupBy } from '../../types';
+import { formatAmount } from '../../utils';
 
 const { width } = Dimensions.get('window');
 console.log({ width });
@@ -73,7 +74,7 @@ const Reports = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
-  const { filteredTransactions } = useGetTransactions();
+  const { filteredTransactions } = useTransactions();
   // sort
   filteredTransactions.sort(
     (a, b) =>
@@ -444,7 +445,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {'₹' + formatDigits(graphData.summary.income.toString())}
+                {formatAmount(graphData.summary.income)}
               </Text>
             </View>
             <View
@@ -474,7 +475,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {'₹' + formatDigits(graphData.summary.expense.toString())}
+                {formatAmount(graphData.summary.expense)}
               </Text>
             </View>
           </View>

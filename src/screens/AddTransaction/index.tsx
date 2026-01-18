@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import {
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Linking,
   ScrollView,
@@ -52,6 +51,7 @@ import AccountSelectionModal from '../../components/organisms/AccountSelectionMo
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
+import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -60,7 +60,7 @@ import {
   TTransactionType,
 } from '../../types';
 import RenderAttachment from './RenderAttachment';
-import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
+import useTransactions from '../../hooks/useTransactions';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
@@ -80,7 +80,7 @@ const AddTransaction = () => {
   const [renderCamera, setRenderCamera] = useState(false);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
-  const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const { addNewTransaction } = useTransactions();
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
@@ -270,7 +270,7 @@ const AddTransaction = () => {
           description: desc,
         });
       } else {
-        addTransaction({
+        addNewTransaction({
           accountId: selectedAccountId,
           amount,
           categoryIds: [selectedCategoryId],

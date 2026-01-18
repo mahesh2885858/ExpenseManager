@@ -42,11 +42,13 @@ const InitialAccountAmountSetup = () => {
     const id = uuid();
     if (route.params?.userName) {
       setUsername(route.params.userName);
+      const amt = parseFloat(amount) || 0;
       addAccount({
         name: accName,
-        balance: parseInt(amount, 10) || 0,
+        balance: amt,
         id,
-        isSelected: true,
+        expense: amt < 0 ? amt : 0,
+        income: amt > 0 ? amt : 0,
       });
       Keyboard.dismiss();
       setIsInitialSetupDone(true);

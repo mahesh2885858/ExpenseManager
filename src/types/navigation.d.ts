@@ -28,7 +28,8 @@ export type TRootStackParamList = {
   };
   TransactionFilters: undefined;
   ManageAccounts: undefined;
-  AddCategory: undefined;
+  ManageCategories: undefined;
+  Settings: undefined;
 };
 
 declare global {

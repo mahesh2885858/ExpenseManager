@@ -10,9 +10,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useAccountStore from '../../stores/accountsStore';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { TAccount } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import CreateNewAccount from './CreateNewAccount';
 
 type TProps = {
   ref: any;
@@ -26,6 +28,13 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AccountSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
   const accounts = useAccountStore(state => state.accounts);
+
+  const {
+    btmShtRef: newAccBtmSheet,
+    handlePresent: handlePresentNewAccBtmSheet,
+    handleSheetChange: handleNewAccSheetChanges,
+  } = useBottomSheetModal();
+
   return (
     <BottomSheetModal
       backdropComponent={pr => BottomCBackdrop(pr)}
@@ -45,6 +54,8 @@ const AccountSelectionModal = (props: TProps) => {
       >
         <View
           style={[
+            gs.flexRow,
+            gs.itemsCenter,
             {
               marginBottom: spacing.md,
               marginTop: spacing.md,
@@ -54,6 +65,7 @@ const AccountSelectionModal = (props: TProps) => {
           <Text
             style={[
               gs.fontBold,
+              gs.fullFlex,
               {
                 fontSize: textSize.lg,
                 color: colors.onBackground,
@@ -62,6 +74,20 @@ const AccountSelectionModal = (props: TProps) => {
           >
             Select an account
           </Text>
+          <PressableWithFeedback onPress={handlePresentNewAccBtmSheet}>
+            <Text
+              style={[
+                styles.manageText,
+                {
+                  fontSize: textSize.md,
+
+                  color: colors.onTertiaryContainer,
+                },
+              ]}
+            >
+              Add new
+            </Text>
+          </PressableWithFeedback>
         </View>
         <BottomSheetFlatList
           contentContainerStyle={styles.container}
@@ -74,6 +100,7 @@ const AccountSelectionModal = (props: TProps) => {
               <PressableWithFeedback
                 onPress={() => {
                   props.onAccountChange(item.id);
+                  props.ref.current?.dismiss();
                 }}
                 style={[
                   gs.flexRow,
@@ -107,6 +134,10 @@ const AccountSelectionModal = (props: TProps) => {
           }}
         />
       </View>
+      <CreateNewAccount
+        handleSheetChanges={handleNewAccSheetChanges}
+        ref={newAccBtmSheet}
+      />
     </BottomSheetModal>
   );
 };
@@ -125,5 +156,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     paddingVertical: spacing.md,
+  },
+  manageText: {
+    fontWeight: '600',
   },
 });

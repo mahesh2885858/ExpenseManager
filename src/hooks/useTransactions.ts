@@ -9,12 +9,15 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TTransaction } from '../types';
+import { TAccount, TTransaction } from '../types';
 
-const useGetTransactions = () => {
+const useTransactions = () => {
   const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const transactions = useTransactionsStore(state => state.transactions);
   const filters = useTransactionsStore(state => state.filters);
+  const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const accounts = useAccountStore(state => state.accounts);
+  const updateAccountBalance = useAccountStore(state => state.updateAccount);
 
   const [search, setSearch] = useState('');
 
@@ -73,12 +76,19 @@ const useGetTransactions = () => {
   );
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(
+    const filtered = transactions.filter(
       t =>
         matchesType(t) &&
         matchesDate(t) &&
         matchesSearch(t) &&
         matchesCategory(t),
+    );
+
+    // Sort once
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.transactionDate).getTime() -
+        new Date(a.transactionDate).getTime(),
     );
   }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
 
@@ -102,6 +112,26 @@ const useGetTransactions = () => {
     }, 0);
   }, [filteredTransactions]);
 
+  const addNewTransaction = (transaction: TTransaction) => {
+    const { accountId, amount, type } = transaction;
+
+    const acc = accounts.filter(item => item.id === accountId)[0];
+    const currentBal = acc?.balance;
+
+    const updatedBal =
+      type === 'expense' ? currentBal - amount : currentBal + amount;
+
+    const updatedAcc: TAccount = {
+      ...acc,
+      balance: updatedBal,
+      expense: type === 'expense' ? acc.expense ?? 0 + amount : acc.expense,
+      income: type === 'income' ? acc.income ?? 0 + amount : acc.income,
+    };
+
+    addTransaction(transaction);
+    updateAccountBalance(updatedAcc);
+  };
+
   return {
     transactions: transactions.filter(t => t.accountId === selectedAccount.id),
     totalExpenses,
@@ -109,7 +139,8 @@ const useGetTransactions = () => {
     filteredTransactions,
     search,
     setSearch,
+    addNewTransaction,
   };
 };
 
-export default useGetTransactions;
+export default useTransactions;

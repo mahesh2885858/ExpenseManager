@@ -115,7 +115,12 @@ const CommonHeader = (props: TProps) => {
                 size={spacing.xl}
               />
             </PressableWithFeedback>
-            <PressableWithFeedback hidden={route.name !== 'Home'}>
+            <PressableWithFeedback
+              onPress={() => {
+                navigation.navigate('Settings');
+              }}
+              hidden={route.name !== 'Home'}
+            >
               <Icon source={'cog'} size={spacing.xl} />
             </PressableWithFeedback>
           </View>

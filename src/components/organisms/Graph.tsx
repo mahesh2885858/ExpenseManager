@@ -14,6 +14,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import { TGroupBy, TTransaction } from '../../types';
 import {
+  formatAmount,
   getDatesOfWeek,
   getMonthRangesOfYear,
   getNetForGivenTransactions,
@@ -33,10 +34,6 @@ type TProps = {
 };
 
 const Graph = (props: TProps) => {
-  console.log({
-    ...props,
-    date: props.selectedRange.map(t => t.toString()),
-  });
   const { colors } = useAppTheme();
   const [focusedItem, setFocusedItem] = useState<Record<string, any> | null>(
     null,
@@ -329,7 +326,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {focusedItem?.bar?.income ?? 0}
+            {formatAmount(focusedItem?.bar?.income ?? 0)}
           </Text>
         </View>
         <View
@@ -358,7 +355,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {focusedItem?.bar?.expense ?? 0}
+            {formatAmount(focusedItem?.bar?.expense ?? 0)}
           </Text>
         </View>
       </View>

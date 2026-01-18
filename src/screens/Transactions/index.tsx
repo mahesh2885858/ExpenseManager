@@ -1,41 +1,28 @@
-import { formatDigits } from 'commonutil-core';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useGetTransactions from '../../hooks/useGetTransactions';
-import useAccountStore from '../../stores/accountsStore';
+import useTransactions from '../../hooks/useTransactions';
+import { formatAmount } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const { colors } = theme;
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
   const {
     totalExpenses,
     totalIncome,
     filteredTransactions,
     search,
     setSearch,
-  } = useGetTransactions();
-
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
-
-  filteredTransactions.sort(
-    (a, b) =>
-      new Date(b.transactionDate).getTime() -
-      new Date(a.transactionDate).getTime(),
-  );
+  } = useTransactions();
 
   return (
-    <ScrollView
-      nestedScrollEnabled={true}
-      contentContainerStyle={[
+    <View
+      style={[
         styles.container,
         {
           paddingTop: top + 5,
@@ -93,8 +80,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              ₹{' '}
-              {formatDigits((selectedAccount.balance + totalIncome).toString())}
+              {formatAmount(totalIncome)}
             </Text>
           </View>
           <View
@@ -124,16 +110,17 @@ const Transactions = () => {
                 },
               ]}
             >
-              ₹ {formatDigits(totalExpenses.toString())}
+              {formatAmount(totalExpenses)}
             </Text>
           </View>
         </View>
       </View>
       {/* summary */}
 
-      {/* recent transactions section */}
+      {/* transactions section */}
       <View
         style={[
+          gs.fullFlex,
           {
             paddingHorizontal: spacing.lg,
           },
@@ -166,7 +153,7 @@ const Transactions = () => {
           )}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -174,7 +161,8 @@ export default Transactions;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
+    flex: 1,
   },
   avatar: {
     height: 45,
