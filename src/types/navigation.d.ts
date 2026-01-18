@@ -30,6 +30,10 @@ export type TRootStackParamList = {
   ManageAccounts: undefined;
   ManageCategories: undefined;
   Settings: undefined;
+  FilteredTransactions: {
+    type: 'account' | 'category';
+    id: string;
+  };
 };
 
 declare global {

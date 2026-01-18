@@ -9,28 +9,34 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TAccount, TTransaction } from '../types';
+import { TAccount, TFilters, TTransaction } from '../types';
 
-const useTransactions = () => {
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
+const useTransactions = (props: { filter?: TFilters }) => {
   const transactions = useTransactionsStore(state => state.transactions);
-  const filters = useTransactionsStore(state => state.filters);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const filters = props?.filter ?? undefined;
   const accounts = useAccountStore(state => state.accounts);
   const updateAccountBalance = useAccountStore(state => state.updateAccount);
+  const removeTransaction = useTransactionsStore(
+    state => state.removeTransaction,
+  );
 
   const [search, setSearch] = useState('');
 
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
+  const matchesAcc = useCallback(
+    (t: TTransaction) => {
+      if (!filters || !filters.accId) return true;
+      return t.accountId === filters.accId;
+    },
+    [filters],
+  );
 
   const matchesType = useCallback(
     (t: TTransaction) => {
-      if (!filters.type) return true;
+      if (!filters || !filters.type) return true;
       return t.type === filters.type;
     },
-    [filters.type],
+    [filters],
   );
 
   const matchesSearch = useCallback(
@@ -46,7 +52,7 @@ const useTransactions = () => {
 
   const matchesDate = useCallback(
     (t: TTransaction) => {
-      if (!filters.date) return true;
+      if (!filters || !filters.date) return true;
 
       if (filters.date.isToday) return isToday(t.transactionDate);
       if (filters.date.isThisWeek) return isThisWeek(t.transactionDate);
@@ -64,25 +70,29 @@ const useTransactions = () => {
 
       return true;
     },
-    [filters.date],
+    [filters],
   );
 
   const matchesCategory = useCallback(
     (t: TTransaction) => {
-      if (!filters.categoryId) return true;
+      if (!filters || !filters.categoryId) return true;
       return t.categoryIds.includes(filters.categoryId);
     },
     [filters],
   );
 
   const filteredTransactions = useMemo(() => {
-    const filtered = transactions.filter(
-      t =>
-        matchesType(t) &&
-        matchesDate(t) &&
-        matchesSearch(t) &&
-        matchesCategory(t),
-    );
+    let filtered = transactions;
+    if (filters) {
+      filtered = transactions.filter(
+        t =>
+          matchesType(t) &&
+          matchesDate(t) &&
+          matchesSearch(t) &&
+          matchesCategory(t) &&
+          matchesAcc(t),
+      );
+    }
 
     // Sort once
     return filtered.sort(
@@ -90,7 +100,39 @@ const useTransactions = () => {
         new Date(b.transactionDate).getTime() -
         new Date(a.transactionDate).getTime(),
     );
-  }, [transactions, matchesType, matchesDate, matchesSearch, matchesCategory]);
+  }, [
+    transactions,
+    matchesType,
+    matchesDate,
+    matchesSearch,
+    matchesCategory,
+    matchesAcc,
+    filters,
+  ]);
+
+  const deleteTransaction = useCallback(
+    (transactionId: string) => {
+      const transaction = transactions.find(t => t.id === transactionId);
+      if (!transaction) return;
+      const { type, amount } = transaction;
+      const acc = accounts.find(acc => acc.id === transaction.accountId);
+      if (!acc) return;
+      const currentBal = acc?.balance;
+
+      const updatedBal =
+        type === 'expense' ? currentBal + amount : currentBal - amount;
+
+      const updatedAcc: TAccount = {
+        ...acc,
+        balance: updatedBal,
+        expense: type === 'expense' ? (acc.expense ?? 0) - amount : acc.expense,
+        income: type === 'income' ? (acc.income ?? 0) - amount : acc.income,
+      };
+      updateAccountBalance(updatedAcc);
+      removeTransaction(transaction.id);
+    },
+    [transactions, accounts, updateAccountBalance, removeTransaction],
+  );
 
   const totalIncome = useMemo(() => {
     return filteredTransactions.reduce((prev, curr) => {
@@ -124,22 +166,24 @@ const useTransactions = () => {
     const updatedAcc: TAccount = {
       ...acc,
       balance: updatedBal,
-      expense: type === 'expense' ? acc.expense ?? 0 + amount : acc.expense,
-      income: type === 'income' ? acc.income ?? 0 + amount : acc.income,
+      expense: type === 'expense' ? (acc.expense ?? 0) + amount : acc.expense,
+      income: type === 'income' ? (acc.income ?? 0) + amount : acc.income,
     };
+
+    console.log({ updatedAcc });
 
     addTransaction(transaction);
     updateAccountBalance(updatedAcc);
   };
 
   return {
-    transactions: transactions.filter(t => t.accountId === selectedAccount.id),
     totalExpenses,
     totalIncome,
     filteredTransactions,
     search,
     setSearch,
     addNewTransaction,
+    deleteTransaction,
   };
 };
 

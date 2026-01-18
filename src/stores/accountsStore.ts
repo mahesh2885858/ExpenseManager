@@ -15,6 +15,7 @@ type TAccountsStoreActions = {
   addAccount: (account: TAccount) => void;
   updateAccount: (acc: TAccount) => void;
   deleteAllAccounts: () => void;
+  removeAnAcc: (id: string) => void;
   getSelectedAccount: () => TAccount;
   selectAccount: (id: string) => void;
 };
@@ -46,10 +47,15 @@ const useAccountStore = create<PositionStore>()(
       updateAccount: acc => {
         const updatedAccounts = get().accounts.map(item => {
           if (item.id === acc.id) {
-            return { ...item };
+            console.log({ acc, item });
+            return { ...acc };
           } else return item;
         });
         set({ accounts: updatedAccounts });
+      },
+      removeAnAcc: id => {
+        const accnts = get().accounts.filter(a => a.id !== id);
+        set({ accounts: accnts });
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },

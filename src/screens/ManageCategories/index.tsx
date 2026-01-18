@@ -9,17 +9,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CreateNewAccount from '../../components/organisms/CreateNewAccount';
-import RenderAccountCard from '../../components/organisms/RenderAccountCard';
+import CreateNewCategory from '../../components/organisms/CreateNewCategory';
+import RenderCategoryCard from '../../components/organisms/RenderCategoryCard';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
-import useAccountStore from '../../stores/accountsStore';
 
-const ManageAccounts = () => {
+const ManageCategories = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useAppTheme();
-  const accounts = useAccountStore(state => state.accounts);
+  //   const accounts = useAccountStore(state => state.accounts);
+  const { categoriesSummary: categories } = useCategories();
   const { kbHeight } = useGetKeyboardHeight();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const [focusedId, setFocusedId] = useState('');
@@ -52,7 +53,7 @@ const ManageAccounts = () => {
                 },
               ]}
             >
-              Manage Accounts
+              Manage Categories
             </Text>
           </View>
           <View style={[gs.fullFlex, styles.listWrapper]}>
@@ -72,15 +73,15 @@ const ManageAccounts = () => {
                       },
                     ]}
                   >
-                    No accounts yet. Start by creating one.
+                    No Categories yet. Start by creating one.
                   </Text>
                 </View>
               }
-              data={accounts}
+              data={categories}
               extraData={focusedId}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
-                <RenderAccountCard
+                <RenderCategoryCard
                   isFocused={focusedId === item.id}
                   changeFocusId={changeFocusId}
                   item={item}
@@ -99,7 +100,7 @@ const ManageAccounts = () => {
             onPress={() => handlePresent()}
           />
         </View>
-        <CreateNewAccount
+        <CreateNewCategory
           handleSheetChanges={handleSheetChange}
           ref={btmShtRef}
         />
@@ -108,7 +109,7 @@ const ManageAccounts = () => {
   );
 };
 
-export default ManageAccounts;
+export default ManageCategories;
 
 const styles = StyleSheet.create({
   header: {

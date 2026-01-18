@@ -2,7 +2,6 @@ import { formatDigits } from 'commonutil-core';
 import { CURRENCY_SYMBOL } from '../common';
 
 export const formatAmount = (amount: number, currency = CURRENCY_SYMBOL) => {
-  console.log({ amount });
   let text = '';
   if (!amount) {
     text = '0';

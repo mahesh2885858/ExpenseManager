@@ -19,7 +19,7 @@ const HomeScreen = () => {
     filteredTransactions,
     search,
     setSearch,
-  } = useTransactions();
+  } = useTransactions({});
   const { totalBalance } = useAccounts();
 
   return (
@@ -170,7 +170,7 @@ const HomeScreen = () => {
             </Text>
           ) : (
             <RenderTransactions
-              transactions={filteredTransactions.slice(undefined, 10)}
+              transactions={filteredTransactions.slice(0, 10)}
             />
           )}
         </View>

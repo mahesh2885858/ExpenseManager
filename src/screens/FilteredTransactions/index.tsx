@@ -1,4 +1,5 @@
-import React from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -6,22 +7,32 @@ import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
+import { TFilters, TRootStackParamList } from '../../types';
 import { formatAmount } from '../../utils';
-import useTransactionsStore from '../../stores/transactionsStore';
 
-const Transactions = () => {
+const FilteredTransactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
+  const route =
+    useRoute<RouteProp<TRootStackParamList, 'FilteredTransactions'>>();
   const { colors } = theme;
-  const filters = useTransactionsStore(state => state.filters);
+  const routeFilter: TFilters = useMemo(() => {
+    const tFilter: TFilters = {
+      date: null,
+      type: null,
+      accId: route.params.type === 'account' ? route.params.id : null,
+      categoryId: route.params.type === 'category' ? route.params.id : null,
+    };
+    return tFilter;
+  }, [route]);
   const {
-    totalExpenses,
-    totalIncome,
     filteredTransactions,
     search,
     setSearch,
+    totalIncome,
+    totalExpenses,
   } = useTransactions({
-    filter: filters,
+    filter: routeFilter,
   });
 
   return (
@@ -34,7 +45,7 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader hideBackButton search={search} setSearch={setSearch} />
+      <CommonHeader hideFilterIcon search={search} setSearch={setSearch} />
 
       {/* summary */}
       <View
@@ -161,7 +172,7 @@ const Transactions = () => {
   );
 };
 
-export default Transactions;
+export default FilteredTransactions;
 
 const styles = StyleSheet.create({
   container: {

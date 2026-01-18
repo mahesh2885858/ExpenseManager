@@ -14,10 +14,12 @@ import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import useAccountStore from '../../stores/accountsStore';
 import { Toast } from 'toastify-react-native';
 import { v4 } from 'uuid';
+import { TAccount } from '../../types';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
+  accToEdit?: TAccount;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
@@ -26,10 +28,13 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const CreateNewAccount = (props: TProps) => {
   const { colors } = useAppTheme();
-  const [accName, setAccName] = useState('');
+  const [accName, setAccName] = useState(
+    props.accToEdit ? props.accToEdit.name : '',
+  );
   const [balance, setBalance] = useState('');
   const accounts = useAccountStore(state => state.accounts);
   const addAccount = useAccountStore(state => state.addAccount);
+  const updateAccount = useAccountStore(state => state.updateAccount);
 
   const renderSaveButton = useMemo(() => {
     return accName.trim().length > 0;
@@ -59,6 +64,21 @@ const CreateNewAccount = (props: TProps) => {
     }
   }, [accName, accounts, addAccount, balance, props]);
 
+  const editAccount = useCallback(() => {
+    if (!props.accToEdit) return;
+    updateAccount({
+      ...props.accToEdit,
+      name: accName,
+    });
+    setAccName('');
+    setBalance('');
+    props.ref.current?.dismiss();
+  }, [props, accName, updateAccount]);
+
+  const isEditModeOn = useMemo(() => {
+    return !!props.accToEdit;
+  }, [props]);
+
   return (
     <BottomSheetModal
       backdropComponent={pr => BottomCBackdrop(pr)}
@@ -82,7 +102,7 @@ const CreateNewAccount = (props: TProps) => {
               },
             ]}
           >
-            Add new account
+            {isEditModeOn ? 'Edit account' : 'Add new account'}
           </Text>
           <View
             style={[
@@ -115,41 +135,50 @@ const CreateNewAccount = (props: TProps) => {
               ]}
             />
           </View>
-          <View
-            style={[
-              styles.accNameBox,
-              {
-                borderColor: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
-            <Text
+          {!isEditModeOn && (
+            <View
               style={[
+                styles.accNameBox,
                 {
-                  color: colors.onSurfaceDisabled,
-                  fontSize: textSize.md,
+                  borderColor: colors.onSurfaceDisabled,
                 },
               ]}
             >
-              Balance
-            </Text>
-            <BottomSheetTextInput
-              keyboardType="numeric"
-              value={balance}
-              onChangeText={setBalance}
-              placeholder={CURRENCY_SYMBOL + '0.00'}
-              placeholderTextColor={colors.onSurfaceDisabled}
-              style={[
-                {
-                  color: colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
-            />
-          </View>
+              <Text
+                style={[
+                  {
+                    color: colors.onSurfaceDisabled,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              >
+                Balance
+              </Text>
+
+              <BottomSheetTextInput
+                keyboardType="numeric"
+                value={balance}
+                onChangeText={setBalance}
+                placeholder={CURRENCY_SYMBOL + '0.00'}
+                placeholderTextColor={colors.onSurfaceDisabled}
+                style={[
+                  {
+                    color: colors.onBackground,
+                    fontSize: textSize.lg,
+                  },
+                ]}
+              />
+            </View>
+          )}
           {renderSaveButton && (
             <PressableWithFeedback
-              onPress={addNewAcc}
+              onPress={() => {
+                if (isEditModeOn) {
+                  editAccount();
+                } else {
+                  addNewAcc();
+                }
+              }}
               style={[
                 styles.button,
                 {
@@ -165,7 +194,7 @@ const CreateNewAccount = (props: TProps) => {
                   },
                 ]}
               >
-                Add
+                {isEditModeOn ? 'Save' : 'Add'}
               </Text>
             </PressableWithFeedback>
           )}
