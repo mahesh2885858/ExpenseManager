@@ -5,7 +5,7 @@ import {
   BottomSheetModal,
   BottomSheetProps,
 } from '@gorhom/bottom-sheet';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -34,6 +34,14 @@ const AccountSelectionModal = (props: TProps) => {
     handlePresent: handlePresentNewAccBtmSheet,
     handleSheetChange: handleNewAccSheetChanges,
   } = useBottomSheetModal();
+
+  const onAccPress = useCallback(
+    (accId: string) => {
+      props.onAccountChange(accId);
+      props.ref.current?.dismiss();
+    },
+    [props],
+  );
 
   return (
     <BottomSheetModal
@@ -99,8 +107,7 @@ const AccountSelectionModal = (props: TProps) => {
             return (
               <PressableWithFeedback
                 onPress={() => {
-                  props.onAccountChange(item.id);
-                  props.ref.current?.dismiss();
+                  onAccPress(item.id);
                 }}
                 style={[
                   gs.flexRow,
@@ -115,6 +122,9 @@ const AccountSelectionModal = (props: TProps) => {
                 key={item.id}
               >
                 <RadioButton.Android
+                  onPress={() => {
+                    onAccPress(item.id);
+                  }}
                   status={isSelected ? 'checked' : 'unchecked'}
                   color={colors.inversePrimary}
                   value={item.name}

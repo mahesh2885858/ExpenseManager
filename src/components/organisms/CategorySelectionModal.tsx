@@ -5,7 +5,7 @@ import {
   BottomSheetModal,
   BottomSheetProps,
 } from '@gorhom/bottom-sheet';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -40,6 +40,14 @@ const CategorySelectionModal = (props: TProps) => {
   const sortedCategories = useMemo(() => {
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
+
+  const onCategoryPress = useCallback(
+    (catId: string) => {
+      props.selectCategory(catId);
+      props.ref.current?.dismiss();
+    },
+    [props],
+  );
 
   return (
     <BottomSheetModal
@@ -84,8 +92,7 @@ const CategorySelectionModal = (props: TProps) => {
                 return (
                   <PressableWithFeedback
                     onPress={() => {
-                      props.selectCategory(item.id);
-                      props.ref.current?.dismiss();
+                      onCategoryPress(item.id);
                     }}
                     style={[
                       gs.flexRow,
@@ -100,6 +107,9 @@ const CategorySelectionModal = (props: TProps) => {
                     key={item.id}
                   >
                     <RadioButton.Android
+                      onPress={() => {
+                        onCategoryPress(item.id);
+                      }}
                       status={isSelected ? 'checked' : 'unchecked'}
                       color={colors.inversePrimary}
                       value={item.name}
