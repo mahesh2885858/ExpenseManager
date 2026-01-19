@@ -3,7 +3,6 @@
  */
 
 import { AppRegistry } from 'react-native';
-import RNFS from 'react-native-fs';
 import 'react-native-get-random-values';
 import App from './App';
 import { name as appName } from './app.json';
@@ -17,12 +16,8 @@ Error: ${error?.stack || error}
 ------------------
 `;
 
-  RNFS.appendFile(crashLogPath, log, 'utf8').catch(e =>
-    console.log('Failed to write crash log', e),
-  );
+  console.log({ log });
 }
-
-const crashLogPath = `${RNFS.DocumentDirectoryPath}/crash_log.txt`;
 
 ErrorUtils.setGlobalHandler((error, isFatal) => {
   saveCrashLog(isFatal ? 'Fatal JS error' : 'Non-fatal JS error', error);
