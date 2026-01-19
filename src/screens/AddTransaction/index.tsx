@@ -1,8 +1,9 @@
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { uCFirst } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FAB, Icon } from 'react-native-paper';
 import {
   DatePickerModal,
@@ -17,9 +19,6 @@ import {
   TimePickerModal,
 } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { uCFirst } from 'commonutil-core';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   interpolateColor,
   SlideInDown,
@@ -46,15 +45,9 @@ import {
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
-import RenderAttachment from './RenderAttachment';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
-
-const renderAttachment = (
-  prop: TAttachment,
-  removeFile: (filePath: string) => void,
-) => <RenderAttachment attachment={prop} removeFile={removeFile} />;
 
 const AddTransaction = () => {
   const { colors } = useAppTheme();
@@ -131,9 +124,7 @@ const AddTransaction = () => {
     initData.time,
   );
   const [desc, setDesc] = useState(initData.desc);
-  const [attachments, setAttachments] = useState<TAttachment[]>(
-    initData.attachments,
-  );
+
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
@@ -172,11 +163,6 @@ const AddTransaction = () => {
     return date;
   }, [date, time]);
 
-  const removeFile = (filePath: string) => {
-    const files = attachments.filter(f => f.path !== filePath);
-    setAttachments(files);
-  };
-
   const saveTransaction = () => {
     try {
       const id =
@@ -197,7 +183,7 @@ const AddTransaction = () => {
           categoryIds: [selectedCategoryId],
           transactionDate: dateToAdd.toISOString(),
           type: transactionType,
-          attachments: attachments,
+          attachments: [],
           description: desc,
         });
       } else {
@@ -209,7 +195,7 @@ const AddTransaction = () => {
           transactionDate: dateToAdd.toISOString(),
           id,
           type: transactionType,
-          attachments: attachments,
+          attachments: [],
           description: desc,
         });
       }
@@ -512,41 +498,6 @@ const AddTransaction = () => {
                 </Text>
               </PressableWithFeedback>
             </View>
-
-            {/* Todo: Attachments list section */}
-            {attachments.length > 0 && (
-              <View
-                style={[
-                  {
-                    marginTop: spacing.lg,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    gs.fontBold,
-                    {
-                      fontSize: textSize.md,
-                      color: colors.onBackground,
-                    },
-                  ]}
-                >
-                  Attachments
-                </Text>
-                <View style={[style.attachmentContainer]}>
-                  <FlatList
-                    contentContainerStyle={{
-                      gap: spacing.md,
-                    }}
-                    horizontal
-                    data={attachments}
-                    renderItem={item => renderAttachment(item.item, removeFile)}
-                    keyExtractor={item => item.path}
-                    showsHorizontalScrollIndicator={false}
-                  />
-                </View>
-              </View>
-            )}
 
             {/* Description section */}
             <TextInput

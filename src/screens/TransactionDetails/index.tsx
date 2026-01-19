@@ -2,15 +2,14 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { formatDigits } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
+import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TRootStackParamList } from '../../types';
-import RenderAttachment from '../AddTransaction/RenderAttachment';
-import useAccountStore from '../../stores/accountsStore';
 
 const TransactionDetails = () => {
   const route =
@@ -273,43 +272,6 @@ const TransactionDetails = () => {
             >
               {transaction.description}
             </Text>
-          </View>
-        )}
-        {/* Attachment section*/}
-        {transaction.attachments && transaction.attachments.length > 0 && (
-          <View
-            style={{
-              paddingHorizontal: spacing.lg,
-              gap: spacing.sm,
-            }}
-          >
-            <Text
-              style={[
-                gs.fontBold,
-                {
-                  color: theme.colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
-            >
-              Attachments
-            </Text>
-            <FlatList
-              horizontal
-              contentContainerStyle={[styles.attachmentContainer]}
-              showsHorizontalScrollIndicator={false}
-              data={transaction.attachments}
-              keyExtractor={(item, i) => item.path + item + i}
-              renderItem={({ item }) => {
-                return (
-                  <RenderAttachment
-                    allowDeletion={false}
-                    attachment={item}
-                    removeFile={() => {}}
-                  />
-                );
-              }}
-            />
           </View>
         )}
       </View>

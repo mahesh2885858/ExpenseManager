@@ -67,12 +67,6 @@ const RenderTransaction = (props: { item: TTransaction }) => {
           gs.centerItems,
         ]}
       >
-        {(props.item.attachments?.length ?? 0) > 0 && (
-          <View style={styles.icon}>
-            <Icon source={'paperclip'} size={10} />
-          </View>
-        )}
-
         <Text
           style={[
             {
