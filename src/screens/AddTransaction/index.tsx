@@ -124,7 +124,7 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
-        accountId: '',
+        accountId: accounts.length === 1 ? accounts[0].id : '',
 
         attachments: [],
         selectedCatId: defaultCategoryId,
@@ -134,7 +134,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultCategoryId]);
+  }, [route, defaultCategoryId, accounts]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
