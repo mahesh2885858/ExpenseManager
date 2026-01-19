@@ -16,6 +16,7 @@ export type TRootStackParamList = {
   AddTransaction:
     | {
         mode: 'new';
+        type?: 'INCOME' | 'EXPENSE';
       }
     | {
         mode: 'edit';
