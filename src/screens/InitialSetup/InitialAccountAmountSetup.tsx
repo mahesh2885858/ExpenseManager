@@ -1,8 +1,14 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
-import { Button, TextInput, useTheme } from 'react-native-paper';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs, MAX_INITIAL_AMOUNT } from '../../common';
@@ -15,8 +21,10 @@ const InitialAccountAmountSetup = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'AmountInput'>>();
   const theme = useTheme();
   const { t } = useTranslation();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('0');
+  const [accName, setAccName] = useState('');
   const addAccount = useAccountStore(state => state.addAccount);
+  const setUsername = useAccountStore(state => state.setUsername);
   const setIsInitialSetupDone = useAccountStore(
     state => state.setIsInitialSetupDone,
   );
@@ -32,16 +40,27 @@ const InitialAccountAmountSetup = () => {
 
   const saveAccount = useCallback(() => {
     const id = uuid();
-    if (route.params?.name) {
+    if (route.params?.userName) {
+      setUsername(route.params.userName);
+      const amt = parseFloat(amount) || 0;
       addAccount({
-        name: route.params.name,
-        balance: parseInt(amount, 10) || 0,
+        name: accName,
+        balance: amt,
         id,
-        isSelected: true,
+        expense: amt < 0 ? amt : 0,
+        income: amt > 0 ? amt : 0,
       });
+      Keyboard.dismiss();
       setIsInitialSetupDone(true);
     }
-  }, [addAccount, amount, route.params?.name, setIsInitialSetupDone]);
+  }, [
+    addAccount,
+    setUsername,
+    accName,
+    amount,
+    route.params?.userName,
+    setIsInitialSetupDone,
+  ]);
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -55,32 +74,97 @@ const InitialAccountAmountSetup = () => {
       ]}
     >
       <View style={styles.headingContainer}>
+        <View style={[gs.flexRow, gs.itemsCenter]}>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                color: theme.colors.onBackground,
+                fontSize: textSize.xl,
+              },
+            ]}
+          >
+            {t('common.setupAccount')}
+          </Text>
+          <Icon
+            source={'wallet-bifold'}
+            size={40}
+            color={theme.colors.tertiary}
+          />
+        </View>
+
         <Text
           style={[
-            theme.fonts.displaySmall,
-            gs.fontBold,
             {
-              color: theme.colors.onBackground,
+              color: theme.colors.onSurfaceDisabled,
+              fontSize: textSize.sm,
             },
           ]}
         >
-          {t('common.amountPlaceholder')}
+          {t('common.setupAccDesc')}
         </Text>
       </View>
-      <TextInput
-        mode="outlined"
-        style={[styles.texInput]}
-        placeholder={t('common.amount') + ' (' + t('common.optional') + ')'}
-        keyboardType="numeric"
-        value={amount}
-        onChangeText={onAmountChange}
-        left={<TextInput.Affix text="₹" />}
-      />
+
+      <View style={[{ gap: spacing.md }]}>
+        <View style={[{ gap: spacing.sm }]}>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                fontSize: textSize.lg,
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {t('common.accName')}
+          </Text>
+          <TextInput
+            autoFocus
+            mode="outlined"
+            style={[styles.texInput]}
+            placeholder={t('common.accName')}
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+            keyboardType="default"
+            value={accName}
+            onChangeText={setAccName}
+            left={<TextInput.Affix text="₹" />}
+            activeOutlineColor={theme.colors.inverseSurface}
+          />
+        </View>
+        <View style={[{ gap: spacing.sm }]}>
+          <Text
+            style={[
+              gs.fontBold,
+              {
+                fontSize: textSize.lg,
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {t('common.amountPlaceholder')}
+          </Text>
+          <TextInput
+            mode="outlined"
+            style={[styles.texInput]}
+            placeholder={t('common.amount') + ' (' + t('common.optional') + ')'}
+            keyboardType="numeric"
+            value={amount}
+            onChangeText={onAmountChange}
+            left={<TextInput.Affix text="₹" />}
+            activeOutlineColor={theme.colors.inverseSurface}
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+          />
+        </View>
+      </View>
+
       <Button
         onPress={saveAccount}
         labelStyle={styles.nextButtonLabel}
         style={styles.nextButton}
         mode="contained"
+        disabled={accName.trim().length <= 0}
+        buttonColor={theme.colors.inversePrimary}
+        textColor={theme.colors.onPrimaryContainer}
       >
         {t('common.next')}
       </Button>
@@ -93,16 +177,15 @@ export default InitialAccountAmountSetup;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     gap: spacing.lg,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
   },
   headingContainer: {
-    width: '80%',
+    marginTop: spacing.md,
   },
   texInput: {
     borderRadius: borderRadius.lg,
-    width: '80%',
     fontSize: textSize.lg,
   },
   nextButton: { width: '40%' },

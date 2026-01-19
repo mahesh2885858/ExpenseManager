@@ -13,11 +13,14 @@ type TTransactionsStore = {
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
   updateTransaction: (id: string, transaction: TTransaction) => void;
-  addCategory: (category: TCategory) => void;
+  addCategory: (category: TCategory, makeDefault: boolean) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
-  setFilters: (filter: TFilters) => void;
+  setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
+  deleteForAnAcc: (accId: string) => void;
+  updateCategory: (cat: TCategory) => void;
+  removeCategory: (catId: string) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -30,11 +33,13 @@ const useTransactionsStore = create<PositionStore>()(
         {
           name: 'General',
           id: DEFAULT_CATEGORY_ID,
+          isDefault: true,
         },
       ],
       filters: {
         date: null,
         type: null,
+        categoryId: null,
       },
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
@@ -48,8 +53,19 @@ const useTransactionsStore = create<PositionStore>()(
           }),
         }));
       },
-      addCategory: category => {
-        set(state => ({ categories: [...state.categories, category] }));
+      addCategory: (category, makeDefault) => {
+        set(state => {
+          if (makeDefault) {
+            return {
+              categories: [
+                ...state.categories.map(cat => ({ ...cat, isDefault: false })),
+                { ...category, isDefault: true },
+              ],
+            };
+          } else {
+            return { categories: [...state.categories, category] };
+          }
+        });
       },
       toggleSelection: id => {
         set(state => ({
@@ -70,7 +86,7 @@ const useTransactionsStore = create<PositionStore>()(
       },
       setFilters: filter => {
         if (filter) {
-          set(() => ({ filters: filter }));
+          set(state => ({ filters: { ...state.filters, ...filter } }));
         }
       },
       resetFilters: () => {
@@ -78,7 +94,30 @@ const useTransactionsStore = create<PositionStore>()(
           filters: {
             date: null,
             type: null,
+            categoryId: null,
           },
+        }));
+      },
+      deleteForAnAcc: accId => {
+        const updatedTransaction = get().transactions.filter(
+          t => t.accountId !== accId,
+        );
+        set({
+          transactions: updatedTransaction,
+        });
+      },
+      updateCategory: cat => {
+        const updatedCats = get().categories.map(c => {
+          if (c.id === cat.id) {
+            return { ...cat };
+          } else return c;
+        });
+        set({ categories: updatedCats });
+      },
+
+      removeCategory: catId => {
+        set(state => ({
+          categories: state.categories.filter(c => c.id !== catId),
         }));
       },
     }),

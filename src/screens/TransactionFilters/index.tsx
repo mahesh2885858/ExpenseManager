@@ -1,13 +1,18 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Icon, Snackbar } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useTransactionsStore from '../../stores/transactionsStore';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const TransactionFilters = () => {
   const { colors } = useAppTheme();
@@ -23,16 +28,23 @@ const TransactionFilters = () => {
   const transactionType = ['Income', 'Expense', 'All'];
   const dateFilter = useTransactionsStore(state => state.filters.date);
   const typeFilter = useTransactionsStore(state => state.filters.type);
-
+  const categoryFilter = useTransactionsStore(
+    state => state.filters.categoryId,
+  );
+  const filtersStore = useTransactionsStore(state => state);
+  console.log({ filtersStore });
   const setFilters = useTransactionsStore(state => state.setFilters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const { categories } = useCategories();
+
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
   const [renderSnack, setRenderSnack] = useState(false);
 
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+
   const isAnyFilterApplied = useMemo(() => {
-    console.log({ dateFilter, typeFilter });
-    return !!dateFilter || !!typeFilter;
-  }, [dateFilter, typeFilter]);
+    return !!dateFilter || !!typeFilter || !!categoryFilter;
+  }, [dateFilter, typeFilter, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
     if (!dateFilter) return 'All';
@@ -61,7 +73,6 @@ const TransactionFilters = () => {
       switch (item) {
         case 'Today':
           setFilters({
-            type: typeFilter,
             date: {
               isToday: true,
             },
@@ -69,7 +80,6 @@ const TransactionFilters = () => {
           break;
         case 'This week':
           setFilters({
-            type: typeFilter,
             date: {
               isThisWeek: true,
             },
@@ -77,7 +87,6 @@ const TransactionFilters = () => {
           break;
         case 'This month':
           setFilters({
-            type: typeFilter,
             date: {
               isThisMonth: true,
             },
@@ -85,7 +94,6 @@ const TransactionFilters = () => {
           break;
         case 'This year':
           setFilters({
-            type: typeFilter,
             date: {
               isThisYear: true,
             },
@@ -93,7 +101,6 @@ const TransactionFilters = () => {
           break;
         case 'Range':
           setFilters({
-            type: typeFilter,
             date: {
               range: givenRange,
             },
@@ -102,38 +109,44 @@ const TransactionFilters = () => {
 
         default:
           setFilters({
-            type: typeFilter,
             date: null,
           });
           break;
       }
     },
-    [setFilters, typeFilter],
+    [setFilters],
   );
 
   const setTypeFilter = (type: string) => {
-    console.log('Type filter is being set here: ', type);
     switch (type) {
       case 'Income':
         setFilters({
-          date: dateFilter,
           type: 'income',
         });
         break;
       case 'Expense':
         setFilters({
-          date: dateFilter,
           type: 'expense',
         });
         break;
 
       default:
         setFilters({
-          date: dateFilter,
           type: null,
         });
         break;
     }
+  };
+
+  const resetCategoryFilter = useCallback(() => {
+    setFilters({ categoryId: null });
+  }, [setFilters]);
+
+  const setCatFilter = (categoryId: string) => {
+    console.log('Category filter is being set here: ', categoryId);
+    setFilters({
+      categoryId: categoryId,
+    });
   };
 
   const onConfirm = useCallback(
@@ -170,208 +183,268 @@ const TransactionFilters = () => {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={[
-        gs.centerItems,
-        gs.fullFlex,
-        {
-          backgroundColor: colors.backdrop,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.filterBox,
-          {
-            backgroundColor: colors.background,
-          },
-        ]}
-      >
-        <View
+    <GestureHandlerRootView>
+      <BottomSheetModalProvider>
+        <KeyboardAvoidingView
           style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            gs.justifyBetween,
-
+            gs.centerItems,
+            gs.fullFlex,
             {
-              paddingHorizontal: spacing.sm,
-              paddingTop: spacing.sm,
+              backgroundColor: colors.backdrop,
             },
           ]}
         >
-          <Text
+          <View
             style={[
+              styles.filterBox,
               {
-                color: colors.onBackground,
-                fontSize: textSize.lg,
+                backgroundColor: colors.background,
               },
             ]}
           >
-            Filters
-          </Text>
-          <PressableWithFeedback
-            onPress={() => {
-              navigation.goBack();
-            }}
-            style={{
-              paddingVertical: spacing.sm,
-            }}
-          >
-            <Icon source={'close'} size={textSize.lg} />
-          </PressableWithFeedback>
-        </View>
-        {/* date filters */}
-        <View
-          style={[
-            styles.dateFilter,
-            gs.flexRow,
-            {
-              borderColor: colors.onSurfaceDisabled,
-            },
-          ]}
-        >
-          {filters.map(item => {
-            const isSelected = selectedFilter === item;
-            const isRange = item === 'Range';
-            return (
+            <View
+              style={[
+                gs.flexRow,
+                gs.itemsCenter,
+                gs.justifyBetween,
+
+                {
+                  paddingHorizontal: spacing.sm,
+                  paddingTop: spacing.sm,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  {
+                    color: colors.onBackground,
+                    fontSize: textSize.lg,
+                  },
+                ]}
+              >
+                Filters
+              </Text>
               <PressableWithFeedback
                 onPress={() => {
-                  if (isRange) {
-                    setRenderCustomDatePicker(true);
-                  } else {
-                    setDateFilter(item);
-                  }
+                  navigation.goBack();
                 }}
+                style={{
+                  paddingVertical: spacing.sm,
+                }}
+              >
+                <Icon source={'close'} size={textSize.lg} />
+              </PressableWithFeedback>
+            </View>
+            {/* date filters */}
+            <View
+              style={[
+                styles.dateFilter,
+                gs.flexRow,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              {filters.map(item => {
+                const isSelected = selectedFilter === item;
+                const isRange = item === 'Range';
+                return (
+                  <PressableWithFeedback
+                    onPress={() => {
+                      if (isRange) {
+                        setRenderCustomDatePicker(true);
+                      } else {
+                        setDateFilter(item);
+                      }
+                    }}
+                    style={[
+                      styles.filterItem,
+                      {
+                        borderColor: isSelected
+                          ? colors.secondaryContainer
+                          : colors.onSecondaryContainer,
+                        backgroundColor: isSelected
+                          ? colors.secondaryContainer
+                          : colors.surface,
+                      },
+                    ]}
+                    key={item}
+                  >
+                    <Text
+                      style={{
+                        color: colors.onPrimaryContainer,
+                        fontSize: textSize.sm,
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </PressableWithFeedback>
+                );
+              })}
+            </View>
+            {/* transaction type filters */}
+            <View
+              style={[
+                styles.dateFilter,
+                gs.flexRow,
+                {
+                  borderColor: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              {transactionType.map(item => {
+                const isSelected = selectedType === item;
+                return (
+                  <PressableWithFeedback
+                    onPress={() => setTypeFilter(item)}
+                    style={[
+                      styles.filterItem,
+                      {
+                        borderColor: isSelected
+                          ? colors.secondaryContainer
+                          : colors.onSecondaryContainer,
+                        backgroundColor: isSelected
+                          ? colors.secondaryContainer
+                          : colors.surface,
+                      },
+                    ]}
+                    key={item}
+                  >
+                    <Text
+                      style={{
+                        color: colors.onPrimaryContainer,
+                        fontSize: textSize.sm,
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </PressableWithFeedback>
+                );
+              })}
+            </View>
+            {/* category filter */}
+            <View
+              style={[
+                gs.flexRow,
+                gs.itemsCenter,
+                {
+                  gap: spacing.sm,
+                },
+              ]}
+            >
+              <View
                 style={[
-                  styles.filterItem,
+                  styles.categoryBox,
+                  gs.fullFlex,
+
                   {
-                    borderColor: isSelected
-                      ? colors.secondaryContainer
-                      : colors.onSecondaryContainer,
-                    backgroundColor: isSelected
-                      ? colors.secondaryContainer
-                      : colors.surface,
+                    borderColor: colors.onPrimaryContainer,
                   },
                 ]}
-                key={item}
               >
-                <Text
-                  style={{
-                    color: colors.onPrimaryContainer,
-                    fontSize: textSize.sm,
-                  }}
+                <PressableWithFeedback
+                  onPress={() => handlePresent()}
+                  style={[gs.flexRow, gs.justifyBetween, gs.itemsCenter]}
                 >
-                  {item}
-                </Text>
-              </PressableWithFeedback>
-            );
-          })}
-        </View>
-        {/* transaction type filters */}
-        <View
-          style={[
-            styles.dateFilter,
-            gs.flexRow,
-            {
-              borderColor: colors.onSurfaceDisabled,
-            },
-          ]}
-        >
-          {transactionType.map(item => {
-            const isSelected = selectedType === item;
-            return (
+                  <Text
+                    style={[
+                      {
+                        color: colors.onPrimaryContainer,
+                      },
+                    ]}
+                  >
+                    {categoryFilter === null
+                      ? 'All'
+                      : categories.filter(c => c.id === categoryFilter)[0]
+                          ?.name ?? ''}
+                  </Text>
+                  <Icon source={'chevron-down'} size={spacing.md} />
+                </PressableWithFeedback>
+              </View>
               <PressableWithFeedback
-                onPress={() => setTypeFilter(item)}
+                onPress={resetCategoryFilter}
+                hidden={categoryFilter === null}
+              >
+                <Icon source={'restart'} size={textSize.xl} />
+              </PressableWithFeedback>
+            </View>
+            <View style={[gs.flexRow, gs.centerItems, styles.filterButtonBox]}>
+              <PressableWithFeedback
+                hidden={!isAnyFilterApplied}
                 style={[
-                  styles.filterItem,
+                  styles.filterButton,
                   {
-                    borderColor: isSelected
-                      ? colors.secondaryContainer
-                      : colors.onSecondaryContainer,
-                    backgroundColor: isSelected
-                      ? colors.secondaryContainer
-                      : colors.surface,
+                    backgroundColor: colors.secondaryContainer,
                   },
                 ]}
-                key={item}
+                onPress={resetFilters}
               >
                 <Text
                   style={{
-                    color: colors.onPrimaryContainer,
-                    fontSize: textSize.sm,
+                    fontSize: textSize.md,
+                    color: colors.onSecondaryContainer,
                   }}
                 >
-                  {item}
+                  Reset
                 </Text>
               </PressableWithFeedback>
-            );
-          })}
-        </View>
-        <View style={[gs.flexRow, gs.centerItems, styles.filterButtonBox]}>
-          <PressableWithFeedback
-            hidden={!isAnyFilterApplied}
-            style={[
-              styles.filterButton,
-              {
-                backgroundColor: colors.secondaryContainer,
-              },
-            ]}
-            onPress={resetFilters}
-          >
-            <Text
-              style={{
-                fontSize: textSize.md,
-                color: colors.onSecondaryContainer,
+              <PressableWithFeedback
+                onPress={navigation.goBack}
+                style={[
+                  styles.filterButton,
+                  {
+                    backgroundColor: colors.secondaryContainer,
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    fontSize: textSize.md,
+                    color: colors.onSecondaryContainer,
+                  }}
+                >
+                  Done
+                </Text>
+              </PressableWithFeedback>
+            </View>
+          </View>
+          {renderCustomDatePicker && (
+            <DatePickerModal
+              startDate={range ? range[0] : undefined}
+              label="Select Custom date range"
+              animationType="fade"
+              presentationStyle="pageSheet"
+              locale="en"
+              mode="range"
+              visible={renderCustomDatePicker}
+              endDate={range ? range[0] : undefined}
+              onConfirm={onConfirm}
+              onDismiss={() => {
+                setRenderCustomDatePicker(false);
               }}
-            >
-              Reset
-            </Text>
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            onPress={navigation.goBack}
-            style={[
-              styles.filterButton,
-              {
-                backgroundColor: colors.secondaryContainer,
-              },
-            ]}
+            />
+          )}
+
+          <CategorySelectionModal
+            handleSheetChanges={handleSheetChange}
+            ref={btmShtRef}
+            selectCategory={id => {
+              setCatFilter(id);
+            }}
+            selectedCategory={categoryFilter}
+            forFilter
+          />
+          <Snackbar
+            visible={renderSnack}
+            onDismiss={() => {
+              setRenderSnack(false);
+            }}
           >
-            <Text
-              style={{
-                fontSize: textSize.md,
-                color: colors.onSecondaryContainer,
-              }}
-            >
-              Done
-            </Text>
-          </PressableWithFeedback>
-        </View>
-      </View>
-      {renderCustomDatePicker && (
-        <DatePickerModal
-          startDate={range ? range[0] : undefined}
-          label="Select Custom date range"
-          animationType="fade"
-          presentationStyle="pageSheet"
-          locale="en"
-          mode="range"
-          visible={renderCustomDatePicker}
-          endDate={range ? range[0] : undefined}
-          onConfirm={onConfirm}
-          onDismiss={() => {
-            setRenderCustomDatePicker(false);
-          }}
-        />
-      )}
-      <Snackbar
-        visible={renderSnack}
-        onDismiss={() => {
-          setRenderSnack(false);
-        }}
-      >
-        <Text>Please select both start and end date.</Text>
-      </Snackbar>
-    </KeyboardAvoidingView>
+            <Text>Please select both start and end date.</Text>
+          </Snackbar>
+        </KeyboardAvoidingView>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 };
 
@@ -381,7 +454,7 @@ const styles = StyleSheet.create({
   filterBox: {
     position: 'absolute',
     bottom: 0,
-    height: 340,
+    height: 400,
     width: '96%',
     borderTopEndRadius: borderRadius.xxl,
     borderTopStartRadius: borderRadius.xxl,
@@ -411,6 +484,14 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: textSize.sm,
+  },
+  categoryBox: {
+    marginVertical: spacing.sm,
+    marginHorizontal: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
   },
   filterButtonBox: {
     gap: spacing.md,

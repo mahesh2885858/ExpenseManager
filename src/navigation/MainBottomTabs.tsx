@@ -8,6 +8,7 @@ import { TBottomTabParamList } from '../types';
 import HomeScreen from '../screens/HomeScreen';
 import MyTabBar from '../components/organisms/MyTabBar';
 import Transactions from '../screens/Transactions';
+import Reports from '../screens/Reports';
 const BottomTab = createBottomTabNavigator<TBottomTabParamList>();
 
 const tabBarIcon = (
@@ -52,6 +53,15 @@ const MainBottomTabs = () => {
       <BottomTab.Screen
         name="Transactions"
         component={Transactions}
+        options={{
+          tabBarIcon: props => tabBarIcon(props, 'history'),
+          headerShown: false,
+        }}
+      />
+
+      <BottomTab.Screen
+        name="Reports"
+        component={Reports}
         options={{
           tabBarIcon: props => tabBarIcon(props, 'history'),
           headerShown: false,

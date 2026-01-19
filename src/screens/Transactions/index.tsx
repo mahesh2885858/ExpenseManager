@@ -1,65 +1,32 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { Icon } from 'react-native-paper';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useGetTransactions from '../../hooks/useGetTransactions';
+import useTransactions from '../../hooks/useTransactions';
+import { formatAmount } from '../../utils';
 import useTransactionsStore from '../../stores/transactionsStore';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
-  const navigation = useNavigation();
-  const { search, setSearch, filteredTransactions } = useGetTransactions();
+  const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
-  const resetFilters = useTransactionsStore(state => state.resetFilters);
-  const [renderSearch, setRenderSearch] = useState(false);
-
-  const isFiltersActive = useMemo(() => {
-    return !!filters.date || !!filters.type;
-  }, [filters]);
-
-  const handleBackPress = useCallback(
-    (isEvent = false) => {
-      resetFilters();
-      if (isEvent) {
-        return false;
-      } else {
-        navigation.goBack();
-      }
-    },
-    [navigation, resetFilters],
-  );
-
-  const onSearchClose = () => {
-    setSearch('');
-    setRenderSearch(false);
-  };
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () =>
-      handleBackPress(true),
-    );
-
-    return () => backHandler.remove();
-  }, [handleBackPress]);
+  const {
+    totalExpenses,
+    totalIncome,
+    filteredTransactions,
+    search,
+    setSearch,
+  } = useTransactions({
+    filter: filters,
+  });
 
   return (
-    <ScrollView
-      nestedScrollEnabled={true}
-      contentContainerStyle={[
+    <View
+      style={[
         styles.container,
         {
           paddingTop: top + 5,
@@ -67,136 +34,110 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
-      {
-        <View
-          style={[
-            {
-              paddingHorizontal: spacing.lg,
-              gap: spacing.md,
-            },
-            gs.flexRow,
-            gs.itemsCenter,
-            gs.justifyBetween,
-          ]}
-        >
-          <>
-            {renderSearch ? (
-              <View
-                style={[
-                  gs.flexRow,
-                  gs.fullFlex,
-                  gs.itemsCenter,
-                  gs.justifyBetween,
+      <CommonHeader hideBackButton search={search} setSearch={setSearch} />
 
-                  {
-                    backgroundColor: theme.colors.surfaceVariant,
-                    borderRadius: borderRadius.pill,
-                  },
-                ]}
-              >
-                <TextInput
-                  value={search}
-                  onChangeText={setSearch}
-                  autoFocus
-                  placeholder="Search here.."
-                  style={[
-                    gs.fullFlex,
-                    {
-                      paddingHorizontal: spacing.md,
-                      color: theme.colors.onBackground,
-                    },
-                  ]}
-                />
-                <PressableWithFeedback
-                  onPress={() => {
-                    onSearchClose();
-                  }}
-                  style={[
-                    {
-                      padding: spacing.xs,
-                      paddingRight: spacing.md,
-                    },
-                  ]}
-                >
-                  <Icon source={'close'} size={textSize.md} />
-                </PressableWithFeedback>
-              </View>
-            ) : (
-              <>
-                <View
-                  style={[
-                    gs.flexRow,
-                    gs.centerItems,
-                    {
-                      gap: spacing.md,
-                    },
-                  ]}
-                >
-                  <Pressable onPress={() => handleBackPress()}>
-                    <Icon size={24} source={'arrow-left'} />
-                  </Pressable>
-                  <Text
-                    style={[
-                      gs.fontBold,
-                      {
-                        fontSize: textSize.lg,
-                        color: theme.colors.onBackground,
-                      },
-                    ]}
-                  >
-                    Transactions
-                  </Text>
-                </View>
-                <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-                  <PressableWithFeedback
-                    onPress={() => {
-                      setRenderSearch(true);
-                    }}
-                    style={[
-                      {
-                        backgroundColor: theme.colors.surfaceVariant,
-                        padding: spacing.xs,
-                        paddingHorizontal: spacing.md,
-                        borderRadius: borderRadius.xxl,
-                      },
-                    ]}
-                  >
-                    <Icon source={'magnify'} size={textSize.md} />
-                  </PressableWithFeedback>
-                  <PressableWithFeedback
-                    onPress={() => {
-                      navigation.navigate('TransactionFilters');
-                    }}
-                    style={[
-                      {
-                        backgroundColor: theme.colors.surfaceVariant,
-                        padding: spacing.xs,
-                        paddingHorizontal: spacing.md,
-                        borderRadius: borderRadius.xxl,
-                      },
-                    ]}
-                  >
-                    <Icon
-                      source={isFiltersActive ? 'filter-off' : 'filter'}
-                      size={textSize.md}
-                    />
-                  </PressableWithFeedback>
-                </View>
-              </>
-            )}
-          </>
-        </View>
-      }
-
-      {/* recent transactions section */}
+      {/* summary */}
       <View
         style={[
+          styles.summary,
+          {
+            backgroundColor: colors.inverseOnSurface,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.summaryText,
+            {
+              color: colors.onPrimaryContainer,
+            },
+          ]}
+        >
+          Summary
+        </Text>
+        <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
+          <View
+            style={[
+              gs.fullFlex,
+              styles.tType,
+              {
+                backgroundColor: colors.surfaceVariant,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
+            >
+              Income
+            </Text>
+            <Text
+              style={[
+                styles.amountText,
+
+                {
+                  color: colors.onPrimaryContainer,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              {formatAmount(totalIncome)}
+            </Text>
+          </View>
+          <View
+            style={[
+              gs.fullFlex,
+              styles.tType,
+              {
+                backgroundColor: colors.surfaceVariant,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
+            >
+              Expense
+            </Text>
+            <Text
+              style={[
+                styles.amountText,
+                {
+                  color: colors.onPrimaryContainer,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              {formatAmount(totalExpenses)}
+            </Text>
+          </View>
+        </View>
+      </View>
+      {/* summary */}
+
+      {/* transactions section */}
+      <View
+        style={[
+          gs.fullFlex,
           {
             paddingHorizontal: spacing.lg,
           },
         ]}
       >
-        <View style={[gs.fullFlex]}>
+        <View
+          style={[
+            gs.fullFlex,
+            {
+              marginTop: spacing.md,
+            },
+          ]}
+        >
           {filteredTransactions.length === 0 ? (
             <Text
               style={[
@@ -212,17 +153,11 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions
-              transactions={filteredTransactions.sort(
-                (a, b) =>
-                  new Date(b.transactionDate).getTime() -
-                  new Date(a.transactionDate).getTime(),
-              )}
-            />
+            <RenderTransactions transactions={filteredTransactions} />
           )}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -230,17 +165,20 @@ export default Transactions;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
+    flex: 1,
   },
   avatar: {
     height: 45,
     width: 45,
   },
+
   totalBalance: {
     width: '100%',
+    marginTop: -10,
   },
   amountText: {
-    fontWeight: '500',
+    fontWeight: '700',
   },
   ieBox: {
     flex: 1,
@@ -250,16 +188,25 @@ const styles = StyleSheet.create({
   ieBanner: {
     fontWeight: 'semibold',
   },
-  filterBox: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-    flexWrap: 'wrap',
-    overflow: 'hidden',
-  },
-  filterItem: {
-    borderWidth: 1,
+  summary: {
+    marginHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.pill,
+    paddingVertical: spacing.sm,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+  },
+  summaryText: {
+    fontSize: textSize.lg,
+  },
+  tTypeBox: {
+    borderRadius: borderRadius.md,
+    gap: spacing.md,
+  },
+  tType: {
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.xs,
   },
 });

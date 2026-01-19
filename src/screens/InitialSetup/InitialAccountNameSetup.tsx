@@ -1,8 +1,14 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
-import { Button, TextInput, useTheme } from 'react-native-paper';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
 import { TRootStackParamList } from '../../types';
@@ -13,10 +19,11 @@ const InitialAccountNameSetup = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigation<NavigationProp<TRootStackParamList>>();
-  const [name, setName] = useState('');
+  const [name, setName] = useState('user');
 
   const navigateToAmountSetup = useCallback(() => {
-    navigate.navigate('AmountInput', { name });
+    Keyboard.dismiss();
+    navigate.navigate('AmountInput', { userName: name });
   }, [name, navigate]);
 
   return (
@@ -32,10 +39,37 @@ const InitialAccountNameSetup = () => {
       ]}
     >
       <View style={styles.headingContainer}>
+        <View style={[gs.flexRow, gs.itemsCenter]}>
+          <Text
+            style={[
+              theme.fonts.displaySmall,
+              gs.fontBold,
+              {
+                color: theme.colors.onBackground,
+                marginRight: spacing.md,
+              },
+            ]}
+          >
+            {'Hi there'}
+          </Text>
+          <Icon source={'hand-wave'} size={60} color={theme.colors.tertiary} />
+          <Text
+            style={[
+              theme.fonts.displaySmall,
+              gs.fontBold,
+              {
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {','}
+          </Text>
+        </View>
+
         <Text
           style={[
-            theme.fonts.displaySmall,
-            gs.fontBold,
+            theme.fonts.headlineSmall,
+
             {
               color: theme.colors.onBackground,
             },
@@ -47,10 +81,13 @@ const InitialAccountNameSetup = () => {
       <TextInput
         error={name.trim() === ''}
         mode="outlined"
-        style={[styles.texInput, { ...theme.fonts.bodyLarge }]}
+        style={[styles.texInput]}
         placeholder={t('common.namePlaceholder')}
         value={name}
         onChangeText={setName}
+        autoFocus
+        activeOutlineColor={theme.colors.inverseSurface}
+        placeholderTextColor={theme.colors.onSurfaceDisabled}
       />
       <Button
         onPress={navigateToAmountSetup}
@@ -59,6 +96,8 @@ const InitialAccountNameSetup = () => {
         style={styles.nextButton}
         mode="contained"
         icon={'arrow-right-circle-outline'}
+        buttonColor={theme.colors.inversePrimary}
+        textColor={theme.colors.onPrimaryContainer}
       >
         {t('common.next')}
       </Button>

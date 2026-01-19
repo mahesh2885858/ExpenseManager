@@ -1,11 +1,11 @@
 import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
 import React from 'react';
-import MainStack from './navigation/MainStack';
-import { useColorScheme } from 'react-native';
+import { ColorSchemeName } from 'react-native';
 import { CombinedDarkTheme, CombinedDefaultTheme } from '../theme';
+import MainStack from './navigation/MainStack';
 
-const Main = () => {
-  const theme = useColorScheme();
+const Main = (props: { theme: ColorSchemeName }) => {
+  const { theme } = props;
 
   const linking: LinkingOptions<ReactNavigation.RootParamList> = {
     prefixes: ['myapp://'],

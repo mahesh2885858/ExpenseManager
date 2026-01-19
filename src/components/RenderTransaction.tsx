@@ -1,4 +1,5 @@
-import { formatDigits, getMaxText } from 'commonutil-core';
+import { useNavigation } from '@react-navigation/native';
+import { getMaxText } from 'commonutil-core';
 import { format, getDate } from 'date-fns';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -8,15 +9,16 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
+import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
-import { useNavigation } from '@react-navigation/native';
+import useTransactions from '../hooks/useTransactions';
 
 const RenderTransaction = (props: { item: TTransaction }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
-  const remove = useTransactionsStore(state => state.removeTransaction);
+  const { deleteTransaction } = useTransactions({});
   const transactions = useTransactionsStore(state => state.transactions);
 
   const selectedTransactions = useMemo(
@@ -26,8 +28,8 @@ const RenderTransaction = (props: { item: TTransaction }) => {
 
   const categoryName = useMemo(() => {
     const cId = props.item.categoryIds[0];
-    const category = categories.filter(c => c.id === cId);
-    return category[0]?.name ?? 'General';
+    const category = categories.find(c => c.id === cId);
+    return category?.name ?? 'Unknown';
   }, [props, categories]);
 
   return (
@@ -50,7 +52,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         gs.flexRow,
         {
           gap: spacing.md,
-          marginTop: spacing.lg,
+          marginBottom: spacing.lg,
         },
       ]}
     >
@@ -60,7 +62,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             padding: spacing.sm,
             paddingHorizontal: spacing.md,
             borderRadius: borderRadius.lg,
-            backgroundColor: theme.colors.secondaryContainer,
+            backgroundColor: theme.colors.primaryContainer,
           },
           gs.centerItems,
         ]}
@@ -74,7 +76,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onSecondaryContainer,
+              color: theme.colors.onPrimaryContainer,
               fontSize: textSize.md,
             },
             gs.fontBold,
@@ -85,7 +87,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onSecondaryContainer,
+              color: theme.colors.onPrimaryContainer,
               fontSize: textSize.md,
             },
             gs.fontBold,
@@ -122,7 +124,12 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         )}
       </View>
       <View
-        style={[gs.centerItems, props.item.isSelected && styles.actionsBox]}
+        style={[
+          gs.flexRow,
+          // gs.centerItems,
+          gs.itemsCenter,
+          props.item.isSelected && styles.actionsBox,
+        ]}
       >
         <Text
           style={[
@@ -132,13 +139,11 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               color:
                 props.item.type === 'expense'
                   ? theme.colors.error
-                  : theme.colors.success,
+                  : theme.colors.tertiary,
             },
           ]}
         >
-          {props.item.type === 'expense'
-            ? `₹${formatDigits(props.item.amount.toString())}`
-            : `₹${formatDigits(props.item.amount.toString())}`}
+          {formatAmount(props.item.amount)}
         </Text>
         {props.item.isSelected && (
           <Animated.View
@@ -147,7 +152,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             style={[gs.flexRow, { gap: spacing.xs }]}
           >
             <PressableWithFeedback
-              onPress={() => remove(props.item.id)}
+              onPress={() => deleteTransaction(props.item.id)}
               style={[
                 styles.action,
                 {
@@ -156,17 +161,6 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               ]}
             >
               <Icon source={'delete'} size={25} color={theme.colors.error} />
-            </PressableWithFeedback>
-            <PressableWithFeedback
-              onPress={() => {}}
-              style={[
-                styles.action,
-                {
-                  backgroundColor: theme.colors.elevation.level5,
-                },
-              ]}
-            >
-              <Icon source={'pencil'} size={25} />
             </PressableWithFeedback>
           </Animated.View>
         )}
@@ -185,10 +179,10 @@ const styles = StyleSheet.create({
   },
   actionsBox: {
     gap: spacing.xs,
-    alignSelf: 'flex-end',
   },
   action: {
-    padding: spacing.xs,
+    padding: spacing.sm,
     borderRadius: borderRadius.sm,
+    marginLeft: spacing.sm,
   },
 });

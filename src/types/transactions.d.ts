@@ -38,4 +38,8 @@ export type TTypeFilter = 'income' | 'expense';
 export type TFilters = {
   date: TDateFilter | null;
   type: TTypeFilter | null;
+  categoryId?: null | string;
+  accId?: null | string;
 };
+
+export type TGroupBy = 'week' | 'month' | 'year';

@@ -1,205 +1,144 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { formatDigits } from 'commonutil-core';
-import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Card } from 'react-native-paper';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useGetTransactions from '../../hooks/useGetTransactions';
-import useAccountStore from '../../stores/accountsStore';
-import useTransactionsStore from '../../stores/transactionsStore';
-import { TBottomTabParamList } from '../../types';
+import useAccounts from '../../hooks/useAccounts';
+import useTransactions from '../../hooks/useTransactions';
+import { formatAmount } from '../../utils';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
-  const getSelectedAccount = useAccountStore(state => state.getSelectedAccount);
-  const { transactions, totalExpenses, totalIncome } = useGetTransactions();
-  const setFilters = useTransactionsStore(state => state.setFilters);
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
-
-  const selectedAccount = useMemo(() => {
-    return getSelectedAccount();
-  }, [getSelectedAccount]);
-
-  const totalBalance = useMemo(() => {
-    return selectedAccount.balance + totalIncome - totalExpenses;
-  }, [selectedAccount, totalExpenses, totalIncome]);
-
-  transactions.sort(
-    (a, b) =>
-      new Date(b.transactionDate).getTime() -
-      new Date(a.transactionDate).getTime(),
-  );
+  const { colors } = theme;
+  const {
+    totalExpenses,
+    totalIncome,
+    filteredTransactions,
+    search,
+    setSearch,
+  } = useTransactions({});
+  const { totalBalance } = useAccounts();
 
   return (
-    <ScrollView
-      nestedScrollEnabled={true}
-      contentContainerStyle={[
+    <View
+      style={[
+        gs.fullFlex,
         styles.container,
         {
           paddingTop: top + 5,
-          gap: spacing.lg,
         },
       ]}
     >
       {/* header section */}
-      <View style={[{ paddingHorizontal: spacing.lg }, gs.flexRow]}>
-        <Pressable
-          style={[
-            {
-              backgroundColor: theme.colors.primaryContainer,
-              borderRadius: borderRadius.round,
-            },
-            styles.avatar,
-            gs.centerItems,
-          ]}
-        >
+      <CommonHeader search={search} setSearch={setSearch} />
+      {/* Accounts summary */}
+
+      <View
+        style={[
+          styles.summary,
+          {
+            backgroundColor: colors.inverseOnSurface,
+            marginTop: spacing.md,
+          },
+        ]}
+      >
+        <View>
           <Text
-            style={{
-              color: theme.colors.onPrimaryContainer,
-              fontSize: textSize.lg,
-            }}
-          >
-            {selectedAccount.name.charAt(0).toUpperCase()}
-          </Text>
-        </Pressable>
-      </View>
-      {/* Total balance section */}
-      <View style={{ paddingHorizontal: spacing.lg }}>
-        <Card mode="contained">
-          <Card.Content
             style={[
-              styles.totalBalance,
+              styles.summaryText,
               {
-                backgroundColor: theme.colors.primaryContainer,
-                borderRadius: borderRadius.lg,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.md,
-                gap: spacing.xs,
+                color: colors.onPrimaryContainer,
+              },
+            ]}
+          >
+            Balance
+          </Text>
+          <Text
+            style={[
+              {
+                color: colors.onPrimaryContainer,
+                fontSize: textSize.md,
+              },
+            ]}
+          >
+            {formatAmount(totalBalance)}
+          </Text>
+        </View>
+
+        <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
+          <View
+            style={[
+              gs.fullFlex,
+              styles.tType,
+              {
+                backgroundColor: colors.surfaceVariant,
               },
             ]}
           >
             <Text
-              style={{
-                color: theme.colors.onPrimaryContainer,
-                fontSize: textSize.md,
-              }}
+              style={[
+                {
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
             >
-              Total Balance
+              Income
             </Text>
             <Text
               style={[
                 styles.amountText,
                 {
-                  color: theme.colors.onPrimaryContainer,
-                  fontSize: textSize.xxxl,
+                  color: colors.onPrimaryContainer,
+                  fontSize: textSize.md,
                 },
               ]}
             >
-              ₹ {totalBalance < 0 && '-'}
-              {formatDigits(
-                totalBalance < 0
-                  ? Math.abs(totalBalance).toString()
-                  : totalBalance.toString(),
-              )}
+              {formatAmount(totalIncome)}
             </Text>
-          </Card.Content>
-        </Card>
+          </View>
+          <View
+            style={[
+              gs.fullFlex,
+              styles.tType,
+              {
+                backgroundColor: colors.surfaceVariant,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
+            >
+              Expense
+            </Text>
+            <Text
+              style={[
+                styles.amountText,
+                {
+                  color: colors.onPrimaryContainer,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              {formatAmount(totalExpenses)}
+            </Text>
+          </View>
+        </View>
       </View>
-      {/* income and expense section */}
-      <View
-        style={[gs.flexRow, { paddingHorizontal: spacing.lg, gap: spacing.md }]}
-      >
-        <PressableWithFeedback
-          onPress={() => {
-            setFilters({
-              type: 'income',
-              date: null,
-            });
-            navigation.navigate('Transactions');
-          }}
-          style={[
-            styles.ieBox,
-            {
-              backgroundColor: theme.colors.surfaceVariant,
-              padding: spacing.sm,
-              borderRadius: borderRadius.md,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.ieBanner,
-              {
-                color: theme.colors.onBackground,
-                fontSize: textSize.md,
-              },
-            ]}
-          >
-            Income
-          </Text>
-          <Text
-            style={[
-              gs.fontBold,
-              {
-                color: theme.colors.success,
-                fontSize: textSize.xl,
-              },
-            ]}
-          >
-            ₹ {formatDigits((selectedAccount.balance + totalIncome).toString())}
-          </Text>
-        </PressableWithFeedback>
-        <PressableWithFeedback
-          onPress={() => {
-            setFilters({
-              type: 'expense',
-              date: null,
-            });
-            navigation.navigate('Transactions');
-          }}
-          style={[
-            styles.ieBox,
-            {
-              backgroundColor: theme.colors.surfaceVariant,
-              padding: spacing.sm,
-              borderRadius: borderRadius.md,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.ieBanner,
-              {
-                color: theme.colors.onBackground,
-                fontSize: textSize.md,
-              },
-            ]}
-          >
-            Expense
-          </Text>
-          <Text
-            style={[
-              gs.fontBold,
-              {
-                color: theme.colors.error,
-                fontSize: textSize.xl,
-              },
-            ]}
-          >
-            ₹ {formatDigits(totalExpenses.toString())}
-          </Text>
-        </PressableWithFeedback>
-      </View>
+
       {/* recent transactions section */}
       <View
         style={[
+          gs.fullFlex,
           {
             paddingHorizontal: spacing.lg,
+            marginTop: spacing.md,
           },
         ]}
       >
@@ -212,10 +151,10 @@ const HomeScreen = () => {
             },
           ]}
         >
-          Recent transactions
+          Recent Transactions
         </Text>
-        <View style={[gs.fullFlex]}>
-          {transactions.length === 0 ? (
+        <View style={[gs.fullFlex, { marginTop: spacing.md }]}>
+          {filteredTransactions.length === 0 ? (
             <Text
               style={[
                 gs.fontBold,
@@ -231,13 +170,12 @@ const HomeScreen = () => {
             </Text>
           ) : (
             <RenderTransactions
-              transactions={transactions.slice(0, 10)}
-              renderSeeAll
+              transactions={filteredTransactions.slice(0, 10)}
             />
           )}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -245,17 +183,19 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
   },
   avatar: {
     height: 45,
     width: 45,
   },
+
   totalBalance: {
     width: '100%',
+    marginTop: -10,
   },
   amountText: {
-    fontWeight: '500',
+    fontWeight: '700',
   },
   ieBox: {
     flex: 1,
@@ -264,5 +204,26 @@ const styles = StyleSheet.create({
   },
   ieBanner: {
     fontWeight: 'semibold',
+  },
+  summary: {
+    marginHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+  },
+  summaryText: {
+    fontSize: textSize.lg,
+  },
+  tTypeBox: {
+    borderRadius: borderRadius.md,
+    gap: spacing.md,
+  },
+  tType: {
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.xs,
   },
 });

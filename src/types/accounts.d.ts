@@ -3,4 +3,7 @@ export type TAccount = {
   name: string;
   balance: number;
   isSelected?: boolean;
+  isDefault?: boolean;
+  expense?: number;
+  income?: number;
 };

@@ -8,7 +8,10 @@ export default {
     amountPlaceholder: 'Initial amount',
     save: 'Save',
     optional: 'Optional',
-    pickName: 'Pick a name',
+    pickName: 'What should I call you?',
     amount: 'Amount',
+    setupAccount: 'Set up an account!',
+    setupAccDesc: 'It can be your bank name, credit or debit card name.',
+    accName: 'Account name',
   },
 };
