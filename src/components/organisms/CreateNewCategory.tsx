@@ -19,7 +19,7 @@ import { TCategorySummary } from '../../types';
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
-  catToEdit: TCategorySummary;
+  catToEdit?: TCategorySummary;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {

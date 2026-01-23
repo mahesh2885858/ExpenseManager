@@ -1,10 +1,11 @@
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetProps,
+  useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
+import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
@@ -28,6 +29,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AccountSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
   const accounts = useAccountStore(state => state.accounts);
+  const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
   const {
     btmShtRef: newAccBtmSheet,
@@ -89,7 +91,11 @@ const AccountSelectionModal = (props: TProps) => {
             </Text>
           </PressableWithFeedback>
         </View>
-        <BottomSheetFlatList
+        <FlashList
+          style={{
+            maxHeight: 500,
+          }}
+          renderScrollComponent={BottomSheetScrollable}
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           data={accounts}

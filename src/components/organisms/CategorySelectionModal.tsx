@@ -1,9 +1,9 @@
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetProps,
+  useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -15,6 +15,7 @@ import useCategories from '../../hooks/useCategories';
 import { TCategory } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewCategory from './CreateNewCategory';
+import { FlashList } from '@shopify/flash-list';
 
 type TProps = {
   ref: any;
@@ -32,6 +33,7 @@ const CategorySelectionModal = (props: TProps) => {
   const { categories } = useCategories();
   const { colors } = useAppTheme();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
   const coloredText = {
     color: colors.onSurfaceVariant,
@@ -73,7 +75,11 @@ const CategorySelectionModal = (props: TProps) => {
                 </Text>
               </PressableWithFeedback>
             </View>
-            <BottomSheetFlatList
+            <FlashList
+              style={{
+                maxHeight: 500,
+              }}
+              renderScrollComponent={BottomSheetScrollable}
               keyExtractor={(item: TCategory) => item.id}
               showsVerticalScrollIndicator={false}
               data={sortedCategories}

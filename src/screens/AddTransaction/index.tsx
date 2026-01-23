@@ -1,16 +1,8 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { format } from 'date-fns';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
   KeyboardAvoidingView,
-  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,7 +18,6 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
 import { uCFirst } from 'commonutil-core';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
@@ -38,11 +29,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Camera,
-  useCameraDevice,
-  useCameraPermission,
-} from 'react-native-vision-camera';
+
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
@@ -52,6 +39,7 @@ import CategorySelectionModal from '../../components/organisms/CategorySelection
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
+import useTransactions from '../../hooks/useTransactions';
 import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
@@ -59,25 +47,15 @@ import {
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
-import RenderAttachment from './RenderAttachment';
-import useTransactions from '../../hooks/useTransactions';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
-
-const renderAttachment = (
-  prop: TAttachment,
-  removeFile: (filePath: string) => void,
-) => <RenderAttachment attachment={prop} removeFile={removeFile} />;
 
 const AddTransaction = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
-  const { hasPermission, requestPermission } = useCameraPermission();
-  const device = useCameraDevice('back');
-  const camera = useRef<Camera>(null);
-  const [renderCamera, setRenderCamera] = useState(false);
+
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
   const { addNewTransaction } = useTransactions({});
@@ -188,67 +166,6 @@ const AddTransaction = () => {
     date?.setMinutes(time.minutes);
     return date;
   }, [date, time]);
-
-  const pickFiles = async () => {
-    try {
-      const filesWithLocalUri: TAttachment[] = [];
-      const PickedFiles = await pick({
-        allowMultiSelection: true,
-        type: [types.images, types.pdf],
-      });
-      console.log({ selectedFiles: PickedFiles });
-      const validFiles = PickedFiles.filter(f => !!f.uri);
-      const copied = await keepLocalCopy({
-        destination: 'documentDirectory',
-        // @ts-expect-error: i don't know why it is throwing error
-        files: validFiles.map(f => ({
-          fileName: f.name ?? 'file',
-          uri: f.uri,
-        })),
-      });
-      copied.forEach((file, i) => {
-        if (file.status === 'error') {
-          console.log('error while copying: ', file.copyError);
-        } else {
-          filesWithLocalUri.push({
-            extension: validFiles[i].nativeType ?? '',
-            name: validFiles[i].name ?? '',
-            path: file.localUri,
-            size: validFiles[i].size ?? 0,
-          });
-        }
-      });
-      console.log({ filesWithLocalUri });
-      setAttachments(filesWithLocalUri);
-    } catch (error) {
-      console.log({ errorWhilePickingFiles: error });
-    }
-  };
-
-  const removeFile = (filePath: string) => {
-    const files = attachments.filter(f => f.path !== filePath);
-    setAttachments(files);
-  };
-
-  const onCameraPress = async () => {
-    if (hasPermission) {
-      if (!device) {
-        console.log('No device found');
-      }
-      setRenderCamera(true);
-    } else {
-      const result = await requestPermission();
-      if (result) {
-        if (!device) {
-          console.log('No device found');
-        }
-        setRenderCamera(true);
-      } else {
-        console.log('Camera permission denied');
-        Linking.openSettings();
-      }
-    }
-  };
 
   const saveTransaction = () => {
     try {
@@ -626,41 +543,6 @@ const AddTransaction = () => {
               </Tooltip>
             </View> */}
 
-            {/* Todo: Attachments list section */}
-            {attachments.length > 0 && (
-              <View
-                style={[
-                  {
-                    marginTop: spacing.lg,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    gs.fontBold,
-                    {
-                      fontSize: textSize.md,
-                      color: colors.onBackground,
-                    },
-                  ]}
-                >
-                  Attachments
-                </Text>
-                <View style={[style.attachmentContainer]}>
-                  <FlatList
-                    contentContainerStyle={{
-                      gap: spacing.md,
-                    }}
-                    horizontal
-                    data={attachments}
-                    renderItem={item => renderAttachment(item.item, removeFile)}
-                    keyExtractor={item => item.path}
-                    showsHorizontalScrollIndicator={false}
-                  />
-                </View>
-              </View>
-            )}
-
             {/* Description section */}
             <TextInput
               style={[
@@ -717,55 +599,7 @@ const AddTransaction = () => {
                 onPress={saveTransaction}
               />
             )}
-          {renderCamera && device && (
-            <View style={[StyleSheet.absoluteFill]}>
-              <Camera
-                style={StyleSheet.absoluteFill}
-                ref={camera}
-                photo
-                device={device}
-                isActive={renderCamera}
-              />
-              <View style={style.cameraToolbar}>
-                <PressableWithFeedback
-                  onPress={async () => {
-                    const file = await camera.current?.takePhoto({});
-                    const result = await fetch(`file://${file.path}`);
-                    const photo = await result.blob();
-                    console.log({ photo, file, result });
-                    const copied = await keepLocalCopy({
-                      destination: 'documentDirectory',
-                      files: [
-                        {
-                          fileName: 'file.jpeg',
-                          uri: result.url,
-                        },
-                      ],
-                    });
-                    copied.forEach(file => {
-                      if (file.status === 'error') {
-                        console.log('error while copying: ', file.copyError);
-                      } else {
-                        console.log({ file });
-                        setAttachments([
-                          {
-                            extension: 'image/jpeg',
-                            name: 'file.jpeg',
-                            path: file.localUri,
-                            size: 100,
-                          },
-                        ]);
-                      }
-                    });
 
-                    setRenderCamera(false);
-                  }}
-                >
-                  <Icon source={'radiobox-marked'} size={70} />
-                </PressableWithFeedback>
-              </View>
-            </View>
-          )}
           <CategorySelectionModal
             handleSheetChanges={handleCategorySheetChanges}
             ref={categoryBtmSheet}
