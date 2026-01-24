@@ -101,13 +101,17 @@ const Backup = (props: TProps) => {
           onPress={exportData}
           style={[styles.themeOption]}
         >
-          <Icon source={'export'} size={24} color={colors.onBackground} />
+          <Icon
+            source={'file-upload-outline'}
+            size={24}
+            color={colors.onBackground}
+          />
           <Text
             style={{
               color: colors.onBackground,
             }}
           >
-            {'export'}
+            {'Export'}
           </Text>
         </PressableWithFeedback>
         <PressableWithFeedback
@@ -115,7 +119,11 @@ const Backup = (props: TProps) => {
           style={[styles.themeOption]}
           disabled={isGettingData}
         >
-          <Icon source={'import'} size={24} color={colors.onBackground} />
+          <Icon
+            source={'file-download-outline'}
+            size={24}
+            color={colors.onBackground}
+          />
           <Text
             style={{
               color: colors.onBackground,
@@ -209,7 +217,6 @@ const Backup = (props: TProps) => {
 export default Backup;
 
 const styles = StyleSheet.create({
-  Container: {},
   setting: {
     borderRadius: borderRadius.md,
     marginHorizontal: spacing.md,
