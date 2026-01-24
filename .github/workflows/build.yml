@@ -60,38 +60,3 @@ jobs:
         with:
           name: app-release
           path: android/app/build/outputs/apk/release/
-
-      # Extract version from build.gradle
-      - name: Extract version
-        id: version
-        run: |
-          VERSION_NAME=$(grep "versionName" android/app/build.gradle | awk '{print $2}' | tr -d '"')
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-
-        # Check if release already exists
-      - name: Check if release exists
-        id: check_release
-        run: |
-          if gh release view "v${{ steps.version.outputs.version_name }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        # Create GitHub Release if not exists
-      - name: Create Release
-        if: steps.check_release.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version_name }}
-          name: Release v${{ steps.version.outputs.version_name }}
-          files: |
-            android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
-            android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk
-            android/app/build/outputs/apk/release/app-x86-release.apk
-            android/app/build/outputs/apk/release/app-x86_64-release.apk
-            android/app/build/outputs/apk/release/app-universal-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

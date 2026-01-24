@@ -9,21 +9,25 @@ ExpenseManager is a mobile application that allows users to manage their account
 ## Screenshots
 
 <p align="center">
-<img src="assets/images/screenshots/Screenshot_20260111_220902.jpg" width="30%">
-<img src="assets/images/screenshots/Screenshot_20260111_220915.jpg" width="30%">
-<img src="assets/images/screenshots/Screenshot_20260111_220827.jpg" width="30%">
+<img src="assets/images/screenshots/homeScreen.jpg" width="30%">
+<img src="assets/images/screenshots/transactions.jpg" width="30%">
+<img src="assets/images/screenshots/addExpense.jpg" width="30%">
+<p>
+<p align="center">
+<img src="assets/images/screenshots/Filters.jpg" width="30%">
+<img src="assets/images/screenshots/settings.jpg" width="30%">
+<img src="assets/images/screenshots/graphMonthly.jpg" width="30%">
 <p>
 
 ## Features
 
 - **Account Management**: Create and manage multiple accounts with initial balances
-- **Initial Setup Flow**: Guided onboarding process for first-time users
+- **Initial Setup Flow**: Guided initial process for first-time users
 - **Theme Support**: Automatic dark/light theme switching based on system preferences
 - **Internationalization**: Multi-language support with i18next
 - **Persistent Storage**: Data persistence using MMKV for fast, secure local storage
-- **Modern UI**: Clean Material Design 3 interface with React Native Paper
-- **State Management**: Efficient state management with Zustand
-- **Navigation**: Smooth navigation experience with React Navigation
+- **Modern UI**: Clean Material Design 3 interface with intuitive UX.
+- **Backup and Import**: Export and import data and keep the data in your device. Data never leaves your device.
 
 ## Contributing
 

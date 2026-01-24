@@ -26,6 +26,7 @@ const useAccounts = () => {
   return {
     totalBalance,
     deleteAcc,
+    accounts,
   };
 };
 
