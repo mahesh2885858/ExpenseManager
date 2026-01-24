@@ -21,6 +21,8 @@ type TTransactionsStoreActions = {
   deleteForAnAcc: (accId: string) => void;
   updateCategory: (cat: TCategory) => void;
   removeCategory: (catId: string) => void;
+  importTransactions: (t: TTransaction[]) => void;
+  importCategories: (cats: TCategories) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -119,6 +121,12 @@ const useTransactionsStore = create<PositionStore>()(
         set(state => ({
           categories: state.categories.filter(c => c.id !== catId),
         }));
+      },
+      importTransactions: transactions => {
+        set({ transactions });
+      },
+      importCategories: cats => {
+        set({ categories: cats });
       },
     }),
     {
