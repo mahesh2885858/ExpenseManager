@@ -7,16 +7,14 @@ import {
   isToday,
 } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
-import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TAccount, TFilters, TTransaction } from '../types';
+import { TFilters, TTransaction } from '../types';
 
 const useTransactions = (props: { filter?: TFilters }) => {
   const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const filters = props?.filter ?? undefined;
-  const accounts = useAccountStore(state => state.accounts);
-  const updateAccountBalance = useAccountStore(state => state.updateAccount);
+
   const removeTransaction = useTransactionsStore(
     state => state.removeTransaction,
   );
@@ -112,26 +110,9 @@ const useTransactions = (props: { filter?: TFilters }) => {
 
   const deleteTransaction = useCallback(
     (transactionId: string) => {
-      const transaction = transactions.find(t => t.id === transactionId);
-      if (!transaction) return;
-      const { type, amount } = transaction;
-      const acc = accounts.find(acc => acc.id === transaction.accountId);
-      if (!acc) return;
-      const currentBal = acc?.balance;
-
-      const updatedBal =
-        type === 'expense' ? currentBal + amount : currentBal - amount;
-
-      const updatedAcc: TAccount = {
-        ...acc,
-        balance: updatedBal,
-        expense: type === 'expense' ? (acc.expense ?? 0) - amount : acc.expense,
-        income: type === 'income' ? (acc.income ?? 0) - amount : acc.income,
-      };
-      updateAccountBalance(updatedAcc);
-      removeTransaction(transaction.id);
+      removeTransaction(transactionId);
     },
-    [transactions, accounts, updateAccountBalance, removeTransaction],
+    [removeTransaction],
   );
 
   const totalIncome = useMemo(() => {
@@ -155,25 +136,7 @@ const useTransactions = (props: { filter?: TFilters }) => {
   }, [filteredTransactions]);
 
   const addNewTransaction = (transaction: TTransaction) => {
-    const { accountId, amount, type } = transaction;
-
-    const acc = accounts.filter(item => item.id === accountId)[0];
-    const currentBal = acc?.balance;
-
-    const updatedBal =
-      type === 'expense' ? currentBal - amount : currentBal + amount;
-
-    const updatedAcc: TAccount = {
-      ...acc,
-      balance: updatedBal,
-      expense: type === 'expense' ? (acc.expense ?? 0) + amount : acc.expense,
-      income: type === 'income' ? (acc.income ?? 0) + amount : acc.income,
-    };
-
-    console.log({ updatedAcc });
-
     addTransaction(transaction);
-    updateAccountBalance(updatedAcc);
   };
 
   return {

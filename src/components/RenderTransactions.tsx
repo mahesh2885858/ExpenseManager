@@ -2,7 +2,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-import { spacing, textSize, useAppTheme } from '../../theme';
+import { textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import { TBottomTabParamList, TTransaction } from '../types';
 import RenderTransaction from './RenderTransaction';
@@ -26,13 +26,10 @@ const RenderTransactions = ({
       renderItem={props => <RenderTransaction item={props.item} />}
       keyExtractor={item => item.id}
       ListFooterComponent={
-        renderSeeAll && transactions.length > 10 ? (
+        renderSeeAll && transactions.length === 10 ? (
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('Transactions');
-            }}
-            style={{
-              marginTop: spacing.lg,
             }}
           >
             <Text

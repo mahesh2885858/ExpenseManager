@@ -23,8 +23,8 @@ type TProps = {
 };
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
-const cardHeightCollapsed = 130;
-const cardHeightExpanded = 200;
+const cardHeightCollapsed = 120;
+const cardHeightExpanded = 180;
 const cardHeightDeleteExpanded = 330;
 
 const RenderCategoryCard = (props: TProps) => {
@@ -76,18 +76,7 @@ const RenderCategoryCard = (props: TProps) => {
       >
         {item.name}
       </Text>
-      <View>
-        <Text
-          style={[
-            styles.text,
-            {
-              color: colors.onBackground,
-            },
-          ]}
-        >
-          Balance: {formatAmount(0)}
-        </Text>
-      </View>
+
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
         <View
           style={[
@@ -257,7 +246,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: spacing.sm,
-    // height: cardHeightCollapsed,
     overflow: 'hidden',
   },
   text: {
@@ -268,7 +256,7 @@ const styles = StyleSheet.create({
   tTypeBox: {
     borderRadius: borderRadius.md,
     gap: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
   },
   tType: {
     paddingLeft: spacing.md,

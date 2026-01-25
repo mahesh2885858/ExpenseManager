@@ -1,14 +1,15 @@
 import { format } from 'date-fns';
 import { useCallback, useState } from 'react';
+import { ToastAndroid } from 'react-native';
 import * as ScopedStorage from 'react-native-scoped-storage';
+import useAccountStore from '../stores/accountsStore';
 import useSettingsStore from '../stores/settingsStore';
+import useTransactionsStore from '../stores/transactionsStore';
+import { TAccount, TCategories, TTransaction } from '../types';
 import { getValidData } from '../utils/validateImportedData';
 import useAccounts from './useAccounts';
 import useCategories from './useCategories';
 import useTransactions from './useTransactions';
-import { TAccount, TCategories, TTransaction } from '../types';
-import useTransactionsStore from '../stores/transactionsStore';
-import useAccountStore from '../stores/accountsStore';
 
 const IMPORT_VERSION = '1';
 
@@ -84,6 +85,7 @@ const useBackup = () => {
           'utf8',
           false,
         );
+        ToastAndroid.show('Exported successfully', ToastAndroid.SHORT);
       } else {
         throw new Error('Something went wrong!!');
       }

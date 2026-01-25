@@ -45,10 +45,8 @@ const InitialAccountAmountSetup = () => {
       const amt = parseFloat(amount) || 0;
       addAccount({
         name: accName,
-        balance: amt,
+        initBalance: amt,
         id,
-        expense: amt < 0 ? amt : 0,
-        income: amt > 0 ? amt : 0,
       });
       Keyboard.dismiss();
       setIsInitialSetupDone(true);
@@ -61,6 +59,7 @@ const InitialAccountAmountSetup = () => {
     route.params?.userName,
     setIsInitialSetupDone,
   ]);
+
   return (
     <KeyboardAvoidingView
       behavior="padding"

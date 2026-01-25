@@ -32,7 +32,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
@@ -105,7 +105,7 @@ const AddTransaction = () => {
         accountId: '',
 
         attachments: [],
-        selectedCatId: defaultCategoryId,
+        selectedCatId: defaultCategoryId ?? DEFAULT_CATEGORY_ID,
         time: {
           hours: new Date().getHours(),
           minutes: new Date().getMinutes(),
