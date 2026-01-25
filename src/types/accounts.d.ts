@@ -1,7 +1,7 @@
 export type TAccount = {
   id: string;
   name: string;
-  balance: number;
+  initBalance: number;
   isSelected?: boolean;
   isDefault?: boolean;
 };

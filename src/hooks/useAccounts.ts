@@ -21,7 +21,7 @@ const useAccounts = () => {
 
   const totalBalance = useMemo(() => {
     return accounts.reduce((prev, item) => {
-      return prev + (item.balance ?? 0);
+      return prev + (item.initBalance ?? 0);
     }, 0);
   }, [accounts]);
 
@@ -40,7 +40,7 @@ const useAccounts = () => {
             income + -t.amount;
           }
         });
-        balance = acc.balance + income - expense;
+        balance = acc.initBalance + income - expense;
       }
 
       return {

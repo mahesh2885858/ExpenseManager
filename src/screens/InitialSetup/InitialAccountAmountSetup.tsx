@@ -45,7 +45,7 @@ const InitialAccountAmountSetup = () => {
       const amt = parseFloat(amount) || 0;
       addAccount({
         name: accName,
-        balance: amt,
+        initBalance: amt,
         id,
       });
       Keyboard.dismiss();

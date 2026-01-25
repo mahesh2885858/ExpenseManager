@@ -51,7 +51,7 @@ const CreateNewAccount = (props: TProps) => {
     } else {
       const id = v4();
       addAccount({
-        balance: parseFloat(balance.trim().length > 0 ? balance : '0'),
+        initBalance: parseFloat(balance.trim().length > 0 ? balance : '0'),
         id,
         name: accName,
       });
