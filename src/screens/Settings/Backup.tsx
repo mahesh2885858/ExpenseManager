@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import { ActivityIndicator, Icon } from 'react-native-paper';
 import {
   createAnimatedComponent,
   useSharedValue,
@@ -28,6 +28,7 @@ const Backup = (props: TProps) => {
     importData,
     isGettingData,
     isImporting,
+    isExporting,
   } = useBackup();
 
   const animHBackup = useSharedValue(heightCollapsed);
@@ -99,13 +100,18 @@ const Backup = (props: TProps) => {
       <View style={[styles.themeOptContainer]}>
         <PressableWithFeedback
           onPress={exportData}
+          disabled={isExporting}
           style={[styles.themeOption]}
         >
-          <Icon
-            source={'file-upload-outline'}
-            size={24}
-            color={colors.onBackground}
-          />
+          {isExporting ? (
+            <ActivityIndicator size={'small'} />
+          ) : (
+            <Icon
+              source={'file-upload-outline'}
+              size={24}
+              color={colors.onBackground}
+            />
+          )}
           <Text
             style={{
               color: colors.onBackground,

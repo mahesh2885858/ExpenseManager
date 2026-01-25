@@ -29,7 +29,11 @@ const App = () => {
           barStyle={combinedTheme === 'dark' ? 'light-content' : 'dark-content'}
         />
         <Main theme={combinedTheme} />
-        <ToastManager />
+        <ToastManager
+          showCloseIcon={false}
+          showProgressBar={false}
+          theme={combinedTheme === 'dark' ? 'dark' : 'light'}
+        />
       </PaperProvider>
     </SafeAreaProvider>
   );
