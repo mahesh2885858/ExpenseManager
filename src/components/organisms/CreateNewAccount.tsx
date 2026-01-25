@@ -7,14 +7,13 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { CURRENCY_SYMBOL } from '../../common';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import useAccountStore from '../../stores/accountsStore';
-import { Toast } from 'toastify-react-native';
-import { v4 } from 'uuid';
 import { TAccount } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -46,7 +45,10 @@ const CreateNewAccount = (props: TProps) => {
       item => item.name.toLowerCase().trim() === accName.trim().toLowerCase(),
     );
     if (isExist) {
-      Toast.info('Account exist. choose different name!!', 'top');
+      ToastAndroid.show(
+        'Account exist. choose different name!!',
+        ToastAndroid.SHORT,
+      );
       return;
     } else {
       const id = v4();

@@ -7,14 +7,13 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import Switch from '../atoms/Switch';
 import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
-import { Toast } from 'toastify-react-native';
 import { TCategorySummary } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import Switch from '../atoms/Switch';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -43,7 +42,10 @@ const CreateNewCategory = (props: TProps) => {
       cat => cat.name.trim().toLowerCase() === catName.trim().toLowerCase(),
     );
     if (isExist) {
-      Toast.info('Category exist. choose different name!!', 'top');
+      ToastAndroid.show(
+        'Category exist. choose different name!!',
+        ToastAndroid.SHORT,
+      );
       return;
     } else {
       addCategory(catName, makeDefault);
