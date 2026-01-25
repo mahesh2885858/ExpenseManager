@@ -170,6 +170,7 @@ const HomeScreen = () => {
             </Text>
           ) : (
             <RenderTransactions
+              renderSeeAll
               transactions={filteredTransactions.slice(0, 10)}
             />
           )}
