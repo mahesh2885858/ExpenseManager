@@ -37,10 +37,10 @@ const useAccounts = () => {
           if (t.type === 'expense') {
             expense += t.amount;
           } else {
-            income + -t.amount;
+            income += t.amount;
           }
         });
-        balance = acc.initBalance + income - expense;
+        balance = acc.initBalance ?? 0 + income - expense;
       }
 
       return {

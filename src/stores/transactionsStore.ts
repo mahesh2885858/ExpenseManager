@@ -8,12 +8,13 @@ type TTransactionsStore = {
   transactions: TTransaction[];
   categories: TCategories;
   filters: TFilters;
+  defaultCategoryId: string | null;
 };
 
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
   updateTransaction: (id: string, transaction: TTransaction) => void;
-  addCategory: (category: TCategory, makeDefault: boolean) => void;
+  addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
   setFilters: (filter: Partial<TFilters>) => void;
@@ -23,6 +24,7 @@ type TTransactionsStoreActions = {
   removeCategory: (catId: string) => void;
   importTransactions: (t: TTransaction[]) => void;
   importCategories: (cats: TCategories) => void;
+  setDefaultCategoryId: (catId: string | null) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -35,9 +37,9 @@ const useTransactionsStore = create<PositionStore>()(
         {
           name: 'General',
           id: DEFAULT_CATEGORY_ID,
-          isDefault: true,
         },
       ],
+      defaultCategoryId: DEFAULT_CATEGORY_ID,
       filters: {
         date: null,
         type: null,
@@ -55,18 +57,9 @@ const useTransactionsStore = create<PositionStore>()(
           }),
         }));
       },
-      addCategory: (category, makeDefault) => {
+      addCategory: category => {
         set(state => {
-          if (makeDefault) {
-            return {
-              categories: [
-                ...state.categories.map(cat => ({ ...cat, isDefault: false })),
-                { ...category, isDefault: true },
-              ],
-            };
-          } else {
-            return { categories: [...state.categories, category] };
-          }
+          return { categories: [...state.categories, category] };
         });
       },
       toggleSelection: id => {
@@ -127,6 +120,9 @@ const useTransactionsStore = create<PositionStore>()(
       },
       importCategories: cats => {
         set({ categories: cats });
+      },
+      setDefaultCategoryId: catId => {
+        set({ defaultCategoryId: catId });
       },
     }),
     {

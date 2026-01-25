@@ -39,6 +39,8 @@ const RenderAccountCard = (props: TProps) => {
   const totals = useMemo(() => {
     return getIncomeExpenseForAcc(props.item.id);
   }, [getIncomeExpenseForAcc, props.item.id]);
+
+  console.log({ totals });
   useEffect(() => {
     if (props.isFocused) {
       animH.value = withTiming(cardHeightExpanded);

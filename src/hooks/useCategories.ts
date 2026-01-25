@@ -8,9 +8,13 @@ const useCategories = () => {
   const addCategory = useTransactionsStore(state => state.addCategory);
   const transactions = useTransactionsStore(state => state.transactions);
   const updateCategory = useTransactionsStore(state => state.updateCategory);
-  const defaultCategoryId = useMemo(() => {
-    return categories.filter(c => c.isDefault)[0]?.id ?? '';
-  }, [categories]);
+  const setDefaultCategoryId = useTransactionsStore(
+    state => state.setDefaultCategoryId,
+  );
+  const defaultCategoryId = useTransactionsStore(
+    state => state.defaultCategoryId,
+  );
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     defaultCategoryId,
   );
@@ -21,14 +25,13 @@ const useCategories = () => {
 
   const addNewCategory = (name: string, makeDefault = false) => {
     const id = uuid();
-
-    addCategory(
-      {
-        id,
-        name,
-      },
-      makeDefault,
-    );
+    addCategory({
+      id,
+      name,
+    });
+    if (makeDefault) {
+      setDefaultCategoryId(id);
+    }
   };
   const categoriesSummary: TCategorySummary[] = useMemo(() => {
     return categories.map(cat => {
