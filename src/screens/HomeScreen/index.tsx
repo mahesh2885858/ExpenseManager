@@ -64,7 +64,7 @@ const HomeScreen = () => {
               },
             ]}
           >
-            {formatAmount(totalBalance)}
+            {formatAmount(totalBalance + totalIncome - totalExpenses)}
           </Text>
         </View>
 

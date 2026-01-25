@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
@@ -32,10 +32,13 @@ const RenderAccountCard = (props: TProps) => {
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
+  const { getIncomeExpenseForAcc } = useAccounts();
   const navigation = useNavigation();
   const { deleteAcc } = useAccounts();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
-  console.log({ props });
+  const totals = useMemo(() => {
+    return getIncomeExpenseForAcc(props.item.id);
+  }, [getIncomeExpenseForAcc, props.item.id]);
   useEffect(() => {
     if (props.isFocused) {
       animH.value = withTiming(cardHeightExpanded);
@@ -86,7 +89,7 @@ const RenderAccountCard = (props: TProps) => {
             },
           ]}
         >
-          Balance: {formatAmount(item.balance)}
+          Balance: {formatAmount(totals.balance)}
         </Text>
       </View>
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
@@ -117,7 +120,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(item.income ?? 0)}
+            {formatAmount(totals.income ?? 0)}
           </Text>
         </View>
         <View
@@ -147,7 +150,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(item.expense ?? 0)}
+            {formatAmount(totals.expense ?? 0)}
           </Text>
         </View>
       </View>

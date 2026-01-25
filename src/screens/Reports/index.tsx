@@ -74,7 +74,7 @@ const Reports = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
-  const { filteredTransactions } = useTransactions();
+  const { filteredTransactions } = useTransactions({});
   // sort
   filteredTransactions.sort(
     (a, b) =>
