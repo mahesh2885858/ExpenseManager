@@ -8,7 +8,7 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { RadioButton } from 'react-native-paper';
+import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -76,19 +76,19 @@ const AccountSelectionModal = (props: TProps) => {
           >
             Select Account
           </Text>
-          <PressableWithFeedback onPress={handlePresentNewAccBtmSheet}>
-            <Text
-              style={[
-                styles.manageText,
-                {
-                  fontSize: textSize.md,
-
-                  color: colors.onTertiaryContainer,
-                },
-              ]}
-            >
-              Add new
-            </Text>
+          <PressableWithFeedback
+            style={[
+              {
+                paddingLeft: spacing.md,
+              },
+            ]}
+            onPress={handlePresentNewAccBtmSheet}
+          >
+            <Icon
+              source={'plus'}
+              size={textSize.xxxl}
+              color={colors.onTertiaryContainer}
+            />
           </PressableWithFeedback>
         </View>
         <FlashList

@@ -7,7 +7,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { RadioButton } from 'react-native-paper';
+import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -68,19 +68,17 @@ const CategorySelectionModal = (props: TProps) => {
               <PressableWithFeedback
                 hidden={props.forFilter}
                 onPress={handlePresent}
+                style={[
+                  {
+                    paddingLeft: spacing.md,
+                  },
+                ]}
               >
-                <Text
-                  style={[
-                    styles.manageText,
-                    {
-                      fontSize: textSize.md,
-
-                      color: colors.onTertiaryContainer,
-                    },
-                  ]}
-                >
-                  Add new
-                </Text>
+                <Icon
+                  source={'plus'}
+                  size={textSize.xxxl}
+                  color={colors.onTertiaryContainer}
+                />
               </PressableWithFeedback>
             </View>
             <FlashList
