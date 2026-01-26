@@ -7,6 +7,7 @@ type TAccountsState = {
   userName: string;
   isInitialSetupDone: boolean;
   accounts: TAccount[];
+  defaultAccountId: string | null;
 };
 
 type TAccountsStoreActions = {
@@ -18,6 +19,7 @@ type TAccountsStoreActions = {
   removeAnAcc: (id: string) => void;
   getSelectedAccount: () => TAccount;
   selectAccount: (id: string) => void;
+  setDefaultAccountId: (id: string | null) => void;
   importAccounts: (accounts: TAccount[]) => void;
 };
 
@@ -28,6 +30,7 @@ const useAccountStore = create<PositionStore>()(
     (set, get) => ({
       isInitialSetupDone: false,
       userName: '',
+      defaultAccountId: null,
       accounts: [],
       setIsInitialSetupDone: (isInitialSetupDone: boolean) =>
         set({ isInitialSetupDone }),
@@ -60,6 +63,9 @@ const useAccountStore = create<PositionStore>()(
       },
       importAccounts: accounts => {
         set({ accounts });
+      },
+      setDefaultAccountId: id => {
+        set({ defaultAccountId: id });
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },

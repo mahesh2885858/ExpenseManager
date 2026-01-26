@@ -34,11 +34,11 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
+import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
-import useAccountStore from '../../stores/accountsStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
   TAttachment,
@@ -60,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const accounts = useAccountStore(state => state.accounts);
+  const { accounts, defaultAccountId } = useAccounts();
 
   const initData: {
     type: TTransactionType;
@@ -100,7 +100,7 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
-        accountId: accounts.length === 1 ? accounts[0]?.id : '',
+        accountId: defaultAccountId,
 
         attachments: [],
         selectedCatId: defaultCategoryId ?? DEFAULT_CATEGORY_ID,
@@ -110,7 +110,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultCategoryId, accounts]);
+  }, [route, defaultCategoryId, defaultAccountId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(

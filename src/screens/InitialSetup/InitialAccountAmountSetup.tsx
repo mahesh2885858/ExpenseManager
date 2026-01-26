@@ -28,6 +28,7 @@ const InitialAccountAmountSetup = () => {
   const setIsInitialSetupDone = useAccountStore(
     state => state.setIsInitialSetupDone,
   );
+  const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
 
   const onAmountChange = useCallback((value: string) => {
     // don't allow floats and etc symbols
@@ -48,6 +49,7 @@ const InitialAccountAmountSetup = () => {
         initBalance: amt,
         id,
       });
+      setDefaultAcc(id);
       Keyboard.dismiss();
       setIsInitialSetupDone(true);
     }
@@ -55,6 +57,7 @@ const InitialAccountAmountSetup = () => {
     addAccount,
     setUsername,
     accName,
+    setDefaultAcc,
     amount,
     route.params?.userName,
     setIsInitialSetupDone,

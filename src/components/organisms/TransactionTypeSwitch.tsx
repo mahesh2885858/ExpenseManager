@@ -117,5 +117,8 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     alignItems: 'center',
+    flexDirection: 'column',
+    height: '100%',
+    justifyContent: 'center',
   },
 });
