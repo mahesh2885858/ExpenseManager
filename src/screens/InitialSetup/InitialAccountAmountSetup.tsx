@@ -126,7 +126,6 @@ const InitialAccountAmountSetup = () => {
             keyboardType="default"
             value={accName}
             onChangeText={setAccName}
-            left={<TextInput.Affix text="₹" />}
             activeOutlineColor={theme.colors.inverseSurface}
           />
         </View>
