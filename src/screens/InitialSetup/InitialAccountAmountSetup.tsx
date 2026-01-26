@@ -11,7 +11,7 @@ import {
 import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
-import { gs, MAX_INITIAL_AMOUNT } from '../../common';
+import { gs, MAX_AMOUNT } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
 import { v4 as uuid } from 'uuid';
@@ -34,7 +34,7 @@ const InitialAccountAmountSetup = () => {
     if (value.includes('.') || value.includes(',') || value.includes('-'))
       return;
     const digits = parseInt(value, 10);
-    if (digits > MAX_INITIAL_AMOUNT) return;
+    if (digits > MAX_AMOUNT) return;
     setAmount(value);
   }, []);
 

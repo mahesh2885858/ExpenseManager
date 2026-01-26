@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { CURRENCY_SYMBOL } from '../../common';
+import { CURRENCY_SYMBOL, MAX_AMOUNT_LENGTH } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import { TAccount } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
@@ -156,6 +156,7 @@ const CreateNewAccount = (props: TProps) => {
 
               <BottomSheetTextInput
                 keyboardType="numeric"
+                maxLength={MAX_AMOUNT_LENGTH}
                 value={balance}
                 onChangeText={setBalance}
                 placeholder={CURRENCY_SYMBOL + '0.00'}
