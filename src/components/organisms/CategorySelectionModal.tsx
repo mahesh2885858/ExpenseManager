@@ -57,7 +57,16 @@ const CategorySelectionModal = (props: TProps) => {
         <View style={[styles.content]}>
           <View>
             <View style={[gs.flexRow, gs.itemsCenter]}>
-              <Text style={[styles.headerText, coloredText, gs.fullFlex]}>
+              <Text
+                style={[
+                  gs.fontBold,
+                  gs.fullFlex,
+                  {
+                    fontSize: textSize.lg,
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
                 Select a category
               </Text>
               <PressableWithFeedback onPress={handlePresent}>
