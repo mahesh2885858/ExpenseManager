@@ -65,7 +65,10 @@ const CategorySelectionModal = (props: TProps) => {
               >
                 Select Category
               </Text>
-              <PressableWithFeedback onPress={handlePresent}>
+              <PressableWithFeedback
+                hidden={props.forFilter}
+                onPress={handlePresent}
+              >
                 <Text
                   style={[
                     styles.manageText,
