@@ -21,7 +21,7 @@ const InitialAccountAmountSetup = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'AmountInput'>>();
   const theme = useTheme();
   const { t } = useTranslation();
-  const [amount, setAmount] = useState('0');
+  const [amount, setAmount] = useState('');
   const [accName, setAccName] = useState('');
   const addAccount = useAccountStore(state => state.addAccount);
   const setUsername = useAccountStore(state => state.setUsername);
