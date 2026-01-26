@@ -74,7 +74,7 @@ const AccountSelectionModal = (props: TProps) => {
               },
             ]}
           >
-            Select an account
+            Select Account
           </Text>
           <PressableWithFeedback onPress={handlePresentNewAccBtmSheet}>
             <Text

@@ -92,7 +92,7 @@ const CreateNewCategory = (props: TProps) => {
               },
             ]}
           >
-            {isEditModeOn ? 'Edit category' : 'Add new category'}
+            {isEditModeOn ? 'Edit Category' : 'Add New Category'}
           </Text>
           <View
             style={[

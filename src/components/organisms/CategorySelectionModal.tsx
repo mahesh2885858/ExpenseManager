@@ -35,10 +35,6 @@ const CategorySelectionModal = (props: TProps) => {
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
-  const coloredText = {
-    color: colors.onSurfaceVariant,
-  };
-
   const sortedCategories = useMemo(() => {
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
@@ -67,7 +63,7 @@ const CategorySelectionModal = (props: TProps) => {
                   },
                 ]}
               >
-                Select a category
+                Select Category
               </Text>
               <PressableWithFeedback onPress={handlePresent}>
                 <Text

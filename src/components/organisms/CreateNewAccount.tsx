@@ -101,7 +101,7 @@ const CreateNewAccount = (props: TProps) => {
               },
             ]}
           >
-            {isEditModeOn ? 'Edit account' : 'Add new account'}
+            {isEditModeOn ? 'Edit Account' : 'Add New Account'}
           </Text>
           <View
             style={[
