@@ -18,16 +18,8 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { uCFirst } from 'commonutil-core';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, {
-  interpolateColor,
-  SlideInDown,
-  SlideOutUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { v4 as uuid } from 'uuid';
@@ -41,6 +33,7 @@ import {
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
@@ -140,10 +133,6 @@ const AddTransaction = () => {
   const { kbHeight } = useGetKeyboardHeight();
   const [accountId, setAccountId] = useState(initData.accountId);
   const progress = useSharedValue(0);
-  // Handlers
-  const changeTransactionType = (type: TTransactionType) => {
-    setTransactionType(type);
-  };
 
   const selectedAcc = useMemo(() => {
     if (accountId.trim().length <= 0) {
@@ -232,25 +221,6 @@ const AddTransaction = () => {
     handleSheetChange: handleCategorySheetChanges,
   } = useBottomSheetModal();
 
-  const animatedBgStyle = useAnimatedStyle(() => {
-    return {
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        [colors.error, colors.success],
-      ),
-    };
-  });
-  const animatedTextStyle = useAnimatedStyle(() => {
-    return {
-      color: interpolateColor(
-        progress.value,
-        [0, 1],
-        [colors.onError, colors.onSuccess],
-      ),
-    };
-  });
-
   useEffect(() => {
     progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {
       duration: 250,
@@ -296,33 +266,19 @@ const AddTransaction = () => {
                   Add Transaction
                 </Text>
               </View>
-              <Animated.View
-                style={[style.tractionTypeButton, animatedBgStyle]}
-              >
-                <PressableWithFeedback
-                  onPress={() =>
-                    changeTransactionType(
-                      transactionType === 'expense' ? 'income' : 'expense',
-                    )
-                  }
-                  style={[gs.overflowHide]}
-                >
-                  <Animated.Text
-                    key={transactionType}
-                    entering={SlideInDown.duration(300)}
-                    exiting={SlideOutUp.duration(1000)}
-                    style={[
-                      {
-                        fontSize: textSize.md,
-                      },
-                      gs.centerText,
-                      animatedTextStyle,
-                    ]}
-                  >
-                    {uCFirst(transactionType)}
-                  </Animated.Text>
-                </PressableWithFeedback>
-              </Animated.View>
+            </View>
+
+            <View
+              style={[
+                {
+                  marginTop: spacing.sm,
+                },
+              ]}
+            >
+              <TransactionTypeSwitch
+                type={transactionType}
+                onChange={setTransactionType}
+              />
             </View>
 
             {/* Amount Input */}
@@ -663,7 +619,7 @@ const style = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   amountInputContainer: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     borderWidth: 1,
     borderRadius: borderRadius.md,
     paddingLeft: spacing.sm,
