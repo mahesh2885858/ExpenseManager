@@ -23,14 +23,7 @@ import {
   subYears,
 } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  BackHandler,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -206,8 +199,8 @@ const Reports = () => {
   }, [currentRange, filteredTransactions]);
 
   return (
-    <ScrollView
-      contentContainerStyle={[
+    <View
+      style={[
         styles.container,
         {
           paddingTop: top + 5,
@@ -496,7 +489,7 @@ const Reports = () => {
           />
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -504,7 +497,8 @@ export default Reports;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 200,
+    // paddingBottom: 200,
+    flex: 1,
   },
   typeButton: {
     paddingVertical: spacing.sm,

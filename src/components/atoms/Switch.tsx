@@ -40,7 +40,7 @@ const Switch = (props: TProps) => {
       backgroundColor: interpolateColor(
         x.value,
         [0, 1],
-        ['white', colors.onSuccess],
+        [colors.onBackground, colors.onSuccess],
       ),
     };
   });

@@ -7,7 +7,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { RadioButton } from 'react-native-paper';
+import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -35,10 +35,6 @@ const CategorySelectionModal = (props: TProps) => {
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
-  const coloredText = {
-    color: colors.onSurfaceVariant,
-  };
-
   const sortedCategories = useMemo(() => {
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
@@ -57,22 +53,32 @@ const CategorySelectionModal = (props: TProps) => {
         <View style={[styles.content]}>
           <View>
             <View style={[gs.flexRow, gs.itemsCenter]}>
-              <Text style={[styles.headerText, coloredText, gs.fullFlex]}>
-                Select a category
+              <Text
+                style={[
+                  gs.fontBold,
+                  gs.fullFlex,
+                  {
+                    fontSize: textSize.lg,
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
+                Select Category
               </Text>
-              <PressableWithFeedback onPress={handlePresent}>
-                <Text
-                  style={[
-                    styles.manageText,
-                    {
-                      fontSize: textSize.md,
-
-                      color: colors.onTertiaryContainer,
-                    },
-                  ]}
-                >
-                  Add new
-                </Text>
+              <PressableWithFeedback
+                hidden={props.forFilter}
+                onPress={handlePresent}
+                style={[
+                  {
+                    paddingLeft: spacing.md,
+                  },
+                ]}
+              >
+                <Icon
+                  source={'plus'}
+                  size={textSize.xxxl}
+                  color={colors.onTertiaryContainer}
+                />
               </PressableWithFeedback>
             </View>
             <FlashList
