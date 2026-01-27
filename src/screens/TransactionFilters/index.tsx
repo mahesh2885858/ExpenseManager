@@ -40,7 +40,11 @@ const TransactionFilters = () => {
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
   const isAnyFilterApplied = useMemo(() => {
-    return !!dateFilter || !!typeFilter || !!categoryFilter;
+    return (
+      (!!dateFilter && !dateFilter.isThisMonth) ||
+      !!typeFilter ||
+      !!categoryFilter
+    );
   }, [dateFilter, typeFilter, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
