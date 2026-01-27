@@ -18,10 +18,9 @@ const TransactionFilters = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const filters = [
-    'All',
-    'Today',
-    'This week',
     'This month',
+    'This week',
+    'Today',
     'This year',
     'Range',
   ] as const;
@@ -31,8 +30,6 @@ const TransactionFilters = () => {
   const categoryFilter = useTransactionsStore(
     state => state.filters.categoryId,
   );
-  const filtersStore = useTransactionsStore(state => state);
-  console.log({ filtersStore });
   const setFilters = useTransactionsStore(state => state.setFilters);
   const resetFilters = useTransactionsStore(state => state.resetFilters);
   const { categories } = useCategories();
@@ -47,13 +44,13 @@ const TransactionFilters = () => {
   }, [dateFilter, typeFilter, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
-    if (!dateFilter) return 'All';
+    if (!dateFilter) return 'This month';
     if (dateFilter.isThisWeek) return 'This week';
     if (dateFilter.isThisMonth) return 'This month';
     if (dateFilter.isToday) return 'Today';
     if (dateFilter.isThisYear) return 'This year';
     if (dateFilter.range) return 'Range';
-    return 'All';
+    return 'This month';
   }, [dateFilter]);
 
   const range = useMemo(() => {
@@ -69,7 +66,6 @@ const TransactionFilters = () => {
 
   const setDateFilter = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
-      console.log('Date filter is being set here: ', item);
       switch (item) {
         case 'Today':
           setFilters({

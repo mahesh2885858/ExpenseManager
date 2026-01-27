@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -13,7 +13,8 @@ import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { formatAmount } from '../../utils';
+import { formatAmount, getDateFilterText } from '../../utils';
+import useCategories from '../../hooks/useCategories';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -28,7 +29,7 @@ const Transactions = () => {
   const { selectedAccount, setSelectedAccountId } = useAccounts();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
-
+  const { categories } = useCategories();
   const accountName = useMemo(() => {
     return selectedAccount?.name ?? '';
   }, [selectedAccount]);
@@ -46,6 +47,28 @@ const Transactions = () => {
             t.description?.toLowerCase().includes(search.toLowerCase()),
         );
   }, [filteredTransactions, search]);
+
+  console.log({ filters });
+
+  const dateFilterText = useMemo(() => {
+    if (filters.date) {
+      return getDateFilterText(filters.date);
+    } else return 'This Month';
+  }, [filters]);
+
+  const categoryFilterText = useMemo(() => {
+    if (filters.categoryId) {
+      return categories.find(cat => cat.id === filters.categoryId)?.name ?? '';
+    } else return '';
+  }, [filters, categories]);
+
+  const typeFilterText = useMemo(() => {
+    return filters.type === 'income'
+      ? 'Income'
+      : filters.type === 'expense'
+      ? 'Expense'
+      : '';
+  }, [filters]);
 
   return (
     <View
@@ -70,76 +93,92 @@ const Transactions = () => {
           },
         ]}
       >
-        <PressableWithFeedback
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            {
-              borderRadius: borderRadius.pill,
-              backgroundColor: colors.inverseOnSurface,
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.sm,
-              gap: spacing.sm,
-            },
-          ]}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            gap: spacing.sm,
+          }}
         >
-          <Icon
-            source={'calendar-range'}
-            color={colors.inverseSurface}
-            size={textSize.md}
-          />
-          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
-        </PressableWithFeedback>
-        <PressableWithFeedback
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            {
-              borderRadius: borderRadius.pill,
-              backgroundColor: colors.inverseOnSurface,
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.sm,
-              gap: spacing.sm,
-            },
-          ]}
-        >
-          <Icon
-            source={'calendar-range'}
-            color={colors.inverseSurface}
-            size={textSize.md}
-          />
-          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
-          <Icon
-            source={'close'}
-            color={colors.inverseSurface}
-            size={textSize.md}
-          />
-        </PressableWithFeedback>
-        <PressableWithFeedback
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            {
-              borderRadius: borderRadius.pill,
-              backgroundColor: colors.inverseOnSurface,
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.sm,
-              gap: spacing.sm,
-            },
-          ]}
-        >
-          <Icon
-            source={'calendar-range'}
-            color={colors.inverseSurface}
-            size={textSize.md}
-          />
-          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
-          <Icon
-            source={'close'}
-            color={colors.inverseSurface}
-            size={textSize.md}
-          />
-        </PressableWithFeedback>
+          <PressableWithFeedback
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {dateFilterText}
+            </Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            hidden={typeFilterText.length <= 0}
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {typeFilterText}
+            </Text>
+            <Icon
+              source={'close'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            hidden={categoryFilterText.length <= 0}
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {categoryFilterText}
+            </Text>
+            <Icon
+              source={'close'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+          </PressableWithFeedback>
+        </ScrollView>
       </View>
 
       {/* summary */}
@@ -148,7 +187,7 @@ const Transactions = () => {
           styles.summary,
           {
             backgroundColor: colors.inverseOnSurface,
-            marginTop: spacing.lg,
+            marginTop: spacing.md,
           },
         ]}
       >
