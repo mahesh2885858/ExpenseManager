@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,13 +20,8 @@ const Transactions = () => {
   const theme = useAppTheme();
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
-  const {
-    totalExpenses,
-    totalIncome,
-    filteredTransactions,
-    search,
-    setSearch,
-  } = useTransactions({
+  const [search, setSearch] = useState('');
+  const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
     filter: filters,
   });
   const navigation = useNavigation();
@@ -41,6 +36,16 @@ const Transactions = () => {
   const navigateToFilters = useCallback(() => {
     navigation.navigate('TransactionFilters');
   }, [navigation]);
+
+  const transactionsToRender = useMemo(() => {
+    return search.trim().length === 0
+      ? filteredTransactions
+      : filteredTransactions.filter(
+          t =>
+            t.amount.toString().includes(search) ||
+            t.description?.toLowerCase().includes(search.toLowerCase()),
+        );
+  }, [filteredTransactions, search]);
 
   return (
     <View
@@ -260,7 +265,7 @@ const Transactions = () => {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholderTextColor={colors.inverseSurface}
+            placeholderTextColor={colors.onSurfaceDisabled}
             style={[
               styles.searchInput,
               {
@@ -315,7 +320,7 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={filteredTransactions} />
+            <RenderTransactions transactions={transactionsToRender} />
           )}
         </View>
       </View>

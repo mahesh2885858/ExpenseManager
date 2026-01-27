@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TFilters, TTransaction } from '../types';
 
-const useTransactions = (props: { filter?: TFilters }) => {
+const useTransactions = (props?: { filter?: TFilters }) => {
   const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const filters = props?.filter ?? undefined;
