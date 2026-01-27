@@ -8,6 +8,7 @@ type TAccountsState = {
   isInitialSetupDone: boolean;
   accounts: TAccount[];
   defaultAccountId: string | null;
+  selectedAccountId: string | null;
 };
 
 type TAccountsStoreActions = {
@@ -17,10 +18,11 @@ type TAccountsStoreActions = {
   updateAccount: (acc: TAccount) => void;
   deleteAllAccounts: () => void;
   removeAnAcc: (id: string) => void;
-  getSelectedAccount: () => TAccount;
+  getSelectedAccount: () => TAccount | undefined;
   selectAccount: (id: string) => void;
   setDefaultAccountId: (id: string | null) => void;
   importAccounts: (accounts: TAccount[]) => void;
+  setSelectedAccountId: (id: string | null) => void;
 };
 
 type PositionStore = TAccountsState & TAccountsStoreActions;
@@ -31,13 +33,15 @@ const useAccountStore = create<PositionStore>()(
       isInitialSetupDone: false,
       userName: '',
       defaultAccountId: null,
+      selectedAccountId: null,
       accounts: [],
       setIsInitialSetupDone: (isInitialSetupDone: boolean) =>
         set({ isInitialSetupDone }),
       addAccount: (account: TAccount) =>
         set(state => ({ accounts: [...state.accounts, account] })),
       deleteAllAccounts: () => set({ accounts: [] }),
-      getSelectedAccount: () => get().accounts.filter(a => a.isSelected)[0],
+      getSelectedAccount: () =>
+        get().accounts.find(a => a.id === (get().selectedAccountId ?? '')),
       selectAccount: id => {
         const newAccounts: TAccount[] = get().accounts.map(acc => {
           if (acc.id === id) return { ...acc, isSelected: true };
@@ -66,6 +70,9 @@ const useAccountStore = create<PositionStore>()(
       },
       setDefaultAccountId: id => {
         set({ defaultAccountId: id });
+      },
+      setSelectedAccountId: id => {
+        set({ selectedAccountId: id });
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },

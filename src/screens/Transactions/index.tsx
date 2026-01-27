@@ -1,13 +1,19 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useMemo } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
+import useAccounts from '../../hooks/useAccounts';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
-import { formatAmount } from '../../utils';
 import useTransactionsStore from '../../stores/transactionsStore';
+import { formatAmount } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -23,6 +29,18 @@ const Transactions = () => {
   } = useTransactions({
     filter: filters,
   });
+  const navigation = useNavigation();
+  const { selectedAccount, setSelectedAccountId } = useAccounts();
+
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+
+  const accountName = useMemo(() => {
+    return selectedAccount?.name ?? '';
+  }, [selectedAccount]);
+
+  const navigateToFilters = useCallback(() => {
+    navigation.navigate('TransactionFilters');
+  }, [navigation]);
 
   return (
     <View
@@ -34,7 +52,90 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader hideBackButton search={search} setSearch={setSearch} />
+      <CommonHeader />
+
+      {/* active filters section */}
+      <View
+        style={[
+          gs.flexRow,
+          {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.sm,
+            gap: spacing.sm,
+          },
+        ]}
+      >
+        <PressableWithFeedback
+          style={[
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              borderRadius: borderRadius.pill,
+              backgroundColor: colors.inverseOnSurface,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <Icon
+            source={'calendar-range'}
+            color={colors.inverseSurface}
+            size={textSize.md}
+          />
+          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          style={[
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              borderRadius: borderRadius.pill,
+              backgroundColor: colors.inverseOnSurface,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <Icon
+            source={'calendar-range'}
+            color={colors.inverseSurface}
+            size={textSize.md}
+          />
+          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
+          <Icon
+            source={'close'}
+            color={colors.inverseSurface}
+            size={textSize.md}
+          />
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          style={[
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              borderRadius: borderRadius.pill,
+              backgroundColor: colors.inverseOnSurface,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <Icon
+            source={'calendar-range'}
+            color={colors.inverseSurface}
+            size={textSize.md}
+          />
+          <Text style={[{ color: colors.inverseSurface }]}>This month</Text>
+          <Icon
+            source={'close'}
+            color={colors.inverseSurface}
+            size={textSize.md}
+          />
+        </PressableWithFeedback>
+      </View>
 
       {/* summary */}
       <View
@@ -42,19 +143,43 @@ const Transactions = () => {
           styles.summary,
           {
             backgroundColor: colors.inverseOnSurface,
+            marginTop: spacing.lg,
           },
         ]}
       >
-        <Text
+        <PressableWithFeedback
+          onPress={handlePresent}
           style={[
-            styles.summaryText,
+            styles.account,
             {
-              color: colors.onPrimaryContainer,
+              backgroundColor: colors.tertiary,
+              gap: spacing.xs,
             },
           ]}
         >
-          Summary
-        </Text>
+          <Icon
+            source={'wallet-bifold'}
+            size={textSize.md}
+            color={colors.onTertiary}
+          />
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[
+              gs.fullFlex,
+              {
+                color: colors.onTertiary,
+              },
+            ]}
+          >
+            {accountName}
+          </Text>
+          <Icon
+            source={'chevron-down'}
+            size={textSize.md}
+            color={colors.onTertiary}
+          />
+        </PressableWithFeedback>
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
           <View
             style={[
@@ -121,6 +246,43 @@ const Transactions = () => {
       </View>
       {/* summary */}
 
+      {/* search and filter section */}
+      <View
+        style={[
+          styles.searchAndFilter,
+          { paddingHorizontal: spacing.md, marginTop: spacing.md },
+        ]}
+      >
+        <View
+          style={[styles.search, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon source={'magnify'} size={textSize.md} />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholderTextColor={colors.inverseSurface}
+            style={[
+              styles.searchInput,
+              {
+                color: colors.inverseSurface,
+              },
+            ]}
+            placeholder="Search transactions"
+          />
+        </View>
+        <PressableWithFeedback
+          onPress={navigateToFilters}
+          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon
+            source="filter"
+            size={textSize.md}
+            color={colors.inverseSurface}
+          />
+          <Text style={[{ color: colors.inverseSurface }]}>Filter</Text>
+        </PressableWithFeedback>
+      </View>
+
       {/* transactions section */}
       <View
         style={[
@@ -144,7 +306,7 @@ const Transactions = () => {
                 gs.fontBold,
                 gs.centerText,
                 {
-                  color: theme.colors.onSurfaceDisabled,
+                  color: theme.colors.inverseSurface,
                   fontSize: textSize.lg,
                   marginTop: spacing.lg,
                 },
@@ -157,6 +319,13 @@ const Transactions = () => {
           )}
         </View>
       </View>
+
+      <AccountSelectionModal
+        handleSheetChanges={handleSheetChange}
+        onAccountChange={id => setSelectedAccountId(id)}
+        ref={btmShtRef}
+        selectedAccountId={selectedAccount?.id ?? ''}
+      />
     </View>
   );
 };
@@ -172,7 +341,14 @@ const styles = StyleSheet.create({
     height: 45,
     width: 45,
   },
-
+  account: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '47%',
+  },
   totalBalance: {
     width: '100%',
     marginTop: -10,
@@ -208,5 +384,30 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     gap: spacing.xs,
+  },
+  searchAndFilter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  search: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.pill,
+  },
+  searchInput: {
+    flex: 1,
+    width: '100%',
+    paddingRight: spacing.lg,
+  },
+  filter: {
+    padding: spacing.sm,
+    borderRadius: borderRadius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
 });
