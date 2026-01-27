@@ -22,11 +22,11 @@ const Transactions = () => {
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
   const [search, setSearch] = useState('');
+  const { selectedAccount, setSelectedAccountId } = useAccounts();
   const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
-    filter: filters,
+    filter: { ...filters, accId: selectedAccount?.id },
   });
   const navigation = useNavigation();
-  const { selectedAccount, setSelectedAccountId } = useAccounts();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const { categories } = useCategories();
