@@ -21,15 +21,18 @@ const Transactions = () => {
   const theme = useAppTheme();
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
+  const setFilters = useTransactionsStore(state => state.setFilters);
   const [search, setSearch] = useState('');
   const { selectedAccount, setSelectedAccountId } = useAccounts();
   const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
     filter: { ...filters, accId: selectedAccount?.id },
   });
+
   const navigation = useNavigation();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const { categories } = useCategories();
+
   const accountName = useMemo(() => {
     return selectedAccount?.name ?? '';
   }, [selectedAccount]);
@@ -47,8 +50,6 @@ const Transactions = () => {
             t.description?.toLowerCase().includes(search.toLowerCase()),
         );
   }, [filteredTransactions, search]);
-
-  console.log({ filters });
 
   const dateFilterText = useMemo(() => {
     if (filters.date) {
@@ -69,6 +70,18 @@ const Transactions = () => {
       ? 'Expense'
       : '';
   }, [filters]);
+
+  const resetTypeFilter = useCallback(() => {
+    setFilters({
+      type: null,
+    });
+  }, [setFilters]);
+
+  const resetCategoryFilter = useCallback(() => {
+    setFilters({
+      categoryId: null,
+    });
+  }, [setFilters]);
 
   return (
     <View
@@ -101,6 +114,7 @@ const Transactions = () => {
           }}
         >
           <PressableWithFeedback
+            onPress={() => navigation.navigate('TransactionFilters')}
             style={[
               gs.flexRow,
               gs.itemsCenter,
@@ -123,6 +137,7 @@ const Transactions = () => {
             </Text>
           </PressableWithFeedback>
           <PressableWithFeedback
+            onPress={resetTypeFilter}
             hidden={typeFilterText.length <= 0}
             style={[
               gs.flexRow,
@@ -151,6 +166,7 @@ const Transactions = () => {
             />
           </PressableWithFeedback>
           <PressableWithFeedback
+            onPress={resetCategoryFilter}
             hidden={categoryFilterText.length <= 0}
             style={[
               gs.flexRow,
