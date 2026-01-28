@@ -4,11 +4,10 @@ import {
 } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { Icon } from 'react-native-paper';
-import { TBottomTabParamList } from '../types';
-import HomeScreen from '../screens/HomeScreen';
 import MyTabBar from '../components/organisms/MyTabBar';
-import Transactions from '../screens/Transactions';
 import Reports from '../screens/Reports';
+import Transactions from '../screens/Transactions';
+import { TBottomTabParamList } from '../types';
 const BottomTab = createBottomTabNavigator<TBottomTabParamList>();
 
 const tabBarIcon = (
@@ -35,7 +34,7 @@ const MainBottomTabs = () => {
         animation: 'shift',
       }}
     >
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Home"
         component={HomeScreen}
         options={{
@@ -43,12 +42,12 @@ const MainBottomTabs = () => {
             tabBarIcon(props, props.focused ? 'home' : 'home-outline'),
           headerShown: false,
         }}
-      />
-      <BottomTab.Screen
+      /> */}
+      {/* <BottomTab.Screen
         name="CustomButton"
         component={() => null}
         options={{ tabBarButton: () => null }}
-      />
+      /> */}
 
       <BottomTab.Screen
         name="Transactions"

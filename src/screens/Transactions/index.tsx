@@ -240,6 +240,11 @@ const Transactions = () => {
             color={colors.onTertiary}
           />
         </PressableWithFeedback>
+        {/* <View>
+          <Text>
+            Balance: 
+          </Text>
+        </View> */}
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
           <View
             style={[
