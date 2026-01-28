@@ -11,11 +11,11 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { formatAmount, getDateFilterText } from '../../utils';
-import useCategories from '../../hooks/useCategories';
 import { TTypeFilter } from '../../types';
+import { formatAmount, getDateFilterText } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -23,10 +23,14 @@ const Transactions = () => {
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
   const setFilters = useTransactionsStore(state => state.setFilters);
+  const selectedSort = useTransactionsStore(state => state.sort);
+  const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
+
   const { selectedAccount, setSelectedAccountId } = useAccounts();
   const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
     filter: { ...filters, accId: selectedAccount?.id },
+    sort: selectedSort,
   });
 
   const navigation = useNavigation();
@@ -109,6 +113,14 @@ const Transactions = () => {
     const { date, type, categoryId } = filters;
     return (!!date && !date.isThisMonth) || !!type || !!categoryId;
   }, [filters]);
+
+  const isSortApplied = useMemo(() => {
+    return selectedSort && selectedSort !== 'dateNewFirst';
+  }, [selectedSort]);
+
+  const navigateToSort = useCallback(() => {
+    navigation.navigate('TransactionSort');
+  }, [navigation]);
 
   return (
     <View
@@ -375,8 +387,21 @@ const Transactions = () => {
           {/* <Text style={[{ color: colors.inverseSurface }]}>Filter</Text> */}
         </PressableWithFeedback>
         <PressableWithFeedback
-          onPress={navigateToFilters}
-          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+          onPress={
+            isSortApplied
+              ? () => {
+                  onSortChange('dateNewFirst');
+                }
+              : navigateToSort
+          }
+          style={[
+            styles.filter,
+            {
+              backgroundColor: isSortApplied
+                ? colors.inversePrimary
+                : colors.inverseOnSurface,
+            },
+          ]}
         >
           <Icon
             source="sort"

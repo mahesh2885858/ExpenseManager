@@ -27,6 +27,7 @@ export type TRootStackParamList = {
     transaction: TTransaction;
   };
   TransactionFilters: undefined;
+  TransactionSort: undefined;
   ManageAccounts: undefined;
   ManageCategories: undefined;
   Settings: undefined;

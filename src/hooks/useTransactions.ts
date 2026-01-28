@@ -8,12 +8,13 @@ import {
 } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TFilters, TTransaction } from '../types';
+import { TFilters, TSort, TTransaction } from '../types';
 
-const useTransactions = (props?: { filter?: TFilters }) => {
+const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
   const filters = props?.filter ?? undefined;
+  const sort = props?.sort ?? undefined;
 
   const removeTransaction = useTransactionsStore(
     state => state.removeTransaction,
@@ -92,12 +93,47 @@ const useTransactions = (props?: { filter?: TFilters }) => {
       );
     }
 
-    // Sort once
-    return filtered.sort(
-      (a, b) =>
-        new Date(b.transactionDate).getTime() -
-        new Date(a.transactionDate).getTime(),
-    );
+    switch (sort) {
+      case 'dateNewFirst':
+      case undefined:
+        filtered.sort((a, b) => {
+          return (
+            new Date(b.transactionDate).getTime() -
+            new Date(a.transactionDate).getTime()
+          );
+        });
+
+        break;
+      case 'dateOldFirst':
+        filtered.sort((a, b) => {
+          return (
+            new Date(a.transactionDate).getTime() -
+            new Date(b.transactionDate).getTime()
+          );
+        });
+        break;
+
+      case 'amountHighFirst':
+        filtered.sort((a, b) => {
+          return b.amount - a.amount;
+        });
+        break;
+      case 'amountLowFirst':
+        filtered.sort((a, b) => {
+          return a.amount - b.amount;
+        });
+        break;
+
+      default:
+        filtered.sort((a, b) => {
+          return (
+            new Date(b.transactionDate).getTime() -
+            new Date(a.transactionDate).getTime()
+          );
+        });
+        break;
+    }
+    return filtered;
   }, [
     transactions,
     matchesType,
@@ -106,6 +142,7 @@ const useTransactions = (props?: { filter?: TFilters }) => {
     matchesCategory,
     matchesAcc,
     filters,
+    sort,
   ]);
 
   const deleteTransaction = useCallback(
