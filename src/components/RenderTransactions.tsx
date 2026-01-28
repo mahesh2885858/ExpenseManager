@@ -2,7 +2,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-import { textSize, useAppTheme } from '../../theme';
+import { spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import { TBottomTabParamList, TTransaction } from '../types';
 import RenderTransaction from './RenderTransaction';
@@ -21,6 +21,21 @@ const RenderTransactions = ({
       contentContainerStyle={{
         paddingBottom: 100,
       }}
+      ListEmptyComponent={
+        <Text
+          style={[
+            gs.fontBold,
+            gs.centerText,
+            {
+              color: theme.colors.onSurfaceDisabled,
+              fontSize: textSize.lg,
+              marginTop: spacing.lg,
+            },
+          ]}
+        >
+          No transactions!!
+        </Text>
+      }
       data={transactions}
       showsVerticalScrollIndicator={false}
       renderItem={props => <RenderTransaction item={props.item} />}

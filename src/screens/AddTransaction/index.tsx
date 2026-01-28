@@ -17,8 +17,6 @@ import {
 } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -228,245 +226,235 @@ const AddTransaction = () => {
   }, [transactionType, progress]);
 
   return (
-    <GestureHandlerRootView style={[gs.fullFlex]}>
-      <BottomSheetModalProvider>
-        <KeyboardAvoidingView
-          behavior="padding"
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={[
+        gs.fullFlex,
+        {
+          paddingTop: top,
+        },
+      ]}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps
+        contentContainerStyle={style.scrollViewContent}
+      >
+        {/* Header */}
+        <View style={[gs.flexRow, gs.itemsCenter, style.header]}>
+          <View
+            style={[gs.flexRow, gs.itemsCenter, gs.fullFlex, style.headerLeft]}
+          >
+            <PressableWithFeedback onPress={navigation.goBack}>
+              <Icon source="arrow-left" size={ICON_SIZE} />
+            </PressableWithFeedback>
+            <Text
+              style={[
+                gs.fontBold,
+                style.headerTitle,
+                { color: colors.onBackground },
+              ]}
+            >
+              Add Transaction
+            </Text>
+          </View>
+        </View>
+
+        <View
           style={[
-            gs.fullFlex,
             {
-              paddingTop: top,
+              marginTop: spacing.sm,
             },
           ]}
         >
-          <ScrollView
-            keyboardShouldPersistTaps
-            contentContainerStyle={style.scrollViewContent}
+          <TransactionTypeSwitch
+            type={transactionType}
+            onChange={setTransactionType}
+          />
+        </View>
+
+        {/* Amount Input */}
+        <View
+          style={[
+            style.amountInputContainer,
+            {
+              borderColor: colors.onSurfaceDisabled,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              {
+                fontSize: textSize.md,
+                color: colors.onSurfaceDisabled,
+              },
+            ]}
           >
-            {/* Header */}
-            <View style={[gs.flexRow, gs.itemsCenter, style.header]}>
-              <View
-                style={[
-                  gs.flexRow,
-                  gs.itemsCenter,
-                  gs.fullFlex,
-                  style.headerLeft,
-                ]}
-              >
-                <PressableWithFeedback onPress={navigation.goBack}>
-                  <Icon source="arrow-left" size={ICON_SIZE} />
-                </PressableWithFeedback>
-                <Text
-                  style={[
-                    gs.fontBold,
-                    style.headerTitle,
-                    { color: colors.onBackground },
-                  ]}
-                >
-                  Add Transaction
-                </Text>
-              </View>
-            </View>
+            Amount
+          </Text>
+          <TextInput
+            maxLength={MAX_AMOUNT_LENGTH}
+            onChangeText={setAmountInput}
+            value={amountInput}
+            autoFocus
+            placeholder={CURRENCY_SYMBOL + '0.00'}
+            keyboardType="numeric"
+            style={[
+              style.textInput,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+            placeholderTextColor={colors.onSurfaceDisabled}
+          />
+        </View>
 
-            <View
+        {/* Category Selection */}
+        <PressableWithFeedback onPress={() => handlePresentCategories()}>
+          <View
+            style={[
+              {
+                marginTop: spacing.md,
+
+                borderColor: colors.onSurfaceDisabled,
+              },
+              style.categoryContainer,
+            ]}
+          >
+            <Text
               style={[
                 {
-                  marginTop: spacing.sm,
+                  fontSize: textSize.md,
+                  color: colors.onSurfaceDisabled,
                 },
               ]}
             >
-              <TransactionTypeSwitch
-                type={transactionType}
-                onChange={setTransactionType}
-              />
-            </View>
-
-            {/* Amount Input */}
-            <View
+              Category
+            </Text>
+            <Text
               style={[
-                style.amountInputContainer,
+                style.categoryText,
                 {
-                  borderColor: colors.onSurfaceDisabled,
+                  color: colors.onBackground,
                 },
               ]}
             >
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: colors.onSurfaceDisabled,
-                  },
-                ]}
-              >
-                Amount
-              </Text>
-              <TextInput
-                maxLength={MAX_AMOUNT_LENGTH}
-                onChangeText={setAmountInput}
-                value={amountInput}
-                autoFocus
-                placeholder={CURRENCY_SYMBOL + '0.00'}
-                keyboardType="numeric"
-                style={[
-                  style.textInput,
-                  {
-                    color: colors.onBackground,
-                  },
-                ]}
-                placeholderTextColor={colors.onSurfaceDisabled}
-              />
-            </View>
+              {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
+                ''}
+            </Text>
+          </View>
+        </PressableWithFeedback>
+        {/* Account section */}
+        <PressableWithFeedback onPress={() => handlePresentModalPress()}>
+          <View
+            style={[
+              {
+                marginTop: spacing.md,
 
-            {/* Category Selection */}
-            <PressableWithFeedback onPress={() => handlePresentCategories()}>
-              <View
-                style={[
-                  {
-                    marginTop: spacing.md,
-
-                    borderColor: colors.onSurfaceDisabled,
-                  },
-                  style.categoryContainer,
-                ]}
-              >
-                <Text
-                  style={[
-                    {
-                      fontSize: textSize.md,
-                      color: colors.onSurfaceDisabled,
-                    },
-                  ]}
-                >
-                  Category
-                </Text>
-                <Text
-                  style={[
-                    style.categoryText,
-                    {
-                      color: colors.onBackground,
-                    },
-                  ]}
-                >
-                  {categories.filter(c => c.id === selectedCategoryId)[0]
-                    ?.name ?? ''}
-                </Text>
-              </View>
-            </PressableWithFeedback>
-            {/* Account section */}
-            <PressableWithFeedback onPress={() => handlePresentModalPress()}>
-              <View
-                style={[
-                  {
-                    marginTop: spacing.md,
-
-                    borderColor: colors.onSurfaceDisabled,
-                  },
-                  style.categoryContainer,
-                ]}
-              >
-                <Text
-                  style={[
-                    {
-                      fontSize: textSize.md,
-                      color: colors.onSurfaceDisabled,
-                    },
-                  ]}
-                >
-                  Account
-                </Text>
-                <Text
-                  style={[
-                    style.categoryText,
-                    {
-                      color: colors.onBackground,
-                    },
-                  ]}
-                >
-                  {selectedAcc?.name ?? 'Select an account'}
-                </Text>
-              </View>
-            </PressableWithFeedback>
-
-            {/* Date and time selection */}
-            <View
+                borderColor: colors.onSurfaceDisabled,
+              },
+              style.categoryContainer,
+            ]}
+          >
+            <Text
               style={[
-                gs.flexRow,
-                gs.itemsCenter,
                 {
-                  marginTop: spacing.md,
-                  gap: spacing.md,
+                  fontSize: textSize.md,
+                  color: colors.onSurfaceDisabled,
                 },
               ]}
             >
-              <PressableWithFeedback
-                onPress={() => setOpenDatePicker(true)}
-                style={[
-                  gs.fullFlex,
-                  {
-                    borderColor: colors.onSurfaceDisabled,
-                  },
-                  style.categoryContainer,
-                ]}
-              >
-                <Text
-                  style={[
-                    {
-                      color: colors.onSurfaceDisabled,
-                      fontSize: textSize.md,
-                    },
-                  ]}
-                >
-                  Date
-                </Text>
-                <Text
-                  style={[
-                    {
-                      color: colors.onBackground,
-                      fontSize: textSize.md,
-                    },
-                  ]}
-                >
-                  {format(
-                    dateToRender ?? new Date(),
-                    DATE_FORMAT,
-                  ).toUpperCase()}
-                </Text>
-              </PressableWithFeedback>
-              <PressableWithFeedback
-                onPress={() => setOpenTimePicker(true)}
-                style={[
-                  gs.fullFlex,
-                  {
-                    borderColor: colors.onSurfaceDisabled,
-                  },
-                  style.categoryContainer,
-                ]}
-              >
-                <Text
-                  style={[
-                    {
-                      color: colors.onSurfaceDisabled,
-                      fontSize: textSize.md,
-                    },
-                  ]}
-                >
-                  Time
-                </Text>
-                <Text
-                  style={[
-                    {
-                      color: colors.onBackground,
-                      fontSize: textSize.md,
-                    },
-                  ]}
-                >
-                  {format(dateToRender ?? new Date(), 'hh:mm aa').toUpperCase()}
-                </Text>
-              </PressableWithFeedback>
-            </View>
+              Account
+            </Text>
+            <Text
+              style={[
+                style.categoryText,
+                {
+                  color: colors.onBackground,
+                },
+              ]}
+            >
+              {selectedAcc?.name ?? 'Select an account'}
+            </Text>
+          </View>
+        </PressableWithFeedback>
 
-            {/* Date and Attachment Selection */}
-            {/* <View style={[gs.flexRow, style.dateAttachmentContainer]}>
+        {/* Date and time selection */}
+        <View
+          style={[
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              marginTop: spacing.md,
+              gap: spacing.md,
+            },
+          ]}
+        >
+          <PressableWithFeedback
+            onPress={() => setOpenDatePicker(true)}
+            style={[
+              gs.fullFlex,
+              {
+                borderColor: colors.onSurfaceDisabled,
+              },
+              style.categoryContainer,
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSurfaceDisabled,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Date
+            </Text>
+            <Text
+              style={[
+                {
+                  color: colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              {format(dateToRender ?? new Date(), DATE_FORMAT).toUpperCase()}
+            </Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={() => setOpenTimePicker(true)}
+            style={[
+              gs.fullFlex,
+              {
+                borderColor: colors.onSurfaceDisabled,
+              },
+              style.categoryContainer,
+            ]}
+          >
+            <Text
+              style={[
+                {
+                  color: colors.onSurfaceDisabled,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              Time
+            </Text>
+            <Text
+              style={[
+                {
+                  color: colors.onBackground,
+                  fontSize: textSize.md,
+                },
+              ]}
+            >
+              {format(dateToRender ?? new Date(), 'hh:mm aa').toUpperCase()}
+            </Text>
+          </PressableWithFeedback>
+        </View>
+
+        {/* Date and Attachment Selection */}
+        {/* <View style={[gs.flexRow, style.dateAttachmentContainer]}>
               <Tooltip title="Add Bill/invoice etc">
                 <PressableWithFeedback
                   onPress={pickFiles}
@@ -505,83 +493,79 @@ const AddTransaction = () => {
               </Tooltip>
             </View> */}
 
-            {/* Description section */}
-            <TextInput
-              style={[
-                style.descBox,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                  color: colors.onBackground,
-                },
-              ]}
-              placeholder="Additional details"
-              multiline
-              maxLength={MAX_DESCRIPTION_LIMIT}
-              onChangeText={setDesc}
-              value={desc}
-              placeholderTextColor={colors.onSurfaceDisabled}
-            />
+        {/* Description section */}
+        <TextInput
+          style={[
+            style.descBox,
+            {
+              borderColor: colors.onSurfaceDisabled,
+              color: colors.onBackground,
+            },
+          ]}
+          placeholder="Additional details"
+          multiline
+          maxLength={MAX_DESCRIPTION_LIMIT}
+          onChangeText={setDesc}
+          value={desc}
+          placeholderTextColor={colors.onSurfaceDisabled}
+        />
 
-            {/* Date Picker Modal */}
-            <DatePickerModal
-              label="Select transaction date"
-              animationType="fade"
-              presentationStyle="pageSheet"
-              locale="en"
-              mode="single"
-              visible={openDatePicker}
-              onDismiss={onDismissSingle}
-              date={date}
-              onConfirm={onConfirmSingle}
-              saveLabel="Save"
-            />
+        {/* Date Picker Modal */}
+        <DatePickerModal
+          label="Select transaction date"
+          animationType="fade"
+          presentationStyle="pageSheet"
+          locale="en"
+          mode="single"
+          visible={openDatePicker}
+          onDismiss={onDismissSingle}
+          date={date}
+          onConfirm={onConfirmSingle}
+          saveLabel="Save"
+        />
 
-            {/* Time Picker Modal */}
-            <TimePickerModal
-              visible={openTimePicker}
-              onDismiss={() => setOpenTimePicker(false)}
-              onConfirm={value => {
-                setTime(value);
-                setOpenTimePicker(false);
-              }}
-              hours={12}
-              minutes={0}
-            />
-          </ScrollView>
-          {amountInput &&
-            !isNaN(parseInt(amountInput, 10)) &&
-            !!selectedAcc && (
-              <FAB
-                icon="check"
-                style={[
-                  style.fab,
-                  {
-                    bottom: kbHeight + 20,
-                  },
-                ]}
-                onPress={saveTransaction}
-              />
-            )}
+        {/* Time Picker Modal */}
+        <TimePickerModal
+          visible={openTimePicker}
+          onDismiss={() => setOpenTimePicker(false)}
+          onConfirm={value => {
+            setTime(value);
+            setOpenTimePicker(false);
+          }}
+          hours={12}
+          minutes={0}
+        />
+      </ScrollView>
+      {amountInput && !isNaN(parseInt(amountInput, 10)) && !!selectedAcc && (
+        <FAB
+          icon="check"
+          style={[
+            style.fab,
+            {
+              bottom: kbHeight + 20,
+            },
+          ]}
+          onPress={saveTransaction}
+        />
+      )}
 
-          <CategorySelectionModal
-            handleSheetChanges={handleCategorySheetChanges}
-            ref={categoryBtmSheet}
-            selectCategory={id => {
-              setSelectedCategoryId(id);
-            }}
-            selectedCategory={selectedCategoryId}
-          />
-          <AccountSelectionModal
-            onAccountChange={id => {
-              setAccountId(id);
-            }}
-            handleSheetChanges={handleSheetChanges}
-            ref={bottomSheetModalRef}
-            selectedAccountId={accountId}
-          />
-        </KeyboardAvoidingView>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+      <CategorySelectionModal
+        handleSheetChanges={handleCategorySheetChanges}
+        ref={categoryBtmSheet}
+        selectCategory={id => {
+          setSelectedCategoryId(id);
+        }}
+        selectedCategory={selectedCategoryId}
+      />
+      <AccountSelectionModal
+        onAccountChange={id => {
+          setAccountId(id);
+        }}
+        handleSheetChanges={handleSheetChanges}
+        ref={bottomSheetModalRef}
+        selectedAccountId={accountId}
+      />
+    </KeyboardAvoidingView>
   );
 };
 

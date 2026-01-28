@@ -41,7 +41,9 @@ const useTransactionsStore = create<PositionStore>()(
       ],
       defaultCategoryId: DEFAULT_CATEGORY_ID,
       filters: {
-        date: null,
+        date: {
+          isThisMonth: true,
+        },
         type: null,
         categoryId: null,
       },
@@ -87,7 +89,9 @@ const useTransactionsStore = create<PositionStore>()(
       resetFilters: () => {
         set(() => ({
           filters: {
-            date: null,
+            date: {
+              isThisMonth: true,
+            },
             type: null,
             categoryId: null,
           },

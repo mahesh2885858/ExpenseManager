@@ -1,28 +1,114 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Badge, Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
+import useAccounts from '../../hooks/useAccounts';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
-import { formatAmount } from '../../utils';
 import useTransactionsStore from '../../stores/transactionsStore';
+import { formatAmount, getDateFilterText } from '../../utils';
+import useCategories from '../../hooks/useCategories';
+import { TTypeFilter } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
   const theme = useAppTheme();
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
-  const {
-    totalExpenses,
-    totalIncome,
-    filteredTransactions,
-    search,
-    setSearch,
-  } = useTransactions({
-    filter: filters,
+  const setFilters = useTransactionsStore(state => state.setFilters);
+  const [search, setSearch] = useState('');
+  const { selectedAccount, setSelectedAccountId } = useAccounts();
+  const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
+    filter: { ...filters, accId: selectedAccount?.id },
   });
+
+  const navigation = useNavigation();
+
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const { categories } = useCategories();
+
+  const accountName = useMemo(() => {
+    return selectedAccount?.name ?? '';
+  }, [selectedAccount]);
+
+  const navigateToFilters = useCallback(() => {
+    navigation.navigate('TransactionFilters');
+  }, [navigation]);
+
+  const transactionsToRender = useMemo(() => {
+    return search.trim().length === 0
+      ? filteredTransactions
+      : filteredTransactions.filter(
+          t =>
+            t.amount.toString().includes(search) ||
+            t.description?.toLowerCase().includes(search.toLowerCase()),
+        );
+  }, [filteredTransactions, search]);
+
+  const dateFilterText = useMemo(() => {
+    if (filters.date) {
+      return getDateFilterText(filters.date);
+    } else return 'This Month';
+  }, [filters]);
+
+  const categoryFilterText = useMemo(() => {
+    if (filters.categoryId) {
+      return categories.find(cat => cat.id === filters.categoryId)?.name ?? '';
+    } else return '';
+  }, [filters, categories]);
+
+  const typeFilterText = useMemo(() => {
+    return filters.type === 'income'
+      ? 'Income'
+      : filters.type === 'expense'
+      ? 'Expense'
+      : '';
+  }, [filters]);
+
+  const resetTypeFilter = useCallback(() => {
+    setFilters({
+      type: null,
+    });
+  }, [setFilters]);
+
+  const resetCategoryFilter = useCallback(() => {
+    setFilters({
+      categoryId: null,
+    });
+  }, [setFilters]);
+
+  const isExpenseFilterOn = useMemo(() => {
+    return filters.type === 'expense';
+  }, [filters]);
+
+  const isIncomeFilterOn = useMemo(() => {
+    return filters.type === 'income';
+  }, [filters]);
+
+  const toggleTypeFilter = useCallback(
+    (type: TTypeFilter) => {
+      if (type === filters.type) {
+        setFilters({ type: null });
+      } else {
+        setFilters({
+          type: type,
+        });
+      }
+    },
+    [setFilters, filters],
+  );
+
+  const isAnyFilterApplied = useMemo(() => {
+    const { date, type, categoryId } = filters;
+    return (!!date && !date.isThisMonth) || !!type || !!categoryId;
+  }, [filters]);
 
   return (
     <View
@@ -34,7 +120,109 @@ const Transactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader hideBackButton search={search} setSearch={setSearch} />
+      <CommonHeader />
+
+      {/* active filters section */}
+      <View
+        style={[
+          gs.flexRow,
+          {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.xs,
+            gap: spacing.sm,
+          },
+        ]}
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            gap: spacing.sm,
+          }}
+        >
+          <PressableWithFeedback
+            onPress={() => navigation.navigate('TransactionFilters')}
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {dateFilterText}
+            </Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={resetTypeFilter}
+            hidden={typeFilterText.length <= 0}
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {typeFilterText}
+            </Text>
+            <Icon
+              source={'close'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={resetCategoryFilter}
+            hidden={categoryFilterText.length <= 0}
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                borderRadius: borderRadius.pill,
+                backgroundColor: colors.inverseOnSurface,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                gap: spacing.sm,
+              },
+            ]}
+          >
+            <Icon
+              source={'calendar-range'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+            <Text style={[{ color: colors.inverseSurface }]}>
+              {categoryFilterText}
+            </Text>
+            <Icon
+              source={'close'}
+              color={colors.inverseSurface}
+              size={textSize.md}
+            />
+          </PressableWithFeedback>
+        </ScrollView>
+      </View>
 
       {/* summary */}
       <View
@@ -42,21 +230,48 @@ const Transactions = () => {
           styles.summary,
           {
             backgroundColor: colors.inverseOnSurface,
+            marginTop: spacing.md,
           },
         ]}
       >
-        <Text
+        <PressableWithFeedback
+          onPress={handlePresent}
           style={[
-            styles.summaryText,
+            styles.account,
             {
-              color: colors.onPrimaryContainer,
+              backgroundColor: colors.tertiary,
+              gap: spacing.xs,
             },
           ]}
         >
-          Summary
-        </Text>
+          <Icon
+            source={'wallet-bifold'}
+            size={textSize.md}
+            color={colors.onTertiary}
+          />
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[
+              gs.fullFlex,
+              {
+                color: colors.onTertiary,
+              },
+            ]}
+          >
+            {accountName}
+          </Text>
+          <Icon
+            source={'chevron-down'}
+            size={textSize.md}
+            color={colors.onTertiary}
+          />
+        </PressableWithFeedback>
+
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
-          <View
+          <PressableWithFeedback
+            disabled={isExpenseFilterOn}
+            onPress={() => toggleTypeFilter('income')}
             style={[
               gs.fullFlex,
               styles.tType,
@@ -84,10 +299,12 @@ const Transactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalIncome)}
+              {isExpenseFilterOn ? '-' : formatAmount(totalIncome)}
             </Text>
-          </View>
-          <View
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={() => toggleTypeFilter('expense')}
+            disabled={isIncomeFilterOn}
             style={[
               gs.fullFlex,
               styles.tType,
@@ -114,12 +331,60 @@ const Transactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalExpenses)}
+              {isIncomeFilterOn ? '-' : formatAmount(totalExpenses)}
             </Text>
-          </View>
+          </PressableWithFeedback>
         </View>
       </View>
       {/* summary */}
+
+      {/* search and filter section */}
+      <View
+        style={[
+          styles.searchAndFilter,
+          { paddingHorizontal: spacing.md, marginTop: spacing.md },
+        ]}
+      >
+        <View
+          style={[styles.search, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon source={'magnify'} size={textSize.md} />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholderTextColor={colors.onSurfaceDisabled}
+            style={[
+              styles.searchInput,
+              {
+                color: colors.inverseSurface,
+              },
+            ]}
+            placeholder="Search transactions"
+          />
+        </View>
+        <PressableWithFeedback
+          onPress={navigateToFilters}
+          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon
+            source="filter"
+            size={textSize.md}
+            color={colors.inverseSurface}
+          />
+          {isAnyFilterApplied && <Badge style={styles.filterBadge} size={10} />}
+          {/* <Text style={[{ color: colors.inverseSurface }]}>Filter</Text> */}
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={navigateToFilters}
+          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon
+            source="sort"
+            size={textSize.md}
+            color={colors.inverseSurface}
+          />
+        </PressableWithFeedback>
+      </View>
 
       {/* transactions section */}
       <View
@@ -144,7 +409,7 @@ const Transactions = () => {
                 gs.fontBold,
                 gs.centerText,
                 {
-                  color: theme.colors.onSurfaceDisabled,
+                  color: theme.colors.inverseSurface,
                   fontSize: textSize.lg,
                   marginTop: spacing.lg,
                 },
@@ -153,10 +418,17 @@ const Transactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactions transactions={filteredTransactions} />
+            <RenderTransactions transactions={transactionsToRender} />
           )}
         </View>
       </View>
+
+      <AccountSelectionModal
+        handleSheetChanges={handleSheetChange}
+        onAccountChange={id => setSelectedAccountId(id)}
+        ref={btmShtRef}
+        selectedAccountId={selectedAccount?.id ?? ''}
+      />
     </View>
   );
 };
@@ -172,7 +444,14 @@ const styles = StyleSheet.create({
     height: 45,
     width: 45,
   },
-
+  account: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '47%',
+  },
   totalBalance: {
     width: '100%',
     marginTop: -10,
@@ -208,5 +487,36 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     gap: spacing.xs,
+  },
+  searchAndFilter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  search: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.pill,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  searchInput: {
+    flex: 1,
+    width: '100%',
+    paddingRight: spacing.lg,
+  },
+  filter: {
+    padding: spacing.sm,
+    borderRadius: borderRadius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    position: 'relative',
   },
 });

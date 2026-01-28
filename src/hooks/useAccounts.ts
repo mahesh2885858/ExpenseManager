@@ -15,13 +15,32 @@ const useAccounts = () => {
     state => state.setDefaultAccountId,
   );
 
+  const setSelectedAccountId = useAccountStore(
+    state => state.setSelectedAccountId,
+  );
+
+  const selectedAccountId = useAccountStore(state => state.selectedAccountId);
+
+  const selectedAccount = useMemo(
+    () => accounts.find(acc => acc.id === selectedAccountId),
+    [accounts, selectedAccountId],
+  );
+
   const deleteAcc = useCallback(
     (id: string) => {
+      const remainingAccounts = accounts.filter(acc => acc.id !== id);
       deleteTransactionForAnAcc(id);
       setDefaultAccountId(null);
+      setSelectedAccountId(remainingAccounts[0].id);
       removeAcc(id);
     },
-    [deleteTransactionForAnAcc, removeAcc, setDefaultAccountId],
+    [
+      deleteTransactionForAnAcc,
+      removeAcc,
+      setDefaultAccountId,
+      accounts,
+      setSelectedAccountId,
+    ],
   );
 
   const totalBalance = useMemo(() => {
@@ -61,6 +80,8 @@ const useAccounts = () => {
     totalBalance,
     deleteAcc,
     accounts,
+    selectedAccount,
+    setSelectedAccountId,
     getIncomeExpenseForAcc,
     defaultAccountId: defaultAccId
       ? defaultAccId

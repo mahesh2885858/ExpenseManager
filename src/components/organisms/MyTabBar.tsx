@@ -39,7 +39,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const translateX = interpolate(
       sliderPosition.value,
       [0, filteredRoutes.length - 1],
-      [0, (filteredRoutes.length - 1) * (300 / filteredRoutes.length)],
+      [0, (filteredRoutes.length - 1) * (200 / filteredRoutes.length)],
     );
 
     return {
@@ -105,11 +105,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           }
 
           const routeIcon =
-            route.name === 'Home'
-              ? 'home'
-              : route.name === 'Transactions'
-              ? 'history'
-              : 'chart-arc';
+            route.name === 'Transactions' ? 'home' : 'chart-arc';
 
           return (
             <Pressable

@@ -15,6 +15,7 @@ import { gs, MAX_AMOUNT } from '../../common';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
 import { v4 as uuid } from 'uuid';
+import useAccounts from '../../hooks/useAccounts';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -29,6 +30,7 @@ const InitialAccountAmountSetup = () => {
     state => state.setIsInitialSetupDone,
   );
   const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
+  const { setSelectedAccountId } = useAccounts();
 
   const onAmountChange = useCallback((value: string) => {
     // don't allow floats and etc symbols
@@ -50,6 +52,7 @@ const InitialAccountAmountSetup = () => {
         id,
       });
       setDefaultAcc(id);
+      setSelectedAccountId(id);
       Keyboard.dismiss();
       setIsInitialSetupDone(true);
     }
@@ -58,6 +61,7 @@ const InitialAccountAmountSetup = () => {
     setUsername,
     accName,
     setDefaultAcc,
+    setSelectedAccountId,
     amount,
     route.params?.userName,
     setIsInitialSetupDone,
