@@ -15,6 +15,7 @@ import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { formatAmount, getDateFilterText } from '../../utils';
 import useCategories from '../../hooks/useCategories';
+import { TTypeFilter } from '../../types';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -82,6 +83,27 @@ const Transactions = () => {
       categoryId: null,
     });
   }, [setFilters]);
+
+  const isExpenseFilterOn = useMemo(() => {
+    return filters.type === 'expense';
+  }, [filters]);
+
+  const isIncomeFilterOn = useMemo(() => {
+    return filters.type === 'income';
+  }, [filters]);
+
+  const toggleTypeFilter = useCallback(
+    (type: TTypeFilter) => {
+      if (type === filters.type) {
+        setFilters({ type: null });
+      } else {
+        setFilters({
+          type: type,
+        });
+      }
+    },
+    [setFilters, filters],
+  );
 
   return (
     <View
@@ -240,13 +262,11 @@ const Transactions = () => {
             color={colors.onTertiary}
           />
         </PressableWithFeedback>
-        {/* <View>
-          <Text>
-            Balance: 
-          </Text>
-        </View> */}
+
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
-          <View
+          <PressableWithFeedback
+            disabled={isExpenseFilterOn}
+            onPress={() => toggleTypeFilter('income')}
             style={[
               gs.fullFlex,
               styles.tType,
@@ -276,8 +296,10 @@ const Transactions = () => {
             >
               {formatAmount(totalIncome)}
             </Text>
-          </View>
-          <View
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={() => toggleTypeFilter('expense')}
+            disabled={isIncomeFilterOn}
             style={[
               gs.fullFlex,
               styles.tType,
@@ -306,7 +328,7 @@ const Transactions = () => {
             >
               {formatAmount(totalExpenses)}
             </Text>
-          </View>
+          </PressableWithFeedback>
         </View>
       </View>
       {/* summary */}

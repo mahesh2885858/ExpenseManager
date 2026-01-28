@@ -34,21 +34,6 @@ const MainBottomTabs = () => {
         animation: 'shift',
       }}
     >
-      {/* <BottomTab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          tabBarIcon: props =>
-            tabBarIcon(props, props.focused ? 'home' : 'home-outline'),
-          headerShown: false,
-        }}
-      /> */}
-      {/* <BottomTab.Screen
-        name="CustomButton"
-        component={() => null}
-        options={{ tabBarButton: () => null }}
-      /> */}
-
       <BottomTab.Screen
         name="Transactions"
         component={Transactions}
