@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import { Badge, Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
@@ -105,6 +105,11 @@ const Transactions = () => {
     [setFilters, filters],
   );
 
+  const isAnyFilterApplied = useMemo(() => {
+    const { date, type, categoryId } = filters;
+    return (!!date && !date.isThisMonth) || !!type || !!categoryId;
+  }, [filters]);
+
   return (
     <View
       style={[
@@ -123,7 +128,7 @@ const Transactions = () => {
           gs.flexRow,
           {
             paddingHorizontal: spacing.md,
-            marginTop: spacing.sm,
+            marginTop: spacing.xs,
             gap: spacing.sm,
           },
         ]}
@@ -294,7 +299,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalIncome)}
+              {isExpenseFilterOn ? '-' : formatAmount(totalIncome)}
             </Text>
           </PressableWithFeedback>
           <PressableWithFeedback
@@ -326,7 +331,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalExpenses)}
+              {isIncomeFilterOn ? '-' : formatAmount(totalExpenses)}
             </Text>
           </PressableWithFeedback>
         </View>
@@ -366,7 +371,18 @@ const Transactions = () => {
             size={textSize.md}
             color={colors.inverseSurface}
           />
-          <Text style={[{ color: colors.inverseSurface }]}>Filter</Text>
+          {isAnyFilterApplied && <Badge style={styles.filterBadge} size={10} />}
+          {/* <Text style={[{ color: colors.inverseSurface }]}>Filter</Text> */}
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={navigateToFilters}
+          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+        >
+          <Icon
+            source="sort"
+            size={textSize.md}
+            color={colors.inverseSurface}
+          />
         </PressableWithFeedback>
       </View>
 
@@ -485,6 +501,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.pill,
   },
+  filterBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
   searchInput: {
     flex: 1,
     width: '100%',
@@ -496,5 +517,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    position: 'relative',
   },
 });
