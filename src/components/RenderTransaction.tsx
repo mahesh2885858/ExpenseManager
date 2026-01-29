@@ -52,7 +52,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         gs.flexRow,
         {
           gap: spacing.md,
-          marginBottom: spacing.lg,
+          marginBottom: spacing.md,
         },
       ]}
     >
@@ -62,7 +62,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             padding: spacing.sm,
             paddingHorizontal: spacing.md,
             borderRadius: borderRadius.lg,
-            backgroundColor: theme.colors.primaryContainer,
+            backgroundColor: theme.colors.surfaceVariant,
           },
           gs.centerItems,
         ]}
@@ -76,7 +76,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onPrimaryContainer,
+              color: theme.colors.onSurfaceVariant,
               fontSize: textSize.md,
             },
             gs.fontBold,
@@ -87,7 +87,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
         <Text
           style={[
             {
-              color: theme.colors.onPrimaryContainer,
+              color: theme.colors.onSurfaceVariant,
               fontSize: textSize.md,
             },
             gs.fontBold,
@@ -101,7 +101,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
           style={[
             {
               fontSize: textSize.lg,
-              color: theme.colors.onBackground,
+              color: theme.colors.onSurface,
             },
           ]}
         >
@@ -112,7 +112,7 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             style={[
               {
                 fontSize: textSize.md,
-                color: theme.colors.onSurfaceDisabled,
+                color: theme.colors.onSurfaceVariant,
               },
             ]}
           >
@@ -156,11 +156,15 @@ const RenderTransaction = (props: { item: TTransaction }) => {
               style={[
                 styles.action,
                 {
-                  backgroundColor: theme.colors.elevation.level5,
+                  backgroundColor: theme.colors.errorContainer,
                 },
               ]}
             >
-              <Icon source={'delete'} size={25} color={theme.colors.error} />
+              <Icon
+                source={'delete'}
+                size={25}
+                color={theme.colors.onErrorContainer}
+              />
             </PressableWithFeedback>
           </Animated.View>
         )}

@@ -69,7 +69,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           style={[
             styles.slider,
             {
-              backgroundColor: colors.onSurfaceVariant,
+              backgroundColor: colors.primary,
               width: `${100 / filteredRoutes.length}%`,
             },
             sliderStyle,
@@ -126,9 +126,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               <Icon
                 source={routeIcon}
                 size={30}
-                color={
-                  isFocused ? colors.primaryContainer : colors.onSurfaceVariant
-                }
+                color={isFocused ? colors.onPrimary : colors.onSurfaceVariant}
               />
             </Pressable>
           );
@@ -144,7 +142,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         style={({ pressed }) => [
           styles.fab,
           {
-            backgroundColor: colors.surfaceVariant,
+            backgroundColor: colors.primary,
             opacity: pressed ? 0.8 : 1,
             transform: [
               {
@@ -154,7 +152,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           },
         ]}
       >
-        <Icon source={'plus'} color={colors.onSurfaceVariant} size={30} />
+        <Icon source={'plus'} color={colors.onPrimary} size={30} />
       </Pressable>
       {/* </View> */}
     </View>
