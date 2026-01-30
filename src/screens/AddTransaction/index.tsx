@@ -315,7 +315,7 @@ const AddTransaction = () => {
               {
                 marginTop: spacing.md,
 
-                borderColor: colors.onSurfaceDisabled,
+                backgroundColor: colors.surfaceVariant,
               },
               style.categoryContainer,
             ]}
@@ -324,7 +324,7 @@ const AddTransaction = () => {
               style={[
                 {
                   fontSize: textSize.md,
-                  color: colors.onSurfaceDisabled,
+                  color: colors.onSurfaceVariant,
                 },
               ]}
             >
@@ -350,7 +350,7 @@ const AddTransaction = () => {
               {
                 marginTop: spacing.md,
 
-                borderColor: colors.onSurfaceDisabled,
+                backgroundColor: colors.surfaceVariant,
               },
               style.categoryContainer,
             ]}
@@ -359,7 +359,7 @@ const AddTransaction = () => {
               style={[
                 {
                   fontSize: textSize.md,
-                  color: colors.onSurfaceDisabled,
+                  color: colors.onSurfaceVariant,
                 },
               ]}
             >
@@ -394,7 +394,7 @@ const AddTransaction = () => {
             style={[
               gs.fullFlex,
               {
-                borderColor: colors.onSurfaceDisabled,
+                backgroundColor: colors.surfaceVariant,
               },
               style.categoryContainer,
             ]}
@@ -402,7 +402,7 @@ const AddTransaction = () => {
             <Text
               style={[
                 {
-                  color: colors.onSurfaceDisabled,
+                  color: colors.onSurfaceVariant,
                   fontSize: textSize.md,
                 },
               ]}
@@ -425,7 +425,7 @@ const AddTransaction = () => {
             style={[
               gs.fullFlex,
               {
-                borderColor: colors.onSurfaceDisabled,
+                backgroundColor: colors.surfaceVariant,
               },
               style.categoryContainer,
             ]}
@@ -433,7 +433,7 @@ const AddTransaction = () => {
             <Text
               style={[
                 {
-                  color: colors.onSurfaceDisabled,
+                  color: colors.onSurfaceVariant,
                   fontSize: textSize.md,
                 },
               ]}
@@ -502,7 +502,7 @@ const AddTransaction = () => {
               color: colors.onBackground,
             },
           ]}
-          placeholder="Additional details"
+          placeholder="Additional details (optional)"
           multiline
           maxLength={MAX_DESCRIPTION_LIMIT}
           onChangeText={setDesc}
@@ -614,7 +614,6 @@ const style = StyleSheet.create({
   },
   categoryContainer: {
     gap: spacing.sm,
-    borderWidth: 1,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,

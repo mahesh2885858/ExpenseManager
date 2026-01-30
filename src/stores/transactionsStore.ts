@@ -2,13 +2,20 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
-import { TCategories, TCategory, TFilters, TTransaction } from '../types';
+import {
+  TCategories,
+  TCategory,
+  TFilters,
+  TSort,
+  TTransaction,
+} from '../types';
 
 type TTransactionsStore = {
   transactions: TTransaction[];
   categories: TCategories;
   filters: TFilters;
   defaultCategoryId: string | null;
+  sort: TSort;
 };
 
 type TTransactionsStoreActions = {
@@ -25,6 +32,7 @@ type TTransactionsStoreActions = {
   importTransactions: (t: TTransaction[]) => void;
   importCategories: (cats: TCategories) => void;
   setDefaultCategoryId: (catId: string | null) => void;
+  setSort: (sort: TSort) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -47,6 +55,7 @@ const useTransactionsStore = create<PositionStore>()(
         type: null,
         categoryId: null,
       },
+      sort: 'dateNewFirst',
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
       },
@@ -127,6 +136,9 @@ const useTransactionsStore = create<PositionStore>()(
       },
       setDefaultCategoryId: catId => {
         set({ defaultCategoryId: catId });
+      },
+      setSort: sort => {
+        set({ sort });
       },
     }),
     {

@@ -12,6 +12,7 @@ import ManageAccounts from '../screens/ManageAccounts';
 import Settings from '../screens/Settings';
 import FilteredTransactions from '../screens/FilteredTransactions';
 import ManageCategories from '../screens/ManageCategories';
+import TransactionSort from '../screens/TransactionSort';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -57,6 +58,15 @@ const MainStack = () => {
           <Stack.Screen
             name="TransactionFilters"
             component={TransactionFilters}
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="TransactionSort"
+            component={TransactionSort}
             options={{
               presentation: 'transparentModal',
               animation: 'slide_from_bottom',

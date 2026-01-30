@@ -11,11 +11,11 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { formatAmount, getDateFilterText } from '../../utils';
-import useCategories from '../../hooks/useCategories';
 import { TTypeFilter } from '../../types';
+import { formatAmount, getDateFilterText } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -23,10 +23,14 @@ const Transactions = () => {
   const { colors } = theme;
   const filters = useTransactionsStore(state => state.filters);
   const setFilters = useTransactionsStore(state => state.setFilters);
+  const selectedSort = useTransactionsStore(state => state.sort);
+  const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
+
   const { selectedAccount, setSelectedAccountId } = useAccounts();
   const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
     filter: { ...filters, accId: selectedAccount?.id },
+    sort: selectedSort,
   });
 
   const navigation = useNavigation();
@@ -110,6 +114,14 @@ const Transactions = () => {
     return (!!date && !date.isThisMonth) || !!type || !!categoryId;
   }, [filters]);
 
+  const isSortApplied = useMemo(() => {
+    return selectedSort && selectedSort !== 'dateNewFirst';
+  }, [selectedSort]);
+
+  const navigateToSort = useCallback(() => {
+    navigation.navigate('TransactionSort');
+  }, [navigation]);
+
   return (
     <View
       style={[
@@ -147,7 +159,7 @@ const Transactions = () => {
               gs.itemsCenter,
               {
                 borderRadius: borderRadius.pill,
-                backgroundColor: colors.inverseOnSurface,
+                backgroundColor: colors.surfaceVariant,
                 paddingHorizontal: spacing.md,
                 paddingVertical: spacing.sm,
                 gap: spacing.sm,
@@ -156,10 +168,10 @@ const Transactions = () => {
           >
             <Icon
               source={'calendar-range'}
-              color={colors.inverseSurface}
+              color={colors.onSurfaceVariant}
               size={textSize.md}
             />
-            <Text style={[{ color: colors.inverseSurface }]}>
+            <Text style={[{ color: colors.onSurfaceVariant }]}>
               {dateFilterText}
             </Text>
           </PressableWithFeedback>
@@ -171,7 +183,7 @@ const Transactions = () => {
               gs.itemsCenter,
               {
                 borderRadius: borderRadius.pill,
-                backgroundColor: colors.inverseOnSurface,
+                backgroundColor: colors.surfaceVariant,
                 paddingHorizontal: spacing.md,
                 paddingVertical: spacing.sm,
                 gap: spacing.sm,
@@ -180,15 +192,15 @@ const Transactions = () => {
           >
             <Icon
               source={'calendar-range'}
-              color={colors.inverseSurface}
+              color={colors.onSurfaceVariant}
               size={textSize.md}
             />
-            <Text style={[{ color: colors.inverseSurface }]}>
+            <Text style={[{ color: colors.onSurfaceVariant }]}>
               {typeFilterText}
             </Text>
             <Icon
               source={'close'}
-              color={colors.inverseSurface}
+              color={colors.onSurfaceVariant}
               size={textSize.md}
             />
           </PressableWithFeedback>
@@ -200,7 +212,7 @@ const Transactions = () => {
               gs.itemsCenter,
               {
                 borderRadius: borderRadius.pill,
-                backgroundColor: colors.inverseOnSurface,
+                backgroundColor: colors.surfaceVariant,
                 paddingHorizontal: spacing.md,
                 paddingVertical: spacing.sm,
                 gap: spacing.sm,
@@ -209,15 +221,15 @@ const Transactions = () => {
           >
             <Icon
               source={'calendar-range'}
-              color={colors.inverseSurface}
+              color={colors.onSurfaceVariant}
               size={textSize.md}
             />
-            <Text style={[{ color: colors.inverseSurface }]}>
+            <Text style={[{ color: colors.onSurfaceVariant }]}>
               {categoryFilterText}
             </Text>
             <Icon
               source={'close'}
-              color={colors.inverseSurface}
+              color={colors.onSurfaceVariant}
               size={textSize.md}
             />
           </PressableWithFeedback>
@@ -229,7 +241,7 @@ const Transactions = () => {
         style={[
           styles.summary,
           {
-            backgroundColor: colors.inverseOnSurface,
+            backgroundColor: colors.surfaceVariant,
             marginTop: spacing.md,
           },
         ]}
@@ -239,15 +251,16 @@ const Transactions = () => {
           style={[
             styles.account,
             {
-              backgroundColor: colors.tertiary,
+              backgroundColor: colors.surface,
               gap: spacing.xs,
+              elevation: 3,
             },
           ]}
         >
           <Icon
             source={'wallet-bifold'}
             size={textSize.md}
-            color={colors.onTertiary}
+            color={colors.onSurface}
           />
           <Text
             numberOfLines={1}
@@ -255,7 +268,7 @@ const Transactions = () => {
             style={[
               gs.fullFlex,
               {
-                color: colors.onTertiary,
+                color: colors.onSurface,
               },
             ]}
           >
@@ -264,7 +277,7 @@ const Transactions = () => {
           <Icon
             source={'chevron-down'}
             size={textSize.md}
-            color={colors.onTertiary}
+            color={colors.onSurface}
           />
         </PressableWithFeedback>
 
@@ -276,14 +289,17 @@ const Transactions = () => {
               gs.fullFlex,
               styles.tType,
               {
-                backgroundColor: colors.surfaceVariant,
+                backgroundColor: colors.surface,
+                elevation: 2,
+                // borderWidth: 1,
+                // borderColor: colors.outlineVariant,
               },
             ]}
           >
             <Text
               style={[
                 {
-                  color: colors.onSurfaceVariant,
+                  color: colors.onSurface,
                 },
               ]}
             >
@@ -294,7 +310,7 @@ const Transactions = () => {
                 styles.amountText,
 
                 {
-                  color: colors.onPrimaryContainer,
+                  color: colors.onSurface,
                   fontSize: textSize.md,
                 },
               ]}
@@ -309,14 +325,15 @@ const Transactions = () => {
               gs.fullFlex,
               styles.tType,
               {
-                backgroundColor: colors.surfaceVariant,
+                backgroundColor: colors.surface,
+                elevation: 2,
               },
             ]}
           >
             <Text
               style={[
                 {
-                  color: colors.onSurfaceVariant,
+                  color: colors.onSurface,
                 },
               ]}
             >
@@ -326,7 +343,7 @@ const Transactions = () => {
               style={[
                 styles.amountText,
                 {
-                  color: colors.onPrimaryContainer,
+                  color: colors.onSurface,
                   fontSize: textSize.md,
                 },
               ]}
@@ -342,21 +359,34 @@ const Transactions = () => {
       <View
         style={[
           styles.searchAndFilter,
-          { paddingHorizontal: spacing.md, marginTop: spacing.md },
+          {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.md,
+            overflow: 'hidden',
+          },
         ]}
       >
         <View
-          style={[styles.search, { backgroundColor: colors.inverseOnSurface }]}
+          style={[
+            styles.search,
+            {
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
         >
           <Icon source={'magnify'} size={textSize.md} />
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholderTextColor={colors.onSurfaceDisabled}
+            placeholderTextColor={colors.onSurfaceVariant}
             style={[
               styles.searchInput,
               {
-                color: colors.inverseSurface,
+                backgroundColor: colors.surface,
+
+                color: colors.onSurface,
               },
             ]}
             placeholder="Search transactions"
@@ -364,24 +394,42 @@ const Transactions = () => {
         </View>
         <PressableWithFeedback
           onPress={navigateToFilters}
-          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+          style={[
+            styles.filter,
+            {
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
         >
-          <Icon
-            source="filter"
-            size={textSize.md}
-            color={colors.inverseSurface}
-          />
+          <Icon source="filter" size={textSize.md} color={colors.onSurface} />
           {isAnyFilterApplied && <Badge style={styles.filterBadge} size={10} />}
           {/* <Text style={[{ color: colors.inverseSurface }]}>Filter</Text> */}
         </PressableWithFeedback>
         <PressableWithFeedback
-          onPress={navigateToFilters}
-          style={[styles.filter, { backgroundColor: colors.inverseOnSurface }]}
+          onPress={
+            isSortApplied
+              ? () => {
+                  onSortChange('dateNewFirst');
+                }
+              : navigateToSort
+          }
+          style={[
+            styles.filter,
+            {
+              backgroundColor: isSortApplied
+                ? colors.primaryContainer
+                : colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
         >
           <Icon
             source="sort"
             size={textSize.md}
-            color={colors.inverseSurface}
+            color={isSortApplied ? colors.onPrimaryContainer : colors.onSurface}
           />
         </PressableWithFeedback>
       </View>
@@ -510,6 +558,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     paddingRight: spacing.lg,
+    borderRadius: borderRadius.pill,
   },
   filter: {
     padding: spacing.sm,

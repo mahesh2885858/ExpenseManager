@@ -43,3 +43,9 @@ export type TFilters = {
 };
 
 export type TGroupBy = 'week' | 'month' | 'year';
+
+export type TSort =
+  | 'dateNewFirst'
+  | 'dateOldFirst'
+  | 'amountHighFirst'
+  | 'amountLowFirst';
