@@ -207,6 +207,10 @@ const AddTransaction = () => {
     }
   };
 
+  const onInputChange = (input: string) => {
+    setAmountInput(input);
+  };
+
   const {
     btmShtRef: bottomSheetModalRef,
     handlePresent: handlePresentModalPress,
@@ -277,7 +281,7 @@ const AddTransaction = () => {
           style={[
             style.amountInputContainer,
             {
-              borderColor: colors.onSurfaceDisabled,
+              borderColor: colors.outline,
             },
           ]}
         >
@@ -285,7 +289,7 @@ const AddTransaction = () => {
             style={[
               {
                 fontSize: textSize.md,
-                color: colors.onSurfaceDisabled,
+                color: colors.onSurfaceVariant,
               },
             ]}
           >
@@ -293,7 +297,7 @@ const AddTransaction = () => {
           </Text>
           <TextInput
             maxLength={MAX_AMOUNT_LENGTH}
-            onChangeText={setAmountInput}
+            onChangeText={onInputChange}
             value={amountInput}
             autoFocus
             placeholder={CURRENCY_SYMBOL + '0.00'}
@@ -321,7 +325,11 @@ const AddTransaction = () => {
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Icon source={'shape'} size={textSize.md} />
+              <Icon
+                source={'shape'}
+                size={textSize.md}
+                color={colors.onSurfaceVariant}
+              />
               <Text
                 style={[
                   {
@@ -347,7 +355,11 @@ const AddTransaction = () => {
                 {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
                   ''}
               </Text>
-              <Icon source="chevron-right" size={textSize.md} />
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="chevron-right"
+                size={textSize.md}
+              />
             </View>
           </View>
         </PressableWithFeedback>
@@ -364,7 +376,11 @@ const AddTransaction = () => {
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Icon source={'wallet'} size={textSize.md} />
+              <Icon
+                color={colors.onSurfaceVariant}
+                source={'wallet'}
+                size={textSize.md}
+              />
               <Text
                 style={[
                   {
@@ -388,7 +404,11 @@ const AddTransaction = () => {
               >
                 {selectedAcc?.name ?? 'Select an account'}
               </Text>
-              <Icon source="chevron-right" size={textSize.md} />
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="chevron-right"
+                size={textSize.md}
+              />
             </View>
           </View>
         </PressableWithFeedback>
@@ -415,7 +435,11 @@ const AddTransaction = () => {
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Icon source="calendar" size={textSize.md} />
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="calendar"
+                size={textSize.md}
+              />
               <Text
                 style={[
                   {
@@ -449,7 +473,11 @@ const AddTransaction = () => {
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Icon source="clock" size={textSize.md} />
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="clock"
+                size={textSize.md}
+              />
 
               <Text
                 style={[
@@ -561,10 +589,12 @@ const AddTransaction = () => {
       {amountInput && !isNaN(parseInt(amountInput, 10)) && !!selectedAcc && (
         <FAB
           icon="check"
+          color={colors.onPrimary}
           style={[
             style.fab,
             {
               bottom: kbHeight + 20,
+              backgroundColor: colors.primary,
             },
           ]}
           onPress={saveTransaction}

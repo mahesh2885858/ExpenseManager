@@ -17,7 +17,6 @@ type TProps = {
 
 const TransactionTypeSwitch = (props: TProps) => {
   const { colors } = useAppTheme();
-  //   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [width, setWidth] = useState(0);
   const highlightX = useSharedValue(2);
 
@@ -53,7 +52,7 @@ const TransactionTypeSwitch = (props: TProps) => {
           highlightAnimStyle,
           styles.highlighter,
           {
-            backgroundColor: colors.primaryContainer,
+            backgroundColor: colors.primary,
             height: sectionHeight - 5,
             borderRadius: borderRadius.md,
           },
@@ -71,7 +70,7 @@ const TransactionTypeSwitch = (props: TProps) => {
             {
               color:
                 props.type === 'income'
-                  ? colors.onBackground
+                  ? colors.onPrimary
                   : colors.onSurfaceDisabled,
             },
           ]}
@@ -88,7 +87,7 @@ const TransactionTypeSwitch = (props: TProps) => {
             {
               color:
                 props.type === 'expense'
-                  ? colors.onBackground
+                  ? colors.onPrimary
                   : colors.onSurfaceDisabled,
             },
           ]}
