@@ -207,6 +207,10 @@ const AddTransaction = () => {
     }
   };
 
+  const onInputChange = (input: string) => {
+    setAmountInput(input);
+  };
+
   const {
     btmShtRef: bottomSheetModalRef,
     handlePresent: handlePresentModalPress,
@@ -277,7 +281,7 @@ const AddTransaction = () => {
           style={[
             style.amountInputContainer,
             {
-              borderColor: colors.onSurfaceDisabled,
+              borderColor: colors.outline,
             },
           ]}
         >
@@ -285,7 +289,7 @@ const AddTransaction = () => {
             style={[
               {
                 fontSize: textSize.md,
-                color: colors.onSurfaceDisabled,
+                color: colors.onSurfaceVariant,
               },
             ]}
           >
@@ -293,7 +297,7 @@ const AddTransaction = () => {
           </Text>
           <TextInput
             maxLength={MAX_AMOUNT_LENGTH}
-            onChangeText={setAmountInput}
+            onChangeText={onInputChange}
             value={amountInput}
             autoFocus
             placeholder={CURRENCY_SYMBOL + '0.00'}
@@ -320,27 +324,43 @@ const AddTransaction = () => {
               style.categoryContainer,
             ]}
           >
-            <Text
-              style={[
-                {
-                  fontSize: textSize.md,
-                  color: colors.onSurfaceVariant,
-                },
-              ]}
-            >
-              Category
-            </Text>
-            <Text
-              style={[
-                style.categoryText,
-                {
-                  color: colors.onBackground,
-                },
-              ]}
-            >
-              {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
-                ''}
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Icon
+                source={'shape'}
+                size={textSize.md}
+                color={colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                Category
+              </Text>
+            </View>
+
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Text
+                style={[
+                  gs.fullFlex,
+                  style.categoryText,
+                  {
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
+                {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
+                  ''}
+              </Text>
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="chevron-right"
+                size={textSize.md}
+              />
+            </View>
           </View>
         </PressableWithFeedback>
         {/* Account section */}
@@ -355,26 +375,41 @@ const AddTransaction = () => {
               style.categoryContainer,
             ]}
           >
-            <Text
-              style={[
-                {
-                  fontSize: textSize.md,
-                  color: colors.onSurfaceVariant,
-                },
-              ]}
-            >
-              Account
-            </Text>
-            <Text
-              style={[
-                style.categoryText,
-                {
-                  color: colors.onBackground,
-                },
-              ]}
-            >
-              {selectedAcc?.name ?? 'Select an account'}
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Icon
+                color={colors.onSurfaceVariant}
+                source={'wallet'}
+                size={textSize.md}
+              />
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                Account
+              </Text>
+            </View>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Text
+                style={[
+                  gs.fullFlex,
+                  style.categoryText,
+                  {
+                    color: colors.onBackground,
+                  },
+                ]}
+              >
+                {selectedAcc?.name ?? 'Select an account'}
+              </Text>
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="chevron-right"
+                size={textSize.md}
+              />
+            </View>
           </View>
         </PressableWithFeedback>
 
@@ -399,16 +434,23 @@ const AddTransaction = () => {
               style.categoryContainer,
             ]}
           >
-            <Text
-              style={[
-                {
-                  color: colors.onSurfaceVariant,
-                  fontSize: textSize.md,
-                },
-              ]}
-            >
-              Date
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="calendar"
+                size={textSize.md}
+              />
+              <Text
+                style={[
+                  {
+                    color: colors.onSurfaceVariant,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              >
+                Date
+              </Text>
+            </View>
             <Text
               style={[
                 {
@@ -430,16 +472,24 @@ const AddTransaction = () => {
               style.categoryContainer,
             ]}
           >
-            <Text
-              style={[
-                {
-                  color: colors.onSurfaceVariant,
-                  fontSize: textSize.md,
-                },
-              ]}
-            >
-              Time
-            </Text>
+            <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+              <Icon
+                color={colors.onSurfaceVariant}
+                source="clock"
+                size={textSize.md}
+              />
+
+              <Text
+                style={[
+                  {
+                    color: colors.onSurfaceVariant,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              >
+                Time
+              </Text>
+            </View>
             <Text
               style={[
                 {
@@ -539,10 +589,12 @@ const AddTransaction = () => {
       {amountInput && !isNaN(parseInt(amountInput, 10)) && !!selectedAcc && (
         <FAB
           icon="check"
+          color={colors.onPrimary}
           style={[
             style.fab,
             {
               bottom: kbHeight + 20,
+              backgroundColor: colors.primary,
             },
           ]}
           onPress={saveTransaction}
