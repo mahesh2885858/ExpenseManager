@@ -36,7 +36,7 @@ export const getValidData = (data: TData): TReturnResults => {
       (!data.categories || data.categories.length === 0) &&
       (!data.transactions || data.transactions.length === 0))
   ) {
-    throw 'No valid data provided';
+    throw new Error('No valid data provided');
   }
 
   if (data.accounts && data.accounts.length > 0) {

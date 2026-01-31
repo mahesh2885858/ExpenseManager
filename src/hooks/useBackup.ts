@@ -10,13 +10,14 @@ import { getValidData } from '../utils/validateImportedData';
 import useAccounts from './useAccounts';
 import useCategories from './useCategories';
 import useTransactions from './useTransactions';
-
-const IMPORT_VERSION = '1';
+import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
+import { sha256 } from 'js-sha256';
+import Stringify from 'fast-json-stable-stringify';
 
 const useBackup = () => {
   const { accounts } = useAccounts();
   const { categories } = useCategories();
-  const { filteredTransactions } = useTransactions({});
+  const { filteredTransactions: transactions } = useTransactions({});
   const importCategories = useTransactionsStore(
     state => state.importCategories,
   );
@@ -51,13 +52,27 @@ const useBackup = () => {
   const exportData = useCallback(async () => {
     try {
       setIsExporting(true);
-      const dataToExport = JSON.stringify({
-        version: IMPORT_VERSION,
-        backupCreatedDate: new Date(),
+
+      const dataToExport = {
         accounts,
-        transactions: filteredTransactions,
+        transactions: transactions,
         categories,
+      };
+
+      const serialized = Stringify(dataToExport);
+      const checksum = sha256(serialized);
+
+      const meta = {
+        app: APP_NAME_EXPORT_DATA,
+        backupVersion: BACKUP_VERSION,
+        createdAt: new Date().toISOString(),
+        checksum: `sha256:${checksum}`,
+      };
+      const data = Stringify({
+        meta,
+        data: dataToExport,
       });
+
       let dir = backupDirPath;
       const persistedUris = await ScopedStorage.getPersistedUriPermissions();
       if (dir) {
@@ -79,7 +94,7 @@ const useBackup = () => {
       if (dir) {
         await ScopedStorage.writeFile(
           dir,
-          dataToExport,
+          data,
           filePath,
           'application/json',
           'utf8',
@@ -100,7 +115,7 @@ const useBackup = () => {
     removeBackupDirPath,
     setBackupDirPath,
     pickTheDirectory,
-    filteredTransactions,
+    transactions,
     accounts,
     categories,
   ]);
@@ -111,18 +126,49 @@ const useBackup = () => {
       const dir = await ScopedStorage.openDocument(true);
       if (dir && dir.data) {
         const data = JSON.parse(dir.data);
-        console.log({ data });
-        const { validData } = getValidData(data);
+
+        if (!data || !data.meta || !data.data)
+          throw new Error('Broken or Invalid data');
+        if (!data.meta.app || data.meta.app !== APP_NAME_EXPORT_DATA)
+          throw new Error('This backup does not belong to this app');
+        if (
+          !data.meta.backupVersion ||
+          data.meta.backupVersion !== BACKUP_VERSION
+        )
+          throw new Error('This backup version is not supported');
+        if (!data.meta.checksum)
+          throw new Error('No signature found in backup.');
+
+        const stored = data.meta.checksum?.replace('sha256:', '');
+        const actual = sha256(Stringify(data.data));
+
+        if (stored !== actual) {
+          throw new Error('Backup file is corrupted or modified.');
+        }
+
+        const { validData, itemsSkipped } = getValidData(data.data);
+
+        const accountIds = new Set(validData.accounts?.map(a => a.id));
+
+        validData.transactions = validData.transactions?.filter(t => {
+          if (!accountIds.has(t.accountId)) {
+            itemsSkipped.transactions += 1;
+            return false;
+          }
+          return true;
+        });
+
         setDataToImport({
           accounts: validData.accounts ?? [],
           categories: validData.categories ?? [],
           transactions: validData.transactions ?? [],
         });
       } else {
-        throw 'No data found';
+        throw new Error('No data found');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.log({ e });
+      ToastAndroid.show(String(e?.message ?? e), ToastAndroid.LONG);
       setDataToImport(null);
     } finally {
       setIsGettingData(false);
