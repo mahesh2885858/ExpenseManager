@@ -3,8 +3,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { BackHandler, Keyboard } from 'react-native';
 
-const useBottomSheetModal = () => {
+const useBottomSheetModal = (callback?: () => void) => {
   const btmShtRef = useRef<BottomSheetModal>(null);
+
   const [open, setOpen] = useState(false);
   const handlePresent = useCallback(() => {
     Keyboard.dismiss();
@@ -12,9 +13,15 @@ const useBottomSheetModal = () => {
     setOpen(true);
   }, []);
 
-  const handleSheetChange = useCallback((index: number) => {
-    setOpen(index >= 0);
-  }, []);
+  const handleSheetChange = useCallback(
+    (index: number) => {
+      setOpen(index >= 0);
+      if (index < 0) {
+        callback && callback();
+      }
+    },
+    [callback],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -22,13 +29,16 @@ const useBottomSheetModal = () => {
         if (open) {
           btmShtRef.current?.dismiss();
 
+          callback && callback();
           return true;
         } else {
           return false;
         }
       });
-      return () => sub.remove();
-    }, [open]),
+      return () => {
+        sub.remove();
+      };
+    }, [open, callback]),
   );
 
   return {

@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { getMaxText } from 'commonutil-core';
 import { format, getDate } from 'date-fns';
 import React, { useMemo } from 'react';
@@ -7,15 +6,17 @@ import { Icon } from 'react-native-paper';
 import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
+import useTransactions from '../hooks/useTransactions';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
-import useTransactions from '../hooks/useTransactions';
 
-const RenderTransaction = (props: { item: TTransaction }) => {
+const RenderTransaction = (props: {
+  item: TTransaction;
+  onItemPress: (t: TTransaction) => void;
+}) => {
   const theme = useAppTheme();
-  const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const { deleteTransaction } = useTransactions({});
@@ -43,9 +44,10 @@ const RenderTransaction = (props: { item: TTransaction }) => {
             toggleSelection(props.item.id);
             return;
           }
-          navigation.navigate('TransactionDetails', {
-            transaction: props.item,
-          });
+          // navigation.navigate('TransactionDetails', {
+          //   transaction: props.item,
+          // });
+          props.onItemPress(props.item);
         }
       }}
       style={[
