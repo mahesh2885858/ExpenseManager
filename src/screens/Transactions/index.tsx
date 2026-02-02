@@ -36,6 +36,7 @@ const Transactions = () => {
   const navigation = useNavigation();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+
   const { categories } = useCategories();
 
   const accountName = useMemo(() => {
@@ -443,14 +444,7 @@ const Transactions = () => {
           },
         ]}
       >
-        <View
-          style={[
-            gs.fullFlex,
-            {
-              marginTop: spacing.md,
-            },
-          ]}
-        >
+        <View style={[gs.fullFlex]}>
           {filteredTransactions.length === 0 ? (
             <Text
               style={[
