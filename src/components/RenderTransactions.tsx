@@ -1,13 +1,16 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import { TBottomTabParamList, TTransaction } from '../types';
 import RenderTransaction from './RenderTransaction';
 import useBottomSheetModal from '../hooks/useBottomSheetModal';
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 import TransactionDetailsSheet from '../screens/TransactionDetails/TransactionDetailsSheet';
+import { Snackbar } from 'react-native-paper';
+import useTransactionsStore from '../stores/transactionsStore';
 
 const RenderTransactions = ({
   transactions,
@@ -20,6 +23,11 @@ const RenderTransactions = ({
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
+  const { dismissAll } = useBottomSheetR();
+  const requestDelete = useTransactionsStore(state => state.requestDelete);
+  const pendingDelete = useTransactionsStore(state => state.pendingDelete);
+  const undoDelete = useTransactionsStore(state => state.undoDelete);
+  const confirmDelete = useTransactionsStore(state => state.confirmDelete);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
       setSelectedTransaction(null);
@@ -27,9 +35,17 @@ const RenderTransactions = ({
   );
 
   const onItemPress = useCallback((t: TTransaction) => {
-    console.log('being called');
     setSelectedTransaction(t);
   }, []);
+
+  const onDeletePress = useCallback(
+    (t: TTransaction) => {
+      setSelectedTransaction(null);
+      requestDelete(t);
+      dismissAll();
+    },
+    [dismissAll, requestDelete],
+  );
 
   useEffect(() => {
     if (selectedTransaction) {
@@ -39,10 +55,7 @@ const RenderTransactions = ({
   return (
     <>
       <FlashList
-        contentContainerStyle={{
-          paddingBottom: 100,
-          paddingTop: spacing.md,
-        }}
+        contentContainerStyle={styles.container}
         ListEmptyComponent={
           <Text
             style={[
@@ -91,9 +104,38 @@ const RenderTransactions = ({
         handleSheetChanges={handleSheetChange}
         ref={btmShtRef}
         selectedTransaction={selectedTransaction}
+        onDeletePress={onDeletePress}
       />
+      <Snackbar
+        action={{
+          label: 'undo',
+          onPress: () => {
+            console.log('cancelling dleete');
+            undoDelete();
+          },
+        }}
+        style={styles.snackBar}
+        onDismiss={() => {
+          console.log('deleting hte trnx');
+          confirmDelete();
+        }}
+        visible={!!pendingDelete}
+      >
+        <Text>Transaction deleted</Text>
+      </Snackbar>
     </>
   );
 };
 
 export default RenderTransactions;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 100,
+    paddingTop: spacing.md,
+  },
+  snackBar: {
+    bottom: 60,
+    zIndex: 1000,
+  },
+});

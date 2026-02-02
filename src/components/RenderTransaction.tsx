@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { getMaxText } from 'commonutil-core';
 import { format, getDate } from 'date-fns';
 import React, { useMemo } from 'react';
@@ -18,7 +17,6 @@ const RenderTransaction = (props: {
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
-  const navigation = useNavigation();
   const categories = useTransactionsStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const { deleteTransaction } = useTransactions({});

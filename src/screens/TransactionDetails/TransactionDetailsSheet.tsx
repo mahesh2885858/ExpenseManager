@@ -23,6 +23,7 @@ type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
   selectedTransaction: TTransaction | null;
+  onDeletePress: (t: TTransaction) => void;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
@@ -85,7 +86,12 @@ const TransactionDetailsSheet = (props: TProps) => {
             Amount
           </Text>
           <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.lg }]}>
-            <PressableWithFeedback>
+            <PressableWithFeedback
+              onPress={() =>
+                props.selectedTransaction &&
+                props.onDeletePress(props.selectedTransaction)
+              }
+            >
               <Icon source={'delete'} size={textSize.xl} />
             </PressableWithFeedback>
             <PressableWithFeedback onPress={navigateToEdit}>

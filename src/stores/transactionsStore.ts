@@ -16,6 +16,7 @@ type TTransactionsStore = {
   filters: TFilters;
   defaultCategoryId: string | null;
   sort: TSort;
+  pendingDelete: TTransaction | null;
 };
 
 type TTransactionsStoreActions = {
@@ -33,6 +34,9 @@ type TTransactionsStoreActions = {
   importCategories: (cats: TCategories) => void;
   setDefaultCategoryId: (catId: string | null) => void;
   setSort: (sort: TSort) => void;
+  requestDelete: (t: TTransaction) => void;
+  undoDelete: () => void;
+  confirmDelete: () => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -56,6 +60,7 @@ const useTransactionsStore = create<PositionStore>()(
         categoryId: null,
       },
       sort: 'dateNewFirst',
+      pendingDelete: null,
       addTransaction: transaction => {
         set(state => ({ transactions: [...state.transactions, transaction] }));
       },
@@ -139,6 +144,27 @@ const useTransactionsStore = create<PositionStore>()(
       },
       setSort: sort => {
         set({ sort });
+      },
+      requestDelete: transaction => {
+        set({
+          pendingDelete: transaction,
+          transactions: get().transactions.filter(t => t.id !== transaction.id),
+        });
+      },
+      confirmDelete: () => {
+        const pending = get().pendingDelete;
+        if (!pending) return;
+        set({
+          pendingDelete: null,
+        });
+      },
+      undoDelete: () => {
+        const pending = get().pendingDelete;
+        if (!pending) return;
+        set({
+          transactions: [pending, ...get().transactions],
+          pendingDelete: null,
+        });
       },
     }),
     {
