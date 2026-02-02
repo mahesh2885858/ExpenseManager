@@ -445,23 +445,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          {filteredTransactions.length === 0 ? (
-            <Text
-              style={[
-                gs.fontBold,
-                gs.centerText,
-                {
-                  color: theme.colors.inverseSurface,
-                  fontSize: textSize.lg,
-                  marginTop: spacing.lg,
-                },
-              ]}
-            >
-              No transactions yet!!
-            </Text>
-          ) : (
-            <RenderTransactions transactions={transactionsToRender} />
-          )}
+          <RenderTransactions transactions={transactionsToRender} />
         </View>
       </View>
 
