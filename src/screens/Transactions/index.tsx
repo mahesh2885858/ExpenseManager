@@ -282,6 +282,19 @@ const Transactions = () => {
           />
         </PressableWithFeedback>
 
+        {/* <View>
+          <Text
+            style={[
+              styles.text,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+          >
+            Balance: {formatAmount(totals.balance)}
+          </Text>
+        </View> */}
+
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
           <PressableWithFeedback
             disabled={isExpenseFilterOn}
@@ -518,6 +531,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+  },
+  text: {
+    fontSize: textSize.md,
+    fontWeight: '600',
   },
   search: {
     flex: 1,

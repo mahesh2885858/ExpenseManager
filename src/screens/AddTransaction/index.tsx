@@ -25,7 +25,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import {
   DEFAULT_CATEGORY_ID,
   gs,
-  MAX_AMOUNT_LENGTH,
+  MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL,
   MAX_DESCRIPTION_LIMIT,
 } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
@@ -43,6 +43,8 @@ import {
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
+import { formatAmount } from '../../utils';
+import { getDigits } from 'commonutil-core';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
@@ -208,7 +210,13 @@ const AddTransaction = () => {
   };
 
   const onInputChange = (input: string) => {
-    setAmountInput(input);
+    try {
+      const cleanDigits = getDigits(input);
+      const t = formatAmount(parseInt(cleanDigits, 10));
+      setAmountInput(t);
+    } catch (e) {
+      console.log({ e });
+    }
   };
 
   const {
@@ -296,7 +304,7 @@ const AddTransaction = () => {
             Amount
           </Text>
           <TextInput
-            maxLength={MAX_AMOUNT_LENGTH}
+            maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
             onChangeText={onInputChange}
             value={amountInput}
             autoFocus

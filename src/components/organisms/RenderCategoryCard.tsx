@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
   createAnimatedComponent,
@@ -34,6 +34,9 @@ const RenderCategoryCard = (props: TProps) => {
   const [openDelDesc, setOpenDelDesc] = useState(false);
   const navigation = useNavigation();
   const deleteCat = useCategoriesStore(state => state.removeCategory);
+  const defaultCategoryId = useCategoriesStore(
+    state => state.defaultCategoryId,
+  );
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   useEffect(() => {
     if (props.isFocused) {
@@ -141,7 +144,13 @@ const RenderCategoryCard = (props: TProps) => {
       </View>
       <View style={[styles.actionBox]}>
         <PressableWithFeedback
-          onPress={() => setOpenDelDesc(true)}
+          onPress={() => {
+            if (defaultCategoryId === item.id) {
+              ToastAndroid.show('Can not delete default category', 2000);
+              return;
+            }
+            setOpenDelDesc(true);
+          }}
           feedbackColor={colors.background}
           style={[styles.action]}
         >
