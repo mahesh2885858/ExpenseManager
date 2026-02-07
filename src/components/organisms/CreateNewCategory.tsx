@@ -27,6 +27,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const CreateNewCategory = (props: TProps) => {
   const { colors } = useAppTheme();
+
   const [makeDefault, setMakeDefault] = useState(false);
   const [catName, setCatName] = useState(
     props.catToEdit ? props.catToEdit.name : '',
@@ -96,34 +97,47 @@ const CreateNewCategory = (props: TProps) => {
           </Text>
           <View
             style={[
-              styles.catNameBox,
+              gs.flexRow,
+              gs.itemsCenter,
               {
-                borderColor: colors.onSurfaceDisabled,
+                marginHorizontal: spacing.md,
+                marginTop: spacing.md,
+                gap: spacing.md,
               },
             ]}
           >
-            <Text
+            <View
               style={[
+                styles.catNameBox,
+                gs.fullFlex,
                 {
-                  color: colors.onSurfaceDisabled,
-                  fontSize: textSize.md,
+                  borderColor: colors.onSurfaceDisabled,
                 },
               ]}
             >
-              Category name
-            </Text>
-            <BottomSheetTextInput
-              value={catName}
-              onChangeText={setCatName}
-              placeholder="Choose your category name"
-              placeholderTextColor={colors.onSurfaceDisabled}
-              style={[
-                {
-                  color: colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
-            />
+              <Text
+                style={[
+                  {
+                    color: colors.onSurfaceDisabled,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              >
+                Category name
+              </Text>
+              <BottomSheetTextInput
+                value={catName}
+                onChangeText={setCatName}
+                placeholder="Choose your category name"
+                placeholderTextColor={colors.onSurfaceDisabled}
+                style={[
+                  {
+                    color: colors.onBackground,
+                    fontSize: textSize.md,
+                  },
+                ]}
+              />
+            </View>
           </View>
           {!isEditModeOn && (
             <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
@@ -210,9 +224,7 @@ const styles = StyleSheet.create({
   catNameBox: {
     borderWidth: 1,
     borderRadius: borderRadius.md,
-    marginHorizontal: spacing.md,
-    marginTop: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingLeft: spacing.sm,
   },
   switchBox: {

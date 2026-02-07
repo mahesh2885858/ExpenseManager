@@ -13,14 +13,13 @@ import useTransactions from './useTransactions';
 import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
 import { sha256 } from 'js-sha256';
 import Stringify from 'fast-json-stable-stringify';
+import useCategoriesStore from '../stores/categoriesStore';
 
 const useBackup = () => {
   const { accounts } = useAccounts();
   const { categories } = useCategories();
   const { filteredTransactions: transactions } = useTransactions({});
-  const importCategories = useTransactionsStore(
-    state => state.importCategories,
-  );
+  const importCategories = useCategoriesStore(state => state.importCategories);
   const importTransactions = useTransactionsStore(
     state => state.importTransactions,
   );

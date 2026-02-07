@@ -27,8 +27,7 @@ const FilteredTransactions = () => {
   }, [route]);
   const {
     filteredTransactions,
-    search,
-    setSearch,
+
     totalIncome,
     totalExpenses,
   } = useTransactions({
@@ -45,7 +44,7 @@ const FilteredTransactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader hideFilterIcon search={search} setSearch={setSearch} />
+      <CommonHeader />
 
       {/* summary */}
       <View

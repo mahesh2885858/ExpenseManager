@@ -10,7 +10,7 @@ import {
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useTransactionsStore from '../../stores/transactionsStore';
+import useCategoriesStore from '../../stores/categoriesStore';
 import { TCategorySummary } from '../../types';
 import { formatAmount } from '../../utils';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
@@ -33,7 +33,7 @@ const RenderCategoryCard = (props: TProps) => {
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
   const navigation = useNavigation();
-  const deleteCat = useTransactionsStore(state => state.removeCategory);
+  const deleteCat = useCategoriesStore(state => state.removeCategory);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   useEffect(() => {
     if (props.isFocused) {

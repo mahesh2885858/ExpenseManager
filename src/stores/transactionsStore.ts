@@ -2,19 +2,11 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
-import {
-  TCategories,
-  TCategory,
-  TFilters,
-  TSort,
-  TTransaction,
-} from '../types';
+import { TFilters, TSort, TTransaction } from '../types';
 
 type TTransactionsStore = {
   transactions: TTransaction[];
-  categories: TCategories;
   filters: TFilters;
-  defaultCategoryId: string | null;
   sort: TSort;
   pendingDelete: TTransaction | null;
 };
@@ -22,17 +14,12 @@ type TTransactionsStore = {
 type TTransactionsStoreActions = {
   addTransaction: (account: TTransaction) => void;
   updateTransaction: (id: string, transaction: TTransaction) => void;
-  addCategory: (category: TCategory) => void;
   toggleSelection: (id: string) => void;
   removeTransaction: (id: string) => void;
   setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
   deleteForAnAcc: (accId: string) => void;
-  updateCategory: (cat: TCategory) => void;
-  removeCategory: (catId: string) => void;
   importTransactions: (t: TTransaction[]) => void;
-  importCategories: (cats: TCategories) => void;
-  setDefaultCategoryId: (catId: string | null) => void;
   setSort: (sort: TSort) => void;
   requestDelete: (t: TTransaction) => void;
   undoDelete: () => void;
@@ -73,11 +60,7 @@ const useTransactionsStore = create<PositionStore>()(
           }),
         }));
       },
-      addCategory: category => {
-        set(state => {
-          return { categories: [...state.categories, category] };
-        });
-      },
+
       toggleSelection: id => {
         set(state => ({
           transactions: state.transactions.map(t => {
@@ -119,29 +102,11 @@ const useTransactionsStore = create<PositionStore>()(
           transactions: updatedTransaction,
         });
       },
-      updateCategory: cat => {
-        const updatedCats = get().categories.map(c => {
-          if (c.id === cat.id) {
-            return { ...cat };
-          } else return c;
-        });
-        set({ categories: updatedCats });
-      },
 
-      removeCategory: catId => {
-        set(state => ({
-          categories: state.categories.filter(c => c.id !== catId),
-        }));
-      },
       importTransactions: transactions => {
         set({ transactions });
       },
-      importCategories: cats => {
-        set({ categories: cats });
-      },
-      setDefaultCategoryId: catId => {
-        set({ defaultCategoryId: catId });
-      },
+
       setSort: sort => {
         set({ sort });
       },

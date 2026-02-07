@@ -3,11 +3,13 @@ import {
   BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetProps,
+  BottomSheetTextInput,
   useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
+import { FlashList } from '@shopify/flash-list';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon, RadioButton } from 'react-native-paper';
+import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -15,7 +17,6 @@ import useCategories from '../../hooks/useCategories';
 import { TCategory } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewCategory from './CreateNewCategory';
-import { FlashList } from '@shopify/flash-list';
 
 type TProps = {
   ref: any;
@@ -33,6 +34,7 @@ const CategorySelectionModal = (props: TProps) => {
   const { categories } = useCategories();
   const { colors } = useAppTheme();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
   const sortedCategories = useMemo(() => {
@@ -41,6 +43,7 @@ const CategorySelectionModal = (props: TProps) => {
 
   return (
     <BottomSheetModal
+      stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
         backgroundColor: colors.inverseOnSurface,
@@ -81,14 +84,29 @@ const CategorySelectionModal = (props: TProps) => {
                 />
               </PressableWithFeedback>
             </View>
+            <View style={[{ marginTop: spacing.sm }]}>
+              <BottomSheetTextInput
+                placeholderTextColor={colors.onSurfaceDisabled}
+                placeholder="Search categories"
+                style={[
+                  styles.searchInput,
+                  {
+                    color: colors.onBackground,
+                    borderColor: colors.outlineVariant,
+                  },
+                ]}
+              />
+            </View>
             <FlashList
               style={{
                 maxHeight: 500,
               }}
+              numColumns={2}
               renderScrollComponent={BottomSheetScrollable}
               keyExtractor={(item: TCategory) => item.id}
               showsVerticalScrollIndicator={false}
               data={sortedCategories}
+              masonry
               contentContainerStyle={[styles.listContainer]}
               renderItem={({ item }: { item: TCategory }) => {
                 const isSelected = props.selectedCategory === item.id;
@@ -105,19 +123,20 @@ const CategorySelectionModal = (props: TProps) => {
                       styles.item,
                       {
                         borderColor: isSelected
-                          ? colors.inversePrimary
+                          ? colors.onPrimaryContainer
                           : colors.onSurfaceDisabled,
                       },
                     ]}
                     key={item.id}
                   >
-                    <RadioButton.Android
+                    {/* <RadioButton.Android
                       status={isSelected ? 'checked' : 'unchecked'}
                       color={colors.inversePrimary}
                       value={item.name}
-                    />
+                    /> */}
                     <Text
                       style={[
+                        gs.fullFlex,
                         {
                           color: colors.onSurface,
                           fontSize: textSize.md,
@@ -126,6 +145,13 @@ const CategorySelectionModal = (props: TProps) => {
                     >
                       {item.name}
                     </Text>
+                    {isSelected && (
+                      <Icon
+                        source={'check'}
+                        size={textSize.md}
+                        color={colors.onPrimaryContainer}
+                      />
+                    )}
                   </PressableWithFeedback>
                 );
               }}
@@ -148,7 +174,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
   },
 
@@ -159,15 +185,22 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: textSize.lg,
   },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.sm,
+  },
   listContainer: {
     marginTop: spacing.md,
     paddingBottom: 100,
   },
   item: {
     borderWidth: 1,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     marginBottom: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    marginRight: 10,
   },
   manageText: {
     fontWeight: '600',
