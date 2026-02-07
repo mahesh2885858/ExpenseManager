@@ -7,7 +7,7 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
@@ -39,6 +39,7 @@ const CreateNewCategory = (props: TProps) => {
   }, [catName]);
 
   const addNew = useCallback(() => {
+    Keyboard.dismiss();
     const isExist = categories.some(
       cat => cat.name.trim().toLowerCase() === catName.trim().toLowerCase(),
     );

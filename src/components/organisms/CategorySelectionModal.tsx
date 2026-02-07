@@ -7,7 +7,7 @@ import {
   useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -37,9 +37,19 @@ const CategorySelectionModal = (props: TProps) => {
 
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
+  const [search, setSearch] = useState('');
+
+  const categoriesToRender = useMemo(() => {
+    return search.trim().length === 0
+      ? categories
+      : categories.filter(cat =>
+          cat.name.toLowerCase().includes(search.trim().toLowerCase()),
+        );
+  }, [categories, search]);
+
   const sortedCategories = useMemo(() => {
-    return categories.sort((a, b) => a.name.localeCompare(b.name));
-  }, [categories]);
+    return categoriesToRender.sort((a, b) => a.name.localeCompare(b.name));
+  }, [categoriesToRender]);
 
   return (
     <BottomSheetModal
@@ -84,19 +94,23 @@ const CategorySelectionModal = (props: TProps) => {
                 />
               </PressableWithFeedback>
             </View>
-            <View style={[{ marginTop: spacing.sm }]}>
-              <BottomSheetTextInput
-                placeholderTextColor={colors.onSurfaceDisabled}
-                placeholder="Search categories"
-                style={[
-                  styles.searchInput,
-                  {
-                    color: colors.onBackground,
-                    borderColor: colors.outlineVariant,
-                  },
-                ]}
-              />
-            </View>
+            {categories.length > 5 && (
+              <View style={[{ marginTop: spacing.sm }]}>
+                <BottomSheetTextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholderTextColor={colors.onSurfaceDisabled}
+                  placeholder="Search categories"
+                  style={[
+                    styles.searchInput,
+                    {
+                      color: colors.onBackground,
+                      borderColor: colors.outlineVariant,
+                    },
+                  ]}
+                />
+              </View>
+            )}
             <FlashList
               style={{
                 maxHeight: 500,
