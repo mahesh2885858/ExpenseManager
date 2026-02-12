@@ -13,7 +13,6 @@ import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import { TCategorySummary } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import Switch from '../atoms/Switch';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -28,7 +27,6 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const CreateNewCategory = (props: TProps) => {
   const { colors } = useAppTheme();
 
-  const [makeDefault, setMakeDefault] = useState(false);
   const [catName, setCatName] = useState(
     props.catToEdit ? props.catToEdit.name : '',
   );
@@ -50,12 +48,11 @@ const CreateNewCategory = (props: TProps) => {
       );
       return;
     } else {
-      addCategory(catName, makeDefault);
+      addCategory(catName, false);
       setCatName('');
-      setMakeDefault(false);
       props.ref.current?.dismiss();
     }
-  }, [catName, makeDefault, addCategory, props, categories]);
+  }, [catName, addCategory, props, categories]);
 
   const editCategory = useCallback(() => {
     if (!props.catToEdit) return;
@@ -140,24 +137,7 @@ const CreateNewCategory = (props: TProps) => {
               />
             </View>
           </View>
-          {!isEditModeOn && (
-            <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
-              <Text
-                style={[
-                  gs.fullFlex,
-                  {
-                    color: colors.onBackground,
-                  },
-                ]}
-              >
-                Make this as default
-              </Text>
-              <Switch
-                isOn={makeDefault}
-                onStateChange={state => setMakeDefault(state)}
-              />
-            </View>
-          )}
+
           {renderSaveButton && (
             <PressableWithFeedback
               onPress={() => {
