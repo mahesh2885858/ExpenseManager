@@ -60,7 +60,9 @@ const RenderCategoryCard = (props: TProps) => {
 
   return (
     <AnimatedPressable
-      onPress={() => props.changeFocusId(props.isFocused ? '' : item.id)}
+      onPress={() => {
+        props.changeFocusId(props.isFocused ? '' : item.id);
+      }}
       style={[
         styles.container,
         {
@@ -69,16 +71,19 @@ const RenderCategoryCard = (props: TProps) => {
         },
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          {
-            color: colors.onBackground,
-          },
-        ]}
-      >
-        {item.name}
-      </Text>
+      <View style={[gs.flexRow]}>
+        <Text
+          style={[
+            gs.fullFlex,
+            styles.text,
+            {
+              color: colors.onBackground,
+            },
+          ]}
+        >
+          {item.name}
+        </Text>
+      </View>
 
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
         <View
