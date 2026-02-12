@@ -10,7 +10,7 @@ import {
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useTransactionsStore from '../../stores/transactionsStore';
+import useCategoriesStore from '../../stores/categoriesStore';
 import { TCategorySummary } from '../../types';
 import { formatAmount } from '../../utils';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
@@ -33,7 +33,8 @@ const RenderCategoryCard = (props: TProps) => {
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
   const navigation = useNavigation();
-  const deleteCat = useTransactionsStore(state => state.removeCategory);
+  const deleteCat = useCategoriesStore(state => state.removeCategory);
+
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   useEffect(() => {
     if (props.isFocused) {
@@ -57,7 +58,9 @@ const RenderCategoryCard = (props: TProps) => {
 
   return (
     <AnimatedPressable
-      onPress={() => props.changeFocusId(props.isFocused ? '' : item.id)}
+      onPress={() => {
+        props.changeFocusId(props.isFocused ? '' : item.id);
+      }}
       style={[
         styles.container,
         {
@@ -66,16 +69,19 @@ const RenderCategoryCard = (props: TProps) => {
         },
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          {
-            color: colors.onBackground,
-          },
-        ]}
-      >
-        {item.name}
-      </Text>
+      <View style={[gs.flexRow]}>
+        <Text
+          style={[
+            gs.fullFlex,
+            styles.text,
+            {
+              color: colors.onBackground,
+            },
+          ]}
+        >
+          {item.name}
+        </Text>
+      </View>
 
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
         <View
@@ -141,7 +147,9 @@ const RenderCategoryCard = (props: TProps) => {
       </View>
       <View style={[styles.actionBox]}>
         <PressableWithFeedback
-          onPress={() => setOpenDelDesc(true)}
+          onPress={() => {
+            setOpenDelDesc(true);
+          }}
           feedbackColor={colors.background}
           style={[styles.action]}
         >

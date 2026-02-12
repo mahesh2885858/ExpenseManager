@@ -8,7 +8,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
 import useAccountStore from '../../stores/accountsStore';
-import useTransactionsStore from '../../stores/transactionsStore';
+import useCategoriesStore from '../../stores/categoriesStore';
 import { TRootStackParamList } from '../../types';
 
 const TransactionDetails = () => {
@@ -17,7 +17,7 @@ const TransactionDetails = () => {
   const transaction = route.params.transaction;
   const theme = useAppTheme();
   const navigation = useNavigation();
-  const categories = useTransactionsStore(state => state.categories);
+  const categories = useCategoriesStore(state => state.categories);
   const accounts = useAccountStore(state => state.accounts);
 
   const categoryName = useMemo(() => {

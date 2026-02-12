@@ -7,13 +7,12 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import { TCategorySummary } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import Switch from '../atoms/Switch';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -26,8 +25,9 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 };
 
 const CreateNewCategory = (props: TProps) => {
+  console.log({ props });
   const { colors } = useAppTheme();
-  const [makeDefault, setMakeDefault] = useState(false);
+
   const [catName, setCatName] = useState(
     props.catToEdit ? props.catToEdit.name : '',
   );
@@ -38,6 +38,7 @@ const CreateNewCategory = (props: TProps) => {
   }, [catName]);
 
   const addNew = useCallback(() => {
+    Keyboard.dismiss();
     const isExist = categories.some(
       cat => cat.name.trim().toLowerCase() === catName.trim().toLowerCase(),
     );
@@ -48,12 +49,11 @@ const CreateNewCategory = (props: TProps) => {
       );
       return;
     } else {
-      addCategory(catName, makeDefault);
+      addCategory(catName, false);
       setCatName('');
-      setMakeDefault(false);
       props.ref.current?.dismiss();
     }
-  }, [catName, makeDefault, addCategory, props, categories]);
+  }, [catName, addCategory, props, categories]);
 
   const editCategory = useCallback(() => {
     if (!props.catToEdit) return;
@@ -61,7 +61,6 @@ const CreateNewCategory = (props: TProps) => {
       ...props.catToEdit,
       name: catName,
     });
-    setCatName('');
     props.ref.current?.dismiss();
   }, [props, catName, updateCategory]);
 
@@ -96,53 +95,49 @@ const CreateNewCategory = (props: TProps) => {
           </Text>
           <View
             style={[
-              styles.catNameBox,
+              gs.flexRow,
+              gs.itemsCenter,
               {
-                borderColor: colors.onSurfaceDisabled,
+                marginHorizontal: spacing.md,
+                marginTop: spacing.md,
+                gap: spacing.md,
               },
             ]}
           >
-            <Text
+            <View
               style={[
+                styles.catNameBox,
+                gs.fullFlex,
                 {
-                  color: colors.onSurfaceDisabled,
-                  fontSize: textSize.md,
+                  borderColor: colors.onSurfaceDisabled,
                 },
               ]}
             >
-              Category name
-            </Text>
-            <BottomSheetTextInput
-              value={catName}
-              onChangeText={setCatName}
-              placeholder="Choose your category name"
-              placeholderTextColor={colors.onSurfaceDisabled}
-              style={[
-                {
-                  color: colors.onBackground,
-                  fontSize: textSize.lg,
-                },
-              ]}
-            />
-          </View>
-          {!isEditModeOn && (
-            <View style={[gs.flexRow, gs.itemsCenter, styles.switchBox]}>
               <Text
                 style={[
-                  gs.fullFlex,
                   {
-                    color: colors.onBackground,
+                    color: colors.onSurfaceDisabled,
+                    fontSize: textSize.md,
                   },
                 ]}
               >
-                Make this as default
+                Category name
               </Text>
-              <Switch
-                isOn={makeDefault}
-                onStateChange={state => setMakeDefault(state)}
+              <BottomSheetTextInput
+                value={catName}
+                onChangeText={setCatName}
+                placeholder="Choose your category name"
+                placeholderTextColor={colors.onSurfaceDisabled}
+                style={[
+                  {
+                    color: colors.onBackground,
+                    fontSize: textSize.md,
+                  },
+                ]}
               />
             </View>
-          )}
+          </View>
+
           {renderSaveButton && (
             <PressableWithFeedback
               onPress={() => {
@@ -210,9 +205,7 @@ const styles = StyleSheet.create({
   catNameBox: {
     borderWidth: 1,
     borderRadius: borderRadius.md,
-    marginHorizontal: spacing.md,
-    marginTop: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingLeft: spacing.sm,
   },
   switchBox: {

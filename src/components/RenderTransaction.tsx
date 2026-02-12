@@ -11,13 +11,14 @@ import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
+import useCategoriesStore from '../stores/categoriesStore';
 
 const RenderTransaction = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
-  const categories = useTransactionsStore(state => state.categories);
+  const categories = useCategoriesStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const { deleteTransaction } = useTransactions({});
   const transactions = useTransactionsStore(state => state.transactions);

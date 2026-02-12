@@ -2,16 +2,17 @@ import { useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
 import { TCategorySummary } from '../types';
+import useCategoriesStore from '../stores/categoriesStore';
 
 const useCategories = () => {
-  const categories = useTransactionsStore(state => state.categories);
-  const addCategory = useTransactionsStore(state => state.addCategory);
+  const categories = useCategoriesStore(state => state.categories);
+  const addCategory = useCategoriesStore(state => state.addCategory);
   const transactions = useTransactionsStore(state => state.transactions);
-  const updateCategory = useTransactionsStore(state => state.updateCategory);
-  const setDefaultCategoryId = useTransactionsStore(
+  const updateCategory = useCategoriesStore(state => state.updateCategory);
+  const setDefaultCategoryId = useCategoriesStore(
     state => state.setDefaultCategoryId,
   );
-  const defaultCategoryId = useTransactionsStore(
+  const defaultCategoryId = useCategoriesStore(
     state => state.defaultCategoryId,
   );
 

@@ -23,9 +23,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import {
-  DEFAULT_CATEGORY_ID,
   gs,
-  MAX_AMOUNT_LENGTH,
+  MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL,
   MAX_DESCRIPTION_LIMIT,
 } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
@@ -39,13 +38,22 @@ import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
+  TAccount,
   TAttachment,
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
+import { formatAmount } from '../../utils';
+import { getDigits } from 'commonutil-core';
 const DATE_FORMAT = 'dd MMM yyyy';
 const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
+
+type TValidatedInputs = {
+  selectedAcc: TAccount;
+  selectedCategoryId: string;
+  amount: number;
+};
 
 const AddTransaction = () => {
   const { colors } = useAppTheme();
@@ -53,7 +61,7 @@ const AddTransaction = () => {
   const { top } = useSafeAreaInsets();
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-  const { categories, defaultCategoryId } = useCategories();
+  const { categories } = useCategories();
   const { addNewTransaction } = useTransactions({});
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
@@ -67,7 +75,7 @@ const AddTransaction = () => {
     desc: string;
     attachments: TAttachment[];
     accountId: string;
-    selectedCatId: string;
+    selectedCatId: string | null;
     time: {
       hours: number;
       minutes: number;
@@ -101,14 +109,14 @@ const AddTransaction = () => {
         accountId: defaultAccountId,
 
         attachments: [],
-        selectedCatId: defaultCategoryId ?? DEFAULT_CATEGORY_ID,
+        selectedCatId: null,
         time: {
           hours: new Date().getHours(),
           minutes: new Date().getMinutes(),
         },
       };
     }
-  }, [route, defaultCategoryId, defaultAccountId]);
+  }, [route, defaultAccountId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -130,6 +138,10 @@ const AddTransaction = () => {
   );
   const { kbHeight } = useGetKeyboardHeight();
   const [accountId, setAccountId] = useState(initData.accountId);
+  const [errorFields, setErrorFields] = useState<Array<
+    'amount' | 'account' | 'category' | 'date' | 'time'
+  > | null>(null);
+
   const progress = useSharedValue(0);
 
   const selectedAcc = useMemo(() => {
@@ -159,23 +171,60 @@ const AddTransaction = () => {
     return date;
   }, [date, time]);
 
+  const validateInputs = () => {
+    const errors: typeof errorFields = [];
+    let amount = 0;
+    if (!selectedAcc) {
+      console.log('No account selected');
+      errors.push('account');
+    }
+    if (!selectedCategoryId) {
+      console.log('No category selected');
+      errors.push('category');
+    }
+
+    if (amountInput.trim().length === 0) {
+      console.log('No amount added');
+      errors.push('amount');
+    } else {
+      amount = parseFloat(getDigits(amountInput));
+
+      if (amount <= 0) {
+        console.log('No amount added');
+        errors.push('amount');
+      }
+    }
+
+    if (errors.length > 0) {
+      setErrorFields(errors);
+      return null;
+    } else {
+      return {
+        selectedAcc,
+        selectedCategoryId,
+        amount,
+      } satisfies TValidatedInputs;
+    }
+  };
+
   const saveTransaction = () => {
     try {
       const id =
         route.params.mode === 'edit' ? route.params.transaction.id : uuid();
-      if (!selectedAcc) {
-        console.log('No account selected');
-        return;
-      }
-      const selectedAccountId = selectedAcc.id;
-      const amount = parseFloat(amountInput);
+
+      const result = validateInputs();
+      console.log({ result });
+      if (!result) return;
+
+      const selectedAccountId = result?.selectedAcc?.id;
+
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
       if (route.params.mode === 'edit') {
         updateTransaction(route.params.transaction.id, {
           ...route.params.transaction,
-          amount,
+          amount: result.amount,
           categoryIds: [selectedCategoryId],
           transactionDate: dateToAdd.toISOString(),
           type: transactionType,
@@ -185,7 +234,7 @@ const AddTransaction = () => {
       } else {
         addNewTransaction({
           accountId: selectedAccountId,
-          amount,
+          amount: result.amount,
           categoryIds: [selectedCategoryId],
           createdAt: new Date().toISOString(),
           transactionDate: dateToAdd.toISOString(),
@@ -208,7 +257,17 @@ const AddTransaction = () => {
   };
 
   const onInputChange = (input: string) => {
-    setAmountInput(input);
+    try {
+      const cleanDigits = getDigits(input);
+      const t = formatAmount(parseInt(cleanDigits, 10));
+      setAmountInput(t);
+      setErrorFields(p => {
+        if (!p) return p;
+        return p.filter(f => f !== 'amount');
+      });
+    } catch (e) {
+      console.log({ e });
+    }
   };
 
   const {
@@ -285,18 +344,34 @@ const AddTransaction = () => {
             },
           ]}
         >
-          <Text
-            style={[
-              {
-                fontSize: textSize.md,
-                color: colors.onSurfaceVariant,
-              },
-            ]}
-          >
-            Amount
-          </Text>
+          <View style={[gs.flexRow]}>
+            <Text
+              style={[
+                gs.fullFlex,
+                {
+                  fontSize: textSize.md,
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
+            >
+              Amount
+            </Text>
+            {errorFields?.some(f => f === 'amount') && (
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.sm,
+                    color: colors.error,
+                    paddingRight: spacing.sm,
+                  },
+                ]}
+              >
+                Required
+              </Text>
+            )}
+          </View>
           <TextInput
-            maxLength={MAX_AMOUNT_LENGTH}
+            maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
             onChangeText={onInputChange}
             value={amountInput}
             autoFocus
@@ -318,7 +393,6 @@ const AddTransaction = () => {
             style={[
               {
                 marginTop: spacing.md,
-
                 backgroundColor: colors.surfaceVariant,
               },
               style.categoryContainer,
@@ -330,16 +404,31 @@ const AddTransaction = () => {
                 size={textSize.md}
                 color={colors.onSurfaceVariant}
               />
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                Category
-              </Text>
+              <View style={[gs.flexRow, gs.fullFlex]}>
+                <Text
+                  style={[
+                    gs.fullFlex,
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onSurfaceVariant,
+                    },
+                  ]}
+                >
+                  Category
+                </Text>
+                {errorFields?.some(f => f === 'category') && (
+                  <Text
+                    style={[
+                      {
+                        fontSize: textSize.sm,
+                        color: colors.error,
+                      },
+                    ]}
+                  >
+                    Required
+                  </Text>
+                )}
+              </View>
             </View>
 
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
@@ -353,7 +442,7 @@ const AddTransaction = () => {
                 ]}
               >
                 {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
-                  ''}
+                  'Select category'}
               </Text>
               <Icon
                 color={colors.onSurfaceVariant}
@@ -586,26 +675,26 @@ const AddTransaction = () => {
           minutes={0}
         />
       </ScrollView>
-      {amountInput && !isNaN(parseInt(amountInput, 10)) && !!selectedAcc && (
-        <FAB
-          icon="check"
-          color={colors.onPrimary}
-          style={[
-            style.fab,
-            {
-              bottom: kbHeight + 20,
-              backgroundColor: colors.primary,
-            },
-          ]}
-          onPress={saveTransaction}
-        />
-      )}
+
+      <FAB
+        icon="check"
+        color={colors.onPrimary}
+        style={[
+          style.fab,
+          {
+            bottom: kbHeight + 20,
+            backgroundColor: colors.primary,
+          },
+        ]}
+        onPress={saveTransaction}
+      />
 
       <CategorySelectionModal
         handleSheetChanges={handleCategorySheetChanges}
         ref={categoryBtmSheet}
         selectCategory={id => {
           setSelectedCategoryId(id);
+          setErrorFields(p => (!p ? p : p.filter(f => f !== 'category')));
         }}
         selectedCategory={selectedCategoryId}
       />
