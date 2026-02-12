@@ -25,6 +25,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 };
 
 const CreateNewCategory = (props: TProps) => {
+  console.log({ props });
   const { colors } = useAppTheme();
 
   const [catName, setCatName] = useState(
@@ -60,7 +61,6 @@ const CreateNewCategory = (props: TProps) => {
       ...props.catToEdit,
       name: catName,
     });
-    setCatName('');
     props.ref.current?.dismiss();
   }, [props, catName, updateCategory]);
 
