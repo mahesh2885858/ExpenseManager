@@ -125,11 +125,15 @@ const Backup = (props: TProps) => {
           style={[styles.themeOption]}
           disabled={isGettingData}
         >
-          <Icon
-            source={'file-download-outline'}
-            size={24}
-            color={colors.onBackground}
-          />
+          {isGettingData ? (
+            <ActivityIndicator size={'small'} />
+          ) : (
+            <Icon
+              source={'file-download-outline'}
+              size={24}
+              color={colors.onBackground}
+            />
+          )}
           <Text
             style={{
               color: colors.onBackground,
