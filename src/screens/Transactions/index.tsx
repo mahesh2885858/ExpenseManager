@@ -27,7 +27,8 @@ const Transactions = () => {
   const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
 
-  const { selectedAccount, setSelectedAccountId } = useAccounts();
+  const { selectedAccount, setSelectedAccountId, currency } = useAccounts();
+
   const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
     filter: { ...filters, accId: selectedAccount?.id },
     sort: selectedSort,
@@ -329,7 +330,9 @@ const Transactions = () => {
                 },
               ]}
             >
-              {isExpenseFilterOn ? '-' : formatAmount(totalIncome)}
+              {isExpenseFilterOn
+                ? '-'
+                : formatAmount(totalIncome, currency.symbol)}
             </Text>
           </PressableWithFeedback>
           <PressableWithFeedback
@@ -362,7 +365,9 @@ const Transactions = () => {
                 },
               ]}
             >
-              {isIncomeFilterOn ? '-' : formatAmount(totalExpenses)}
+              {isIncomeFilterOn
+                ? '-'
+                : formatAmount(totalExpenses, currency.symbol)}
             </Text>
           </PressableWithFeedback>
         </View>

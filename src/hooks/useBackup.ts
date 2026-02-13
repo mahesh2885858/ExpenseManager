@@ -182,6 +182,7 @@ const useBackup = () => {
       importTransactions(dataToImport.transactions);
       setDataToImport(null);
       setIsImporting(false);
+      ToastAndroid.show('Imported successfully', ToastAndroid.LONG);
     }
   }, [dataToImport, importAccounts, importCategories, importTransactions]);
 

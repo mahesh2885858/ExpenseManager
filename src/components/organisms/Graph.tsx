@@ -21,6 +21,7 @@ import {
   getWeekRangesOfMonth,
 } from '../../utils';
 import Bar from './Bar';
+import useAccounts from '../../hooks/useAccounts';
 const { width } = Dimensions.get('screen');
 const CHART_HEIGHT = 270;
 const X_AXIS_ITEM_HEIGHT = 5;
@@ -35,6 +36,7 @@ type TProps = {
 
 const Graph = (props: TProps) => {
   const { colors } = useAppTheme();
+  const { currency } = useAccounts();
   const [focusedItem, setFocusedItem] = useState<Record<string, any> | null>(
     null,
   );
@@ -324,7 +326,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(focusedItem?.bar?.income ?? 0)}
+            {formatAmount(focusedItem?.bar?.income ?? 0, currency.symbol)}
           </Text>
         </View>
         <View
@@ -353,7 +355,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(focusedItem?.bar?.expense ?? 0)}
+            {formatAmount(focusedItem?.bar?.expense ?? 0, currency.symbol)}
           </Text>
         </View>
       </View>

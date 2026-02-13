@@ -35,6 +35,7 @@ import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TGroupBy } from '../../types';
 import { formatAmount } from '../../utils';
+import useAccounts from '../../hooks/useAccounts';
 
 const { width } = Dimensions.get('window');
 console.log({ width });
@@ -68,6 +69,8 @@ const Reports = () => {
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
   const { filteredTransactions } = useTransactions({});
+  const { currency } = useAccounts();
+
   // sort
   filteredTransactions.sort(
     (a, b) =>
@@ -438,7 +441,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {formatAmount(graphData.summary.income)}
+                {formatAmount(graphData.summary.income, currency.symbol)}
               </Text>
             </View>
             <View
@@ -468,7 +471,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {formatAmount(graphData.summary.expense)}
+                {formatAmount(graphData.summary.expense, currency.symbol)}
               </Text>
             </View>
           </View>

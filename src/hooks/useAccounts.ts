@@ -20,6 +20,7 @@ const useAccounts = () => {
   );
 
   const selectedAccountId = useAccountStore(state => state.selectedAccountId);
+  const currency = useAccountStore(state => state.currency);
 
   const selectedAccount = useMemo(
     () => accounts.find(acc => acc.id === selectedAccountId),
@@ -79,6 +80,7 @@ const useAccounts = () => {
   return {
     totalBalance,
     deleteAcc,
+    currency,
     accounts,
     selectedAccount,
     setSelectedAccountId,

@@ -77,26 +77,43 @@ const Backup = (props: TProps) => {
         },
       ]}
     >
-      <Text
+      <View
         style={[
-          styles.settingTitle,
+          gs.flexRow,
+          gs.itemsCenter,
           {
-            color: colors.onBackground,
+            gap: spacing.sm,
           },
         ]}
       >
-        Backup
-      </Text>
-      <Text
-        style={[
-          styles.settingDesc,
-          {
-            color: colors.onSurfaceDisabled,
-          },
-        ]}
-      >
-        {'Backup and restore your data'}
-      </Text>
+        <Icon
+          source={'backup-restore'}
+          size={textSize.xxl}
+          color={colors.onBackground}
+        />
+        <View style={[{ gap: spacing.sm }]}>
+          <Text
+            style={[
+              styles.settingTitle,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+          >
+            Backup
+          </Text>
+          <Text
+            style={[
+              styles.settingDesc,
+              {
+                color: colors.onSurfaceDisabled,
+              },
+            ]}
+          >
+            {'Backup and restore your data'}
+          </Text>
+        </View>
+      </View>
       <View style={[styles.themeOptContainer]}>
         <PressableWithFeedback
           onPress={exportData}
@@ -125,11 +142,15 @@ const Backup = (props: TProps) => {
           style={[styles.themeOption]}
           disabled={isGettingData}
         >
-          <Icon
-            source={'file-download-outline'}
-            size={24}
-            color={colors.onBackground}
-          />
+          {isGettingData ? (
+            <ActivityIndicator size={'small'} />
+          ) : (
+            <Icon
+              source={'file-download-outline'}
+              size={24}
+              color={colors.onBackground}
+            />
+          )}
           <Text
             style={{
               color: colors.onBackground,
