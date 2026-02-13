@@ -10,12 +10,15 @@ import {
 } from 'react-native';
 import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs, MAX_AMOUNT } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
+import useAccounts from '../../hooks/useAccounts';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
-import { v4 as uuid } from 'uuid';
-import useAccounts from '../../hooks/useAccounts';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -26,11 +29,14 @@ const InitialAccountAmountSetup = () => {
   const [accName, setAccName] = useState('');
   const addAccount = useAccountStore(state => state.addAccount);
   const setUsername = useAccountStore(state => state.setUsername);
+  const currency = useAccountStore(state => state.currency);
   const setIsInitialSetupDone = useAccountStore(
     state => state.setIsInitialSetupDone,
   );
   const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
   const { setSelectedAccountId } = useAccounts();
+
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
   const onAmountChange = useCallback((value: string) => {
     // don't allow floats and etc symbols
@@ -148,17 +154,53 @@ const InitialAccountAmountSetup = () => {
           >
             {t('common.amountPlaceholder')}
           </Text>
-          <TextInput
-            mode="outlined"
-            style={[styles.texInput]}
-            placeholder={t('common.amount') + ' (' + t('common.optional') + ')'}
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={onAmountChange}
-            left={<TextInput.Affix text="₹" />}
-            activeOutlineColor={theme.colors.inverseSurface}
-            placeholderTextColor={theme.colors.onSurfaceDisabled}
-          />
+          <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+            <PressableWithFeedback
+              onPress={handlePresent}
+              style={[
+                gs.centerItems,
+                {
+                  paddingHorizontal: spacing.md,
+                  backgroundColor: theme.colors.surfaceVariant,
+                  paddingVertical: spacing.sm,
+                  borderRadius: borderRadius.sm,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: theme.colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                {currency.code}
+              </Text>
+              <Text
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: theme.colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                {currency.symbol}
+              </Text>
+            </PressableWithFeedback>
+            <TextInput
+              mode="outlined"
+              style={[gs.fullFlex, styles.texInput]}
+              placeholder={
+                t('common.amount') + ' (' + t('common.optional') + ')'
+              }
+              keyboardType="numeric"
+              value={amount}
+              onChangeText={onAmountChange}
+              activeOutlineColor={theme.colors.inverseSurface}
+              placeholderTextColor={theme.colors.onSurfaceDisabled}
+            />
+          </View>
         </View>
       </View>
 
@@ -173,6 +215,10 @@ const InitialAccountAmountSetup = () => {
       >
         {t('common.next')}
       </Button>
+      <CurrencySelectionModal
+        handleSheetChanges={handleSheetChange}
+        ref={btmShtRef}
+      />
     </KeyboardAvoidingView>
   );
 };

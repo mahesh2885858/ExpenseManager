@@ -33,7 +33,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const TransactionDetailsSheet = (props: TProps) => {
   const { colors } = useAppTheme();
   const { categories } = useCategories();
-  const { accounts } = useAccounts();
+  const { accounts, currency } = useAccounts();
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
 
@@ -119,7 +119,10 @@ const TransactionDetailsSheet = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(props.selectedTransaction?.amount ?? 0)}
+            {formatAmount(
+              props.selectedTransaction?.amount ?? 0,
+              currency.symbol,
+            )}
           </Text>
         </View>
         <View style={[{ paddingHorizontal: spacing.md }]}>

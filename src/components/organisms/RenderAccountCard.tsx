@@ -32,7 +32,7 @@ const RenderAccountCard = (props: TProps) => {
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
-  const { getIncomeExpenseForAcc } = useAccounts();
+  const { getIncomeExpenseForAcc, currency } = useAccounts();
   const navigation = useNavigation();
   const { deleteAcc } = useAccounts();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
@@ -40,7 +40,6 @@ const RenderAccountCard = (props: TProps) => {
     return getIncomeExpenseForAcc(props.item.id);
   }, [getIncomeExpenseForAcc, props.item.id]);
 
-  console.log({ totals });
   useEffect(() => {
     if (props.isFocused) {
       animH.value = withTiming(cardHeightExpanded);
@@ -91,7 +90,7 @@ const RenderAccountCard = (props: TProps) => {
             },
           ]}
         >
-          Balance: {formatAmount(totals.balance)}
+          Balance: {formatAmount(totals.balance, currency.symbol)}
         </Text>
       </View>
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
@@ -122,7 +121,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(totals.income ?? 0)}
+            {formatAmount(totals.income ?? 0, currency.symbol)}
           </Text>
         </View>
         <View
@@ -152,7 +151,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(totals.expense ?? 0)}
+            {formatAmount(totals.expense ?? 0, currency.symbol)}
           </Text>
         </View>
       </View>

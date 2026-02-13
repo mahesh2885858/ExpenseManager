@@ -9,6 +9,7 @@ import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
 import { formatAmount } from '../../utils';
+import useAccounts from '../../hooks/useAccounts';
 
 const FilteredTransactions = () => {
   const { top } = useSafeAreaInsets();
@@ -33,6 +34,7 @@ const FilteredTransactions = () => {
   } = useTransactions({
     filter: routeFilter,
   });
+  const { currency } = useAccounts();
 
   return (
     <View
@@ -94,7 +96,7 @@ const FilteredTransactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalIncome)}
+              {formatAmount(totalIncome, currency.symbol)}
             </Text>
           </View>
           <View
@@ -124,7 +126,7 @@ const FilteredTransactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalExpenses)}
+              {formatAmount(totalExpenses, currency.symbol)}
             </Text>
           </View>
         </View>

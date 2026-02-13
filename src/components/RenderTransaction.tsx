@@ -12,12 +12,14 @@ import { TTransaction } from '../types';
 import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 import useCategoriesStore from '../stores/categoriesStore';
+import useAccounts from '../hooks/useAccounts';
 
 const RenderTransaction = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
+  const { currency } = useAccounts();
   const categories = useCategoriesStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const { deleteTransaction } = useTransactions({});
@@ -146,7 +148,7 @@ const RenderTransaction = (props: {
             },
           ]}
         >
-          {formatAmount(props.item.amount)}
+          {formatAmount(props.item.amount, currency.symbol)}
         </Text>
         {props.item.isSelected && (
           <Animated.View

@@ -46,7 +46,6 @@ import {
 import { formatAmount } from '../../utils';
 import { getDigits } from 'commonutil-core';
 const DATE_FORMAT = 'dd MMM yyyy';
-const CURRENCY_SYMBOL = '₹';
 const ICON_SIZE = 24;
 
 type TValidatedInputs = {
@@ -66,7 +65,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { accounts, defaultAccountId } = useAccounts();
+  const { accounts, defaultAccountId, currency } = useAccounts();
 
   const initData: {
     type: TTransactionType;
@@ -85,7 +84,7 @@ const AddTransaction = () => {
       const tr = route.params.transaction;
       return {
         type: tr.type,
-        amountInput: String(tr.amount),
+        amountInput: formatAmount(tr.amount, currency.symbol),
         date: new Date(tr.transactionDate),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
@@ -116,7 +115,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultAccountId]);
+  }, [route, defaultAccountId, currency]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -259,7 +258,7 @@ const AddTransaction = () => {
   const onInputChange = (input: string) => {
     try {
       const cleanDigits = getDigits(input);
-      const t = formatAmount(parseInt(cleanDigits, 10));
+      const t = formatAmount(parseInt(cleanDigits, 10), currency.symbol);
       setAmountInput(t);
       setErrorFields(p => {
         if (!p) return p;
@@ -375,7 +374,7 @@ const AddTransaction = () => {
             onChangeText={onInputChange}
             value={amountInput}
             autoFocus
-            placeholder={CURRENCY_SYMBOL + '0.00'}
+            placeholder={currency.symbol + '0.00'}
             keyboardType="numeric"
             style={[
               style.textInput,

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import zustandStorage from '../storage';
-import { TAccount } from '../types';
+import { TAccount, TCurrency } from '../types';
 
 type TAccountsState = {
   userName: string;
@@ -9,6 +9,7 @@ type TAccountsState = {
   accounts: TAccount[];
   defaultAccountId: string | null;
   selectedAccountId: string | null;
+  currency: TCurrency;
 };
 
 type TAccountsStoreActions = {
@@ -23,6 +24,7 @@ type TAccountsStoreActions = {
   setDefaultAccountId: (id: string | null) => void;
   importAccounts: (accounts: TAccount[]) => void;
   setSelectedAccountId: (id: string | null) => void;
+  setCurrency: (cur: TCurrency) => void;
 };
 
 type PositionStore = TAccountsState & TAccountsStoreActions;
@@ -35,6 +37,13 @@ const useAccountStore = create<PositionStore>()(
       defaultAccountId: null,
       selectedAccountId: null,
       accounts: [],
+      currency: {
+        code: 'INR',
+        name: 'Indian Rupee',
+        symbol: '₹',
+        decimal_digits: 2,
+        countries: ['India'],
+      },
       setIsInitialSetupDone: (isInitialSetupDone: boolean) =>
         set({ isInitialSetupDone }),
       addAccount: (account: TAccount) =>
@@ -73,6 +82,9 @@ const useAccountStore = create<PositionStore>()(
       },
       setSelectedAccountId: id => {
         set({ selectedAccountId: id });
+      },
+      setCurrency: cur => {
+        set({ currency: cur });
       },
     }),
     { name: 'account-storage', storage: createJSONStorage(zustandStorage) },
