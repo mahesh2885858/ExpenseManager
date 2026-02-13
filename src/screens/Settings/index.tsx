@@ -8,6 +8,7 @@ import HeaderWithBackButton from '../../components/atoms/HeaderWithBackButton';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import Backup from './Backup';
 import ThemeSwitch from './ThemeSwitch';
+import { Icon } from 'react-native-paper';
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -33,31 +34,41 @@ const Settings = () => {
           }}
           style={[
             styles.setting,
+            gs.flexRow,
+            gs.itemsCenter,
             {
               borderColor: colors.onSurfaceDisabled,
+              gap: spacing.sm,
             },
           ]}
         >
-          <Text
-            style={[
-              styles.settingTitle,
-              {
-                color: colors.onBackground,
-              },
-            ]}
-          >
-            Accounts
-          </Text>
-          <Text
-            style={[
-              styles.settingDesc,
-              {
-                color: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
-            Manage your accounts here
-          </Text>
+          <Icon
+            source={'wallet'}
+            size={textSize.xxl}
+            color={colors.onBackground}
+          />
+          <View style={[{ gap: spacing.sm }]}>
+            <Text
+              style={[
+                styles.settingTitle,
+                {
+                  color: colors.onBackground,
+                },
+              ]}
+            >
+              Accounts
+            </Text>
+            <Text
+              style={[
+                styles.settingDesc,
+                {
+                  color: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              Manage your accounts here
+            </Text>
+          </View>
         </PressableWithFeedback>
         <PressableWithFeedback
           onPress={() => {
@@ -65,31 +76,41 @@ const Settings = () => {
           }}
           style={[
             styles.setting,
+            gs.flexRow,
+            gs.itemsCenter,
             {
               borderColor: colors.onSurfaceDisabled,
+              gap: spacing.sm,
             },
           ]}
         >
-          <Text
-            style={[
-              styles.settingTitle,
-              {
-                color: colors.onBackground,
-              },
-            ]}
-          >
-            Categories
-          </Text>
-          <Text
-            style={[
-              styles.settingDesc,
-              {
-                color: colors.onSurfaceDisabled,
-              },
-            ]}
-          >
-            Manage your categories here
-          </Text>
+          <Icon
+            source={'shape'}
+            size={textSize.xxl}
+            color={colors.onBackground}
+          />
+          <View style={[{ gap: spacing.sm }]}>
+            <Text
+              style={[
+                styles.settingTitle,
+                {
+                  color: colors.onBackground,
+                },
+              ]}
+            >
+              Categories
+            </Text>
+            <Text
+              style={[
+                styles.settingDesc,
+                {
+                  color: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              Manage your categories here
+            </Text>
+          </View>
         </PressableWithFeedback>
         <Backup scrollRef={scrollRef} />
       </ScrollView>

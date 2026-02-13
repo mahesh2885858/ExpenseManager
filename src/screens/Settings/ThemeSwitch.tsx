@@ -12,6 +12,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import useUIStore from '../../stores/uiStore';
 import { uCFirst } from 'commonutil-core';
 import { Icon } from 'react-native-paper';
+import { gs } from '../../common';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -74,26 +75,41 @@ const ThemeSwitch = () => {
         },
       ]}
     >
-      <Text
-        style={[
-          styles.settingTitle,
-          {
-            color: colors.onBackground,
-          },
-        ]}
-      >
-        Theme
-      </Text>
-      <Text
-        style={[
-          styles.settingDesc,
-          {
-            color: colors.onSurfaceDisabled,
-          },
-        ]}
-      >
-        {uCFirst(theme)}
-      </Text>
+      <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
+        <Icon
+          color={colors.onBackground}
+          source={'palette'}
+          size={textSize.xxl}
+        />
+        <View
+          style={[
+            {
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.settingTitle,
+              {
+                color: colors.onBackground,
+              },
+            ]}
+          >
+            Theme
+          </Text>
+          <Text
+            style={[
+              styles.settingDesc,
+              {
+                color: colors.onSurfaceDisabled,
+              },
+            ]}
+          >
+            {uCFirst(theme)}
+          </Text>
+        </View>
+      </View>
       <View style={[styles.themeOptContainer]}>
         {/* Animated sliding highlight box */}
         <AnimatedView
