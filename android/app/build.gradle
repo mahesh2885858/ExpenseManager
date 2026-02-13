@@ -82,8 +82,8 @@ android {
         applicationId "io.github.mahesh2885858.expensemanager"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "0.7.5"
+        versionCode 12
+        versionName "0.7.6"
     }
 
     signingConfigs {
