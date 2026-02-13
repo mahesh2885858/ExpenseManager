@@ -9,11 +9,18 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import Backup from './Backup';
 import ThemeSwitch from './ThemeSwitch';
 import { Icon } from 'react-native-paper';
+import useAccounts from '../../hooks/useAccounts';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 
 const Settings = () => {
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
   const { colors } = useAppTheme();
+  const { currency } = useAccounts();
+
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+
   const scrollRef = useRef<ScrollView>(null);
 
   return (
@@ -112,7 +119,53 @@ const Settings = () => {
             </Text>
           </View>
         </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={() => {
+            handlePresent();
+          }}
+          style={[
+            styles.setting,
+            gs.flexRow,
+            gs.itemsCenter,
+            {
+              borderColor: colors.onSurfaceDisabled,
+              gap: spacing.sm,
+            },
+          ]}
+        >
+          <Icon
+            source={'currency-usd'}
+            size={textSize.xxl}
+            color={colors.onBackground}
+          />
+          <View style={[{ gap: spacing.sm }]}>
+            <Text
+              style={[
+                styles.settingTitle,
+                {
+                  color: colors.onBackground,
+                },
+              ]}
+            >
+              Currency
+            </Text>
+            <Text
+              style={[
+                styles.settingDesc,
+                {
+                  color: colors.onSurfaceDisabled,
+                },
+              ]}
+            >
+              {currency.name} ({currency.symbol})
+            </Text>
+          </View>
+        </PressableWithFeedback>
         <Backup scrollRef={scrollRef} />
+        <CurrencySelectionModal
+          handleSheetChanges={handleSheetChange}
+          ref={btmShtRef}
+        />
       </ScrollView>
     </View>
   );
