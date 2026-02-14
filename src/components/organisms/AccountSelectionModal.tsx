@@ -92,6 +92,24 @@ const AccountSelectionModal = (props: TProps) => {
           </PressableWithFeedback>
         </View>
         <FlashList
+          ListEmptyComponent={
+            <View style={[gs.fullFlex, gs.centerItems]}>
+              <Text
+                style={[
+                  gs.fontBold,
+                  gs.centerText,
+                  {
+                    color: colors.onSurfaceDisabled,
+                    fontSize: textSize.lg,
+                    marginTop: spacing.lg,
+                    paddingBottom: spacing.lg,
+                  },
+                ]}
+              >
+                No accounts yet. Start by creating one.
+              </Text>
+            </View>
+          }
           style={{
             maxHeight: 500,
           }}

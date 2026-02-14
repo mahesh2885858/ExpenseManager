@@ -41,7 +41,7 @@ const Transactions = () => {
   const { categories } = useCategories();
 
   const accountName = useMemo(() => {
-    return selectedAccount?.name ?? '';
+    return selectedAccount?.name ?? 'None';
   }, [selectedAccount]);
 
   const navigateToFilters = useCallback(() => {
