@@ -8,6 +8,8 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
+import useAccounts from '../../hooks/useAccounts';
+import useCategories from '../../hooks/useCategories';
 
 const FilteredTransactions = () => {
   const { top } = useSafeAreaInsets();
@@ -26,13 +28,34 @@ const FilteredTransactions = () => {
   }, [route]);
   const {
     filteredTransactions,
-
     totalIncome,
     totalExpenses,
     getFormattedAmount,
   } = useTransactions({
     filter: routeFilter,
   });
+
+  const { getAccountNameById } = useAccounts();
+  const { getCategoryNameById } = useCategories();
+
+  const heading = useMemo(() => {
+    if (routeFilter.accId) {
+      return {
+        title: 'Account',
+        subTitle: getAccountNameById(routeFilter.accId),
+      };
+    }
+    if (routeFilter.categoryId) {
+      return {
+        title: 'Category',
+        subTitle: getCategoryNameById(routeFilter.categoryId),
+      };
+    }
+    return {
+      subTitle: '',
+      title: '',
+    };
+  }, [routeFilter, getAccountNameById, getCategoryNameById]);
 
   return (
     <View
@@ -44,7 +67,7 @@ const FilteredTransactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader />
+      <CommonHeader heading={heading.title} />
 
       {/* summary */}
       <View
@@ -63,7 +86,7 @@ const FilteredTransactions = () => {
             },
           ]}
         >
-          Summary
+          {heading.subTitle}
         </Text>
         <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
           <View

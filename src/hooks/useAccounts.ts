@@ -79,6 +79,13 @@ const useAccounts = () => {
     [accounts, transactions],
   );
 
+  const getAccountNameById = useCallback(
+    (id: string) => {
+      return accounts.find(acc => acc.id === id)?.name ?? '';
+    },
+    [accounts],
+  );
+
   return {
     totalBalance,
     deleteAcc,
@@ -87,6 +94,7 @@ const useAccounts = () => {
     selectedAccount,
     setSelectedAccountId,
     getIncomeExpenseForAcc,
+    getAccountNameById,
     defaultAccountId: defaultAccId
       ? defaultAccId
       : accounts.length > 0
