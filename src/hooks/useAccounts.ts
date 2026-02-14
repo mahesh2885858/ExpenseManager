@@ -32,7 +32,9 @@ const useAccounts = () => {
       const remainingAccounts = accounts.filter(acc => acc.id !== id);
       deleteTransactionForAnAcc(id);
       setDefaultAccountId(null);
-      setSelectedAccountId(remainingAccounts[0].id);
+      setSelectedAccountId(
+        remainingAccounts.length === 0 ? null : remainingAccounts[0].id,
+      );
       removeAcc(id);
     },
     [
