@@ -86,7 +86,7 @@ const NumberFormat = (props: Props) => {
       <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
         <Icon
           color={colors.onBackground}
-          source={'palette'}
+          source={'numeric'}
           size={textSize.xxl}
         />
         <View
