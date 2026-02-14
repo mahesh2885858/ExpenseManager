@@ -1,18 +1,18 @@
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { uCFirst } from 'commonutil-core';
+import React, { useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import {
   createAnimatedComponent,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { TTheme } from '../../types';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import useUIStore from '../../stores/uiStore';
-import { uCFirst } from 'commonutil-core';
-import { Icon } from 'react-native-paper';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import useUIStore from '../../stores/uiStore';
+import { TTheme } from '../../types';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -23,13 +23,16 @@ const themeOptions: TTheme[] = ['light', 'dark', 'system'];
 const themeOptionWidth = 90;
 const { width } = Dimensions.get('screen');
 const themeOptionSpacing = (width - 2 * spacing.md - 3 * themeOptionWidth) / 4; // gap between options
-
-const ThemeSwitch = () => {
+type Props = {
+  onItemPress: (item: string | null) => void;
+  expandedItem: string | null;
+};
+const ThemeSwitch = (props: Props) => {
   const { colors } = useAppTheme();
 
   const animHeight = useSharedValue(themeOptionHeightCollapsed);
 
-  const [expandTheme, setExpandTheme] = useState(false);
+  // const [expandTheme, setExpandTheme] = useState(false);
   const theme = useUIStore(state => state.theme);
   const setTheme = useUIStore(state => state.setThem);
   const highlightX = useSharedValue(
@@ -37,7 +40,8 @@ const ThemeSwitch = () => {
   ); // x position of highlight
 
   const onPress = () => {
-    setExpandTheme(p => !p);
+    props.onItemPress('theme');
+    // setExpandTheme(p => !p);
   };
 
   const changeTheme = (t: TTheme) => {
@@ -57,12 +61,12 @@ const ThemeSwitch = () => {
   });
 
   useEffect(() => {
-    if (expandTheme) {
+    if (props.expandedItem === 'theme') {
       animHeight.value = withTiming(themeOptionHeightExpanded);
     } else {
       animHeight.value = withTiming(themeOptionHeightCollapsed);
     }
-  }, [expandTheme, animHeight]);
+  }, [props, animHeight]);
 
   return (
     <AnimatedPressable

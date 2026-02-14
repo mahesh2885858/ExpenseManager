@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -23,6 +23,12 @@ const Settings = () => {
 
   const scrollRef = useRef<ScrollView>(null);
 
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  const onItemPress = (item: string | null) => {
+    setExpandedItem(p => (p === item ? null : item));
+  };
+
   return (
     <View
       style={[
@@ -34,7 +40,7 @@ const Settings = () => {
     >
       <HeaderWithBackButton headerText="Settings" />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.Container}>
-        <ThemeSwitch />
+        <ThemeSwitch expandedItem={expandedItem} onItemPress={onItemPress} />
         <PressableWithFeedback
           onPress={() => {
             navigation.navigate('ManageAccounts');
@@ -161,7 +167,11 @@ const Settings = () => {
             </Text>
           </View>
         </PressableWithFeedback>
-        <Backup scrollRef={scrollRef} />
+        <Backup
+          scrollRef={scrollRef}
+          expandedItem={expandedItem}
+          onItemPress={onItemPress}
+        />
         <CurrencySelectionModal
           handleSheetChanges={handleSheetChange}
           ref={btmShtRef}
