@@ -469,16 +469,31 @@ const AddTransaction = () => {
                 source={'wallet'}
                 size={textSize.md}
               />
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                Account
-              </Text>
+              <View style={[gs.flexRow, gs.fullFlex]}>
+                <Text
+                  style={[
+                    gs.fullFlex,
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onSurfaceVariant,
+                    },
+                  ]}
+                >
+                  Account
+                </Text>
+                {errorFields?.some(f => f === 'account') && (
+                  <Text
+                    style={[
+                      {
+                        fontSize: textSize.sm,
+                        color: colors.error,
+                      },
+                    ]}
+                  >
+                    Required
+                  </Text>
+                )}
+              </View>
             </View>
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Text
@@ -700,6 +715,7 @@ const AddTransaction = () => {
       <AccountSelectionModal
         onAccountChange={id => {
           setAccountId(id);
+          setErrorFields(p => (!p ? p : p.filter(f => f !== 'account')));
         }}
         handleSheetChanges={handleSheetChanges}
         ref={bottomSheetModalRef}
