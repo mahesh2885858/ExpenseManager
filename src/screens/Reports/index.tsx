@@ -23,7 +23,7 @@ import {
   subYears,
 } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,11 +34,6 @@ import Graph from '../../components/organisms/Graph';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TGroupBy } from '../../types';
-import { formatAmount } from '../../utils';
-import useAccounts from '../../hooks/useAccounts';
-
-const { width } = Dimensions.get('window');
-console.log({ width });
 
 const start: Record<TGroupBy, Function> = {
   month: startOfMonth,
@@ -68,8 +63,7 @@ const Reports = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
-  const { filteredTransactions } = useTransactions({});
-  const { currency } = useAccounts();
+  const { filteredTransactions, getFormattedAmount } = useTransactions({});
 
   // sort
   filteredTransactions.sort(
@@ -441,7 +435,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {formatAmount(graphData.summary.income, currency.symbol)}
+                {getFormattedAmount(graphData.summary.income)}
               </Text>
             </View>
             <View
@@ -471,7 +465,7 @@ const Reports = () => {
                   },
                 ]}
               >
-                {formatAmount(graphData.summary.expense, currency.symbol)}
+                {getFormattedAmount(graphData.summary.expense)}
               </Text>
             </View>
           </View>

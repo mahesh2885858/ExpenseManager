@@ -1,7 +1,11 @@
 import { formatDigits } from 'commonutil-core';
 import { CURRENCY_SYMBOL } from '../common';
 
-export const formatAmount = (amount: number, currency = CURRENCY_SYMBOL) => {
+export const formatAmount = (
+  amount: number,
+  currency = CURRENCY_SYMBOL,
+  format: 'indian' | 'international' = 'indian',
+) => {
   try {
     let text = '';
     if (!amount) {
@@ -9,9 +13,9 @@ export const formatAmount = (amount: number, currency = CURRENCY_SYMBOL) => {
     }
     if (amount < 0) {
       const abs = Math.abs(amount);
-      text = '-' + currency + formatDigits(String(abs));
+      text = '-' + currency + formatDigits(String(abs), format);
     } else {
-      text = currency + formatDigits(String(amount));
+      text = currency + formatDigits(String(amount), format);
     }
 
     return text;

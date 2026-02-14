@@ -7,3 +7,5 @@ export type TCurrency = {
   decimal_digits: number;
   countries: string[];
 };
+
+export type TNumberFormat = 'lakhs' | 'millions';

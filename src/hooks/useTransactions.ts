@@ -9,10 +9,15 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TFilters, TSort, TTransaction } from '../types';
+import { formatAmount } from '../utils';
+import useAccountStore from '../stores/accountsStore';
+import useUIStore from '../stores/uiStore';
 
 const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const currency = useAccountStore(state => state.currency);
+  const numberFormat = useUIStore(state => state.numberFormat);
   const filters = props?.filter ?? undefined;
   const sort = props?.sort ?? undefined;
 
@@ -176,6 +181,17 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     addTransaction(transaction);
   };
 
+  const getFormattedAmount = useCallback(
+    (amount: number) => {
+      return formatAmount(
+        amount,
+        currency.symbol,
+        numberFormat === 'lakhs' ? 'indian' : 'international',
+      );
+    },
+    [currency, numberFormat],
+  );
+
   return {
     totalExpenses,
     totalIncome,
@@ -184,6 +200,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     setSearch,
     addNewTransaction,
     deleteTransaction,
+    getFormattedAmount,
   };
 };
 

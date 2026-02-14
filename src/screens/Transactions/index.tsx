@@ -15,7 +15,7 @@ import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TTypeFilter } from '../../types';
-import { formatAmount, getDateFilterText } from '../../utils';
+import { getDateFilterText } from '../../utils';
 
 const Transactions = () => {
   const { top } = useSafeAreaInsets();
@@ -27,9 +27,14 @@ const Transactions = () => {
   const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
 
-  const { selectedAccount, setSelectedAccountId, currency } = useAccounts();
+  const { selectedAccount, setSelectedAccountId } = useAccounts();
 
-  const { totalExpenses, totalIncome, filteredTransactions } = useTransactions({
+  const {
+    totalExpenses,
+    totalIncome,
+    filteredTransactions,
+    getFormattedAmount,
+  } = useTransactions({
     filter: { ...filters, accId: selectedAccount?.id },
     sort: selectedSort,
   });
@@ -330,9 +335,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              {isExpenseFilterOn
-                ? '-'
-                : formatAmount(totalIncome, currency.symbol)}
+              {isExpenseFilterOn ? '-' : getFormattedAmount(totalIncome)}
             </Text>
           </PressableWithFeedback>
           <PressableWithFeedback
@@ -365,9 +368,7 @@ const Transactions = () => {
                 },
               ]}
             >
-              {isIncomeFilterOn
-                ? '-'
-                : formatAmount(totalExpenses, currency.symbol)}
+              {isIncomeFilterOn ? '-' : getFormattedAmount(totalExpenses)}
             </Text>
           </PressableWithFeedback>
         </View>

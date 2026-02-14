@@ -8,8 +8,6 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
-import { formatAmount } from '../../utils';
-import useAccounts from '../../hooks/useAccounts';
 
 const FilteredTransactions = () => {
   const { top } = useSafeAreaInsets();
@@ -31,10 +29,10 @@ const FilteredTransactions = () => {
 
     totalIncome,
     totalExpenses,
+    getFormattedAmount,
   } = useTransactions({
     filter: routeFilter,
   });
-  const { currency } = useAccounts();
 
   return (
     <View
@@ -96,7 +94,7 @@ const FilteredTransactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalIncome, currency.symbol)}
+              {getFormattedAmount(totalIncome)}
             </Text>
           </View>
           <View
@@ -126,7 +124,7 @@ const FilteredTransactions = () => {
                 },
               ]}
             >
-              {formatAmount(totalExpenses, currency.symbol)}
+              {getFormattedAmount(totalExpenses)}
             </Text>
           </View>
         </View>

@@ -7,22 +7,19 @@ import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import useTransactions from '../hooks/useTransactions';
+import useCategoriesStore from '../stores/categoriesStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
-import { formatAmount } from '../utils';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
-import useCategoriesStore from '../stores/categoriesStore';
-import useAccounts from '../hooks/useAccounts';
 
 const RenderTransaction = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
-  const { currency } = useAccounts();
   const categories = useCategoriesStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
-  const { deleteTransaction } = useTransactions({});
+  const { deleteTransaction, getFormattedAmount } = useTransactions({});
   const transactions = useTransactionsStore(state => state.transactions);
 
   const selectedTransactions = useMemo(
@@ -148,7 +145,7 @@ const RenderTransaction = (props: {
             },
           ]}
         >
-          {formatAmount(props.item.amount, currency.symbol)}
+          {getFormattedAmount(props.item.amount)}
         </Text>
         {props.item.isSelected && (
           <Animated.View
