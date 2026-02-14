@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Icon } from 'react-native-paper';
 import {
@@ -17,6 +17,8 @@ const heightCollapsed = 75;
 const heightDoubleExpanded = 420;
 type TProps = {
   scrollRef: React.RefObject<ScrollView | null>;
+  onItemPress: (item: string | null) => void;
+  expandedItem: string | null;
 };
 const Backup = (props: TProps) => {
   const { colors } = useAppTheme();
@@ -32,10 +34,11 @@ const Backup = (props: TProps) => {
   } = useBackup();
 
   const animHBackup = useSharedValue(heightCollapsed);
-  const [expandBackup, setExpandBackup] = useState(false);
+  // const [expandBackup, setExpandBackup] = useState(false);
 
   const onBackupOptionPress = () => {
-    setExpandBackup(p => !p);
+    // setExpandBackup(p => !p);
+    props.onItemPress('backup');
   };
 
   const scrollToBottom = useCallback(() => {
@@ -45,26 +48,26 @@ const Backup = (props: TProps) => {
   }, [props]);
 
   useEffect(() => {
-    if (expandBackup) {
+    if (props.expandedItem === 'backup') {
       animHBackup.value = withTiming(heightExpanded);
     } else {
       animHBackup.value = withTiming(heightCollapsed);
       resetDataToImport();
     }
-  }, [expandBackup, animHBackup, resetDataToImport]);
+  }, [props, animHBackup, resetDataToImport]);
 
   useEffect(() => {
-    if (!expandBackup) return;
+    if (props.expandedItem !== 'backup') return;
     if (dataToImport) {
       animHBackup.value = withTiming(heightDoubleExpanded, {}, () => {
         runOnJS(scrollToBottom)();
       });
-    } else if (expandBackup) {
+    } else if (props.expandedItem === 'backup') {
       animHBackup.value = withTiming(heightExpanded);
     } else {
       animHBackup.value = withTiming(heightCollapsed);
     }
-  }, [dataToImport, animHBackup, expandBackup, scrollToBottom]);
+  }, [dataToImport, animHBackup, props, scrollToBottom]);
 
   return (
     <AnimatedPressable
