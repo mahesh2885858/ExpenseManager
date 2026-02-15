@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
 import { TCategorySummary } from '../types';
@@ -50,6 +50,13 @@ const useCategories = () => {
     });
   }, [categories, transactions]);
 
+  const getCategoryNameById = useCallback(
+    (id: string) => {
+      return categories.find(cat => cat.id === id)?.name ?? '';
+    },
+    [categories],
+  );
+
   return {
     categories,
     selectCategory,
@@ -58,6 +65,7 @@ const useCategories = () => {
     defaultCategoryId,
     categoriesSummary,
     updateCategory,
+    getCategoryNameById,
   };
 };
 

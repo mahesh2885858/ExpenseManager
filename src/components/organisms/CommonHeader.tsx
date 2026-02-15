@@ -5,8 +5,10 @@ import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-
-const CommonHeader = () => {
+type TProps = {
+  heading?: string;
+};
+const CommonHeader = ({ heading = 'Transactions' }: TProps) => {
   const navigation = useNavigation();
 
   const { colors } = useAppTheme();
@@ -24,7 +26,7 @@ const CommonHeader = () => {
               },
             ]}
           >
-            Transactions
+            {heading}
           </Text>
         </View>
 

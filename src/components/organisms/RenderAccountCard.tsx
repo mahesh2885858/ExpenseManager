@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
@@ -8,13 +9,12 @@ import {
 } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import { TAccount } from '../../types';
-import { formatAmount } from '../../utils';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import CreateNewAccount from './CreateNewAccount';
 import useAccounts from '../../hooks/useAccounts';
-import { useNavigation } from '@react-navigation/native';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useTransactions from '../../hooks/useTransactions';
+import { TAccount } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import CreateNewAccount from './CreateNewAccount';
 
 type TProps = {
   item: TAccount;
@@ -32,9 +32,9 @@ const RenderAccountCard = (props: TProps) => {
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
-  const { getIncomeExpenseForAcc, currency } = useAccounts();
+  const { getIncomeExpenseForAcc, deleteAcc } = useAccounts();
   const navigation = useNavigation();
-  const { deleteAcc } = useAccounts();
+  const { getFormattedAmount } = useTransactions({});
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const totals = useMemo(() => {
     return getIncomeExpenseForAcc(props.item.id);
@@ -90,7 +90,7 @@ const RenderAccountCard = (props: TProps) => {
             },
           ]}
         >
-          Balance: {formatAmount(totals.balance, currency.symbol)}
+          Balance: {getFormattedAmount(totals.balance)}
         </Text>
       </View>
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
@@ -121,7 +121,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(totals.income ?? 0, currency.symbol)}
+            {getFormattedAmount(totals.income ?? 0)}
           </Text>
         </View>
         <View
@@ -151,7 +151,7 @@ const RenderAccountCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(totals.expense ?? 0, currency.symbol)}
+            {getFormattedAmount(totals.expense ?? 0)}
           </Text>
         </View>
       </View>

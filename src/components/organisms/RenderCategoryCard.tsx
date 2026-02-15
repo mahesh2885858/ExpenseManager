@@ -10,12 +10,11 @@ import {
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useTransactions from '../../hooks/useTransactions';
 import useCategoriesStore from '../../stores/categoriesStore';
 import { TCategorySummary } from '../../types';
-import { formatAmount } from '../../utils';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewCategory from './CreateNewCategory';
-import useAccounts from '../../hooks/useAccounts';
 
 type TProps = {
   item: TCategorySummary;
@@ -35,7 +34,7 @@ const RenderCategoryCard = (props: TProps) => {
   const [openDelDesc, setOpenDelDesc] = useState(false);
   const navigation = useNavigation();
   const deleteCat = useCategoriesStore(state => state.removeCategory);
-  const { currency } = useAccounts();
+  const { getFormattedAmount } = useTransactions({});
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   useEffect(() => {
@@ -113,7 +112,7 @@ const RenderCategoryCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(item.income ?? 0, currency.symbol)}
+            {getFormattedAmount(item.income ?? 0)}
           </Text>
         </View>
         <View
@@ -143,7 +142,7 @@ const RenderCategoryCard = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(item.expense ?? 0, currency.symbol)}
+            {getFormattedAmount(item.expense ?? 0)}
           </Text>
         </View>
       </View>

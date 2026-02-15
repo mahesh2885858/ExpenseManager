@@ -12,16 +12,15 @@ import {
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import useTransactions from '../../hooks/useTransactions';
 import { TGroupBy, TTransaction } from '../../types';
 import {
-  formatAmount,
   getDatesOfWeek,
   getMonthRangesOfYear,
   getNetForGivenTransactions,
   getWeekRangesOfMonth,
 } from '../../utils';
 import Bar from './Bar';
-import useAccounts from '../../hooks/useAccounts';
 const { width } = Dimensions.get('screen');
 const CHART_HEIGHT = 270;
 const X_AXIS_ITEM_HEIGHT = 5;
@@ -36,10 +35,10 @@ type TProps = {
 
 const Graph = (props: TProps) => {
   const { colors } = useAppTheme();
-  const { currency } = useAccounts();
   const [focusedItem, setFocusedItem] = useState<Record<string, any> | null>(
     null,
   );
+  const { getFormattedAmount } = useTransactions({});
 
   const graphData = useMemo(() => {
     switch (props.filter) {
@@ -326,7 +325,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(focusedItem?.bar?.income ?? 0, currency.symbol)}
+            {getFormattedAmount(focusedItem?.bar?.income ?? 0)}
           </Text>
         </View>
         <View
@@ -355,7 +354,7 @@ const Graph = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(focusedItem?.bar?.expense ?? 0, currency.symbol)}
+            {getFormattedAmount(focusedItem?.bar?.expense ?? 0)}
           </Text>
         </View>
       </View>

@@ -12,6 +12,7 @@ import { Icon } from 'react-native-paper';
 import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
+import NumberFormat from './NumberFormat';
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -167,6 +168,7 @@ const Settings = () => {
             </Text>
           </View>
         </PressableWithFeedback>
+        <NumberFormat expandedItem={expandedItem} onItemPress={onItemPress} />
         <Backup
           scrollRef={scrollRef}
           expandedItem={expandedItem}

@@ -20,6 +20,7 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getDigits } from 'commonutil-core';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import {
@@ -43,8 +44,6 @@ import {
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
-import { formatAmount } from '../../utils';
-import { getDigits } from 'commonutil-core';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -61,7 +60,7 @@ const AddTransaction = () => {
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories } = useCategories();
-  const { addNewTransaction } = useTransactions({});
+  const { addNewTransaction, getFormattedAmount } = useTransactions({});
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
@@ -84,7 +83,7 @@ const AddTransaction = () => {
       const tr = route.params.transaction;
       return {
         type: tr.type,
-        amountInput: formatAmount(tr.amount, currency.symbol),
+        amountInput: getFormattedAmount(tr.amount),
         date: new Date(tr.transactionDate),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
@@ -115,7 +114,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultAccountId, currency]);
+  }, [route, defaultAccountId, getFormattedAmount]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -258,7 +257,7 @@ const AddTransaction = () => {
   const onInputChange = (input: string) => {
     try {
       const cleanDigits = getDigits(input);
-      const t = formatAmount(parseInt(cleanDigits, 10), currency.symbol);
+      const t = getFormattedAmount(parseInt(cleanDigits, 10));
       setAmountInput(t);
       setErrorFields(p => {
         if (!p) return p;
@@ -469,16 +468,31 @@ const AddTransaction = () => {
                 source={'wallet'}
                 size={textSize.md}
               />
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                Account
-              </Text>
+              <View style={[gs.flexRow, gs.fullFlex]}>
+                <Text
+                  style={[
+                    gs.fullFlex,
+                    {
+                      fontSize: textSize.md,
+                      color: colors.onSurfaceVariant,
+                    },
+                  ]}
+                >
+                  Account
+                </Text>
+                {errorFields?.some(f => f === 'account') && (
+                  <Text
+                    style={[
+                      {
+                        fontSize: textSize.sm,
+                        color: colors.error,
+                      },
+                    ]}
+                  >
+                    Required
+                  </Text>
+                )}
+              </View>
             </View>
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Text
@@ -700,6 +714,7 @@ const AddTransaction = () => {
       <AccountSelectionModal
         onAccountChange={id => {
           setAccountId(id);
+          setErrorFields(p => (!p ? p : p.filter(f => f !== 'account')));
         }}
         handleSheetChanges={handleSheetChanges}
         ref={bottomSheetModalRef}

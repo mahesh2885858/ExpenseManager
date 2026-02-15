@@ -6,6 +6,7 @@ import {
   BottomSheetView,
   useBottomSheetModal,
 } from '@gorhom/bottom-sheet';
+import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -15,9 +16,8 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import useAccounts from '../../hooks/useAccounts';
 import useCategories from '../../hooks/useCategories';
+import useTransactions from '../../hooks/useTransactions';
 import { TTransaction } from '../../types';
-import { formatAmount } from '../../utils';
-import { useNavigation } from '@react-navigation/native';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -33,10 +33,10 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const TransactionDetailsSheet = (props: TProps) => {
   const { colors } = useAppTheme();
   const { categories } = useCategories();
-  const { accounts, currency } = useAccounts();
+  const { accounts } = useAccounts();
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
-
+  const { getFormattedAmount } = useTransactions({});
   const categoryName =
     categories.find(c => c.id === props.selectedTransaction?.categoryIds[0])
       ?.name ?? 'Unknown';
@@ -119,10 +119,7 @@ const TransactionDetailsSheet = (props: TProps) => {
               },
             ]}
           >
-            {formatAmount(
-              props.selectedTransaction?.amount ?? 0,
-              currency.symbol,
-            )}
+            {getFormattedAmount(props.selectedTransaction?.amount ?? 0)}
           </Text>
         </View>
         <View style={[{ paddingHorizontal: spacing.md }]}>
