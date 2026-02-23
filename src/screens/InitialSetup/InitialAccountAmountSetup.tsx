@@ -45,9 +45,9 @@ const InitialAccountAmountSetup = () => {
   const onAmountChange = useCallback(
     (value: string) => {
       // don't allow floats and etc symbols
-      if (value.includes('.') || value.includes(',') || value.includes('-'))
-        return;
+      if (value.includes('.') || value.includes('-')) return;
       const cleanDigits = getDigits(value);
+      console.log({ cleanDigits });
       const parsedDigits = parseInt(cleanDigits, 10);
       if (parsedDigits > MAX_AMOUNT) return;
 
