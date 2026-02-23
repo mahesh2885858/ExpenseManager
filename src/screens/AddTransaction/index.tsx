@@ -59,7 +59,7 @@ const AddTransaction = () => {
   const { top } = useSafeAreaInsets();
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-  const { categories } = useCategories();
+  const { categories, defaultCategoryId } = useCategories();
   const { addNewTransaction, getFormattedAmount } = useTransactions({});
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
@@ -107,14 +107,19 @@ const AddTransaction = () => {
         accountId: defaultAccountId,
 
         attachments: [],
-        selectedCatId: null,
+        selectedCatId:
+          categories.length === 1
+            ? categories[0]?.id ?? defaultCategoryId
+            : defaultAccountId
+            ? defaultCategoryId
+            : null,
         time: {
           hours: new Date().getHours(),
           minutes: new Date().getMinutes(),
         },
       };
     }
-  }, [route, defaultAccountId, getFormattedAmount]);
+  }, [route, defaultAccountId, categories, getFormattedAmount]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
