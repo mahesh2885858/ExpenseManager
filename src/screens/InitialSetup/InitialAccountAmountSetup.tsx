@@ -19,6 +19,8 @@ import useAccounts from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useAccountStore from '../../stores/accountsStore';
 import { TRootStackParamList } from '../../types';
+import { getDigits } from 'commonutil-core';
+import useTransactions from '../../hooks/useTransactions';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -36,16 +38,23 @@ const InitialAccountAmountSetup = () => {
   const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
   const { setSelectedAccountId } = useAccounts();
 
+  const { getFormattedAmount } = useTransactions();
+
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
-  const onAmountChange = useCallback((value: string) => {
-    // don't allow floats and etc symbols
-    if (value.includes('.') || value.includes(',') || value.includes('-'))
-      return;
-    const digits = parseInt(value, 10);
-    if (digits > MAX_AMOUNT) return;
-    setAmount(value);
-  }, []);
+  const onAmountChange = useCallback(
+    (value: string) => {
+      // don't allow floats and etc symbols
+      if (value.includes('.') || value.includes('-')) return;
+      const cleanDigits = getDigits(value);
+      const parsedDigits = parseInt(cleanDigits, 10);
+      if (parsedDigits > MAX_AMOUNT) return;
+
+      const formattedAmount = getFormattedAmount(parsedDigits);
+      setAmount(formattedAmount);
+    },
+    [getFormattedAmount],
+  );
 
   const saveAccount = useCallback(() => {
     const id = uuid();

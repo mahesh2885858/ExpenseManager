@@ -59,7 +59,7 @@ const AddTransaction = () => {
   const { top } = useSafeAreaInsets();
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
-  const { categories } = useCategories();
+  const { categories, defaultCategoryId } = useCategories();
   const { addNewTransaction, getFormattedAmount } = useTransactions({});
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
@@ -107,14 +107,19 @@ const AddTransaction = () => {
         accountId: defaultAccountId,
 
         attachments: [],
-        selectedCatId: null,
+        selectedCatId:
+          categories.length === 1
+            ? categories[0]?.id ?? defaultCategoryId
+            : defaultAccountId
+            ? defaultCategoryId
+            : null,
         time: {
           hours: new Date().getHours(),
           minutes: new Date().getMinutes(),
         },
       };
     }
-  }, [route, defaultAccountId, getFormattedAmount]);
+  }, [route, defaultAccountId, categories, getFormattedAmount]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -338,7 +343,9 @@ const AddTransaction = () => {
           style={[
             style.amountInputContainer,
             {
-              borderColor: colors.outline,
+              borderColor: errorFields?.some(f => f === 'amount')
+                ? colors.error
+                : colors.outline,
             },
           ]}
         >
@@ -354,19 +361,6 @@ const AddTransaction = () => {
             >
               Amount
             </Text>
-            {errorFields?.some(f => f === 'amount') && (
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.sm,
-                    color: colors.error,
-                    paddingRight: spacing.sm,
-                  },
-                ]}
-              >
-                Required
-              </Text>
-            )}
           </View>
           <TextInput
             maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
@@ -381,7 +375,11 @@ const AddTransaction = () => {
                 color: colors.onBackground,
               },
             ]}
-            placeholderTextColor={colors.onSurfaceDisabled}
+            placeholderTextColor={
+              errorFields?.some(f => f === 'amount')
+                ? colors.error
+                : colors.onSurfaceDisabled
+            }
           />
         </View>
 
@@ -392,6 +390,10 @@ const AddTransaction = () => {
               {
                 marginTop: spacing.md,
                 backgroundColor: colors.surfaceVariant,
+                borderColor: errorFields?.some(f => f === 'category')
+                  ? colors.error
+                  : 'transparent',
+                borderWidth: errorFields?.some(f => f === 'category') ? 1 : 0,
               },
               style.categoryContainer,
             ]}
@@ -414,18 +416,6 @@ const AddTransaction = () => {
                 >
                   Category
                 </Text>
-                {errorFields?.some(f => f === 'category') && (
-                  <Text
-                    style={[
-                      {
-                        fontSize: textSize.sm,
-                        color: colors.error,
-                      },
-                    ]}
-                  >
-                    Required
-                  </Text>
-                )}
               </View>
             </View>
 
@@ -435,7 +425,9 @@ const AddTransaction = () => {
                   gs.fullFlex,
                   style.categoryText,
                   {
-                    color: colors.onBackground,
+                    color: errorFields?.some(f => f === 'category')
+                      ? colors.error
+                      : colors.onBackground,
                   },
                 ]}
               >
