@@ -17,6 +17,8 @@ import {
 import useAccountStore from '../../stores/accountsStore';
 import { TAccount } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import { getDigits } from 'commonutil-core';
+import useTransactions from '../../hooks/useTransactions';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -37,10 +39,22 @@ const CreateNewAccount = (props: TProps) => {
   const accounts = useAccountStore(state => state.accounts);
   const addAccount = useAccountStore(state => state.addAccount);
   const updateAccount = useAccountStore(state => state.updateAccount);
+  const { getFormattedAmount } = useTransactions();
 
   const renderSaveButton = useMemo(() => {
     return accName.trim().length > 0;
   }, [accName]);
+
+  const onInputChange = (input: string) => {
+    try {
+      const cleanDigits = getDigits(input);
+
+      const t = getFormattedAmount(parseInt(cleanDigits, 10));
+      setBalance(t);
+    } catch (e) {
+      console.log({ e });
+    }
+  };
 
   const addNewAcc = useCallback(() => {
     // check for existing acc name
@@ -56,7 +70,9 @@ const CreateNewAccount = (props: TProps) => {
     } else {
       const id = v4();
       addAccount({
-        initBalance: parseFloat(balance.trim().length > 0 ? balance : '0'),
+        initBalance: parseFloat(
+          balance.trim().length > 0 ? getDigits(balance) : '0',
+        ),
         id,
         name: accName,
       });
@@ -161,7 +177,7 @@ const CreateNewAccount = (props: TProps) => {
                 keyboardType="numeric"
                 maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
                 value={balance}
-                onChangeText={setBalance}
+                onChangeText={onInputChange}
                 placeholder={CURRENCY_SYMBOL + '0.00'}
                 placeholderTextColor={colors.onSurfaceDisabled}
                 style={[

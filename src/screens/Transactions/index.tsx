@@ -27,11 +27,13 @@ const Transactions = () => {
   const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
 
-  const { selectedAccount, setSelectedAccountId } = useAccounts();
+  const { selectedAccount, setSelectedAccountId, getIncomeExpenseForAcc } =
+    useAccounts();
 
   const {
     totalExpenses,
     totalIncome,
+
     filteredTransactions,
     getFormattedAmount,
   } = useTransactions({
@@ -48,6 +50,10 @@ const Transactions = () => {
   const accountName = useMemo(() => {
     return selectedAccount?.name ?? 'None';
   }, [selectedAccount]);
+
+  const accountBalance = useMemo(() => {
+    return getIncomeExpenseForAcc(selectedAccount?.id ?? '').balance;
+  }, [selectedAccount, getIncomeExpenseForAcc]);
 
   const navigateToFilters = useCallback(() => {
     navigation.navigate('TransactionFilters');
@@ -253,125 +259,141 @@ const Transactions = () => {
           },
         ]}
       >
-        <PressableWithFeedback
-          onPress={handlePresent}
+        <View
           style={[
-            styles.account,
+            gs.flexRow,
+            gs.justifyBetween,
             {
-              backgroundColor: colors.surface,
-              gap: spacing.xs,
-              elevation: 3,
+              marginTop: spacing.sm,
             },
           ]}
         >
-          <Icon
-            source={'wallet-bifold'}
-            size={textSize.md}
-            color={colors.onSurface}
-          />
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+          <View>
+            <Text
+              style={[
+                styles.balanceTitle,
+                {
+                  color: colors.onSurfaceVariant,
+                },
+              ]}
+            >
+              Your Balance
+            </Text>
+            <View>
+              <Text
+                style={[
+                  styles.balanceText,
+                  {
+                    color: colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                {getFormattedAmount(accountBalance)}
+              </Text>
+            </View>
+          </View>
+          <PressableWithFeedback
+            onPress={handlePresent}
             style={[
-              gs.fullFlex,
+              styles.account,
+              {
+                backgroundColor: colors.surface,
+                gap: spacing.xs,
+                elevation: 3,
+              },
+            ]}
+          >
+            <Icon
+              source={'wallet-bifold'}
+              size={textSize.md}
+              color={colors.onSurface}
+            />
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={[
+                gs.fullFlex,
+                {
+                  color: colors.onSurface,
+                },
+              ]}
+            >
+              {accountName}
+            </Text>
+            <Icon
+              source={'chevron-down'}
+              size={textSize.md}
+              color={colors.onSurface}
+            />
+          </PressableWithFeedback>
+        </View>
+      </View>
+      <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
+        <PressableWithFeedback
+          disabled={isExpenseFilterOn}
+          onPress={() => toggleTypeFilter('income')}
+          style={[
+            gs.fullFlex,
+            styles.tType,
+            {
+              backgroundColor: colors.surfaceVariant,
+            },
+          ]}
+        >
+          <Text
+            style={[
               {
                 color: colors.onSurface,
               },
             ]}
           >
-            {accountName}
+            Income
           </Text>
-          <Icon
-            source={'chevron-down'}
-            size={textSize.md}
-            color={colors.onSurface}
-          />
-        </PressableWithFeedback>
-
-        {/* <View>
           <Text
             style={[
-              styles.text,
+              styles.amountText,
+
               {
-                color: colors.onBackground,
+                color: colors.onSurface,
+                fontSize: textSize.md,
               },
             ]}
           >
-            Balance: {formatAmount(totals.balance)}
+            {isExpenseFilterOn ? '-' : getFormattedAmount(totalIncome)}
           </Text>
-        </View> */}
-
-        <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
-          <PressableWithFeedback
-            disabled={isExpenseFilterOn}
-            onPress={() => toggleTypeFilter('income')}
+        </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={() => toggleTypeFilter('expense')}
+          disabled={isIncomeFilterOn}
+          style={[
+            gs.fullFlex,
+            styles.tType,
+            {
+              backgroundColor: colors.surfaceVariant,
+            },
+          ]}
+        >
+          <Text
             style={[
-              gs.fullFlex,
-              styles.tType,
               {
-                backgroundColor: colors.surface,
-                elevation: 2,
-                // borderWidth: 1,
-                // borderColor: colors.outlineVariant,
+                color: colors.onSurface,
               },
             ]}
           >
-            <Text
-              style={[
-                {
-                  color: colors.onSurface,
-                },
-              ]}
-            >
-              Income
-            </Text>
-            <Text
-              style={[
-                styles.amountText,
-
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.md,
-                },
-              ]}
-            >
-              {isExpenseFilterOn ? '-' : getFormattedAmount(totalIncome)}
-            </Text>
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            onPress={() => toggleTypeFilter('expense')}
-            disabled={isIncomeFilterOn}
+            Expense
+          </Text>
+          <Text
             style={[
-              gs.fullFlex,
-              styles.tType,
+              styles.amountText,
               {
-                backgroundColor: colors.surface,
-                elevation: 2,
+                color: colors.onSurface,
+                fontSize: textSize.md,
               },
             ]}
           >
-            <Text
-              style={[
-                {
-                  color: colors.onSurface,
-                },
-              ]}
-            >
-              Expense
-            </Text>
-            <Text
-              style={[
-                styles.amountText,
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.md,
-                },
-              ]}
-            >
-              {isIncomeFilterOn ? '-' : getFormattedAmount(totalExpenses)}
-            </Text>
-          </PressableWithFeedback>
-        </View>
+            {isIncomeFilterOn ? '-' : getFormattedAmount(totalExpenses)}
+          </Text>
+        </PressableWithFeedback>
       </View>
       {/* summary */}
 
@@ -495,7 +517,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',
-    width: '47%',
+    maxHeight: 35,
+    width: '40%',
   },
   totalBalance: {
     width: '100%',
@@ -526,6 +549,8 @@ const styles = StyleSheet.create({
   tTypeBox: {
     borderRadius: borderRadius.md,
     gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
   },
   tType: {
     paddingLeft: spacing.md,
@@ -568,5 +593,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     position: 'relative',
+  },
+  balanceTitle: {
+    fontSize: textSize.sm,
+  },
+  balanceText: {
+    fontSize: textSize.lg,
+    fontWeight: 'bold',
   },
 });

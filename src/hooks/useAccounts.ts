@@ -59,6 +59,7 @@ const useAccounts = () => {
       let expense = 0;
       let income = 0;
       let balance = 0;
+      console.log({ transactionsForAcc, acc });
       if (acc) {
         transactionsForAcc.forEach(t => {
           if (t.type === 'expense') {
@@ -67,7 +68,7 @@ const useAccounts = () => {
             income += t.amount;
           }
         });
-        balance = acc.initBalance ?? 0 + income - expense;
+        balance = (acc.initBalance ?? 0) + income - expense;
       }
 
       return {
