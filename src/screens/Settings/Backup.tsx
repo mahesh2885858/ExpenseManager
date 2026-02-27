@@ -13,7 +13,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import useBackup from '../../hooks/useBackup';
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const heightExpanded = 200;
-const heightCollapsed = 75;
+const heightCollapsed = 65;
 const heightDoubleExpanded = 420;
 type TProps = {
   scrollRef: React.RefObject<ScrollView | null>;
@@ -91,7 +91,7 @@ const Backup = (props: TProps) => {
       >
         <Icon
           source={'backup-restore'}
-          size={textSize.xxl}
+          size={textSize.xl}
           color={colors.onBackground}
         />
         <View style={[{ gap: spacing.sm }]}>
@@ -259,18 +259,18 @@ const styles = StyleSheet.create({
     height: 75,
   },
   settingTitle: {
-    fontSize: textSize.lg,
+    fontSize: textSize.md,
     fontWeight: '500',
   },
   settingDesc: {
-    fontSize: textSize.md,
+    fontSize: textSize.sm,
     fontWeight: 'normal',
   },
   themeOptContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
     position: 'relative',
   },
   highlightBox: {

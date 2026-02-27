@@ -20,7 +20,7 @@ const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
 
 const formatOptionHeightExpanded = 200;
-const formatOptionHeightCollapsed = 75;
+const formatOptionHeightCollapsed = 65;
 const formatOptions: TNumberFormat[] = ['lakhs', 'millions'];
 const { width } = Dimensions.get('screen');
 const formatOptionWidth = 120;
@@ -87,7 +87,7 @@ const NumberFormat = (props: Props) => {
         <Icon
           color={colors.onBackground}
           source={'numeric'}
-          size={textSize.xxl}
+          size={textSize.xl}
         />
         <View
           style={[
@@ -184,18 +184,18 @@ const styles = StyleSheet.create({
     height: 75,
   },
   settingTitle: {
-    fontSize: textSize.lg,
+    fontSize: textSize.md,
     fontWeight: '500',
   },
   settingDesc: {
-    fontSize: textSize.md,
+    fontSize: textSize.sm,
     fontWeight: 'normal',
   },
   themeOptContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
     position: 'relative',
   },
   highlightBox: {

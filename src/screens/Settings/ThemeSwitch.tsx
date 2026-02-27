@@ -18,7 +18,7 @@ const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
 
 const themeOptionHeightExpanded = 200;
-const themeOptionHeightCollapsed = 75;
+const themeOptionHeightCollapsed = 65;
 const themeOptions: TTheme[] = ['light', 'dark', 'system'];
 const themeOptionWidth = 90;
 const { width } = Dimensions.get('screen');
@@ -83,7 +83,7 @@ const ThemeSwitch = (props: Props) => {
         <Icon
           color={colors.onBackground}
           source={'palette'}
-          size={textSize.xxl}
+          size={textSize.xl}
         />
         <View
           style={[
@@ -177,18 +177,18 @@ const styles = StyleSheet.create({
     height: 75,
   },
   settingTitle: {
-    fontSize: textSize.lg,
+    fontSize: textSize.md,
     fontWeight: '500',
   },
   settingDesc: {
-    fontSize: textSize.md,
+    fontSize: textSize.sm,
     fontWeight: 'normal',
   },
   themeOptContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
     position: 'relative',
   },
   highlightBox: {

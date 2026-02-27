@@ -92,10 +92,14 @@ const TransactionDetailsSheet = (props: TProps) => {
                 props.onDeletePress(props.selectedTransaction)
               }
             >
-              <Icon source={'delete'} size={textSize.xl} />
+              <Icon source={'delete'} size={textSize.xl} color={colors.error} />
             </PressableWithFeedback>
             <PressableWithFeedback onPress={navigateToEdit}>
-              <Icon source={'pencil'} size={textSize.xl} />
+              <Icon
+                source={'pencil'}
+                size={textSize.xl}
+                color={colors.onPrimaryContainer}
+              />
             </PressableWithFeedback>
           </View>
         </View>
