@@ -26,7 +26,6 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 };
 
 const CreateNewCategory = (props: TProps) => {
-  console.log({ props });
   const { colors } = useAppTheme();
 
   const [catName, setCatName] = useState(
