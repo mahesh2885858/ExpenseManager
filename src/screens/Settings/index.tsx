@@ -58,7 +58,7 @@ const Settings = () => {
         >
           <Icon
             source={'wallet'}
-            size={textSize.xxl}
+            size={textSize.xl}
             color={colors.onBackground}
           />
           <View style={[{ gap: spacing.sm }]}>
@@ -100,7 +100,7 @@ const Settings = () => {
         >
           <Icon
             source={'shape'}
-            size={textSize.xxl}
+            size={textSize.xl}
             color={colors.onBackground}
           />
           <View style={[{ gap: spacing.sm }]}>
@@ -142,7 +142,7 @@ const Settings = () => {
         >
           <Icon
             source={'currency-usd'}
-            size={textSize.xxl}
+            size={textSize.xl}
             color={colors.onBackground}
           />
           <View style={[{ gap: spacing.sm }]}>
@@ -198,14 +198,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: spacing.sm,
     overflow: 'hidden',
-    height: 75,
+    height: 65,
   },
   settingTitle: {
-    fontSize: textSize.lg,
+    fontSize: textSize.md,
     fontWeight: '500',
   },
   settingDesc: {
-    fontSize: textSize.md,
+    fontSize: textSize.sm,
     fontWeight: 'normal',
   },
   themeOptContainer: {

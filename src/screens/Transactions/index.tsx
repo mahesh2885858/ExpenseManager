@@ -354,7 +354,7 @@ const Transactions = () => {
               styles.amountText,
 
               {
-                color: colors.onSurface,
+                color: colors.success,
                 fontSize: textSize.md,
               },
             ]}
@@ -386,7 +386,7 @@ const Transactions = () => {
             style={[
               styles.amountText,
               {
-                color: colors.onSurface,
+                color: colors.error,
                 fontSize: textSize.md,
               },
             ]}
