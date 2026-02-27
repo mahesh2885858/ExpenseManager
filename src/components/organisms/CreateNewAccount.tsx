@@ -6,8 +6,15 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Keyboard,
+  StatusBar,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import {
@@ -19,6 +26,8 @@ import { TAccount } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { getDigits } from 'commonutil-core';
 import useTransactions from '../../hooks/useTransactions';
+import { Keyframe } from 'react-native-reanimated';
+import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -36,6 +45,7 @@ const CreateNewAccount = (props: TProps) => {
     props.accToEdit ? props.accToEdit.name : '',
   );
   const [balance, setBalance] = useState('');
+  const { topPadding } = usePaddingKeyboard();
   const accounts = useAccountStore(state => state.accounts);
   const addAccount = useAccountStore(state => state.addAccount);
   const updateAccount = useAccountStore(state => state.updateAccount);
@@ -110,7 +120,7 @@ const CreateNewAccount = (props: TProps) => {
       onChange={props.handleSheetChanges}
       maxDynamicContentSize={500}
     >
-      <BottomSheetView style={[styles.container]}>
+      <BottomSheetView style={[styles.container, { paddingTop: topPadding }]}>
         <View>
           <Text
             style={[

@@ -13,6 +13,7 @@ import { gs } from '../../common';
 import useCategories from '../../hooks/useCategories';
 import { TCategorySummary } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -32,6 +33,7 @@ const CreateNewCategory = (props: TProps) => {
     props.catToEdit ? props.catToEdit.name : '',
   );
   const { addCategory, categories, updateCategory } = useCategories();
+  const { topPadding } = usePaddingKeyboard();
 
   const renderSaveButton = useMemo(() => {
     return catName.trim().length > 0;
@@ -81,7 +83,7 @@ const CreateNewCategory = (props: TProps) => {
       onChange={props.handleSheetChanges}
       maxDynamicContentSize={500}
     >
-      <BottomSheetView style={[styles.container]}>
+      <BottomSheetView style={[styles.container, { paddingTop: topPadding }]}>
         <View>
           <Text
             style={[
