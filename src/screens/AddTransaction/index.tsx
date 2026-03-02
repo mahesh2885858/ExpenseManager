@@ -676,8 +676,8 @@ const AddTransaction = () => {
             setTime(value);
             setOpenTimePicker(false);
           }}
-          hours={12}
-          minutes={0}
+          hours={time.hours}
+          minutes={time.minutes}
         />
       </ScrollView>
 
