@@ -418,7 +418,7 @@ const Transactions = () => {
             },
           ]}
         >
-          <Icon source={'magnify'} size={textSize.md} />
+          <Icon source={'magnify'} size={textSize.lg} />
           <TextInput
             value={search}
             onChangeText={setSearch}
