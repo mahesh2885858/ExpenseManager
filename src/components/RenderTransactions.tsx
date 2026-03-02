@@ -113,15 +113,27 @@ const RenderTransactions = ({
             console.log('cancelling dleete');
             undoDelete();
           },
+          textColor: theme.colors.onSurfaceVariant,
         }}
-        style={styles.snackBar}
+        style={[
+          styles.snackBar,
+          { backgroundColor: theme.colors.surfaceVariant },
+        ]}
         onDismiss={() => {
           console.log('deleting hte trnx');
           confirmDelete();
         }}
         visible={!!pendingDelete}
       >
-        <Text>Transaction deleted</Text>
+        <Text
+          style={[
+            {
+              color: theme.colors.onSurfaceVariant,
+            },
+          ]}
+        >
+          Transaction deleted
+        </Text>
       </Snackbar>
     </>
   );
