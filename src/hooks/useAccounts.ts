@@ -59,7 +59,6 @@ const useAccounts = () => {
       let expense = 0;
       let income = 0;
       let balance = 0;
-      console.log({ transactionsForAcc, acc });
       if (acc) {
         transactionsForAcc.forEach(t => {
           if (t.type === 'expense') {
