@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import useAccountStore from '../stores/accountsStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import useTransactions from './useTransactions';
+import { roundValue } from 'commonutil-core';
 
 const useAccounts = () => {
   const accounts = useAccountStore(state => state.accounts);
@@ -73,7 +74,7 @@ const useAccounts = () => {
       return {
         expense,
         income,
-        balance,
+        balance: roundValue(balance, 2),
       };
     },
     [accounts, transactions],

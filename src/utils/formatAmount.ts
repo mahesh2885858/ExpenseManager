@@ -2,7 +2,7 @@ import { formatDigits } from 'commonutil-core';
 import { CURRENCY_SYMBOL } from '../common';
 
 export const formatAmount = (
-  amount: number,
+  amount: number | string,
   currency = CURRENCY_SYMBOL,
   format: 'indian' | 'international' = 'indian',
 ) => {
@@ -11,8 +11,9 @@ export const formatAmount = (
     if (!amount) {
       text = '0';
     }
-    if (amount < 0) {
-      const abs = Math.abs(amount);
+    const intAmount = typeof amount === 'number' ? amount : parseFloat(amount);
+    if (intAmount < 0) {
+      const abs = Math.abs(intAmount);
       text = '-' + currency + formatDigits(String(abs), format);
     } else {
       text = currency + formatDigits(String(amount), format);
@@ -20,7 +21,7 @@ export const formatAmount = (
 
     return text;
   } catch (e) {
-    console.log({ e });
+    console.log({ e, enteredAmount: amount });
     return currency + 0;
   }
 };

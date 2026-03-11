@@ -6,28 +6,21 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Keyboard,
-  StatusBar,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  View,
-} from 'react-native';
+import { getDigits } from 'commonutil-core';
+import React, { useCallback, useMemo, useState } from 'react';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import {
   CURRENCY_SYMBOL,
   MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL,
 } from '../../common';
+import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
+import useTransactions from '../../hooks/useTransactions';
 import useAccountStore from '../../stores/accountsStore';
 import { TAccount } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import { getDigits } from 'commonutil-core';
-import useTransactions from '../../hooks/useTransactions';
-import { Keyframe } from 'react-native-reanimated';
-import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
+import AmountInputBoard from './AmountInputBoard';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;

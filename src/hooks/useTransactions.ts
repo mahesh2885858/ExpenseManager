@@ -182,7 +182,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   };
 
   const getFormattedAmount = useCallback(
-    (amount: number) => {
+    (amount: number | string) => {
       return formatAmount(
         amount,
         currency.symbol,

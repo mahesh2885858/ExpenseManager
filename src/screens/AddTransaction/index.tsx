@@ -20,12 +20,12 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getDigits } from 'commonutil-core';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
+import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
 import useAccounts from '../../hooks/useAccounts';
@@ -40,7 +40,6 @@ import {
   TRootStackParamList,
   TTransactionType,
 } from '../../types';
-import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -61,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { accounts, defaultAccountId, currency } = useAccounts();
+  const { accounts, defaultAccountId } = useAccounts();
 
   const initData: {
     type: TTransactionType;
@@ -78,9 +77,10 @@ const AddTransaction = () => {
   } = useMemo(() => {
     if (route.params.mode === 'edit') {
       const tr = route.params.transaction;
+      console.log({ tr });
       return {
         type: tr.type,
-        amountInput: getFormattedAmount(tr.amount),
+        amountInput: tr.amount.toString(),
         date: new Date(tr.transactionDate),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
@@ -116,13 +116,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [
-    route,
-    defaultAccountId,
-    categories,
-    getFormattedAmount,
-    defaultCategoryId,
-  ]);
+  }, [route, defaultAccountId, categories, defaultCategoryId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -685,7 +679,10 @@ const AddTransaction = () => {
 
       <AmountInputBoard
         amountInput={amountInput}
-        setAmountInput={setAmountInput}
+        setAmountInput={text => {
+          setErrorFields(p => (p ? p?.filter(f => f !== 'amount') : null));
+          setAmountInput(text);
+        }}
         handleSheetChanges={handleAmountSheetChange}
         ref={amountInputSheetRef}
       />

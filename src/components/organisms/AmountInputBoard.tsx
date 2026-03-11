@@ -4,9 +4,8 @@ import {
   BottomSheetModal,
   BottomSheetProps,
   BottomSheetView,
-  useBottomSheet,
 } from '@gorhom/bottom-sheet';
-import React, { ForwardedRef, RefObject, useMemo, useState } from 'react';
+import React, { RefObject, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -49,6 +48,7 @@ const AmountInputBoard = (props: TProps) => {
 
   const onButtonPress = (button: string) => {
     let text = input;
+
     const decimalPart = text.split('.')[1];
     if (
       button !== 'save' &&
@@ -64,6 +64,7 @@ const AmountInputBoard = (props: TProps) => {
       case 'save':
         // TODO: save the it for later
         setAmountInput(text);
+        setInput('');
         props.ref.current?.dismiss();
         break;
       default:
@@ -79,6 +80,9 @@ const AmountInputBoard = (props: TProps) => {
 
   return (
     <BottomSheetModal
+      onDismiss={() => {
+        setInput('');
+      }}
       stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
@@ -122,7 +126,7 @@ const AmountInputBoard = (props: TProps) => {
                   },
                 ]}
               >
-                {getFormattedAmount(parseFloat(input))}
+                {getFormattedAmount(input)}
               </Text>
             </View>
             {/*amount display end*/}
