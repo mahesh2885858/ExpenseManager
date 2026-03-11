@@ -20,16 +20,12 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getDigits } from 'commonutil-core';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import {
-  gs,
-  MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL,
-  MAX_DESCRIPTION_LIMIT,
-} from '../../common';
+import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
+import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
 import useAccounts from '../../hooks/useAccounts';
@@ -64,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { accounts, defaultAccountId, currency } = useAccounts();
+  const { accounts, defaultAccountId } = useAccounts();
 
   const initData: {
     type: TTransactionType;
@@ -81,9 +77,10 @@ const AddTransaction = () => {
   } = useMemo(() => {
     if (route.params.mode === 'edit') {
       const tr = route.params.transaction;
+      console.log({ tr });
       return {
         type: tr.type,
-        amountInput: getFormattedAmount(tr.amount),
+        amountInput: tr.amount.toString(),
         date: new Date(tr.transactionDate),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
@@ -119,7 +116,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultAccountId, categories, getFormattedAmount]);
+  }, [route, defaultAccountId, categories, defaultCategoryId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -190,7 +187,7 @@ const AddTransaction = () => {
       console.log('No amount added');
       errors.push('amount');
     } else {
-      amount = parseFloat(getDigits(amountInput));
+      amount = parseFloat(amountInput);
 
       if (amount <= 0) {
         console.log('No amount added');
@@ -259,20 +256,6 @@ const AddTransaction = () => {
     }
   };
 
-  const onInputChange = (input: string) => {
-    try {
-      const cleanDigits = getDigits(input);
-      const t = getFormattedAmount(parseInt(cleanDigits, 10));
-      setAmountInput(t);
-      setErrorFields(p => {
-        if (!p) return p;
-        return p.filter(f => f !== 'amount');
-      });
-    } catch (e) {
-      console.log({ e });
-    }
-  };
-
   const {
     btmShtRef: bottomSheetModalRef,
     handlePresent: handlePresentModalPress,
@@ -283,6 +266,12 @@ const AddTransaction = () => {
     btmShtRef: categoryBtmSheet,
     handlePresent: handlePresentCategories,
     handleSheetChange: handleCategorySheetChanges,
+  } = useBottomSheetModal();
+
+  const {
+    btmShtRef: amountInputSheetRef,
+    handlePresent: handleAmountInputPresent,
+    handleSheetChange: handleAmountSheetChange,
   } = useBottomSheetModal();
 
   useEffect(() => {
@@ -339,7 +328,8 @@ const AddTransaction = () => {
         </View>
 
         {/* Amount Input */}
-        <View
+        <PressableWithFeedback
+          onPress={() => handleAmountInputPresent()}
           style={[
             style.amountInputContainer,
             {
@@ -362,26 +352,19 @@ const AddTransaction = () => {
               Amount
             </Text>
           </View>
-          <TextInput
-            maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
-            onChangeText={onInputChange}
-            value={amountInput}
-            autoFocus
-            placeholder={currency.symbol + '0.00'}
-            keyboardType="numeric"
+          <Text
             style={[
               style.textInput,
               {
                 color: colors.onBackground,
               },
             ]}
-            placeholderTextColor={
-              errorFields?.some(f => f === 'amount')
-                ? colors.error
-                : colors.onSurfaceDisabled
-            }
-          />
-        </View>
+          >
+            {getFormattedAmount(
+              amountInput.length > 0 ? parseFloat(amountInput) : 0,
+            )}
+          </Text>
+        </PressableWithFeedback>
 
         {/* Category Selection */}
         <PressableWithFeedback onPress={() => handlePresentCategories()}>
@@ -694,6 +677,16 @@ const AddTransaction = () => {
         onPress={saveTransaction}
       />
 
+      <AmountInputBoard
+        amountInput={amountInput}
+        setAmountInput={text => {
+          setErrorFields(p => (p ? p?.filter(f => f !== 'amount') : null));
+          setAmountInput(text);
+        }}
+        handleSheetChanges={handleAmountSheetChange}
+        ref={amountInputSheetRef}
+      />
+
       <CategorySelectionModal
         handleSheetChanges={handleCategorySheetChanges}
         ref={categoryBtmSheet}
@@ -758,6 +751,7 @@ const style = StyleSheet.create({
   },
   textInput: {
     fontSize: textSize.lg,
+    paddingVertical: spacing.sm,
   },
   categoryContainer: {
     gap: spacing.sm,
