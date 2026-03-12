@@ -20,21 +20,23 @@ import CreateNewAccount from './CreateNewAccount';
 type TProps = {
   ref: any;
   handleSheetChanges: BottomSheetProps['onChange'];
-  selectedAccountId: string;
-  onAccountChange: (id: string) => void;
+  selectedWalletId: string;
+  onWalletChange: (id: string) => void;
 };
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
   return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
 };
-const AccountSelectionModal = (props: TProps) => {
+const WalletSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
-  const accounts = useWalletStore(state => state.wallets);
+  const wallets = useWalletStore(state => state.wallets);
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
+  const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
+  const defaultWalletId = useWalletStore(state => state.defaultWalletId);
 
   const {
-    btmShtRef: newAccBtmSheet,
-    handlePresent: handlePresentNewAccBtmSheet,
-    handleSheetChange: handleNewAccSheetChanges,
+    btmShtRef: newWalletBtmSheet,
+    handlePresent: handlePresentNewWalletBtmSheet,
+    handleSheetChange: handleNewWalletSheetChanges,
   } = useBottomSheetModal();
 
   return (
@@ -82,7 +84,7 @@ const AccountSelectionModal = (props: TProps) => {
                 paddingLeft: spacing.md,
               },
             ]}
-            onPress={handlePresentNewAccBtmSheet}
+            onPress={handlePresentNewWalletBtmSheet}
           >
             <Icon
               source={'plus'}
@@ -116,14 +118,15 @@ const AccountSelectionModal = (props: TProps) => {
           renderScrollComponent={BottomSheetScrollable}
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
-          data={accounts}
+          data={wallets}
           keyExtractor={(item: TWallet) => item.id}
           renderItem={({ item }: { item: TWallet }) => {
-            const isSelected = props.selectedAccountId === item.id;
+            const isSelected = props.selectedWalletId === item.id;
+            const isDefault = defaultWalletId === item.id;
             return (
               <PressableWithFeedback
                 onPress={() => {
-                  props.onAccountChange(item.id);
+                  props.onWalletChange(item.id);
                   props.ref.current?.dismiss();
                 }}
                 style={[
@@ -145,6 +148,7 @@ const AccountSelectionModal = (props: TProps) => {
                 />
                 <Text
                   style={[
+                    gs.fullFlex,
                     {
                       color: colors.onSurface,
                       fontSize: textSize.md,
@@ -153,20 +157,33 @@ const AccountSelectionModal = (props: TProps) => {
                 >
                   {item.name}
                 </Text>
+                <PressableWithFeedback
+                  onPress={() => setDefaultWalletId(item.id)}
+                  style={[gs.centerItems, { marginRight: spacing.md }]}
+                >
+                  <Icon
+                    source={isDefault ? 'star' : 'star-outline'}
+                    size={textSize.lg}
+                    color={isDefault ? colors.primary : 'transparent'}
+                  />
+                  {isDefault && (
+                    <Text style={[{ fontSize: textSize.xs }]}>Default</Text>
+                  )}
+                </PressableWithFeedback>
               </PressableWithFeedback>
             );
           }}
         />
       </View>
       <CreateNewAccount
-        handleSheetChanges={handleNewAccSheetChanges}
-        ref={newAccBtmSheet}
+        handleSheetChanges={handleNewWalletSheetChanges}
+        ref={newWalletBtmSheet}
       />
     </BottomSheetModal>
   );
 };
 
-export default AccountSelectionModal;
+export default WalletSelectionModal;
 
 const styles = StyleSheet.create({
   container: {

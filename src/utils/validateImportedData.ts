@@ -2,13 +2,13 @@ import { TWallet, TCategories, TTransaction } from '../types';
 import { getUniqueData } from './getUniqueData';
 
 type TData = {
-  accounts?: TWallet[];
+  wallets?: TWallet[];
   transactions?: TTransaction[];
   categories?: TCategories;
 };
 
 type TItemsSkipped = {
-  accounts: number;
+  wallets: number;
   transactions: number;
   categories: number;
 };
@@ -20,32 +20,33 @@ type TReturnResults = {
 
 export const getValidData = (data: TData): TReturnResults => {
   const validData: TData = {
-    accounts: [],
+    wallets: [],
     categories: [],
     transactions: [],
   };
   const itemsSkipped: TItemsSkipped = {
-    accounts: 0,
+    wallets: 0,
     categories: 0,
     transactions: 0,
   };
+  console.log({ data });
 
   if (
     !data ||
-    ((!data.accounts || data.accounts.length === 0) &&
+    ((!data.wallets || data.wallets.length === 0) &&
       (!data.categories || data.categories.length === 0) &&
       (!data.transactions || data.transactions.length === 0))
   ) {
     throw new Error('No valid data provided');
   }
 
-  if (data.accounts && data.accounts.length > 0) {
-    const uniqueAccData = getUniqueData(data.accounts, 'id');
+  if (data.wallets && data.wallets.length > 0) {
+    const uniqueAccData = getUniqueData(data.wallets, 'id');
     uniqueAccData.forEach(acc => {
       if (acc.id && acc.name) {
-        validData.accounts?.push(acc);
+        validData.wallets?.push(acc);
       } else {
-        itemsSkipped.accounts += 1;
+        itemsSkipped.wallets += 1;
       }
     });
   }
@@ -64,8 +65,8 @@ export const getValidData = (data: TData): TReturnResults => {
   if (data.transactions && data.transactions.length > 0) {
     const uniqueTransactions = getUniqueData(data.transactions, 'id');
     uniqueTransactions.forEach(tr => {
-      if (tr.id && tr.accountId && tr.type && tr.transactionDate) {
-        validData.transactions?.push({ ...tr, walletId: tr.accountId });
+      if (tr.id && tr.walletId && tr.type && tr.transactionDate) {
+        validData.transactions?.push({ ...tr, walletId: tr.walletId });
       } else {
         itemsSkipped.transactions += 1;
       }

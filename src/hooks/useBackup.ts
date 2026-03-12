@@ -146,11 +146,12 @@ const useBackup = () => {
         }
 
         const { validData, itemsSkipped } = getValidData(data.data);
+        console.log({ validData });
 
-        const accountIds = new Set(validData.accounts?.map(a => a.id));
+        const accountIds = new Set(validData.wallets?.map(a => a.id));
 
         validData.transactions = validData.transactions?.filter(t => {
-          if (!accountIds.has(t.accountId)) {
+          if (!accountIds.has(t.walletId)) {
             itemsSkipped.transactions += 1;
             return false;
           }
@@ -158,7 +159,7 @@ const useBackup = () => {
         });
 
         setDataToImport({
-          wallets: validData.accounts ?? [],
+          wallets: validData.wallets ?? [],
           categories: validData.categories ?? [],
           transactions: validData.transactions ?? [],
         });

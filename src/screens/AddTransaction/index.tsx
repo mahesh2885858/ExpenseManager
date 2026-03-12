@@ -24,7 +24,7 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
@@ -44,7 +44,7 @@ const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
 type TValidatedInputs = {
-  selectedAcc: TWallet;
+  selectedWallet: TWallet;
   selectedCategoryId: string;
   amount: number;
 };
@@ -60,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { wallets: accounts, defaultWalletId: defaultAccountId } = useWallets();
+  const { wallets, defaultWalletId } = useWallets();
 
   const initData: {
     type: TTransactionType;
@@ -68,16 +68,16 @@ const AddTransaction = () => {
     date: CalendarDate;
     desc: string;
     attachments: TAttachment[];
-    accountId: string;
+    walletId: string;
     selectedCatId: string | null;
     time: {
       hours: number;
       minutes: number;
     };
   } = useMemo(() => {
+    console.log({ defaultWalletId });
     if (route.params.mode === 'edit') {
       const tr = route.params.transaction;
-      console.log({ tr });
       return {
         type: tr.type,
         amountInput: tr.amount.toString(),
@@ -85,7 +85,7 @@ const AddTransaction = () => {
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
         selectedCatId: tr.categoryIds[0],
-        accountId: tr.walletId,
+        walletId: tr.walletId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
           minutes: new Date(tr.transactionDate).getMinutes(),
@@ -101,13 +101,13 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
-        accountId: defaultAccountId,
+        walletId: defaultWalletId,
 
         attachments: [],
         selectedCatId:
           categories.length === 1
             ? categories[0]?.id ?? defaultCategoryId
-            : defaultAccountId
+            : defaultWalletId
             ? defaultCategoryId
             : null,
         time: {
@@ -116,7 +116,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultAccountId, categories, defaultCategoryId]);
+  }, [route, defaultWalletId, categories, defaultCategoryId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -137,21 +137,22 @@ const AddTransaction = () => {
     initData.selectedCatId,
   );
   const { kbHeight } = useGetKeyboardHeight();
-  const [accountId, setAccountId] = useState(initData.accountId);
+  const [walletId, setWalletId] = useState(initData.walletId);
   const [errorFields, setErrorFields] = useState<Array<
-    'amount' | 'account' | 'category' | 'date' | 'time'
+    'amount' | 'wallet' | 'category' | 'date' | 'time'
   > | null>(null);
 
   const progress = useSharedValue(0);
 
-  const selectedAcc = useMemo(() => {
-    if (accountId.trim().length <= 0) {
+  const selectedWallet = useMemo(() => {
+    console.log({ walletId, wallets });
+    if (walletId.trim().length <= 0) {
       return null;
     } else {
-      const selectedAccount = accounts.filter(acc => acc.id === accountId);
-      return selectedAccount[0] ?? null;
+      const fitleredWallets = wallets.filter(wallet => wallet.id === walletId);
+      return fitleredWallets[0] ?? null;
     }
-  }, [accountId, accounts]);
+  }, [walletId, wallets]);
 
   const onDismissSingle = useCallback(() => {
     setOpenDatePicker(false);
@@ -174,9 +175,9 @@ const AddTransaction = () => {
   const validateInputs = () => {
     const errors: typeof errorFields = [];
     let amount = 0;
-    if (!selectedAcc) {
+    if (!selectedWallet) {
       console.log('No wallet selected');
-      errors.push('account');
+      errors.push('wallet');
     }
     if (!selectedCategoryId) {
       console.log('No category selected');
@@ -200,7 +201,7 @@ const AddTransaction = () => {
       return null;
     } else {
       return {
-        selectedAcc,
+        selectedWallet,
         selectedCategoryId,
         amount,
       } satisfies TValidatedInputs;
@@ -213,10 +214,9 @@ const AddTransaction = () => {
         route.params.mode === 'edit' ? route.params.transaction.id : uuid();
 
       const result = validateInputs();
-      console.log({ result });
       if (!result) return;
 
-      const selectedAccountId = result?.selectedAcc?.id;
+      const selectedWalletId = result?.selectedWallet?.id;
 
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
@@ -233,7 +233,7 @@ const AddTransaction = () => {
         });
       } else {
         addNewTransaction({
-          walletId: selectedAccountId,
+          walletId: selectedWalletId,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
           createdAt: new Date().toISOString(),
@@ -425,7 +425,7 @@ const AddTransaction = () => {
             </View>
           </View>
         </PressableWithFeedback>
-        {/* Account section */}
+        {/* Wallet section */}
         <PressableWithFeedback onPress={() => handlePresentModalPress()}>
           <View
             style={[
@@ -455,7 +455,7 @@ const AddTransaction = () => {
                 >
                   Wallet
                 </Text>
-                {errorFields?.some(f => f === 'account') && (
+                {errorFields?.some(f => f === 'wallet') && (
                   <Text
                     style={[
                       {
@@ -479,7 +479,7 @@ const AddTransaction = () => {
                   },
                 ]}
               >
-                {selectedAcc?.name ?? 'Select a wallet'}
+                {selectedWallet?.name ?? 'Select a wallet'}
               </Text>
               <Icon
                 color={colors.onSurfaceVariant}
@@ -696,14 +696,14 @@ const AddTransaction = () => {
         }}
         selectedCategory={selectedCategoryId}
       />
-      <AccountSelectionModal
-        onAccountChange={id => {
-          setAccountId(id);
-          setErrorFields(p => (!p ? p : p.filter(f => f !== 'account')));
+      <WalletSelectionModal
+        onWalletChange={id => {
+          setWalletId(id);
+          setErrorFields(p => (!p ? p : p.filter(f => f !== 'wallet')));
         }}
         handleSheetChanges={handleSheetChanges}
         ref={bottomSheetModalRef}
-        selectedAccountId={accountId}
+        selectedWalletId={walletId}
       />
     </KeyboardAvoidingView>
   );

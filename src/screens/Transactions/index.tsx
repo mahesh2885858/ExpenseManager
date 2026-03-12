@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useWallets from '../../hooks/useAccounts';
@@ -493,11 +493,11 @@ const Transactions = () => {
         </View>
       </View>
 
-      <AccountSelectionModal
+      <WalletSelectionModal
         handleSheetChanges={handleSheetChange}
-        onAccountChange={id => setSelectedAccountId(id)}
+        onWalletChange={id => setSelectedAccountId(id)}
         ref={btmShtRef}
-        selectedAccountId={selectedAccount?.id ?? ''}
+        selectedWalletId={selectedAccount?.id ?? ''}
       />
     </View>
   );

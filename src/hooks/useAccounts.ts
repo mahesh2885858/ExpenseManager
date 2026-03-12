@@ -13,7 +13,7 @@ const useWallets = () => {
   const { filteredTransactions: transactions } = useTransactions({});
   const defaultWalletId = useWalletStore(state => state.defaultWalletId);
   const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
-
+  console.log({ defaultWalletId, wallets });
   const setSelectedWalletId = useWalletStore(
     state => state.setSelectedWalletId,
   );
@@ -94,6 +94,7 @@ const useWallets = () => {
     setSelectedWalletId,
     getIncomeExpenseForWallet,
     getWalletNameById,
+    setDefaultWalletId,
     defaultWalletId: defaultWalletId
       ? defaultWalletId
       : wallets.length > 0
