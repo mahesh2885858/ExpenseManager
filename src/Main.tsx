@@ -4,6 +4,7 @@ import { ColorSchemeName, View } from 'react-native';
 import { CombinedDarkTheme, CombinedDefaultTheme, useAppTheme } from '../theme';
 import MainStack from './navigation/MainStack';
 import { gs } from './common';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const Main = (props: { theme: ColorSchemeName }) => {
   const { theme } = props;
@@ -42,9 +43,11 @@ const Main = (props: { theme: ColorSchemeName }) => {
       linking={linking}
       theme={theme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}
     >
-      <View style={[gs.fullFlex, { backgroundColor: colors.background }]}>
-        <MainStack />
-      </View>
+      <BottomSheetModalProvider>
+        <View style={[gs.fullFlex, { backgroundColor: colors.background }]}>
+          <MainStack />
+        </View>
+      </BottomSheetModalProvider>
     </NavigationContainer>
   );
 };

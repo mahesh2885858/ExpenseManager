@@ -61,9 +61,6 @@ const AmountInputBoard = (props: TProps) => {
         text = text.length === 0 ? text : text.slice(0, text.length - 1);
         break;
       case 'save':
-        // TODO: save the it for later
-        setAmountInput(text);
-        setInput('');
         props.ref.current?.dismiss();
         break;
       default:

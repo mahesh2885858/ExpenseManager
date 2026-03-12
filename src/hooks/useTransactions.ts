@@ -182,11 +182,12 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   };
 
   const getFormattedAmount = useCallback(
-    (amount: number | string) => {
+    (amount: number | string, keepCurrencySymbol = true) => {
       return formatAmount(
         amount,
         currency.symbol,
         numberFormat === 'lakhs' ? 'indian' : 'international',
+        keepCurrencySymbol,
       );
     },
     [currency, numberFormat],
