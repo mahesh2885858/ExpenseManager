@@ -6,10 +6,10 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { RefObject, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { gs, MAX_AMOUNT } from '../../common';
 import useTransactions from '../../hooks/useTransactions';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 
@@ -47,6 +47,7 @@ const AmountInputBoard = (props: TProps) => {
 
   const onButtonPress = (button: string) => {
     let text = input;
+    console.log({ text });
 
     const decimalPart = text.split('.')[1];
     if (
@@ -65,6 +66,17 @@ const AmountInputBoard = (props: TProps) => {
         break;
       default:
         text = text + button;
+        if (
+          parseFloat(text) >= MAX_AMOUNT &&
+          button !== 'back' &&
+          button !== 'save'
+        ) {
+          ToastAndroid.show(
+            'Maximum allowed is: ' + getFormattedAmount(MAX_AMOUNT),
+            2000,
+          );
+          return;
+        }
         break;
     }
     setInput(text);
