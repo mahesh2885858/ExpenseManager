@@ -96,7 +96,7 @@ const useTransactionsStore = create<PositionStore>()(
       },
       deleteForAnAcc: accId => {
         const updatedTransaction = get().transactions.filter(
-          t => t.accountId !== accId,
+          t => t.walletId !== accId,
         );
         set({
           transactions: updatedTransaction,

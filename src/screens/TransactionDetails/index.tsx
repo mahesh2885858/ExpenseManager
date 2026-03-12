@@ -26,7 +26,7 @@ const TransactionDetails = () => {
   }, [categories, transaction]);
 
   const accountName = useMemo(() => {
-    return accounts.find(acc => acc.id === transaction.accountId)?.name ?? '';
+    return accounts.find(acc => acc.id === transaction.walletId)?.name ?? '';
   }, [transaction, accounts]);
 
   return (

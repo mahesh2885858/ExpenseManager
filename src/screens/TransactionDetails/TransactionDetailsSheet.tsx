@@ -42,7 +42,7 @@ const TransactionDetailsSheet = (props: TProps) => {
       ?.name ?? 'Unknown';
 
   const accName =
-    accounts.find(acc => acc.id === props.selectedTransaction?.accountId)
+    accounts.find(acc => acc.id === props.selectedTransaction?.walletId)
       ?.name ?? '';
 
   const navigateToEdit = useCallback(() => {

@@ -85,7 +85,7 @@ const AddTransaction = () => {
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
         selectedCatId: tr.categoryIds[0],
-        accountId: tr.accountId,
+        accountId: tr.walletId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
           minutes: new Date(tr.transactionDate).getMinutes(),
@@ -233,7 +233,7 @@ const AddTransaction = () => {
         });
       } else {
         addNewTransaction({
-          accountId: selectedAccountId,
+          walletId: selectedAccountId,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
           createdAt: new Date().toISOString(),

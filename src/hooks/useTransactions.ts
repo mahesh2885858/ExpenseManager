@@ -30,7 +30,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const matchesAcc = useCallback(
     (t: TTransaction) => {
       if (!filters || !filters.accId) return true;
-      return t.accountId === filters.accId;
+      return t.walletId === filters.accId;
     },
     [filters],
   );

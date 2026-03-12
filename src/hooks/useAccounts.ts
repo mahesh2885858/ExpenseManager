@@ -54,9 +54,7 @@ const useWallets = () => {
   const getIncomeExpenseForWallet = useCallback(
     (id: string) => {
       const wallet = wallets.find(w => w.id === id);
-      const transactionsForWallet = transactions.filter(
-        t => t.accountId === id,
-      );
+      const transactionsForWallet = transactions.filter(t => t.walletId === id);
       let expense = 0;
       let income = 0;
       let balance = 0;
