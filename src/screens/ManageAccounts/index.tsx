@@ -13,13 +13,13 @@ import CreateNewAccount from '../../components/organisms/CreateNewAccount';
 import RenderAccountCard from '../../components/organisms/RenderAccountCard';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
-import useAccountStore from '../../stores/accountsStore';
+import useWalletStore from '../../stores/walletsStore';
 
 const ManageAccounts = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useAppTheme();
-  const accounts = useAccountStore(state => state.accounts);
+  const accounts = useWalletStore(state => state.wallets);
   const { kbHeight } = useGetKeyboardHeight();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const [focusedId, setFocusedId] = useState('');

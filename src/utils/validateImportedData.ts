@@ -1,8 +1,8 @@
-import { TAccount, TCategories, TTransaction } from '../types';
+import { TWallet, TCategories, TTransaction } from '../types';
 import { getUniqueData } from './getUniqueData';
 
 type TData = {
-  accounts?: TAccount[];
+  accounts?: TWallet[];
   transactions?: TTransaction[];
   categories?: TCategories;
 };

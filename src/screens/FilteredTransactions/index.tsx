@@ -8,7 +8,7 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useCategories from '../../hooks/useCategories';
 
 const FilteredTransactions = () => {
@@ -35,7 +35,7 @@ const FilteredTransactions = () => {
     filter: routeFilter,
   });
 
-  const { getAccountNameById } = useAccounts();
+  const { getWalletNameById: getAccountNameById } = useWallets();
   const { getCategoryNameById } = useCategories();
 
   const heading = useMemo(() => {

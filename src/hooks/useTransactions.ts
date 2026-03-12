@@ -10,13 +10,13 @@ import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TFilters, TSort, TTransaction } from '../types';
 import { formatAmount } from '../utils';
-import useAccountStore from '../stores/accountsStore';
+import useWalletStore from '../stores/walletsStore';
 import useUIStore from '../stores/uiStore';
 
 const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
-  const currency = useAccountStore(state => state.currency);
+  const currency = useWalletStore(state => state.currency);
   const numberFormat = useUIStore(state => state.numberFormat);
   const filters = props?.filter ?? undefined;
   const sort = props?.sort ?? undefined;

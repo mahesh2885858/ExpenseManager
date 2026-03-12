@@ -9,15 +9,15 @@ import {
 } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
-import { TAccount } from '../../types';
+import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewAccount from './CreateNewAccount';
 
 type TProps = {
-  item: TAccount;
+  item: TWallet;
   isFocused?: boolean;
   changeFocusId: (id: string) => void;
 };
@@ -32,7 +32,10 @@ const RenderAccountCard = (props: TProps) => {
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
-  const { getIncomeExpenseForAcc, deleteAcc } = useAccounts();
+  const {
+    getIncomeExpenseForWallet: getIncomeExpenseForAcc,
+    deleteWallet: deleteAcc,
+  } = useWallets();
   const navigation = useNavigation();
   const { getFormattedAmount } = useTransactions({});
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();

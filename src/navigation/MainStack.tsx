@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import InitialAccountAmountSetup from '../screens/InitialSetup/InitialAccountAmountSetup';
 import InitialAccountNameSetup from '../screens/InitialSetup/InitialAccountNameSetup';
-import useAccountStore from '../stores/accountsStore';
+import useWalletStore from '../stores/walletsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
 import AddTransaction from '../screens/AddTransaction';
@@ -16,7 +16,7 @@ import TransactionSort from '../screens/TransactionSort';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
-  const isInitialSetupDone = useAccountStore(state => state.isInitialSetupDone);
+  const isInitialSetupDone = useWalletStore(state => state.isInitialSetupDone);
   return (
     <Stack.Navigator>
       {!isInitialSetupDone ? (

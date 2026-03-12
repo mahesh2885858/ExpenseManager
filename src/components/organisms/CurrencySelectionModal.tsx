@@ -15,7 +15,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { currencies, gs } from '../../common';
 import { TCurrency } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import useAccountStore from '../../stores/accountsStore';
+import useWalletStore from '../../stores/walletsStore';
 
 type TProps = {
   ref: any;
@@ -33,8 +33,8 @@ const CurrencySelectionModal = (props: TProps) => {
   const { dismissAll } = useBottomSheetModal();
 
   const [search, setSearch] = useState('');
-  const setCurrency = useAccountStore(state => state.setCurrency);
-  const currency = useAccountStore(state => state.currency);
+  const setCurrency = useWalletStore(state => state.setCurrency);
+  const currency = useWalletStore(state => state.currency);
 
   const currenciesToRender = useMemo(() => {
     return search.trim().length === 0

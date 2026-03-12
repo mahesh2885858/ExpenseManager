@@ -28,14 +28,14 @@ import AccountSelectionModal from '../../components/organisms/AccountSelectionMo
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
-  TAccount,
+  TWallet,
   TAttachment,
   TRootStackParamList,
   TTransactionType,
@@ -44,7 +44,7 @@ const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
 type TValidatedInputs = {
-  selectedAcc: TAccount;
+  selectedAcc: TWallet;
   selectedCategoryId: string;
   amount: number;
 };
@@ -60,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { accounts, defaultAccountId } = useAccounts();
+  const { wallets: accounts, defaultWalletId: defaultAccountId } = useWallets();
 
   const initData: {
     type: TTransactionType;

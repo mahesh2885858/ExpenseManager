@@ -15,9 +15,9 @@ import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs, MAX_AMOUNT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useAccountStore from '../../stores/accountsStore';
+import useWalletStore from '../../stores/walletsStore';
 import { TRootStackParamList } from '../../types';
 import { getDigits } from 'commonutil-core';
 import useTransactions from '../../hooks/useTransactions';
@@ -30,14 +30,14 @@ const InitialAccountAmountSetup = () => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [accName, setAccName] = useState('');
-  const addAccount = useAccountStore(state => state.addAccount);
-  const setUsername = useAccountStore(state => state.setUsername);
-  const currency = useAccountStore(state => state.currency);
-  const setIsInitialSetupDone = useAccountStore(
+  const addAccount = useWalletStore(state => state.addWallet);
+  const setUsername = useWalletStore(state => state.setUsername);
+  const currency = useWalletStore(state => state.currency);
+  const setIsInitialSetupDone = useWalletStore(
     state => state.setIsInitialSetupDone,
   );
-  const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
-  const { setSelectedAccountId } = useAccounts();
+  const setDefaultAcc = useWalletStore(state => state.setDefaultWalletId);
+  const { setSelectedWalletId: setSelectedAccountId } = useWallets();
 
   const { getFormattedAmount } = useTransactions();
 

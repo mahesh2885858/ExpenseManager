@@ -11,7 +11,7 @@ export type TAttachment = {
 
 export type TTransaction = {
   id: string;
-  accountId: string; // ID associated with account to which this transaction is added
+  accountId: string; // ID associated with wallet to which this transaction is added
   type: TTransactionType; // Only either income or expense
   amount: number;
   createdAt: string; // ISO string format - when the transaction record created

@@ -12,8 +12,8 @@ import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useAccountStore from '../../stores/accountsStore';
-import { TAccount } from '../../types';
+import useWalletStore from '../../stores/walletsStore';
+import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewAccount from './CreateNewAccount';
 
@@ -28,7 +28,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 };
 const AccountSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
-  const accounts = useAccountStore(state => state.accounts);
+  const accounts = useWalletStore(state => state.wallets);
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
   const {
@@ -117,8 +117,8 @@ const AccountSelectionModal = (props: TProps) => {
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           data={accounts}
-          keyExtractor={(item: TAccount) => item.id}
-          renderItem={({ item }: { item: TAccount }) => {
+          keyExtractor={(item: TWallet) => item.id}
+          renderItem={({ item }: { item: TWallet }) => {
             const isSelected = props.selectedAccountId === item.id;
             return (
               <PressableWithFeedback

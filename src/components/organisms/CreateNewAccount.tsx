@@ -15,8 +15,8 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
 import useTransactions from '../../hooks/useTransactions';
-import useAccountStore from '../../stores/accountsStore';
-import { TAccount } from '../../types';
+import useWalletStore from '../../stores/walletsStore';
+import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AmountInputBoard from './AmountInputBoard';
 
@@ -25,7 +25,7 @@ const screenHeight = Dimensions.get('screen').height;
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
-  accToEdit?: TAccount;
+  accToEdit?: TWallet;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
@@ -41,9 +41,9 @@ const CreateNewAccount = (props: TProps) => {
   );
   const [balance, setBalance] = useState('');
   const { topPadding } = usePaddingKeyboard();
-  const accounts = useAccountStore(state => state.accounts);
-  const addAccount = useAccountStore(state => state.addAccount);
-  const updateAccount = useAccountStore(state => state.updateAccount);
+  const accounts = useWalletStore(state => state.wallets);
+  const addAccount = useWalletStore(state => state.addWallet);
+  const updateAccount = useWalletStore(state => state.updateWallet);
   const { getFormattedAmount } = useTransactions();
 
   const { btmShtRef, handlePresent, handleSheetChange, open } =
