@@ -5,11 +5,11 @@ import {
   BottomSheetProps,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import React, { RefObject, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { RefObject, useMemo } from 'react';
+import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { gs, MAX_AMOUNT } from '../../common';
 import useTransactions from '../../hooks/useTransactions';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 
@@ -27,8 +27,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AmountInputBoard = (props: TProps) => {
   const { colors } = useAppTheme();
   const { getFormattedAmount } = useTransactions();
-  const { amountInput, setAmountInput } = props;
-  const [input, setInput] = useState(amountInput);
+  const { amountInput: input, setAmountInput: setInput } = props;
   const buttonStyles = StyleSheet.create({
     button: {
       flex: 1,
@@ -62,13 +61,21 @@ const AmountInputBoard = (props: TProps) => {
         text = text.length === 0 ? text : text.slice(0, text.length - 1);
         break;
       case 'save':
-        // TODO: save the it for later
-        setAmountInput(text);
-        setInput('');
         props.ref.current?.dismiss();
         break;
       default:
         text = text + button;
+        if (
+          parseFloat(text) >= MAX_AMOUNT &&
+          button !== 'back' &&
+          button !== 'save'
+        ) {
+          ToastAndroid.show(
+            'Maximum allowed is: ' + getFormattedAmount(MAX_AMOUNT),
+            2000,
+          );
+          return;
+        }
         break;
     }
     setInput(text);
@@ -80,9 +87,6 @@ const AmountInputBoard = (props: TProps) => {
 
   return (
     <BottomSheetModal
-      onDismiss={() => {
-        setInput('');
-      }}
       stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{

@@ -1,74 +1,72 @@
 import { useCallback, useMemo } from 'react';
-import useAccountStore from '../stores/accountsStore';
+import useWalletStore from '../stores/walletsStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import useTransactions from './useTransactions';
 import { roundValue } from 'commonutil-core';
 
-const useAccounts = () => {
-  const accounts = useAccountStore(state => state.accounts);
-  const removeAcc = useAccountStore(state => state.removeAnAcc);
-  const deleteTransactionForAnAcc = useTransactionsStore(
+const useWallets = () => {
+  const wallets = useWalletStore(state => state.wallets);
+  const removeWallet = useWalletStore(state => state.removeAWallet);
+  const deleteTransactionForAWallet = useTransactionsStore(
     state => state.deleteForAnAcc,
   );
   const { filteredTransactions: transactions } = useTransactions({});
-  const defaultAccId = useAccountStore(state => state.defaultAccountId);
-  const setDefaultAccountId = useAccountStore(
-    state => state.setDefaultAccountId,
+  const defaultWalletId = useWalletStore(state => state.defaultWalletId);
+  const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
+
+  const setSelectedWalletId = useWalletStore(
+    state => state.setSelectedWalletId,
   );
 
-  const setSelectedAccountId = useAccountStore(
-    state => state.setSelectedAccountId,
+  const selectedWalletId = useWalletStore(state => state.selectedWalletId);
+  const currency = useWalletStore(state => state.currency);
+
+  const selectedWallet = useMemo(
+    () => wallets.find(acc => acc.id === selectedWalletId),
+    [wallets, selectedWalletId],
   );
 
-  const selectedAccountId = useAccountStore(state => state.selectedAccountId);
-  const currency = useAccountStore(state => state.currency);
-
-  const selectedAccount = useMemo(
-    () => accounts.find(acc => acc.id === selectedAccountId),
-    [accounts, selectedAccountId],
-  );
-
-  const deleteAcc = useCallback(
+  const deleteWallet = useCallback(
     (id: string) => {
-      const remainingAccounts = accounts.filter(acc => acc.id !== id);
-      deleteTransactionForAnAcc(id);
-      setDefaultAccountId(null);
-      setSelectedAccountId(
-        remainingAccounts.length === 0 ? null : remainingAccounts[0].id,
+      const remainingWallets = wallets.filter(acc => acc.id !== id);
+      deleteTransactionForAWallet(id);
+      setDefaultWalletId(null);
+      setSelectedWalletId(
+        remainingWallets.length === 0 ? null : remainingWallets[0].id,
       );
-      removeAcc(id);
+      removeWallet(id);
     },
     [
-      deleteTransactionForAnAcc,
-      removeAcc,
-      setDefaultAccountId,
-      accounts,
-      setSelectedAccountId,
+      deleteTransactionForAWallet,
+      removeWallet,
+      setDefaultWalletId,
+      wallets,
+      setSelectedWalletId,
     ],
   );
 
   const totalBalance = useMemo(() => {
-    return accounts.reduce((prev, item) => {
+    return wallets.reduce((prev, item) => {
       return prev + (item.initBalance ?? 0);
     }, 0);
-  }, [accounts]);
+  }, [wallets]);
 
-  const getIncomeExpenseForAcc = useCallback(
+  const getIncomeExpenseForWallet = useCallback(
     (id: string) => {
-      const acc = accounts.find(a => a.id === id);
-      const transactionsForAcc = transactions.filter(t => t.accountId === id);
+      const wallet = wallets.find(w => w.id === id);
+      const transactionsForWallet = transactions.filter(t => t.walletId === id);
       let expense = 0;
       let income = 0;
       let balance = 0;
-      if (acc) {
-        transactionsForAcc.forEach(t => {
+      if (wallet) {
+        transactionsForWallet.forEach(t => {
           if (t.type === 'expense') {
             expense += t.amount;
           } else {
             income += t.amount;
           }
         });
-        balance = (acc.initBalance ?? 0) + income - expense;
+        balance = (wallet.initBalance ?? 0) + income - expense;
       }
 
       return {
@@ -77,31 +75,31 @@ const useAccounts = () => {
         balance: roundValue(balance, 2),
       };
     },
-    [accounts, transactions],
+    [wallets, transactions],
   );
 
-  const getAccountNameById = useCallback(
+  const getWalletNameById = useCallback(
     (id: string) => {
-      return accounts.find(acc => acc.id === id)?.name ?? '';
+      return wallets.find(wallet => wallet.id === id)?.name ?? '';
     },
-    [accounts],
+    [wallets],
   );
 
   return {
     totalBalance,
-    deleteAcc,
+    deleteWallet,
     currency,
-    accounts,
-    selectedAccount,
-    setSelectedAccountId,
-    getIncomeExpenseForAcc,
-    getAccountNameById,
-    defaultAccountId: defaultAccId
-      ? defaultAccId
-      : accounts.length > 0
-      ? accounts[0].id
+    wallets,
+    selectedWallet,
+    setSelectedWalletId,
+    getIncomeExpenseForWallet,
+    getWalletNameById,
+    defaultWalletId: defaultWalletId
+      ? defaultWalletId
+      : wallets.length > 0
+      ? wallets[0].id
       : '',
   };
 };
 
-export default useAccounts;
+export default useWallets;

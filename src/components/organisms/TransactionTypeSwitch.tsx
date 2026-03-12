@@ -37,7 +37,6 @@ const TransactionTypeSwitch = (props: TProps) => {
   return (
     <View
       onLayout={e => {
-        console.log({ e: e.nativeEvent.layout });
         setWidth(e.nativeEvent.layout.width);
       }}
       style={[

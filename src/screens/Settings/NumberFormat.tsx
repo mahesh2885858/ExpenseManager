@@ -14,7 +14,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import useUIStore from '../../stores/uiStore';
 import { TNumberFormat } from '../../types';
 import { formatAmount } from '../../utils';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -42,7 +42,7 @@ const NumberFormat = (props: Props) => {
       1,
   ); // x position of highlight
 
-  const { currency } = useAccounts();
+  const { currency } = useWallets();
 
   const onPress = () => {
     props.onItemPress('format');

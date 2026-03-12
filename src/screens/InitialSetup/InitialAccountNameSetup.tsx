@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
 import { TRootStackParamList } from '../../types';
 import { gs } from '../../common/';
+import useBackup from '../../hooks/useBackup';
 
 const InitialAccountNameSetup = () => {
   const { bottom, top } = useSafeAreaInsets();

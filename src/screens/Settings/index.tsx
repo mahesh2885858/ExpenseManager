@@ -9,7 +9,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import Backup from './Backup';
 import ThemeSwitch from './ThemeSwitch';
 import { Icon } from 'react-native-paper';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 import NumberFormat from './NumberFormat';
@@ -18,7 +18,7 @@ const Settings = () => {
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
   const { colors } = useAppTheme();
-  const { currency } = useAccounts();
+  const { currency } = useWallets();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
@@ -70,7 +70,7 @@ const Settings = () => {
                 },
               ]}
             >
-              Accounts
+              Wallets
             </Text>
             <Text
               style={[
@@ -80,7 +80,7 @@ const Settings = () => {
                 },
               ]}
             >
-              Manage your accounts here
+              Manage your wallets here
             </Text>
           </View>
         </PressableWithFeedback>

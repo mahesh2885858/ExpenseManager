@@ -181,7 +181,7 @@ const Backup = (props: TProps) => {
           <Text
             style={[styles.importSummaryText, { color: colors.onBackground }]}
           >
-            Accounts: {dataToImport?.accounts.length}
+            Wallets: {dataToImport?.wallets.length}
           </Text>
           <Text
             style={[styles.importSummaryText, { color: colors.onBackground }]}

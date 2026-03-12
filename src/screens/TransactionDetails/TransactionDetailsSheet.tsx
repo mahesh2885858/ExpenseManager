@@ -14,7 +14,7 @@ import { Icon } from 'react-native-paper';
 import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import { TTransaction } from '../../types';
@@ -33,7 +33,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const TransactionDetailsSheet = (props: TProps) => {
   const { colors } = useAppTheme();
   const { categories } = useCategories();
-  const { accounts } = useAccounts();
+  const { wallets: accounts } = useWallets();
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
   const { getFormattedAmount } = useTransactions({});
@@ -42,7 +42,7 @@ const TransactionDetailsSheet = (props: TProps) => {
       ?.name ?? 'Unknown';
 
   const accName =
-    accounts.find(acc => acc.id === props.selectedTransaction?.accountId)
+    accounts.find(acc => acc.id === props.selectedTransaction?.walletId)
       ?.name ?? '';
 
   const navigateToEdit = useCallback(() => {
@@ -201,7 +201,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                   },
                 ]}
               >
-                Account
+                Wallet
               </Text>
             </View>
             <Text

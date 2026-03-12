@@ -15,12 +15,13 @@ import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs, MAX_AMOUNT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useAccountStore from '../../stores/accountsStore';
+import useWalletStore from '../../stores/walletsStore';
 import { TRootStackParamList } from '../../types';
 import { getDigits } from 'commonutil-core';
 import useTransactions from '../../hooks/useTransactions';
+import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -29,18 +30,23 @@ const InitialAccountAmountSetup = () => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [accName, setAccName] = useState('');
-  const addAccount = useAccountStore(state => state.addAccount);
-  const setUsername = useAccountStore(state => state.setUsername);
-  const currency = useAccountStore(state => state.currency);
-  const setIsInitialSetupDone = useAccountStore(
+  const addAccount = useWalletStore(state => state.addWallet);
+  const setUsername = useWalletStore(state => state.setUsername);
+  const currency = useWalletStore(state => state.currency);
+  const setIsInitialSetupDone = useWalletStore(
     state => state.setIsInitialSetupDone,
   );
-  const setDefaultAcc = useAccountStore(state => state.setDefaultAccountId);
-  const { setSelectedAccountId } = useAccounts();
+  const setDefaultAcc = useWalletStore(state => state.setDefaultWalletId);
+  const { setSelectedWalletId: setSelectedAccountId } = useWallets();
 
   const { getFormattedAmount } = useTransactions();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const {
+    btmShtRef: amountBtmShtRef,
+    handlePresent: amountBoardPresent,
+    handleSheetChange: amountBoardSheetChange,
+  } = useBottomSheetModal();
 
   const onAmountChange = useCallback(
     (value: string) => {
@@ -197,18 +203,27 @@ const InitialAccountAmountSetup = () => {
                 {currency.symbol}
               </Text>
             </PressableWithFeedback>
-            <TextInput
-              mode="outlined"
+            <PressableWithFeedback
+              onPress={amountBoardPresent}
               style={[gs.fullFlex, styles.texInput]}
-              placeholder={
-                t('common.amount') + ' (' + t('common.optional') + ')'
-              }
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={onAmountChange}
-              activeOutlineColor={theme.colors.inverseSurface}
-              placeholderTextColor={theme.colors.onSurfaceDisabled}
-            />
+            >
+              <Text
+                style={[
+                  styles.amountBox,
+                  {
+                    borderColor: theme.colors.inverseSurface,
+                    color:
+                      amount.length === 0
+                        ? theme.colors.onSurfaceDisabled
+                        : theme.colors.onBackground,
+                  },
+                ]}
+              >
+                {amount.length === 0
+                  ? t('common.amount') + ' (' + t('common.optional') + ')'
+                  : getFormattedAmount(amount, false)}
+              </Text>
+            </PressableWithFeedback>
           </View>
         </View>
       </View>
@@ -227,6 +242,12 @@ const InitialAccountAmountSetup = () => {
       <CurrencySelectionModal
         handleSheetChanges={handleSheetChange}
         ref={btmShtRef}
+      />
+      <AmountInputBoard
+        ref={amountBtmShtRef}
+        handleSheetChanges={amountBoardSheetChange}
+        amountInput={amount}
+        setAmountInput={setAmount}
       />
     </KeyboardAvoidingView>
   );
@@ -250,4 +271,11 @@ const styles = StyleSheet.create({
   },
   nextButton: { width: '40%' },
   nextButtonLabel: { fontSize: textSize.md },
+  amountBox: {
+    borderWidth: 1,
+    borderRadius: borderRadius.sm,
+    fontSize: textSize.lg - 2,
+    paddingVertical: spacing.sm + 5,
+    paddingLeft: spacing.xs,
+  },
 });

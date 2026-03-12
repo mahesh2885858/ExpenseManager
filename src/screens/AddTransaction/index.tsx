@@ -28,14 +28,14 @@ import AccountSelectionModal from '../../components/organisms/AccountSelectionMo
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
 import {
-  TAccount,
+  TWallet,
   TAttachment,
   TRootStackParamList,
   TTransactionType,
@@ -44,7 +44,7 @@ const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
 type TValidatedInputs = {
-  selectedAcc: TAccount;
+  selectedAcc: TWallet;
   selectedCategoryId: string;
   amount: number;
 };
@@ -60,7 +60,7 @@ const AddTransaction = () => {
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
   );
-  const { accounts, defaultAccountId } = useAccounts();
+  const { wallets: accounts, defaultWalletId: defaultAccountId } = useWallets();
 
   const initData: {
     type: TTransactionType;
@@ -85,7 +85,7 @@ const AddTransaction = () => {
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
         selectedCatId: tr.categoryIds[0],
-        accountId: tr.accountId,
+        accountId: tr.walletId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
           minutes: new Date(tr.transactionDate).getMinutes(),
@@ -175,7 +175,7 @@ const AddTransaction = () => {
     const errors: typeof errorFields = [];
     let amount = 0;
     if (!selectedAcc) {
-      console.log('No account selected');
+      console.log('No wallet selected');
       errors.push('account');
     }
     if (!selectedCategoryId) {
@@ -233,7 +233,7 @@ const AddTransaction = () => {
         });
       } else {
         addNewTransaction({
-          accountId: selectedAccountId,
+          walletId: selectedAccountId,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
           createdAt: new Date().toISOString(),
@@ -453,7 +453,7 @@ const AddTransaction = () => {
                     },
                   ]}
                 >
-                  Account
+                  Wallet
                 </Text>
                 {errorFields?.some(f => f === 'account') && (
                   <Text
@@ -479,7 +479,7 @@ const AddTransaction = () => {
                   },
                 ]}
               >
-                {selectedAcc?.name ?? 'Select an account'}
+                {selectedAcc?.name ?? 'Select a wallet'}
               </Text>
               <Icon
                 color={colors.onSurfaceVariant}

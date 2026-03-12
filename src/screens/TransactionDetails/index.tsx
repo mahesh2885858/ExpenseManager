@@ -7,7 +7,7 @@ import { Card, Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
-import useAccountStore from '../../stores/accountsStore';
+import useWalletStore from '../../stores/walletsStore';
 import useCategoriesStore from '../../stores/categoriesStore';
 import { TRootStackParamList } from '../../types';
 
@@ -18,7 +18,7 @@ const TransactionDetails = () => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const categories = useCategoriesStore(state => state.categories);
-  const accounts = useAccountStore(state => state.accounts);
+  const accounts = useWalletStore(state => state.wallets);
 
   const categoryName = useMemo(() => {
     const category = categories.find(c => c.id === transaction.categoryIds[0]);
@@ -26,7 +26,7 @@ const TransactionDetails = () => {
   }, [categories, transaction]);
 
   const accountName = useMemo(() => {
-    return accounts.find(acc => acc.id === transaction.accountId)?.name ?? '';
+    return accounts.find(acc => acc.id === transaction.walletId)?.name ?? '';
   }, [transaction, accounts]);
 
   return (

@@ -2,12 +2,12 @@ import { format } from 'date-fns';
 import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import * as ScopedStorage from 'react-native-scoped-storage';
-import useAccountStore from '../stores/accountsStore';
+import useWalletStore from '../stores/walletsStore';
 import useSettingsStore from '../stores/settingsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TAccount, TCategories, TTransaction } from '../types';
+import { TWallet, TCategories, TTransaction } from '../types';
 import { getValidData } from '../utils/validateImportedData';
-import useAccounts from './useAccounts';
+import useWallets from './useAccounts';
 import useCategories from './useCategories';
 import useTransactions from './useTransactions';
 import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
@@ -16,14 +16,14 @@ import Stringify from 'fast-json-stable-stringify';
 import useCategoriesStore from '../stores/categoriesStore';
 
 const useBackup = () => {
-  const { accounts } = useAccounts();
+  const { wallets } = useWallets();
   const { categories } = useCategories();
   const { filteredTransactions: transactions } = useTransactions({});
   const importCategories = useCategoriesStore(state => state.importCategories);
   const importTransactions = useTransactionsStore(
     state => state.importTransactions,
   );
-  const importAccounts = useAccountStore(state => state.importAccounts);
+  const importWallets = useWalletStore(state => state.importWallets);
   const backupDirPath = useSettingsStore(state => state.backupDirPath);
   const setBackupDirPath = useSettingsStore(state => state.setBackupDirPath);
   const removeBackupDirPath = useSettingsStore(
@@ -31,7 +31,7 @@ const useBackup = () => {
   );
 
   const [dataToImport, setDataToImport] = useState<null | {
-    accounts: TAccount[];
+    wallets: TWallet[];
     categories: TCategories;
     transactions: TTransaction[];
   }>(null);
@@ -53,7 +53,7 @@ const useBackup = () => {
       setIsExporting(true);
 
       const dataToExport = {
-        accounts,
+        wallets,
         transactions: transactions,
         categories,
       };
@@ -115,7 +115,7 @@ const useBackup = () => {
     setBackupDirPath,
     pickTheDirectory,
     transactions,
-    accounts,
+    wallets,
     categories,
   ]);
 
@@ -158,7 +158,7 @@ const useBackup = () => {
         });
 
         setDataToImport({
-          accounts: validData.accounts ?? [],
+          wallets: validData.accounts ?? [],
           categories: validData.categories ?? [],
           transactions: validData.transactions ?? [],
         });
@@ -177,14 +177,14 @@ const useBackup = () => {
   const importData = useCallback(() => {
     if (dataToImport) {
       setIsImporting(true);
-      importAccounts(dataToImport.accounts);
+      importWallets(dataToImport.wallets);
       importCategories(dataToImport.categories);
       importTransactions(dataToImport.transactions);
       setDataToImport(null);
       setIsImporting(false);
       ToastAndroid.show('Imported successfully', ToastAndroid.LONG);
     }
-  }, [dataToImport, importAccounts, importCategories, importTransactions]);
+  }, [dataToImport, importWallets, importCategories, importTransactions]);
 
   return {
     exportData,

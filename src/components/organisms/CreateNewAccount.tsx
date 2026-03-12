@@ -8,24 +8,24 @@ import {
 } from '@gorhom/bottom-sheet';
 import { getDigits } from 'commonutil-core';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import {
-  CURRENCY_SYMBOL,
-  MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL,
-} from '../../common';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
 import useTransactions from '../../hooks/useTransactions';
-import useAccountStore from '../../stores/accountsStore';
-import { TAccount } from '../../types';
+import useWalletStore from '../../stores/walletsStore';
+import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AmountInputBoard from './AmountInputBoard';
+
+const screenHeight = Dimensions.get('screen').height;
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
   handleSheetChanges: BottomSheetProps['onChange'];
-  accToEdit?: TAccount;
+  accToEdit?: TWallet;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
@@ -34,30 +34,24 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const CreateNewAccount = (props: TProps) => {
   const { colors } = useAppTheme();
+  const { top, bottom } = useSafeAreaInsets();
+  const availableScreenHeight = screenHeight - top - bottom;
   const [accName, setAccName] = useState(
     props.accToEdit ? props.accToEdit.name : '',
   );
   const [balance, setBalance] = useState('');
   const { topPadding } = usePaddingKeyboard();
-  const accounts = useAccountStore(state => state.accounts);
-  const addAccount = useAccountStore(state => state.addAccount);
-  const updateAccount = useAccountStore(state => state.updateAccount);
+  const accounts = useWalletStore(state => state.wallets);
+  const addAccount = useWalletStore(state => state.addWallet);
+  const updateAccount = useWalletStore(state => state.updateWallet);
   const { getFormattedAmount } = useTransactions();
+
+  const { btmShtRef, handlePresent, handleSheetChange, open } =
+    useBottomSheetModal();
 
   const renderSaveButton = useMemo(() => {
     return accName.trim().length > 0;
   }, [accName]);
-
-  const onInputChange = (input: string) => {
-    try {
-      const cleanDigits = getDigits(input);
-
-      const t = getFormattedAmount(parseInt(cleanDigits, 10));
-      setBalance(t);
-    } catch (e) {
-      console.log({ e });
-    }
-  };
 
   const addNewAcc = useCallback(() => {
     // check for existing acc name
@@ -66,7 +60,7 @@ const CreateNewAccount = (props: TProps) => {
     );
     if (isExist) {
       ToastAndroid.show(
-        'Account exist. choose different name!!',
+        'Wallet exist. choose different name!!',
         ToastAndroid.SHORT,
       );
       return;
@@ -111,9 +105,17 @@ const CreateNewAccount = (props: TProps) => {
       }}
       ref={props.ref}
       onChange={props.handleSheetChanges}
-      maxDynamicContentSize={500}
+      maxDynamicContentSize={open ? availableScreenHeight : 500}
     >
-      <BottomSheetView style={[styles.container, { paddingTop: topPadding }]}>
+      <BottomSheetView
+        style={[
+          styles.container,
+          {
+            paddingTop: topPadding,
+            height: open ? availableScreenHeight : 'auto',
+          },
+        ]}
+      >
         <View>
           <Text
             style={[
@@ -123,7 +125,7 @@ const CreateNewAccount = (props: TProps) => {
               },
             ]}
           >
-            {isEditModeOn ? 'Edit Account' : 'Add New Account'}
+            {isEditModeOn ? 'Edit Wallet' : 'Add New Wallet'}
           </Text>
           <View
             style={[
@@ -141,12 +143,12 @@ const CreateNewAccount = (props: TProps) => {
                 },
               ]}
             >
-              Account name
+              Wallet name
             </Text>
             <BottomSheetTextInput
               value={accName}
               onChangeText={setAccName}
-              placeholder="My Account"
+              placeholder="My Wallet"
               placeholderTextColor={colors.onSurfaceDisabled}
               style={[
                 {
@@ -157,7 +159,8 @@ const CreateNewAccount = (props: TProps) => {
             />
           </View>
           {!isEditModeOn && (
-            <View
+            <PressableWithFeedback
+              onPress={handlePresent}
               style={[
                 styles.accNameBox,
                 {
@@ -176,21 +179,22 @@ const CreateNewAccount = (props: TProps) => {
                 Balance
               </Text>
 
-              <BottomSheetTextInput
-                keyboardType="numeric"
-                maxLength={MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL}
-                value={balance}
-                onChangeText={onInputChange}
-                placeholder={CURRENCY_SYMBOL + '0.00'}
-                placeholderTextColor={colors.onSurfaceDisabled}
-                style={[
-                  {
-                    color: colors.onBackground,
-                    fontSize: textSize.lg,
-                  },
-                ]}
-              />
-            </View>
+              <View style={[{ paddingBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    {
+                      fontSize: textSize.xl,
+                      color:
+                        balance.length === 0
+                          ? colors.onSurfaceDisabled
+                          : colors.onBackground,
+                    },
+                  ]}
+                >
+                  {getFormattedAmount(balance)}
+                </Text>
+              </View>
+            </PressableWithFeedback>
           )}
           {renderSaveButton && (
             <PressableWithFeedback
@@ -222,6 +226,12 @@ const CreateNewAccount = (props: TProps) => {
           )}
         </View>
       </BottomSheetView>
+      <AmountInputBoard
+        amountInput={balance}
+        handleSheetChanges={handleSheetChange}
+        ref={btmShtRef}
+        setAmountInput={setBalance}
+      />
     </BottomSheetModal>
   );
 };

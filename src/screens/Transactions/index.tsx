@@ -9,7 +9,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactions from '../../components/RenderTransactions';
-import useAccounts from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
@@ -27,8 +27,11 @@ const Transactions = () => {
   const onSortChange = useTransactionsStore(state => state.setSort);
   const [search, setSearch] = useState('');
 
-  const { selectedAccount, setSelectedAccountId, getIncomeExpenseForAcc } =
-    useAccounts();
+  const {
+    selectedWallet: selectedAccount,
+    setSelectedWalletId: setSelectedAccountId,
+    getIncomeExpenseForWallet: getIncomeExpenseForAcc,
+  } = useWallets();
 
   const {
     totalExpenses,
