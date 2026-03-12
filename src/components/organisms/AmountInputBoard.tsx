@@ -5,7 +5,7 @@ import {
   BottomSheetProps,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import React, { RefObject, useMemo, useState } from 'react';
+import React, { RefObject, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -27,8 +27,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AmountInputBoard = (props: TProps) => {
   const { colors } = useAppTheme();
   const { getFormattedAmount } = useTransactions();
-  const { amountInput, setAmountInput } = props;
-  const [input, setInput] = useState(amountInput);
+  const { amountInput: input, setAmountInput: setInput } = props;
   const buttonStyles = StyleSheet.create({
     button: {
       flex: 1,
@@ -80,9 +79,6 @@ const AmountInputBoard = (props: TProps) => {
 
   return (
     <BottomSheetModal
-      onDismiss={() => {
-        setInput('');
-      }}
       stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
