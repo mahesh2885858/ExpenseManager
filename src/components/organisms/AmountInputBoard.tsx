@@ -47,7 +47,6 @@ const AmountInputBoard = (props: TProps) => {
 
   const onButtonPress = (button: string) => {
     let text = input;
-    console.log({ text });
 
     const decimalPart = text.split('.')[1];
     if (
