@@ -196,8 +196,8 @@ const RenderAccountCard = (props: TProps) => {
             },
           ]}
         >
-          Deleting this account will also delete all transactions associated
-          with this account. Are you sure you want to continue?
+          Deleting this wallet will also delete all transactions associated with
+          this wallet. Are you sure you want to continue?
         </Text>
         <View style={[gs.flexRow, styles.btnContainer]}>
           <PressableWithFeedback

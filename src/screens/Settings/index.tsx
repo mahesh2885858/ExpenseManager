@@ -70,7 +70,7 @@ const Settings = () => {
                 },
               ]}
             >
-              Accounts
+              Wallets
             </Text>
             <Text
               style={[
@@ -80,7 +80,7 @@ const Settings = () => {
                 },
               ]}
             >
-              Manage your accounts here
+              Manage your wallets here
             </Text>
           </View>
         </PressableWithFeedback>

@@ -74,7 +74,7 @@ const AccountSelectionModal = (props: TProps) => {
               },
             ]}
           >
-            Select Account
+            Select Wallet
           </Text>
           <PressableWithFeedback
             style={[
@@ -106,7 +106,7 @@ const AccountSelectionModal = (props: TProps) => {
                   },
                 ]}
               >
-                No accounts yet. Start by creating one.
+                No wallets yet. Start by creating one.
               </Text>
             </View>
           }

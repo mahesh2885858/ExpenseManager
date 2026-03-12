@@ -175,7 +175,7 @@ const AddTransaction = () => {
     const errors: typeof errorFields = [];
     let amount = 0;
     if (!selectedAcc) {
-      console.log('No account selected');
+      console.log('No wallet selected');
       errors.push('account');
     }
     if (!selectedCategoryId) {
@@ -453,7 +453,7 @@ const AddTransaction = () => {
                     },
                   ]}
                 >
-                  Account
+                  Wallet
                 </Text>
                 {errorFields?.some(f => f === 'account') && (
                   <Text
@@ -479,7 +479,7 @@ const AddTransaction = () => {
                   },
                 ]}
               >
-                {selectedAcc?.name ?? 'Select an account'}
+                {selectedAcc?.name ?? 'Select a wallet'}
               </Text>
               <Icon
                 color={colors.onSurfaceVariant}

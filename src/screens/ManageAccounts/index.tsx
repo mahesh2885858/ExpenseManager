@@ -52,7 +52,7 @@ const ManageAccounts = () => {
                 },
               ]}
             >
-              Manage Accounts
+              Manage Wallets
             </Text>
           </View>
           <View style={[gs.fullFlex, styles.listWrapper]}>
@@ -72,7 +72,7 @@ const ManageAccounts = () => {
                       },
                     ]}
                   >
-                    No accounts yet. Start by creating one.
+                    No wallets yet. Start by creating one.
                   </Text>
                 </View>
               }

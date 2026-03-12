@@ -60,7 +60,7 @@ const CreateNewAccount = (props: TProps) => {
     );
     if (isExist) {
       ToastAndroid.show(
-        'Account exist. choose different name!!',
+        'Wallet exist. choose different name!!',
         ToastAndroid.SHORT,
       );
       return;
@@ -125,7 +125,7 @@ const CreateNewAccount = (props: TProps) => {
               },
             ]}
           >
-            {isEditModeOn ? 'Edit Account' : 'Add New Account'}
+            {isEditModeOn ? 'Edit Wallet' : 'Add New Wallet'}
           </Text>
           <View
             style={[
@@ -143,12 +143,12 @@ const CreateNewAccount = (props: TProps) => {
                 },
               ]}
             >
-              Account name
+              Wallet name
             </Text>
             <BottomSheetTextInput
               value={accName}
               onChangeText={setAccName}
-              placeholder="My Account"
+              placeholder="My Wallet"
               placeholderTextColor={colors.onSurfaceDisabled}
               style={[
                 {

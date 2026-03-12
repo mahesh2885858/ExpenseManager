@@ -201,7 +201,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                   },
                 ]}
               >
-                Account
+                Wallet
               </Text>
             </View>
             <Text

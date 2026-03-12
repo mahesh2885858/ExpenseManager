@@ -10,8 +10,8 @@ export default {
     optional: 'Optional',
     pickName: 'What should I call you?',
     amount: 'Amount',
-    setupAccount: 'Set up an account!',
+    setupAccount: 'Set up a wallet!',
     setupAccDesc: 'It can be your bank name, credit or debit card name.',
-    accName: 'Account name',
+    accName: 'Wallet name',
   },
 };
