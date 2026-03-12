@@ -7,8 +7,12 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 type TProps = {
   heading?: string;
+  hideSettings?: boolean;
 };
-const CommonHeader = ({ heading = 'Transactions' }: TProps) => {
+const CommonHeader = ({
+  heading = 'Transactions',
+  hideSettings = false,
+}: TProps) => {
   const navigation = useNavigation();
 
   const { colors } = useAppTheme();
@@ -32,6 +36,7 @@ const CommonHeader = ({ heading = 'Transactions' }: TProps) => {
 
         <View style={styles.headerRight}>
           <PressableWithFeedback
+            hidden={hideSettings}
             onPress={() => {
               navigation.navigate('Settings');
             }}

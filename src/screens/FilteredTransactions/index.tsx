@@ -41,7 +41,7 @@ const FilteredTransactions = () => {
   const heading = useMemo(() => {
     if (routeFilter.accId) {
       return {
-        title: 'Account',
+        title: 'Wallet',
         subTitle: getAccountNameById(routeFilter.accId),
       };
     }
@@ -67,7 +67,7 @@ const FilteredTransactions = () => {
       ]}
     >
       {/* header section */}
-      <CommonHeader heading={heading.title} />
+      <CommonHeader hideSettings heading={heading.title} />
 
       {/* summary */}
       <View
