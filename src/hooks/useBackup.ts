@@ -5,7 +5,12 @@ import * as ScopedStorage from 'react-native-scoped-storage';
 import useWalletStore from '../stores/walletsStore';
 import useSettingsStore from '../stores/settingsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TWallet, TCategories, TTransaction } from '../types';
+import {
+  TWallet,
+  TCategories,
+  TTransaction,
+  TTransactionByIds,
+} from '../types';
 import { getValidData } from '../utils/validateImportedData';
 import useWallets from './useAccounts';
 import useCategories from './useCategories';
@@ -18,7 +23,10 @@ import useCategoriesStore from '../stores/categoriesStore';
 const useBackup = () => {
   const { wallets } = useWallets();
   const { categories } = useCategories();
-  const { filteredTransactions: transactions } = useTransactions({});
+  const transactionsIds = useTransactionsStore(state => state.transactionsIds);
+  const transactionsByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
   const importCategories = useCategoriesStore(state => state.importCategories);
   const importTransactions = useTransactionsStore(
     state => state.importTransactions,
@@ -51,10 +59,15 @@ const useBackup = () => {
   const exportData = useCallback(async () => {
     try {
       setIsExporting(true);
-
+      const transactions: TTransaction[] = [];
+      if (transactionsByIds) {
+        transactionsIds.forEach(id => {
+          transactions.push(transactionsByIds[id]);
+        });
+      }
       const dataToExport = {
         wallets,
-        transactions: transactions,
+        transactions,
         categories,
       };
 
@@ -114,9 +127,10 @@ const useBackup = () => {
     removeBackupDirPath,
     setBackupDirPath,
     pickTheDirectory,
-    transactions,
+    transactionsIds,
     wallets,
     categories,
+    transactionsByIds,
   ]);
 
   const getDataToImport = useCallback(async () => {
@@ -180,7 +194,18 @@ const useBackup = () => {
       setIsImporting(true);
       importWallets(dataToImport.wallets);
       importCategories(dataToImport.categories);
-      importTransactions(dataToImport.transactions);
+      let data: TTransactionByIds = null;
+      const ids: string[] = [];
+      dataToImport.transactions.forEach(tr => {
+        if (!data) {
+          data = { [tr.id]: tr };
+        } else {
+          data[tr.id] = tr;
+        }
+        ids.push(tr.id);
+      });
+      console.log({ ids, data });
+      importTransactions(ids, data);
       setDataToImport(null);
       setIsImporting(false);
       ToastAndroid.show('Imported successfully', ToastAndroid.LONG);

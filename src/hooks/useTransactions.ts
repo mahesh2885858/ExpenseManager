@@ -14,8 +14,10 @@ import useWalletStore from '../stores/walletsStore';
 import useUIStore from '../stores/uiStore';
 
 const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
-  const transactions = useTransactionsStore(state => state.transactions);
   const addTransaction = useTransactionsStore(state => state.addTransaction);
+  const deSelectTransaction = useTransactionsStore(
+    state => state.deSelectTransaction,
+  );
   const currency = useWalletStore(state => state.currency);
   const numberFormat = useUIStore(state => state.numberFormat);
   const filters = props?.filter ?? undefined;
@@ -26,6 +28,10 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   );
 
   const [search, setSearch] = useState('');
+  const transactionsIds = useTransactionsStore(state => state.transactionsIds);
+  const transactionsByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
 
   const matchesAcc = useCallback(
     (t: TTransaction) => {
@@ -86,16 +92,21 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   );
 
   const filteredTransactions = useMemo(() => {
-    let filtered = transactions;
+    if (!transactionsByIds) return [];
+    let filtered = transactionsIds;
+
     if (filters) {
-      filtered = transactions.filter(
-        t =>
+      filtered = transactionsIds.filter(id => {
+        const t = transactionsByIds[id];
+        return (
+          t &&
           matchesType(t) &&
           matchesDate(t) &&
           matchesSearch(t) &&
           matchesCategory(t) &&
-          matchesAcc(t),
-      );
+          matchesAcc(t)
+        );
+      });
     }
 
     switch (sort) {
@@ -103,8 +114,8 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
       case undefined:
         filtered.sort((a, b) => {
           return (
-            new Date(b.transactionDate).getTime() -
-            new Date(a.transactionDate).getTime()
+            new Date(transactionsByIds[b].transactionDate).getTime() -
+            new Date(transactionsByIds[a].transactionDate).getTime()
           );
         });
 
@@ -112,35 +123,34 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
       case 'dateOldFirst':
         filtered.sort((a, b) => {
           return (
-            new Date(a.transactionDate).getTime() -
-            new Date(b.transactionDate).getTime()
+            new Date(transactionsByIds[a].transactionDate).getTime() -
+            new Date(transactionsByIds[b].transactionDate).getTime()
           );
         });
         break;
 
       case 'amountHighFirst':
         filtered.sort((a, b) => {
-          return b.amount - a.amount;
+          return transactionsByIds[b].amount - transactionsByIds[a].amount;
         });
         break;
       case 'amountLowFirst':
         filtered.sort((a, b) => {
-          return a.amount - b.amount;
+          return transactionsByIds[a].amount - transactionsByIds[b].amount;
         });
         break;
 
       default:
         filtered.sort((a, b) => {
           return (
-            new Date(b.transactionDate).getTime() -
-            new Date(a.transactionDate).getTime()
+            new Date(transactionsByIds[b].transactionDate).getTime() -
+            new Date(transactionsByIds[a].transactionDate).getTime()
           );
         });
         break;
     }
     return filtered;
   }, [
-    transactions,
     matchesType,
     matchesDate,
     matchesSearch,
@@ -148,34 +158,40 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     matchesAcc,
     filters,
     sort,
+    transactionsByIds,
+    transactionsIds,
   ]);
 
   const deleteTransaction = useCallback(
     (transactionId: string) => {
       removeTransaction(transactionId);
+      deSelectTransaction(transactionId);
     },
-    [removeTransaction],
+    [removeTransaction, deSelectTransaction],
   );
 
   const totalIncome = useMemo(() => {
+    if (!transactionsByIds) return 0;
     return filteredTransactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
+      if (transactionsByIds[curr].type === 'expense') {
         return prev;
       } else {
-        return prev + curr.amount;
+        return prev + transactionsByIds[curr].amount;
       }
     }, 0);
-  }, [filteredTransactions]);
+  }, [filteredTransactions, transactionsByIds]);
 
   const totalExpenses = useMemo(() => {
+    if (!transactionsByIds) return 0;
+
     return filteredTransactions.reduce((prev, curr) => {
-      if (curr.type === 'expense') {
-        return prev + curr.amount;
+      if (transactionsByIds[curr].type === 'expense') {
+        return prev + transactionsByIds[curr].amount;
       } else {
         return prev;
       }
     }, 0);
-  }, [filteredTransactions]);
+  }, [transactionsByIds, filteredTransactions]);
 
   const addNewTransaction = (transaction: TTransaction) => {
     addTransaction(transaction);
@@ -202,6 +218,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     addNewTransaction,
     deleteTransaction,
     getFormattedAmount,
+    transactionsByIds,
   };
 };
 

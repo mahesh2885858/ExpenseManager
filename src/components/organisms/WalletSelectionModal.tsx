@@ -159,15 +159,24 @@ const WalletSelectionModal = (props: TProps) => {
                 </Text>
                 <PressableWithFeedback
                   onPress={() => setDefaultWalletId(item.id)}
-                  style={[gs.centerItems, { marginRight: spacing.md }]}
+                  style={[
+                    gs.centerItems,
+                    { marginRight: isDefault ? spacing.md : spacing.lg },
+                  ]}
                 >
                   <Icon
                     source={isDefault ? 'star' : 'star-outline'}
                     size={textSize.lg}
-                    color={isDefault ? colors.primary : 'transparent'}
+                    color={colors.primary}
                   />
                   {isDefault && (
-                    <Text style={[{ fontSize: textSize.xs }]}>Default</Text>
+                    <Text
+                      style={[
+                        { fontSize: textSize.xs, color: colors.onBackground },
+                      ]}
+                    >
+                      Default
+                    </Text>
                   )}
                 </PressableWithFeedback>
               </PressableWithFeedback>

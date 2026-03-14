@@ -7,8 +7,11 @@ import useCategoriesStore from '../stores/categoriesStore';
 const useCategories = () => {
   const categories = useCategoriesStore(state => state.categories);
   const addCategory = useCategoriesStore(state => state.addCategory);
-  const transactions = useTransactionsStore(state => state.transactions);
   const updateCategory = useCategoriesStore(state => state.updateCategory);
+  const transactionIds = useTransactionsStore(state => state.transactionsIds);
+  const transactionsByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
   const setDefaultCategoryId = useCategoriesStore(
     state => state.setDefaultCategoryId,
   );
@@ -36,19 +39,34 @@ const useCategories = () => {
   };
   const categoriesSummary: TCategorySummary[] = useMemo(() => {
     return categories.map(cat => {
-      const tr = transactions.filter(t => t.categoryIds.includes(cat.id));
+      if (!transactionsByIds)
+        return {
+          name: cat.name,
+          id: cat.id,
+          income: 0,
+          expense: 0,
+        };
+      const ids =
+        transactionsByIds &&
+        transactionIds.filter(id =>
+          transactionsByIds[id].categoryIds.includes(cat.id),
+        );
       return {
         name: cat.name,
         id: cat.id,
-        income: tr.reduce((prev, item) => {
-          return item.type === 'income' ? prev + item.amount : prev;
+        income: ids.reduce((prev, item) => {
+          return transactionsByIds[item].type === 'income'
+            ? prev + transactionsByIds[item].amount
+            : prev;
         }, 0),
-        expense: tr.reduce((prev, item) => {
-          return item.type === 'expense' ? prev + item.amount : prev;
+        expense: ids.reduce((prev, item) => {
+          return transactionsByIds[item].type === 'expense'
+            ? prev + transactionsByIds[item].amount
+            : prev;
         }, 0),
       };
     });
-  }, [categories, transactions]);
+  }, [categories, transactionsByIds, transactionIds]);
 
   const getCategoryNameById = useCallback(
     (id: string) => {

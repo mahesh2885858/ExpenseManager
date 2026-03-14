@@ -33,7 +33,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import Graph from '../../components/organisms/Graph';
 import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { TGroupBy } from '../../types';
+import { TGroupBy, TTransaction } from '../../types';
 
 const start: Record<TGroupBy, Function> = {
   month: startOfMonth,
@@ -63,14 +63,8 @@ const Reports = () => {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const resetFilters = useTransactionsStore(state => state.resetFilters);
-  const { filteredTransactions, getFormattedAmount } = useTransactions({});
-
-  // sort
-  filteredTransactions.sort(
-    (a, b) =>
-      new Date(a.transactionDate).getTime() -
-      new Date(b.transactionDate).getTime(),
-  );
+  const { filteredTransactions, getFormattedAmount, transactionsByIds } =
+    useTransactions({});
 
   // filter states
   const [groupBy, setGroupBy] = useState<TGroupBy>('week');
@@ -170,10 +164,23 @@ const Reports = () => {
   const graphData = useMemo(() => {
     const start = currentRange[0];
     const end = currentRange[1];
-    const result = filteredTransactions.filter(
-      t =>
-        !isBefore(t.transactionDate, start) && !isAfter(t.transactionDate, end),
-    );
+    if (!transactionsByIds)
+      return {
+        result: [],
+        summary: {
+          expense: 0,
+          income: 0,
+        },
+      };
+    const result: TTransaction[] = [];
+    filteredTransactions.forEach(t => {
+      if (
+        !isBefore(transactionsByIds[t].transactionDate, start) &&
+        !isAfter(transactionsByIds[t].transactionDate, end)
+      ) {
+        result.push(transactionsByIds[t]);
+      }
+    });
     const t = result.reduce(
       (prev, item) => {
         return {
@@ -193,7 +200,7 @@ const Reports = () => {
       result,
       summary: t,
     };
-  }, [currentRange, filteredTransactions]);
+  }, [currentRange, transactionsByIds, filteredTransactions]);
 
   return (
     <View

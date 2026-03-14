@@ -25,6 +25,10 @@ const Transactions = () => {
   const setFilters = useTransactionsStore(state => state.setFilters);
   const selectedSort = useTransactionsStore(state => state.sort);
   const onSortChange = useTransactionsStore(state => state.setSort);
+  const transactionIds = useTransactionsStore(state => state.transactionsIds);
+  const transactionByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
   const [search, setSearch] = useState('');
 
   const {
@@ -63,14 +67,17 @@ const Transactions = () => {
   }, [navigation]);
 
   const transactionsToRender = useMemo(() => {
+    if (!transactionByIds) return [];
     return search.trim().length === 0
       ? filteredTransactions
       : filteredTransactions.filter(
           t =>
-            t.amount.toString().includes(search) ||
-            t.description?.toLowerCase().includes(search.toLowerCase()),
+            transactionByIds[t].amount.toString().includes(search) ||
+            transactionByIds[t].description
+              ?.toLowerCase()
+              .includes(search.toLowerCase()),
         );
-  }, [filteredTransactions, search]);
+  }, [filteredTransactions, search, transactionByIds]);
 
   const dateFilterText = useMemo(() => {
     if (filters.date) {
@@ -137,6 +144,8 @@ const Transactions = () => {
   const navigateToSort = useCallback(() => {
     navigation.navigate('TransactionSort');
   }, [navigation]);
+
+  console.log({ transactionByIds, transactionIds });
 
   return (
     <View

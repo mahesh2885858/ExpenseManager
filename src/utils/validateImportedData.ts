@@ -29,7 +29,6 @@ export const getValidData = (data: TData): TReturnResults => {
     categories: 0,
     transactions: 0,
   };
-  console.log({ data });
 
   if (
     !data ||
