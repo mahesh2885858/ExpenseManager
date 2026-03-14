@@ -145,8 +145,6 @@ const Transactions = () => {
     navigation.navigate('TransactionSort');
   }, [navigation]);
 
-  console.log({ transactionByIds, transactionIds });
-
   return (
     <View
       style={[

@@ -5,6 +5,7 @@ export type TBottomTabParamList = {
   Home: undefined;
   CustomButton: undefined;
   Transactions: undefined;
+  Budgets: undefined;
   Reports: undefined;
 };
 
@@ -33,6 +34,9 @@ export type TRootStackParamList = {
   Settings: undefined;
   FilteredTransactions: {
     type: 'account' | 'category';
+    id: string;
+  };
+  BudgetDetails: {
     id: string;
   };
 };

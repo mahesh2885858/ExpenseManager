@@ -75,7 +75,6 @@ const AddTransaction = () => {
       minutes: number;
     };
   } = useMemo(() => {
-    console.log({ defaultWalletId });
     if (route.params.mode === 'edit') {
       const tr = route.params.transaction;
       return {
@@ -145,7 +144,6 @@ const AddTransaction = () => {
   const progress = useSharedValue(0);
 
   const selectedWallet = useMemo(() => {
-    console.log({ walletId, wallets });
     if (walletId.trim().length <= 0) {
       return null;
     } else {
@@ -176,22 +174,18 @@ const AddTransaction = () => {
     const errors: typeof errorFields = [];
     let amount = 0;
     if (!selectedWallet) {
-      console.log('No wallet selected');
       errors.push('wallet');
     }
     if (!selectedCategoryId) {
-      console.log('No category selected');
       errors.push('category');
     }
 
     if (amountInput.trim().length === 0) {
-      console.log('No amount added');
       errors.push('amount');
     } else {
       amount = parseFloat(amountInput);
 
       if (amount <= 0) {
-        console.log('No amount added');
         errors.push('amount');
       }
     }
