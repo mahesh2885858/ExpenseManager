@@ -14,12 +14,14 @@ import { gs } from '../../common';
 import useTransactions from '../../hooks/useTransactions';
 import { roundValue } from 'commonutil-core';
 import { useNavigation } from '@react-navigation/native';
+import useBudgetStore from '../../stores/budgetStore';
 
 const Budget = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount } = useTransactions();
+  const budgets = useBudgetStore(state => state.budgets);
   const navigate = useNavigation();
 
   const getProgressColor = (progress: number) => {
@@ -31,21 +33,6 @@ const Budget = () => {
   const onAddPress = useCallback(() => {
     navigate.navigate('AddOrEditBudget', { mode: 'new' });
   }, [navigate]);
-
-  const budgets = [
-    {
-      total: 10000,
-      spent: 3000,
-    },
-    {
-      total: 10400,
-      spent: 5700,
-    },
-    {
-      total: 23000,
-      spent: 22300,
-    },
-  ];
 
   return (
     <View style={[styles.container, { marginTop: top }]}>
@@ -63,8 +50,8 @@ const Budget = () => {
       {/*header ends*/}
       {/*BudgetCard starts*/}
       {budgets.map(budget => {
-        const left = budget.total - budget.spent;
-        const progress = roundValue(budget.spent / budget.total, 2);
+        const left = budget.amount - 0;
+        const progress = roundValue(0 / budget.amount, 2);
         return (
           <PressableWithFeedback
             onPress={() => {
@@ -72,7 +59,7 @@ const Budget = () => {
                 id: '123',
               });
             }}
-            key={budget.total}
+            key={budget.id}
             style={[styles.budgetCard]}
           >
             <View style={[styles.budgetTopRow]}>
@@ -84,7 +71,7 @@ const Budget = () => {
                   </Text>
                   <Text
                     style={[styles.budgetTotalText]}
-                  >{`of ${getFormattedAmount(budget.total)}`}</Text>
+                  >{`of ${getFormattedAmount(budget.amount)}`}</Text>
                 </View>
               </View>
               <View>
@@ -101,7 +88,7 @@ const Budget = () => {
               </View>
               <View style={[styles.budgetRemaining]}>
                 <Text style={[styles.budgetRemainText]}>
-                  {getFormattedAmount(12000)}
+                  {getFormattedAmount(budget.amount - 0)}
                 </Text>
                 <Text style={[styles.budgetRemainTextPrep]}>Left</Text>
               </View>
