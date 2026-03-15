@@ -198,6 +198,7 @@ const AddOrEditBudget = () => {
         <Text style={[styles.headerText]}>{heading}</Text>
       </View>
       {/*header ends*/}
+
       {/*Budget name starts*/}
       <View>
         <Text style={[styles.selectCatText]}>Budget Name</Text>
@@ -211,6 +212,7 @@ const AddOrEditBudget = () => {
         {errors.name && <Text style={[styles.errorText]}>{errors.name}</Text>}
       </View>
       {/*Budget name ends*/}
+
       {/*Category selections starts*/}
       <View>
         <View style={[styles.categorySelectionBox]}>
@@ -263,6 +265,7 @@ const AddOrEditBudget = () => {
         )}
       </View>
       {/*Category selections ends*/}
+
       {/*Budget Amount starts*/}
       <View>
         <View style={[styles.budgetAmtBox]}>
@@ -281,6 +284,7 @@ const AddOrEditBudget = () => {
         )}
       </View>
       {/*Budget Amount ends*/}
+
       {/*Budget Period starts*/}
       <View>
         <View style={[styles.budgetAmtBox]}>
@@ -310,7 +314,6 @@ const AddOrEditBudget = () => {
           <Text style={[styles.errorText]}>{errors.period}</Text>
         )}
       </View>
-
       {/*Budget Period ends*/}
 
       <PressableWithFeedback onPress={onSave} style={[styles.saveButton]}>
@@ -337,7 +340,6 @@ const AddOrEditBudget = () => {
         selectBudgetPeriod={setBudgetPeriod}
         selectedPeriod={budgetPeriod}
       />
-      {/* Date Picker Modal */}
       <DatePickerModal
         label="Select transaction date"
         animationType="fade"
