@@ -82,7 +82,7 @@ const RenderTransaction = (props: {
           style={[
             {
               color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.md,
+              fontSize: textSize.sm,
             },
             gs.fontBold,
           ]}
@@ -93,7 +93,7 @@ const RenderTransaction = (props: {
           style={[
             {
               color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.md,
+              fontSize: textSize.sm,
             },
             gs.fontBold,
           ]}
@@ -105,7 +105,7 @@ const RenderTransaction = (props: {
         <Text
           style={[
             {
-              fontSize: textSize.lg,
+              fontSize: textSize.md,
               color: theme.colors.onSurface,
             },
           ]}
@@ -116,7 +116,7 @@ const RenderTransaction = (props: {
           <Text
             style={[
               {
-                fontSize: textSize.md,
+                fontSize: textSize.sm,
                 color: theme.colors.onSurfaceVariant,
               },
             ]}
@@ -140,7 +140,7 @@ const RenderTransaction = (props: {
           style={[
             gs.fontBold,
             {
-              fontSize: textSize.lg,
+              fontSize: textSize.md,
               color:
                 transaction.type === 'expense'
                   ? theme.colors.error

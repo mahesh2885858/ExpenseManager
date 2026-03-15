@@ -1,5 +1,8 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Icon, ProgressBar } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppTheme,
   borderRadius,
@@ -7,19 +10,16 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { Icon, ProgressBar } from 'react-native-paper';
 import { gs } from '../../common';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
-import { roundValue } from 'commonutil-core';
-import { useNavigation } from '@react-navigation/native';
 
 const BudgetDetails = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount, filteredTransactions } = useTransactions();
   const navigation = useNavigation();
 
   const getProgressColor = (progress: number) => {
@@ -29,6 +29,7 @@ const BudgetDetails = () => {
   };
 
   const budgetName = 'Groceries';
+  console.log({ filteredTransactions });
   return (
     <View style={[styles.container, { marginTop: top }]}>
       {/*header starts*/}
@@ -44,7 +45,6 @@ const BudgetDetails = () => {
       </View>
       {/*header ends*/}
       {/*Budget deatils starts*/}
-
       <View style={[styles.budgetCard]}>
         <View style={[styles.budgetTopRow]}>
           <View style={[gs.fullFlex, gs.flexRow, gs.itemsCenter]}>
@@ -71,8 +71,30 @@ const BudgetDetails = () => {
           <Text style={[styles.budgetSpentPercentage]}>45%</Text>
         </View>
       </View>
-
+      <View style={[styles.budgetCard]}>
+        <View style={[styles.budgetBottomRow]}>
+          <View style={[styles.budgetRemaining]}>
+            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+              Budget Period -
+            </Text>
+            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+              Monthly -
+            </Text>
+            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+              Mar 15, 2026
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View style={[styles.budgetCard]}>
+        <Text style={[styles.spendingText]}>Spendings</Text>
+      </View>
       {/*Budget details ends*/}
+      {/*Transactions for this budget starts*/}
+      <View style={[gs.fullFlex]}>
+        <RenderTransactions transactions={filteredTransactions} />
+      </View>
+      {/*Transactions for this budget ends*/}
     </View>
   );
 };
@@ -82,6 +104,7 @@ const createStyles = (colors: AppTheme['colors']) => {
     container: {
       backgroundColor: colors.background,
       paddingHorizontal: spacing.md,
+      flex: 1,
     },
     header: {
       paddingTop: spacing.md,
@@ -101,7 +124,6 @@ const createStyles = (colors: AppTheme['colors']) => {
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.sm,
       borderRadius: borderRadius.md,
-      marginBottom: spacing.md,
     },
     budgetTopRow: {
       flexDirection: 'row',
@@ -120,10 +142,7 @@ const createStyles = (colors: AppTheme['colors']) => {
       fontSize: textSize.sm,
       color: colors.onBackground,
     },
-    budgetTotalText: {
-      fontSize: textSize.sm,
-      color: colors.onSurfaceDisabled,
-    },
+
     budgetBottomRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -151,6 +170,14 @@ const createStyles = (colors: AppTheme['colors']) => {
     budgetRemainTextPrep: {
       fontSize: textSize.sm,
       color: colors.onSurfaceDisabled,
+    },
+    mutedText: {
+      color: colors.onSurfaceDisabled,
+    },
+    spendingText: {
+      fontSize: textSize.md,
+      fontWeight: '500',
+      color: colors.onBackground,
     },
   });
   return styles;
