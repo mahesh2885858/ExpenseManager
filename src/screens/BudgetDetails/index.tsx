@@ -1,5 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, ProgressBar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,6 +27,7 @@ const BudgetDetails = () => {
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   const getProgressColor = (progress: number) => {
     if (progress <= 0.5) return colors.success;
@@ -35,15 +36,18 @@ const BudgetDetails = () => {
   };
 
   const expand = useCallback(() => {
-    if (animHeight.value === 100) {
+    if (isDeleteAlertOpen) {
       animHeight.value = withTiming(0);
+      setIsDeleteAlertOpen(false);
     } else {
       animHeight.value = withTiming(100);
+      setIsDeleteAlertOpen(true);
     }
-  }, [animHeight]);
+  }, [animHeight, isDeleteAlertOpen]);
 
   const collapse = useCallback(() => {
     animHeight.value = withTiming(0);
+    setIsDeleteAlertOpen(false);
   }, [animHeight]);
 
   const deleteItem = useCallback(() => {
@@ -52,10 +56,6 @@ const BudgetDetails = () => {
   }, [route, removeBudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
-  const isDeleteAlertOpen = useMemo(
-    () => animHeight.value === 100,
-    [animHeight],
-  );
 
   return (
     <View style={[styles.container, { marginTop: top }]}>

@@ -467,6 +467,7 @@ const createStyles = (colors: AppTheme['colors']) => {
       gap: spacing.xs,
       flexDirection: 'row',
       alignItems: 'center',
+      marginRight: spacing.sm,
     },
     selectedChipText: {
       color: colors.onPrimary,

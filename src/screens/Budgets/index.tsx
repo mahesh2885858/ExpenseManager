@@ -51,6 +51,11 @@ const Budget = () => {
       {/*header ends*/}
       {/*BudgetCard starts*/}
       <FlashList
+        ListEmptyComponent={
+          <View>
+            <Text>No budget yet</Text>
+          </View>
+        }
         data={budgets}
         contentContainerStyle={[gs.fullFlex]}
         keyExtractor={item => item.id}
@@ -69,7 +74,7 @@ const Budget = () => {
             >
               <View style={[styles.budgetTopRow]}>
                 <View style={[gs.fullFlex]}>
-                  <Text style={[styles.budgetName]}>Groceries</Text>
+                  <Text style={[styles.budgetName]}>{budget.name}</Text>
                   <View style={[gs.flexRow, styles.budgetShortSummary]}>
                     <Text style={[styles.budgetSpentText]}>
                       {getFormattedAmount(left)}
@@ -95,7 +100,7 @@ const Budget = () => {
                   <Text style={[styles.budgetRemainText]}>
                     {getFormattedAmount(budget.amount - 0)}
                   </Text>
-                  <Text style={[styles.budgetRemainTextPrep]}>Left</Text>
+                  <Text style={[styles.budgetRemainTextPrep]}> Left</Text>
                 </View>
               </View>
             </PressableWithFeedback>
