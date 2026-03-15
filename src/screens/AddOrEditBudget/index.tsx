@@ -20,14 +20,19 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
-import { TBudgetPeriods, TRootStackParamList } from '../../types';
+import {
+  TBudget,
+  TBudgetPeriod,
+  TBudgetPeriods,
+  TRootStackParamList,
+} from '../../types';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useCategories from '../../hooks/useCategories';
 import { FlashList } from '@shopify/flash-list';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
-import { getDigits, uCFirst } from 'commonutil-core';
+import { getDigits, roundValue, uCFirst } from 'commonutil-core';
 import {
   CalendarDate,
   RangeChange,
@@ -35,6 +40,9 @@ import {
 import { format } from 'date-fns';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { TextInput } from 'react-native-gesture-handler';
+import useBudgetStore from '../../stores/budgetStore';
+import { v4 as uuid } from 'uuid';
+
 const dateFormatString = 'do MMM yyyy';
 const AddOrEditBudget = () => {
   const { colors } = useAppTheme();
@@ -44,6 +52,8 @@ const AddOrEditBudget = () => {
   const { getFormattedAmount } = useTransactions();
   const navigation = useNavigation();
   const { categories } = useCategories();
+  const addBudget = useBudgetStore(state => state.addBudget);
+
   const [name, setName] = useState('');
   const [selectedCatIds, setSelectedCatIds] = useState<string[]>([]);
   const [budgetAmount, setBudgetAmount] = useState('');
@@ -134,6 +144,9 @@ const AddOrEditBudget = () => {
       err.period = 'Both start and end date is required for one time budget';
     }
     setErrors(err);
+    if (Object.keys(err).some(k => err[k as keyof typeof err].length > 0))
+      return false;
+    return true;
   }, [name, selectedCatIds, budgetAmount, budgetPeriod, customRange]);
 
   const onNameChange = useCallback(
@@ -152,9 +165,45 @@ const AddOrEditBudget = () => {
     [removeError],
   );
 
+  const addNew = useCallback(() => {
+    const id = uuid();
+    const amount = roundValue(parseFloat(budgetAmount), 2);
+    let period: TBudgetPeriod = {} as TBudgetPeriod;
+    if (budgetPeriod === 'one time' && customRange.start && customRange.end) {
+      period = {
+        type: 'one time',
+        range: {
+          start: customRange.start,
+          end: customRange.end,
+        },
+      };
+    } else {
+      period.type = budgetPeriod;
+    }
+    const budget: TBudget = {
+      id,
+      amount,
+      categoryIds: selectedCatIds,
+      createdAt: new Date().toISOString(),
+      name,
+      period,
+    };
+    addBudget(budget);
+  }, [
+    budgetAmount,
+    name,
+    selectedCatIds,
+    budgetPeriod,
+    customRange,
+    addBudget,
+  ]);
+
   const onSave = useCallback(() => {
-    validateInputData();
-  }, [validateInputData]);
+    if (validateInputData()) {
+      addNew();
+      navigation.goBack();
+    }
+  }, [validateInputData, addNew, navigation]);
 
   const heading = useMemo(() => {
     return route.params.mode === 'new' ? 'Create Budget' : 'Update Budget';
