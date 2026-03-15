@@ -15,6 +15,7 @@ import useTransactions from '../../hooks/useTransactions';
 import { roundValue } from 'commonutil-core';
 import { useNavigation } from '@react-navigation/native';
 import useBudgetStore from '../../stores/budgetStore';
+import { FlashList } from '@shopify/flash-list';
 
 const Budget = () => {
   const { colors } = useAppTheme();
@@ -49,54 +50,58 @@ const Budget = () => {
       </View>
       {/*header ends*/}
       {/*BudgetCard starts*/}
-      {budgets.map(budget => {
-        const left = budget.amount - 0;
-        const progress = roundValue(0 / budget.amount, 2);
-        return (
-          <PressableWithFeedback
-            onPress={() => {
-              navigate.navigate('BudgetDetails', {
-                id: '123',
-              });
-            }}
-            key={budget.id}
-            style={[styles.budgetCard]}
-          >
-            <View style={[styles.budgetTopRow]}>
-              <View style={[gs.fullFlex]}>
-                <Text style={[styles.budgetName]}>Groceries</Text>
-                <View style={[gs.flexRow, styles.budgetShortSummary]}>
-                  <Text style={[styles.budgetSpentText]}>
-                    {getFormattedAmount(left)}
-                  </Text>
-                  <Text
-                    style={[styles.budgetTotalText]}
-                  >{`of ${getFormattedAmount(budget.amount)}`}</Text>
+      <FlashList
+        data={budgets}
+        contentContainerStyle={[gs.fullFlex]}
+        keyExtractor={item => item.id}
+        renderItem={({ item: budget }) => {
+          const left = budget.amount - 0;
+          const progress = roundValue(0 / budget.amount, 2);
+          return (
+            <PressableWithFeedback
+              onPress={() => {
+                navigate.navigate('BudgetDetails', {
+                  budget,
+                });
+              }}
+              key={budget.id}
+              style={[styles.budgetCard]}
+            >
+              <View style={[styles.budgetTopRow]}>
+                <View style={[gs.fullFlex]}>
+                  <Text style={[styles.budgetName]}>Groceries</Text>
+                  <View style={[gs.flexRow, styles.budgetShortSummary]}>
+                    <Text style={[styles.budgetSpentText]}>
+                      {getFormattedAmount(left)}
+                    </Text>
+                    <Text
+                      style={[styles.budgetTotalText]}
+                    >{`of ${getFormattedAmount(budget.amount)}`}</Text>
+                  </View>
+                </View>
+                <View>
+                  <Icon source={'chevron-right'} size={textSize.xl} />
                 </View>
               </View>
-              <View>
-                <Icon source={'chevron-right'} size={textSize.xl} />
+              <View style={[styles.budgetBottomRow]}>
+                <View style={[gs.fullFlex]}>
+                  <ProgressBar
+                    style={[styles.budgetProgres]}
+                    progress={progress}
+                    color={getProgressColor(progress)}
+                  />
+                </View>
+                <View style={[styles.budgetRemaining]}>
+                  <Text style={[styles.budgetRemainText]}>
+                    {getFormattedAmount(budget.amount - 0)}
+                  </Text>
+                  <Text style={[styles.budgetRemainTextPrep]}>Left</Text>
+                </View>
               </View>
-            </View>
-            <View style={[styles.budgetBottomRow]}>
-              <View style={[gs.fullFlex]}>
-                <ProgressBar
-                  style={[styles.budgetProgres]}
-                  progress={progress}
-                  color={getProgressColor(progress)}
-                />
-              </View>
-              <View style={[styles.budgetRemaining]}>
-                <Text style={[styles.budgetRemainText]}>
-                  {getFormattedAmount(budget.amount - 0)}
-                </Text>
-                <Text style={[styles.budgetRemainTextPrep]}>Left</Text>
-              </View>
-            </View>
-          </PressableWithFeedback>
-        );
-      })}
-
+            </PressableWithFeedback>
+          );
+        }}
+      />
       {/*BudgetCard ends*/}
     </View>
   );
@@ -107,6 +112,7 @@ const createStyles = (colors: AppTheme['colors']) => {
     container: {
       backgroundColor: colors.background,
       paddingHorizontal: spacing.md,
+      flex: 1,
     },
     header: {
       paddingTop: spacing.sm,

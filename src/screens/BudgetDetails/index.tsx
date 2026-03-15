@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, ProgressBar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,13 +14,19 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactions from '../../components/RenderTransactions';
 import useTransactions from '../../hooks/useTransactions';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
+import useBudgetStore from '../../stores/budgetStore';
+import { TRootStackParamList } from '../../types';
 
 const BudgetDetails = () => {
   const { colors } = useAppTheme();
+  const route = useRoute<RouteProp<TRootStackParamList, 'BudgetDetails'>>();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount, filteredTransactions } = useTransactions();
+  const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
+  const animHeight = useSharedValue(0);
 
   const getProgressColor = (progress: number) => {
     if (progress <= 0.5) return colors.success;
@@ -28,8 +34,29 @@ const BudgetDetails = () => {
     return colors.error;
   };
 
-  const budgetName = 'Groceries';
-  console.log({ filteredTransactions });
+  const expand = useCallback(() => {
+    if (animHeight.value === 100) {
+      animHeight.value = withTiming(0);
+    } else {
+      animHeight.value = withTiming(100);
+    }
+  }, [animHeight]);
+
+  const collapse = useCallback(() => {
+    animHeight.value = withTiming(0);
+  }, [animHeight]);
+
+  const deleteItem = useCallback(() => {
+    removeBudget(route.params.budget.id);
+    navigation.goBack();
+  }, [route, removeBudget, navigation]);
+
+  const budgetName = route.params.budget.name ?? 'Unknown';
+  const isDeleteAlertOpen = useMemo(
+    () => animHeight.value === 100,
+    [animHeight],
+  );
+
   return (
     <View style={[styles.container, { marginTop: top }]}>
       {/*header starts*/}
@@ -42,8 +69,46 @@ const BudgetDetails = () => {
           />
         </PressableWithFeedback>
         <Text style={[styles.headerText]}>{budgetName}</Text>
+        <PressableWithFeedback onPress={expand}>
+          <Icon
+            source={isDeleteAlertOpen ? 'close' : 'delete'}
+            size={textSize.xl}
+            color={colors.onBackground}
+          />
+        </PressableWithFeedback>
       </View>
       {/*header ends*/}
+
+      {/*Delete confirmation starts*/}
+      <Animated.View
+        style={[
+          styles.deleteBox,
+          {
+            height: animHeight,
+          },
+        ]}
+      >
+        <Text style={[styles.deleteBoxText]}>This can not be undone.</Text>
+        <Text style={[styles.deleteBoxText]}>
+          Are you sure you want to delete this budget?
+        </Text>
+        <View style={[styles.deleteBtnBox]}>
+          <PressableWithFeedback
+            onPress={collapse}
+            style={[styles.deleteBtn, styles.cancelBtn]}
+          >
+            <Text style={[styles.cancelBtnText]}>Cancel</Text>
+          </PressableWithFeedback>
+          <PressableWithFeedback
+            onPress={deleteItem}
+            style={[styles.deleteBtn, styles.dltBtn]}
+          >
+            <Text style={[styles.dltBtnText]}>Delete</Text>
+          </PressableWithFeedback>
+        </View>
+      </Animated.View>
+      {/*Delete confirmation ends*/}
+
       {/*Budget deatils starts*/}
       <View style={[styles.budgetCard]}>
         <View style={[styles.budgetTopRow]}>
@@ -118,6 +183,39 @@ const createStyles = (colors: AppTheme['colors']) => {
       fontWeight: 'bold',
       flex: 1,
       color: colors.onBackground,
+    },
+    deleteBox: {
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      overflow: 'hidden',
+    },
+    deleteBoxText: {
+      color: colors.error,
+    },
+    deleteBtnBox: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.xxl,
+      marginTop: spacing.md,
+    },
+    deleteBtn: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.sm,
+    },
+    cancelBtn: {
+      backgroundColor: colors.primary,
+    },
+    cancelBtnText: {
+      color: colors.onPrimary,
+      fontSize: textSize.md,
+    },
+    dltBtn: {
+      backgroundColor: colors.error,
+    },
+    dltBtnText: {
+      color: colors.onError,
+      fontSize: textSize.md,
     },
     budgetCard: {
       gap: spacing.sm,

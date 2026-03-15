@@ -108,7 +108,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             route.name === 'Transactions'
               ? 'home'
               : route.name === 'Budgets'
-              ? 'wallet'
+              ? 'hand-coin'
               : 'chart-arc';
 
           return (
