@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   AppTheme,
@@ -28,6 +28,10 @@ const Budget = () => {
     return colors.error;
   };
 
+  const onAddPress = useCallback(() => {
+    navigate.navigate('AddOrEditBudget', { mode: 'new' });
+  }, [navigate]);
+
   const budgets = [
     {
       total: 10000,
@@ -42,12 +46,13 @@ const Budget = () => {
       spent: 22300,
     },
   ];
+
   return (
     <View style={[styles.container, { marginTop: top }]}>
       {/*header starts*/}
       <View style={[styles.header]}>
         <Text style={[styles.headerText]}>Budget</Text>
-        <PressableWithFeedback>
+        <PressableWithFeedback onPress={onAddPress}>
           <Icon
             source={'plus'}
             size={textSize.xxl}
@@ -117,10 +122,10 @@ const createStyles = (colors: AppTheme['colors']) => {
       paddingHorizontal: spacing.md,
     },
     header: {
-      paddingTop: spacing.md,
+      paddingTop: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: spacing.md,
+      marginBottom: spacing.sm,
     },
     headerText: {
       fontSize: textSize.lg,

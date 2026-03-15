@@ -107,7 +107,7 @@ const createStyles = (colors: AppTheme['colors']) => {
       flex: 1,
     },
     header: {
-      paddingTop: spacing.md,
+      paddingTop: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: spacing.xs,
