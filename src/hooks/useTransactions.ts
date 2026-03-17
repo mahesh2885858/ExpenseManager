@@ -168,6 +168,9 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     (transactionId: string) => {
       removeTransaction(transactionId);
       deSelectTransaction(transactionId);
+      if (!transactionsByIds) return;
+      const t = transactionsByIds[transactionId];
+      updateBudgetSpentForTransaction(t, 'delete');
     },
     [removeTransaction, deSelectTransaction],
   );

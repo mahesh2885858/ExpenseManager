@@ -31,8 +31,8 @@ export const getRangeForBudgetPeriod = (period: TBudgetPeriod) => {
       periodRange.start = startOfYear(new Date());
       break;
     case 'one time':
-      periodRange.end = period.range.end;
-      periodRange.start = period.range.start;
+      periodRange.end = new Date(period.range.end);
+      periodRange.start = new Date(period.range.start);
       break;
     default:
       break;

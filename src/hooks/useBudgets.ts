@@ -50,7 +50,10 @@ const useBudgets = () => {
     [budgets, transactionsIds, transactionsByIds],
   );
   const updateBudgetSpentForTransaction = useCallback(
-    (transaction: TTransaction) => {
+    (
+      transaction: TTransaction,
+      operation: 'create' | 'delete' | 'update' = 'create',
+    ) => {
       if (transaction.type === 'income') return;
       const budgetsForThisCat = budgets.filter(b =>
         b.categoryIds.includes(transaction.categoryIds[0]),
@@ -63,7 +66,11 @@ const useBudgets = () => {
             transaction.transactionDate >= period.start?.toISOString() &&
             transaction.transactionDate <= period.end?.toISOString()
           ) {
-            const newAmountSpent = b.spent + transaction.amount;
+            const newAmountSpent =
+              operation === 'create'
+                ? b.spent + transaction.amount
+                : b.spent - transaction.amount;
+
             updateBudget({ ...b, spent: newAmountSpent });
           }
         });
@@ -71,6 +78,7 @@ const useBudgets = () => {
     },
     [budgets, updateBudget],
   );
+
   return {
     getTransactionIdsForBudget,
     updateBudgetSpentForTransaction,

@@ -76,7 +76,7 @@ const BudgetDetails = () => {
       return uCFirst(budget.period.type);
     }
   }, [budget]);
-
+  console.log({ budget });
   const transactionIds = getTransactionIdsForBudget(budget.id);
 
   return (
