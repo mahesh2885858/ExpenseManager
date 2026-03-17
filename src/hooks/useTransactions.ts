@@ -12,6 +12,7 @@ import { TFilters, TSort, TTransaction } from '../types';
 import { formatAmount } from '../utils';
 import useWalletStore from '../stores/walletsStore';
 import useUIStore from '../stores/uiStore';
+import useBudgets from './useBudgets';
 
 const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const addTransaction = useTransactionsStore(state => state.addTransaction);
@@ -32,6 +33,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
   );
+  const { updateBudgetSpentForTransaction } = useBudgets();
 
   const matchesAcc = useCallback(
     (t: TTransaction) => {
@@ -195,6 +197,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
 
   const addNewTransaction = (transaction: TTransaction) => {
     addTransaction(transaction);
+    updateBudgetSpentForTransaction(transaction);
   };
 
   const getFormattedAmount = useCallback(

@@ -1,14 +1,18 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
+import { roundValue, uCFirst } from 'commonutil-core';
+import { format } from 'date-fns';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
+import { Icon } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
 import {
-  Button,
-  Chip,
-  customText,
-  Icon,
-  ProgressBar,
-} from 'react-native-paper';
+  CalendarDate,
+  RangeChange,
+} from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { v4 as uuid } from 'uuid';
 import {
   AppTheme,
   borderRadius,
@@ -18,30 +22,19 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import RenderTransactions from '../../components/RenderTransactions';
+import AmountInputBoard from '../../components/organisms/AmountInputBoard';
+import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
+import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
+import useBudgetStore from '../../stores/budgetStore';
 import {
   TBudget,
   TBudgetPeriod,
   TBudgetPeriods,
   TRootStackParamList,
 } from '../../types';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
-import useCategories from '../../hooks/useCategories';
-import { FlashList } from '@shopify/flash-list';
-import AmountInputBoard from '../../components/organisms/AmountInputBoard';
-import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
-import { getDigits, roundValue, uCFirst } from 'commonutil-core';
-import {
-  CalendarDate,
-  RangeChange,
-} from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import { format } from 'date-fns';
-import { DatePickerModal } from 'react-native-paper-dates';
-import { TextInput } from 'react-native-gesture-handler';
-import useBudgetStore from '../../stores/budgetStore';
-import { v4 as uuid } from 'uuid';
 
 const dateFormatString = 'do MMM yyyy';
 const AddOrEditBudget = () => {
@@ -187,6 +180,7 @@ const AddOrEditBudget = () => {
       createdAt: new Date().toISOString(),
       name,
       period,
+      spent: 0,
     };
     addBudget(budget);
   }, [

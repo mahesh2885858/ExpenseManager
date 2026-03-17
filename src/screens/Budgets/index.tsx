@@ -52,16 +52,17 @@ const Budget = () => {
       {/*BudgetCard starts*/}
       <FlashList
         ListEmptyComponent={
-          <View>
-            <Text>No budget yet</Text>
+          <View style={[styles.emptyList]}>
+            <Text style={[styles.emptyListText]}>
+              No budget yet. Create by clicking on '+' icon above.
+            </Text>
           </View>
         }
         data={budgets}
         contentContainerStyle={[gs.fullFlex]}
         keyExtractor={item => item.id}
         renderItem={({ item: budget }) => {
-          const left = budget.amount - 0;
-          const progress = roundValue(0 / budget.amount, 2);
+          const progress = roundValue(budget.spent / budget.amount, 2);
           return (
             <PressableWithFeedback
               onPress={() => {
@@ -77,7 +78,7 @@ const Budget = () => {
                   <Text style={[styles.budgetName]}>{budget.name}</Text>
                   <View style={[gs.flexRow, styles.budgetShortSummary]}>
                     <Text style={[styles.budgetSpentText]}>
-                      {getFormattedAmount(left)}
+                      {getFormattedAmount(budget.spent)}
                     </Text>
                     <Text
                       style={[styles.budgetTotalText]}
@@ -98,7 +99,7 @@ const Budget = () => {
                 </View>
                 <View style={[styles.budgetRemaining]}>
                   <Text style={[styles.budgetRemainText]}>
-                    {getFormattedAmount(budget.amount - 0)}
+                    {getFormattedAmount(budget.amount - budget.spent)}
                   </Text>
                   <Text style={[styles.budgetRemainTextPrep]}> Left</Text>
                 </View>
@@ -131,6 +132,18 @@ const createStyles = (colors: AppTheme['colors']) => {
       flex: 1,
       color: colors.onBackground,
     },
+    emptyList: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyListText: {
+      fontSize: textSize.lg,
+      color: colors.onSurfaceDisabled,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+
     budgetCard: {
       gap: spacing.sm,
       backgroundColor: colors.surfaceVariant,

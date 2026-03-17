@@ -17,6 +17,11 @@ import useTransactions from '../../hooks/useTransactions';
 import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import useBudgetStore from '../../stores/budgetStore';
 import { TRootStackParamList } from '../../types';
+import { roundValue, uCFirst } from 'commonutil-core';
+import { format } from 'date-fns';
+import useBudgets from '../../hooks/useBudgets';
+
+const dateFormatString = 'MMM dd, yyyy';
 
 const BudgetDetails = () => {
   const { colors } = useAppTheme();
@@ -24,6 +29,7 @@ const BudgetDetails = () => {
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount, filteredTransactions } = useTransactions();
+  const { getTransactionIdsForBudget } = useBudgets();
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
@@ -56,6 +62,22 @@ const BudgetDetails = () => {
   }, [route, removeBudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
+  const budget = route.params.budget;
+  const progress = budget.spent / budget.amount;
+
+  const budgetPeriodLabel = useMemo(() => {
+    if (budget.period.type === 'one time') {
+      return (
+        format(budget.period.range.start, dateFormatString) +
+        ' - ' +
+        format(budget.period.range.end, dateFormatString)
+      );
+    } else {
+      return uCFirst(budget.period.type);
+    }
+  }, [budget]);
+
+  const transactionIds = getTransactionIdsForBudget(budget.id);
 
   return (
     <View style={[styles.container, { marginTop: top }]}>
@@ -113,27 +135,31 @@ const BudgetDetails = () => {
       <View style={[styles.budgetCard]}>
         <View style={[styles.budgetTopRow]}>
           <View style={[gs.fullFlex, gs.flexRow, gs.itemsCenter]}>
-            <Text style={[styles.budgetName]}>Monthly Budget</Text>
+            <Text style={[styles.budgetName]}>
+              {'Remaining: ' + getFormattedAmount(budget.amount - budget.spent)}
+            </Text>
             <View style={[gs.flexRow, styles.budgetShortSummary]}>
               <Text style={[styles.budgetSpentText]}>
-                {getFormattedAmount(8000)}
+                {'Total: ' + getFormattedAmount(budget.amount)}
               </Text>
             </View>
           </View>
         </View>
         <ProgressBar
           style={[styles.budgetProgres]}
-          progress={0.7}
-          color={getProgressColor(0.8)}
+          progress={progress}
+          color={getProgressColor(progress)}
         />
         <View style={[styles.budgetBottomRow]}>
           <View style={[styles.budgetRemaining]}>
             <Text style={[styles.budgetRemainText]}>
-              {getFormattedAmount(12000)}
+              {getFormattedAmount(budget.spent)}
             </Text>
             <Text style={[styles.budgetRemainTextPrep]}>Spent</Text>
           </View>
-          <Text style={[styles.budgetSpentPercentage]}>45%</Text>
+          <Text style={[styles.budgetSpentPercentage]}>
+            {roundValue(progress * 100)}%
+          </Text>
         </View>
       </View>
       <View style={[styles.budgetCard]}>
@@ -143,10 +169,7 @@ const BudgetDetails = () => {
               Budget Period -
             </Text>
             <Text style={[styles.budgetRemainText, styles.mutedText]}>
-              Monthly -
-            </Text>
-            <Text style={[styles.budgetRemainText, styles.mutedText]}>
-              Mar 15, 2026
+              {budgetPeriodLabel}
             </Text>
           </View>
         </View>
@@ -157,7 +180,7 @@ const BudgetDetails = () => {
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactions transactions={filteredTransactions} />
+        <RenderTransactions transactions={transactionIds} />
       </View>
       {/*Transactions for this budget ends*/}
     </View>

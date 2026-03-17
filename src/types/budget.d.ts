@@ -16,6 +16,7 @@ export type TBudget = {
   id: string;
   name: string;
   amount: number;
+  spent: number;
   categoryIds: string[];
   period: TBudgetPeriod;
   createdAt: string;
