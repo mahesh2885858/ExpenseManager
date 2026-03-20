@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   manageText: {
     fontWeight: '600',
   },
-  listStyle = {
+  listStyle: {
     maxHeight: 500,
   },
 });

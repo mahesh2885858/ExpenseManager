@@ -30,7 +30,8 @@ const useBudgets = () => {
           const trDate = new Date(tr.transactionDate);
           if (
             trDate.getTime() >= periodRange.start.getTime() &&
-            trDate.getTime() <= periodRange.end.getTime()
+            trDate.getTime() <= periodRange.end.getTime() &&
+            tr.type === 'expense'
           ) {
             if (budget.categoryIds.includes(tr.categoryIds[0])) {
               budgetTransactionIds.push(trId);
@@ -106,11 +107,19 @@ const useBudgets = () => {
     [updateBudgetSpentForTransaction],
   );
 
+  const getBudgetById = useCallback(
+    (id: string) => {
+      return budgets.find(b => b.id === id);
+    },
+    [budgets],
+  );
+
   return {
     getTransactionIdsForBudget,
     updateBudgetSpentForTransaction,
     updateBudgetForTransactionUpdate,
     getBudgetForAGivenTransactions,
+    getBudgetById,
   };
 };
 export default useBudgets;

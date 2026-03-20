@@ -29,7 +29,7 @@ const BudgetDetails = () => {
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount } = useTransactions();
-  const { getTransactionIdsForBudget } = useBudgets();
+  const { getTransactionIdsForBudget, getBudgetById } = useBudgets();
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
@@ -62,10 +62,9 @@ const BudgetDetails = () => {
   }, [route, removeBudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
-  const budget = route.params.budget;
-  const progress = budget.spent / budget.amount;
-
+  const budget = getBudgetById(route.params.budget.id);
   const budgetPeriodLabel = useMemo(() => {
+    if (!budget) return 'No budget';
     if (budget.period.type === 'one time') {
       return (
         format(budget.period.range.start, dateFormatString) +
@@ -76,8 +75,12 @@ const BudgetDetails = () => {
       return uCFirst(budget.period.type);
     }
   }, [budget]);
+
+  const progress = budget ? budget.spent / budget.amount : 0;
+
   console.log({ budget });
-  const transactionIds = getTransactionIdsForBudget(budget.id);
+  const transactionIds = budget ? getTransactionIdsForBudget(budget.id) : [];
+  console.log({ transactionIds });
 
   return (
     <View style={[styles.container, { marginTop: top }]}>

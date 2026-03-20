@@ -18,7 +18,6 @@ const RenderTransaction = (props: {
 }) => {
   const theme = useAppTheme();
   const categories = useCategoriesStore(state => state.categories);
-  const toggleSelection = useTransactionsStore(state => state.toggleSelection);
   const { getFormattedAmount } = useTransactions({});
   const requestDelete = useTransactionsStore(state => state.requestDelete);
 
@@ -40,18 +39,8 @@ const RenderTransaction = (props: {
   const transaction = transactionsByIds[props.item];
   return (
     <PressableWithFeedback
-      onLongPress={() => toggleSelection(props.item)}
       onPress={() => {
-        if (selectedTransactions.has(props.item)) {
-          toggleSelection(props.item);
-        } else {
-          if (selectedTransactions.size > 0) {
-            toggleSelection(props.item);
-            return;
-          }
-
-          props.onItemPress(transaction);
-        }
+        props.onItemPress(transaction);
       }}
       style={[
         gs.flexRow,
