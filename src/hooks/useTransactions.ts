@@ -28,12 +28,17 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     state => state.removeTransaction,
   );
 
+  const updateTransaction = useTransactionsStore(
+    state => state.updateTransaction,
+  );
+
   const [search, setSearch] = useState('');
   const transactionsIds = useTransactionsStore(state => state.transactionsIds);
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
   );
-  const { updateBudgetSpentForTransaction } = useBudgets();
+  const { updateBudgetSpentForTransaction, updateBudgetForTransactionUpdate } =
+    useBudgets();
 
   const matchesAcc = useCallback(
     (t: TTransaction) => {
@@ -172,7 +177,12 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
       const t = transactionsByIds[transactionId];
       updateBudgetSpentForTransaction(t, 'delete');
     },
-    [removeTransaction, deSelectTransaction],
+    [
+      removeTransaction,
+      deSelectTransaction,
+      transactionsByIds,
+      updateBudgetSpentForTransaction,
+    ],
   );
 
   const totalIncome = useMemo(() => {
@@ -215,6 +225,14 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     [currency, numberFormat],
   );
 
+  const updateATransaction = useCallback(
+    (id: string, updated: TTransaction, original: TTransaction) => {
+      updateTransaction(id, updated);
+      updateBudgetForTransactionUpdate(updated, original);
+    },
+    [updateTransaction, updateBudgetForTransactionUpdate],
+  );
+
   return {
     totalExpenses,
     totalIncome,
@@ -222,6 +240,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     search,
     setSearch,
     addNewTransaction,
+    updateATransaction,
     deleteTransaction,
     getFormattedAmount,
     transactionsByIds,

@@ -1,24 +1,23 @@
 import { format } from 'date-fns';
+import Stringify from 'fast-json-stable-stringify';
+import { sha256 } from 'js-sha256';
 import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import * as ScopedStorage from 'react-native-scoped-storage';
-import useWalletStore from '../stores/walletsStore';
+import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
+import useCategoriesStore from '../stores/categoriesStore';
 import useSettingsStore from '../stores/settingsStore';
 import useTransactionsStore from '../stores/transactionsStore';
+import useWalletStore from '../stores/walletsStore';
 import {
-  TWallet,
   TCategories,
   TTransaction,
   TTransactionByIds,
+  TWallet,
 } from '../types';
 import { getValidData } from '../utils/validateImportedData';
 import useWallets from './useAccounts';
 import useCategories from './useCategories';
-import useTransactions from './useTransactions';
-import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
-import { sha256 } from 'js-sha256';
-import Stringify from 'fast-json-stable-stringify';
-import useCategoriesStore from '../stores/categoriesStore';
 
 const useBackup = () => {
   const { wallets } = useWallets();

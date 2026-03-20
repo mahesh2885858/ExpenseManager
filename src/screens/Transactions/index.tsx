@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import RenderTransactions from '../../components/RenderTransactions';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -25,7 +25,6 @@ const Transactions = () => {
   const setFilters = useTransactionsStore(state => state.setFilters);
   const selectedSort = useTransactionsStore(state => state.sort);
   const onSortChange = useTransactionsStore(state => state.setSort);
-  const transactionIds = useTransactionsStore(state => state.transactionsIds);
   const transactionByIds = useTransactionsStore(
     state => state.transactionsByIds,
   );
@@ -309,7 +308,6 @@ const Transactions = () => {
               {
                 backgroundColor: colors.surface,
                 gap: spacing.xs,
-                elevation: 3,
               },
             ]}
           >
@@ -414,16 +412,15 @@ const Transactions = () => {
           {
             paddingHorizontal: spacing.md,
             marginTop: spacing.md,
-            overflow: 'hidden',
           },
         ]}
       >
         <View
           style={[
             styles.search,
+            gs.borderOne,
             {
               backgroundColor: colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -448,9 +445,9 @@ const Transactions = () => {
           onPress={navigateToFilters}
           style={[
             styles.filter,
+            gs.borderOne,
             {
               backgroundColor: colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -469,11 +466,11 @@ const Transactions = () => {
           }
           style={[
             styles.filter,
+            gs.borderOne,
             {
               backgroundColor: isSortApplied
                 ? colors.primaryContainer
                 : colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -529,6 +526,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     maxHeight: 35,
     width: '40%',
+    elevation: 3,
   },
   totalBalance: {
     width: '100%',
@@ -570,6 +568,7 @@ const styles = StyleSheet.create({
   },
   searchAndFilter: {
     flexDirection: 'row',
+    overflow: 'hidden',
     alignItems: 'center',
     gap: spacing.md,
   },

@@ -186,9 +186,9 @@ const useTransactionsStore = create<PositionStore>()(
       undoDelete: () => {
         const pending = get().pendingDelete;
         if (!pending) return;
-        const t = [...get().transactionsIds, pending.id];
+        const ids = [...get().transactionsIds, pending.id];
         set({
-          transactionsIds: [...get().transactionsIds, pending.id],
+          transactionsIds: ids,
           pendingDelete: null,
         });
       },

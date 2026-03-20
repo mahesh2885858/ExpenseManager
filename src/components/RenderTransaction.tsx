@@ -19,7 +19,7 @@ const RenderTransaction = (props: {
   const theme = useAppTheme();
   const categories = useCategoriesStore(state => state.categories);
   const toggleSelection = useTransactionsStore(state => state.toggleSelection);
-  const { deleteTransaction, getFormattedAmount } = useTransactions({});
+  const { getFormattedAmount } = useTransactions({});
   const requestDelete = useTransactionsStore(state => state.requestDelete);
 
   const transactionsByIds = useTransactionsStore(

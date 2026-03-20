@@ -28,7 +28,7 @@ const BudgetDetails = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'BudgetDetails'>>();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
-  const { getFormattedAmount, filteredTransactions } = useTransactions();
+  const { getFormattedAmount } = useTransactions();
   const { getTransactionIdsForBudget } = useBudgets();
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();

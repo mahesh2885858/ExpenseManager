@@ -65,9 +65,7 @@ const BudgetPeriodSelectionModal = (props: TProps) => {
             </View>
 
             <FlashList
-              style={{
-                maxHeight: 500,
-              }}
+              style={[styles.listStyle]}
               data={budgetPeriods}
               renderScrollComponent={BottomSheetScrollable}
               keyExtractor={item => item}
@@ -165,5 +163,8 @@ const styles = StyleSheet.create({
   },
   manageText: {
     fontWeight: '600',
+  },
+  listStyle: {
+    maxHeight: 500,
   },
 });

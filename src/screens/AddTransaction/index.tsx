@@ -24,21 +24,21 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
-import useTransactionsStore from '../../stores/transactionsStore';
 import {
-  TWallet,
   TAttachment,
   TRootStackParamList,
+  TTransaction,
   TTransactionType,
+  TWallet,
 } from '../../types';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
@@ -56,10 +56,9 @@ const AddTransaction = () => {
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
-  const { addNewTransaction, getFormattedAmount } = useTransactions({});
-  const updateTransaction = useTransactionsStore(
-    state => state.updateTransaction,
-  );
+  const { addNewTransaction, getFormattedAmount, updateATransaction } =
+    useTransactions({});
+
   const { wallets, defaultWalletId } = useWallets();
 
   const initData: {
@@ -129,9 +128,7 @@ const AddTransaction = () => {
     initData.time,
   );
   const [desc, setDesc] = useState(initData.desc);
-  const [attachments, setAttachments] = useState<TAttachment[]>(
-    initData.attachments,
-  );
+  const [attachments] = useState<TAttachment[]>(initData.attachments);
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
@@ -216,7 +213,8 @@ const AddTransaction = () => {
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
       if (route.params.mode === 'edit') {
-        updateTransaction(route.params.transaction.id, {
+        const original = route.params.transaction;
+        const updated: TTransaction = {
           ...route.params.transaction,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
@@ -224,7 +222,8 @@ const AddTransaction = () => {
           type: transactionType,
           attachments: attachments,
           description: desc,
-        });
+        };
+        updateATransaction(route.params.transaction.id, updated, original);
       } else {
         addNewTransaction({
           walletId: selectedWalletId,
@@ -267,6 +266,17 @@ const AddTransaction = () => {
     handlePresent: handleAmountInputPresent,
     handleSheetChange: handleAmountSheetChange,
   } = useBottomSheetModal();
+
+  const categoryContainerStyle = useMemo(() => {
+    const hasError = errorFields?.includes('category');
+
+    return {
+      marginTop: spacing.md,
+      backgroundColor: colors.surfaceVariant,
+      borderColor: hasError ? colors.error : 'transparent',
+      borderWidth: hasError ? 1 : 0,
+    };
+  }, [colors, errorFields]);
 
   useEffect(() => {
     progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {
@@ -363,17 +373,7 @@ const AddTransaction = () => {
         {/* Category Selection */}
         <PressableWithFeedback onPress={() => handlePresentCategories()}>
           <View
-            style={[
-              {
-                marginTop: spacing.md,
-                backgroundColor: colors.surfaceVariant,
-                borderColor: errorFields?.some(f => f === 'category')
-                  ? colors.error
-                  : 'transparent',
-                borderWidth: errorFields?.some(f => f === 'category') ? 1 : 0,
-              },
-              style.categoryContainer,
-            ]}
+            style={[{ ...categoryContainerStyle }, style.categoryContainer]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Icon

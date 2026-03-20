@@ -1,5 +1,4 @@
 /* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react/no-unstable-nested-components */
 import { useNavigation } from '@react-navigation/native';
 import { uCFirst } from 'commonutil-core';
 import {
@@ -162,8 +161,8 @@ const Reports = () => {
   }, [handleBackPress]);
 
   const graphData = useMemo(() => {
-    const start = currentRange[0];
-    const end = currentRange[1];
+    const rangeStart = currentRange[0];
+    const rangeEnd = currentRange[1];
     if (!transactionsByIds)
       return {
         result: [],
@@ -175,8 +174,8 @@ const Reports = () => {
     const result: TTransaction[] = [];
     filteredTransactions.forEach(t => {
       if (
-        !isBefore(transactionsByIds[t].transactionDate, start) &&
-        !isAfter(transactionsByIds[t].transactionDate, end)
+        !isBefore(transactionsByIds[t].transactionDate, rangeStart) &&
+        !isAfter(transactionsByIds[t].transactionDate, rangeEnd)
       ) {
         result.push(transactionsByIds[t]);
       }

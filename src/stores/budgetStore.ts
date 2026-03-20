@@ -11,6 +11,7 @@ type TBudgetActions = {
   addBudget: (budget: TBudget) => void;
   removeBudget: (id: string) => void;
   updateBudget: (budget: TBudget) => void;
+  updateMulitpleBudgets: (budgets: TBudget[]) => void;
 };
 
 type PositionStore = TBudgetStore & TBudgetActions;
@@ -31,6 +32,14 @@ const useBudgetStore = create<PositionStore>()(
           budgets: get().budgets.map(b =>
             b.id === budget.id ? { ...budget } : { ...b },
           ),
+        }));
+      },
+      updateMulitpleBudgets(budgets) {
+        set(() => ({
+          budgets: get().budgets.map(b => {
+            const found = budgets.find(budget => budget.id === b.id);
+            return found ? found : b;
+          }),
         }));
       },
     }),

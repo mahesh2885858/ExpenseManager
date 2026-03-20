@@ -112,9 +112,7 @@ const WalletSelectionModal = (props: TProps) => {
               </Text>
             </View>
           }
-          style={{
-            maxHeight: 500,
-          }}
+          style={[styles.listStyle]}
           renderScrollComponent={BottomSheetScrollable}
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
@@ -209,5 +207,8 @@ const styles = StyleSheet.create({
   },
   manageText: {
     fontWeight: '600',
+  },
+  listStyle = {
+    maxHeight: 500,
   },
 });

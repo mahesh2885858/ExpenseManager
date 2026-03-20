@@ -1,21 +1,14 @@
-import {
-  endOfMonth,
-  endOfWeek,
-  endOfYear,
-  startOfMonth,
-  startOfWeek,
-  startOfYear,
-} from 'date-fns';
 import { useCallback } from 'react';
-import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import useBudgetStore from '../stores/budgetStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TTransaction } from '../types';
+import { TBudget, TTransaction } from '../types';
 import { getRangeForBudgetPeriod } from '../utils/getRangeForBudgetPeriod';
 
 const useBudgets = () => {
   const budgets = useBudgetStore(state => state.budgets);
-  const updateBudget = useBudgetStore(state => state.updateBudget);
+  const updateMultipleBudgets = useBudgetStore(
+    state => state.updateMulitpleBudgets,
+  );
   const transactionsIds = useTransactionsStore(state => state.transactionsIds);
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
@@ -33,11 +26,11 @@ const useBudgets = () => {
 
       transactionsIds.forEach(trId => {
         const tr = transactionsByIds[trId];
-        if (tr && periodRange.start && periodRange.end) {
-          const trDate = tr.transactionDate;
+        if (tr) {
+          const trDate = new Date(tr.transactionDate);
           if (
-            trDate >= periodRange.start?.toISOString() &&
-            trDate <= periodRange.end?.toISOString()
+            trDate.getTime() >= periodRange.start.getTime() &&
+            trDate.getTime() <= periodRange.end.getTime()
           ) {
             if (budget.categoryIds.includes(tr.categoryIds[0])) {
               budgetTransactionIds.push(trId);
@@ -49,39 +42,75 @@ const useBudgets = () => {
     },
     [budgets, transactionsIds, transactionsByIds],
   );
+
+  const getBudgetForAGivenTransactions = useCallback(
+    (t: TTransaction) => {
+      if (t.type === 'income') return [];
+      const budgetsForThiT: TBudget[] = [];
+      budgets.forEach(b => {
+        const period = getRangeForBudgetPeriod(b.period);
+        if (!period.end || !period.start) return;
+        const tDate = new Date(t.transactionDate);
+        if (
+          b.categoryIds.includes(t.categoryIds[0]) &&
+          period.start.getTime() <= tDate.getTime() &&
+          period.end.getTime() >= tDate.getTime()
+        ) {
+          budgetsForThiT.push(b);
+        }
+      });
+      return budgetsForThiT;
+    },
+    [budgets],
+  );
+
   const updateBudgetSpentForTransaction = useCallback(
-    (
-      transaction: TTransaction,
-      operation: 'create' | 'delete' | 'update' = 'create',
-    ) => {
+    (transaction: TTransaction, operation: 'create' | 'delete' = 'create') => {
       if (transaction.type === 'income') return;
       const budgetsForThisCat = budgets.filter(b =>
         b.categoryIds.includes(transaction.categoryIds[0]),
       );
       if (budgetsForThisCat.length > 0) {
         // does this budget covers the given transaction period
+        //
+        const updatedBudgets: TBudget[] = [];
+        const trDate = new Date(transaction.transactionDate);
         budgetsForThisCat.forEach(b => {
           const period = getRangeForBudgetPeriod(b.period);
+          if (!period.start || !period.end) return;
           if (
-            transaction.transactionDate >= period.start?.toISOString() &&
-            transaction.transactionDate <= period.end?.toISOString()
+            trDate.getTime() >= period.start.getTime() &&
+            trDate.getTime() <= period.end.getTime()
           ) {
             const newAmountSpent =
               operation === 'create'
                 ? b.spent + transaction.amount
                 : b.spent - transaction.amount;
 
-            updateBudget({ ...b, spent: newAmountSpent });
+            updatedBudgets.push({ ...b, spent: newAmountSpent });
           }
         });
+        if (updatedBudgets.length > 0) {
+          updateMultipleBudgets(updatedBudgets);
+        }
       }
     },
-    [budgets, updateBudget],
+    [budgets, updateMultipleBudgets],
+  );
+
+  const updateBudgetForTransactionUpdate = useCallback(
+    (updated: TTransaction, original: TTransaction) => {
+      updateBudgetSpentForTransaction(original, 'delete');
+      updateBudgetSpentForTransaction(updated, 'create');
+    },
+    [updateBudgetSpentForTransaction],
   );
 
   return {
     getTransactionIdsForBudget,
     updateBudgetSpentForTransaction,
+    updateBudgetForTransactionUpdate,
+    getBudgetForAGivenTransactions,
   };
 };
 export default useBudgets;

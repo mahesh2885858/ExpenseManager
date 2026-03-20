@@ -29,4 +29,7 @@ export const gs = StyleSheet.create({
   overflowHide: {
     overflow: 'hidden',
   },
+  borderOne: {
+    borderWidth: 1,
+  },
 });

@@ -113,9 +113,7 @@ const CategorySelectionModal = (props: TProps) => {
               </View>
             )}
             <FlashList
-              style={{
-                maxHeight: 500,
-              }}
+              style={[styles.listStyle]}
               numColumns={2}
               renderScrollComponent={BottomSheetScrollable}
               keyExtractor={(item: TCategory) => item.id}
@@ -221,5 +219,8 @@ const styles = StyleSheet.create({
   },
   manageText: {
     fontWeight: '600',
+  },
+  listStyle: {
+    maxHeight: 500,
   },
 });
