@@ -26,9 +26,8 @@ const RenderTransactions = ({
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
   const { dismissAll } = useBottomSheetR();
-  const { deleteTransaction } = useTransactions();
+  const { deleteTransaction, undoTransactionDelete } = useTransactions();
   const pendingDelete = useTransactionsStore(state => state.pendingDelete);
-  const undoDelete = useTransactionsStore(state => state.undoDelete);
   const confirmDelete = useTransactionsStore(state => state.confirmDelete);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
@@ -108,12 +107,11 @@ const RenderTransactions = ({
         onDeletePress={onDeletePress}
       />
       <Snackbar
+        duration={1500}
         action={{
           label: 'undo',
           onPress: () => {
-            console.log('cancelling dleete');
-
-            undoDelete();
+            undoTransactionDelete();
           },
           textColor: theme.colors.onSurfaceVariant,
         }}

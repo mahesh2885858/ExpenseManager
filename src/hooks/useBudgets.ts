@@ -5,7 +5,7 @@ import { TBudget, TTransaction } from '../types';
 import { getRangeForBudgetPeriod } from '../utils/getRangeForBudgetPeriod';
 
 const useBudgets = () => {
-  const budgets = useBudgetStore(state => state.budgets);
+  const allBudgets = useBudgetStore(state => state.budgets);
   const updateMultipleBudgets = useBudgetStore(
     state => state.updateMulitpleBudgets,
   );
@@ -17,7 +17,7 @@ const useBudgets = () => {
   const getTransactionIdsForBudget = useCallback(
     (id: string) => {
       if (!transactionsByIds) return [];
-      const budget = budgets.find(b => b.id === id);
+      const budget = allBudgets.find(b => b.id === id);
       if (!budget) return [];
       const periodRange = getRangeForBudgetPeriod(budget.period);
 
@@ -41,14 +41,14 @@ const useBudgets = () => {
       });
       return budgetTransactionIds;
     },
-    [budgets, transactionsIds, transactionsByIds],
+    [allBudgets, transactionsIds, transactionsByIds],
   );
 
   const getBudgetForAGivenTransactions = useCallback(
     (t: TTransaction) => {
       if (t.type === 'income') return [];
       const budgetsForThiT: TBudget[] = [];
-      budgets.forEach(b => {
+      allBudgets.forEach(b => {
         const period = getRangeForBudgetPeriod(b.period);
         if (!period.end || !period.start) return;
         const tDate = new Date(t.transactionDate);
@@ -62,18 +62,22 @@ const useBudgets = () => {
       });
       return budgetsForThiT;
     },
-    [budgets],
+    [allBudgets],
   );
 
-  const updateBudgetSpentForTransaction = useCallback(
-    (transaction: TTransaction, operation: 'create' | 'delete' = 'create') => {
-      if (transaction.type === 'income') return;
+  const getUpdatedBudgetsAfterATransaction = useCallback(
+    (
+      transaction: TTransaction,
+      operation: 'create' | 'delete' = 'create',
+      budgets: TBudget[],
+    ) => {
+      if (transaction.type === 'income') return budgets;
       const budgetsForThisCat = budgets.filter(b =>
         b.categoryIds.includes(transaction.categoryIds[0]),
       );
       if (budgetsForThisCat.length > 0) {
         // does this budget covers the given transaction period
-        //
+
         const updatedBudgets: TBudget[] = [];
         const trDate = new Date(transaction.transactionDate);
         budgetsForThisCat.forEach(b => {
@@ -91,27 +95,50 @@ const useBudgets = () => {
             updatedBudgets.push({ ...b, spent: newAmountSpent });
           }
         });
-        if (updatedBudgets.length > 0) {
-          updateMultipleBudgets(updatedBudgets);
-        }
-      }
+
+        return budgets.map(b => {
+          const find = updatedBudgets.find(u => u.id === b.id);
+          return find ? { ...find } : { ...b };
+        });
+      } else return budgets;
     },
-    [budgets, updateMultipleBudgets],
+    [],
+  );
+
+  const updateBudgetSpentForTransaction = useCallback(
+    (transaction: TTransaction, operation: 'create' | 'delete' = 'create') => {
+      const result = getUpdatedBudgetsAfterATransaction(
+        transaction,
+        operation,
+        allBudgets,
+      );
+      updateMultipleBudgets(result);
+    },
+    [allBudgets, updateMultipleBudgets, getUpdatedBudgetsAfterATransaction],
   );
 
   const updateBudgetForTransactionUpdate = useCallback(
     (updated: TTransaction, original: TTransaction) => {
-      updateBudgetSpentForTransaction(original, 'delete');
-      updateBudgetSpentForTransaction(updated, 'create');
+      const result = getUpdatedBudgetsAfterATransaction(
+        original,
+        'delete',
+        allBudgets,
+      );
+      const updatedBudgets = getUpdatedBudgetsAfterATransaction(
+        updated,
+        'create',
+        result,
+      );
+      updateMultipleBudgets(updatedBudgets);
     },
-    [updateBudgetSpentForTransaction],
+    [getUpdatedBudgetsAfterATransaction, allBudgets, updateMultipleBudgets],
   );
 
   const getBudgetById = useCallback(
     (id: string) => {
-      return budgets.find(b => b.id === id);
+      return allBudgets.find(b => b.id === id);
     },
-    [budgets],
+    [allBudgets],
   );
 
   return {

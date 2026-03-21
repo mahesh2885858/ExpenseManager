@@ -25,6 +25,8 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const sort = props?.sort ?? undefined;
 
   const removeTransaction = useTransactionsStore(state => state.requestDelete);
+  const undoDelete = useTransactionsStore(state => state.undoDelete);
+  const pendingDelete = useTransactionsStore(state => state.pendingDelete);
 
   const updateTransaction = useTransactionsStore(
     state => state.updateTransaction,
@@ -225,11 +227,17 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
 
   const updateATransaction = useCallback(
     (id: string, updated: TTransaction, original: TTransaction) => {
-      updateTransaction(id, updated);
       updateBudgetForTransactionUpdate(updated, original);
+      updateTransaction(id, updated);
     },
     [updateTransaction, updateBudgetForTransactionUpdate],
   );
+
+  const undoTransactionDelete = useCallback(() => {
+    if (!pendingDelete) return;
+    undoDelete();
+    updateBudgetSpentForTransaction(pendingDelete);
+  }, [undoDelete, pendingDelete, updateBudgetSpentForTransaction]);
 
   return {
     totalExpenses,
@@ -242,6 +250,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
     deleteTransaction,
     getFormattedAmount,
     transactionsByIds,
+    undoTransactionDelete,
   };
 };
 
