@@ -105,7 +105,7 @@ const AddTransaction = () => {
         selectedCatId:
           categories.length === 1
             ? categories[0]?.id ?? defaultCategoryId
-            : defaultWalletId
+            : defaultCategoryId
             ? defaultCategoryId
             : null,
         time: {
@@ -115,6 +115,8 @@ const AddTransaction = () => {
       };
     }
   }, [route, defaultWalletId, categories, defaultCategoryId]);
+
+  console.log({ initData });
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
