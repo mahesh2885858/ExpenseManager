@@ -93,6 +93,9 @@ const CreateNewAccount = (props: TProps) => {
   const isEditModeOn = useMemo(() => {
     return !!props.accToEdit;
   }, [props]);
+  const containerHeight = useMemo(() => {
+    return open ? availableScreenHeight : 'auto';
+  }, [open, availableScreenHeight]);
 
   return (
     <BottomSheetModal
@@ -112,7 +115,7 @@ const CreateNewAccount = (props: TProps) => {
           styles.container,
           {
             paddingTop: topPadding,
-            height: open ? availableScreenHeight : 'auto',
+            height: containerHeight,
           },
         ]}
       >

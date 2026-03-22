@@ -11,9 +11,8 @@ import {
 import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize } from '../../../theme';
-import { TRootStackParamList } from '../../types';
 import { gs } from '../../common/';
-import useBackup from '../../hooks/useBackup';
+import { TRootStackParamList } from '../../types';
 
 const InitialAccountNameSetup = () => {
   const { bottom, top } = useSafeAreaInsets();

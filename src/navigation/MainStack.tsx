@@ -13,6 +13,8 @@ import Settings from '../screens/Settings';
 import FilteredTransactions from '../screens/FilteredTransactions';
 import ManageCategories from '../screens/ManageCategories';
 import TransactionSort from '../screens/TransactionSort';
+import BudgetDetails from '../screens/BudgetDetails';
+import AddOrEditBudget from '../screens/AddOrEditBudget';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -98,6 +100,20 @@ const MainStack = () => {
           <Stack.Screen
             name="FilteredTransactions"
             component={FilteredTransactions}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="BudgetDetails"
+            component={BudgetDetails}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="AddOrEditBudget"
+            component={AddOrEditBudget}
             options={{
               headerShown: false,
             }}

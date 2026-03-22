@@ -13,42 +13,34 @@ import { TTransaction } from '../types';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 
 const RenderTransaction = (props: {
-  item: TTransaction;
+  item: string;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
   const categories = useCategoriesStore(state => state.categories);
-  const toggleSelection = useTransactionsStore(state => state.toggleSelection);
-  const { deleteTransaction, getFormattedAmount } = useTransactions({});
-  const transactions = useTransactionsStore(state => state.transactions);
+  const { getFormattedAmount } = useTransactions({});
+  const requestDelete = useTransactionsStore(state => state.requestDelete);
 
-  const selectedTransactions = useMemo(
-    () => transactions.filter(d => d.isSelected),
-    [transactions],
+  const transactionsByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
+  const selectedTransactions = useTransactionsStore(
+    state => state.selectedTransactionIds,
   );
 
   const categoryName = useMemo(() => {
-    const cId = props.item.categoryIds[0];
+    if (!transactionsByIds) return 'Unknown';
+    const cId = transactionsByIds[props.item].categoryIds[0];
     const category = categories.find(c => c.id === cId);
     return category?.name ?? 'Unknown';
-  }, [props, categories]);
+  }, [props, categories, transactionsByIds]);
 
+  if (!transactionsByIds) return <View>No Transaction found</View>;
+  const transaction = transactionsByIds[props.item];
   return (
     <PressableWithFeedback
-      onLongPress={() => toggleSelection(props.item.id)}
       onPress={() => {
-        if (props.item.isSelected) {
-          toggleSelection(props.item.id);
-        } else {
-          if (selectedTransactions.length > 0) {
-            toggleSelection(props.item.id);
-            return;
-          }
-          // navigation.navigate('TransactionDetails', {
-          //   transaction: props.item,
-          // });
-          props.onItemPress(props.item);
-        }
+        props.onItemPress(transaction);
       }}
       style={[
         gs.flexRow,
@@ -69,7 +61,7 @@ const RenderTransaction = (props: {
           gs.centerItems,
         ]}
       >
-        {(props.item.attachments?.length ?? 0) > 0 && (
+        {(transaction.attachments?.length ?? 0) > 0 && (
           <View style={styles.icon}>
             <Icon source={'paperclip'} size={10} />
           </View>
@@ -79,47 +71,47 @@ const RenderTransaction = (props: {
           style={[
             {
               color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.md,
+              fontSize: textSize.sm,
             },
             gs.fontBold,
           ]}
         >
-          {format(props.item.transactionDate, 'MMM')}
+          {format(transaction.transactionDate, 'MMM')}
         </Text>
         <Text
           style={[
             {
               color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.md,
+              fontSize: textSize.sm,
             },
             gs.fontBold,
           ]}
         >
-          {getDate(props.item.transactionDate)}
+          {getDate(transaction.transactionDate)}
         </Text>
       </View>
       <View style={[gs.fullFlex, gs.justifyCenter]}>
         <Text
           style={[
             {
-              fontSize: textSize.lg,
+              fontSize: textSize.md,
               color: theme.colors.onSurface,
             },
           ]}
         >
           {categoryName}
         </Text>
-        {props.item.description && (
+        {transaction.description && (
           <Text
             style={[
               {
-                fontSize: textSize.md,
+                fontSize: textSize.sm,
                 color: theme.colors.onSurfaceVariant,
               },
             ]}
           >
             {getMaxText(
-              props.item.description.replace(/[\r\n]+/g, ' ') ?? '',
+              transaction.description.replace(/[\r\n]+/g, ' ') ?? '',
               20,
             )}
           </Text>
@@ -130,31 +122,31 @@ const RenderTransaction = (props: {
           gs.flexRow,
           // gs.centerItems,
           gs.itemsCenter,
-          props.item.isSelected && styles.actionsBox,
+          transaction.isSelected && styles.actionsBox,
         ]}
       >
         <Text
           style={[
             gs.fontBold,
             {
-              fontSize: textSize.lg,
+              fontSize: textSize.md,
               color:
-                props.item.type === 'expense'
+                transaction.type === 'expense'
                   ? theme.colors.error
                   : theme.colors.tertiary,
             },
           ]}
         >
-          {getFormattedAmount(props.item.amount)}
+          {getFormattedAmount(transaction.amount)}
         </Text>
-        {props.item.isSelected && (
+        {selectedTransactions.has(props.item) && (
           <Animated.View
             entering={ZoomIn}
             exiting={ZoomOut}
             style={[gs.flexRow, { gap: spacing.xs }]}
           >
             <PressableWithFeedback
-              onPress={() => deleteTransaction(props.item.id)}
+              onPress={() => requestDelete(transaction)}
               style={[
                 styles.action,
                 {

@@ -12,16 +12,15 @@ import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize } from '../../../theme';
-import { gs, MAX_AMOUNT } from '../../common';
+import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
 import { TRootStackParamList } from '../../types';
-import { getDigits } from 'commonutil-core';
-import useTransactions from '../../hooks/useTransactions';
-import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 
 const InitialAccountAmountSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
@@ -47,20 +46,6 @@ const InitialAccountAmountSetup = () => {
     handlePresent: amountBoardPresent,
     handleSheetChange: amountBoardSheetChange,
   } = useBottomSheetModal();
-
-  const onAmountChange = useCallback(
-    (value: string) => {
-      // don't allow floats and etc symbols
-      if (value.includes('.') || value.includes('-')) return;
-      const cleanDigits = getDigits(value);
-      const parsedDigits = parseInt(cleanDigits, 10);
-      if (parsedDigits > MAX_AMOUNT) return;
-
-      const formattedAmount = getFormattedAmount(parsedDigits);
-      setAmount(formattedAmount);
-    },
-    [getFormattedAmount],
-  );
 
   const saveAccount = useCallback(() => {
     const id = uuid();

@@ -24,27 +24,27 @@ import { v4 as uuid } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useTransactions from '../../hooks/useTransactions';
-import useTransactionsStore from '../../stores/transactionsStore';
 import {
-  TWallet,
   TAttachment,
   TRootStackParamList,
+  TTransaction,
   TTransactionType,
+  TWallet,
 } from '../../types';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
 type TValidatedInputs = {
-  selectedAcc: TWallet;
+  selectedWallet: TWallet;
   selectedCategoryId: string;
   amount: number;
 };
@@ -56,11 +56,10 @@ const AddTransaction = () => {
 
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
-  const { addNewTransaction, getFormattedAmount } = useTransactions({});
-  const updateTransaction = useTransactionsStore(
-    state => state.updateTransaction,
-  );
-  const { wallets: accounts, defaultWalletId: defaultAccountId } = useWallets();
+  const { addNewTransaction, getFormattedAmount, updateATransaction } =
+    useTransactions({});
+
+  const { wallets, defaultWalletId } = useWallets();
 
   const initData: {
     type: TTransactionType;
@@ -68,7 +67,7 @@ const AddTransaction = () => {
     date: CalendarDate;
     desc: string;
     attachments: TAttachment[];
-    accountId: string;
+    walletId: string;
     selectedCatId: string | null;
     time: {
       hours: number;
@@ -77,7 +76,6 @@ const AddTransaction = () => {
   } = useMemo(() => {
     if (route.params.mode === 'edit') {
       const tr = route.params.transaction;
-      console.log({ tr });
       return {
         type: tr.type,
         amountInput: tr.amount.toString(),
@@ -85,7 +83,7 @@ const AddTransaction = () => {
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
         selectedCatId: tr.categoryIds[0],
-        accountId: tr.walletId,
+        walletId: tr.walletId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
           minutes: new Date(tr.transactionDate).getMinutes(),
@@ -101,13 +99,13 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
-        accountId: defaultAccountId,
+        walletId: defaultWalletId,
 
         attachments: [],
         selectedCatId:
           categories.length === 1
             ? categories[0]?.id ?? defaultCategoryId
-            : defaultAccountId
+            : defaultCategoryId
             ? defaultCategoryId
             : null,
         time: {
@@ -116,7 +114,7 @@ const AddTransaction = () => {
         },
       };
     }
-  }, [route, defaultAccountId, categories, defaultCategoryId]);
+  }, [route, defaultWalletId, categories, defaultCategoryId]);
 
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
@@ -130,28 +128,26 @@ const AddTransaction = () => {
     initData.time,
   );
   const [desc, setDesc] = useState(initData.desc);
-  const [attachments, setAttachments] = useState<TAttachment[]>(
-    initData.attachments,
-  );
+  const [attachments] = useState<TAttachment[]>(initData.attachments);
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initData.selectedCatId,
   );
   const { kbHeight } = useGetKeyboardHeight();
-  const [accountId, setAccountId] = useState(initData.accountId);
+  const [walletId, setWalletId] = useState(initData.walletId);
   const [errorFields, setErrorFields] = useState<Array<
-    'amount' | 'account' | 'category' | 'date' | 'time'
+    'amount' | 'wallet' | 'category' | 'date' | 'time'
   > | null>(null);
 
   const progress = useSharedValue(0);
 
-  const selectedAcc = useMemo(() => {
-    if (accountId.trim().length <= 0) {
+  const selectedWallet = useMemo(() => {
+    if (walletId.trim().length <= 0) {
       return null;
     } else {
-      const selectedAccount = accounts.filter(acc => acc.id === accountId);
-      return selectedAccount[0] ?? null;
+      const fitleredWallets = wallets.filter(wallet => wallet.id === walletId);
+      return fitleredWallets[0] ?? null;
     }
-  }, [accountId, accounts]);
+  }, [walletId, wallets]);
 
   const onDismissSingle = useCallback(() => {
     setOpenDatePicker(false);
@@ -174,23 +170,19 @@ const AddTransaction = () => {
   const validateInputs = () => {
     const errors: typeof errorFields = [];
     let amount = 0;
-    if (!selectedAcc) {
-      console.log('No wallet selected');
-      errors.push('account');
+    if (!selectedWallet) {
+      errors.push('wallet');
     }
     if (!selectedCategoryId) {
-      console.log('No category selected');
       errors.push('category');
     }
 
     if (amountInput.trim().length === 0) {
-      console.log('No amount added');
       errors.push('amount');
     } else {
       amount = parseFloat(amountInput);
 
       if (amount <= 0) {
-        console.log('No amount added');
         errors.push('amount');
       }
     }
@@ -200,7 +192,7 @@ const AddTransaction = () => {
       return null;
     } else {
       return {
-        selectedAcc,
+        selectedWallet,
         selectedCategoryId,
         amount,
       } satisfies TValidatedInputs;
@@ -213,16 +205,16 @@ const AddTransaction = () => {
         route.params.mode === 'edit' ? route.params.transaction.id : uuid();
 
       const result = validateInputs();
-      console.log({ result });
       if (!result) return;
 
-      const selectedAccountId = result?.selectedAcc?.id;
+      const selectedWalletId = result?.selectedWallet?.id;
 
       const dateToAdd = date ?? new Date();
       dateToAdd?.setHours(time.hours);
       dateToAdd?.setMinutes(time.minutes);
       if (route.params.mode === 'edit') {
-        updateTransaction(route.params.transaction.id, {
+        const original = route.params.transaction;
+        const updated: TTransaction = {
           ...route.params.transaction,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
@@ -230,10 +222,11 @@ const AddTransaction = () => {
           type: transactionType,
           attachments: attachments,
           description: desc,
-        });
+        };
+        updateATransaction(route.params.transaction.id, updated, original);
       } else {
         addNewTransaction({
-          walletId: selectedAccountId,
+          walletId: selectedWalletId,
           amount: result.amount,
           categoryIds: [selectedCategoryId],
           createdAt: new Date().toISOString(),
@@ -273,6 +266,17 @@ const AddTransaction = () => {
     handlePresent: handleAmountInputPresent,
     handleSheetChange: handleAmountSheetChange,
   } = useBottomSheetModal();
+
+  const categoryContainerStyle = useMemo(() => {
+    const hasError = errorFields?.includes('category');
+
+    return {
+      marginTop: spacing.md,
+      backgroundColor: colors.surfaceVariant,
+      borderColor: hasError ? colors.error : 'transparent',
+      borderWidth: hasError ? 1 : 0,
+    };
+  }, [colors, errorFields]);
 
   useEffect(() => {
     progress.value = withTiming(transactionType === 'expense' ? 0 : 1, {
@@ -369,17 +373,7 @@ const AddTransaction = () => {
         {/* Category Selection */}
         <PressableWithFeedback onPress={() => handlePresentCategories()}>
           <View
-            style={[
-              {
-                marginTop: spacing.md,
-                backgroundColor: colors.surfaceVariant,
-                borderColor: errorFields?.some(f => f === 'category')
-                  ? colors.error
-                  : 'transparent',
-                borderWidth: errorFields?.some(f => f === 'category') ? 1 : 0,
-              },
-              style.categoryContainer,
-            ]}
+            style={[{ ...categoryContainerStyle }, style.categoryContainer]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Icon
@@ -425,7 +419,7 @@ const AddTransaction = () => {
             </View>
           </View>
         </PressableWithFeedback>
-        {/* Account section */}
+        {/* Wallet section */}
         <PressableWithFeedback onPress={() => handlePresentModalPress()}>
           <View
             style={[
@@ -455,7 +449,7 @@ const AddTransaction = () => {
                 >
                   Wallet
                 </Text>
-                {errorFields?.some(f => f === 'account') && (
+                {errorFields?.some(f => f === 'wallet') && (
                   <Text
                     style={[
                       {
@@ -479,7 +473,7 @@ const AddTransaction = () => {
                   },
                 ]}
               >
-                {selectedAcc?.name ?? 'Select a wallet'}
+                {selectedWallet?.name ?? 'Select a wallet'}
               </Text>
               <Icon
                 color={colors.onSurfaceVariant}
@@ -696,14 +690,14 @@ const AddTransaction = () => {
         }}
         selectedCategory={selectedCategoryId}
       />
-      <AccountSelectionModal
-        onAccountChange={id => {
-          setAccountId(id);
-          setErrorFields(p => (!p ? p : p.filter(f => f !== 'account')));
+      <WalletSelectionModal
+        onWalletChange={id => {
+          setWalletId(id);
+          setErrorFields(p => (!p ? p : p.filter(f => f !== 'wallet')));
         }}
         handleSheetChanges={handleSheetChanges}
         ref={bottomSheetModalRef}
-        selectedAccountId={accountId}
+        selectedWalletId={walletId}
       />
     </KeyboardAvoidingView>
   );

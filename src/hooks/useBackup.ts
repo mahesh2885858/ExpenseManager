@@ -1,24 +1,36 @@
 import { format } from 'date-fns';
+import Stringify from 'fast-json-stable-stringify';
+import { sha256 } from 'js-sha256';
 import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import * as ScopedStorage from 'react-native-scoped-storage';
-import useWalletStore from '../stores/walletsStore';
+import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
+import useCategoriesStore from '../stores/categoriesStore';
 import useSettingsStore from '../stores/settingsStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TWallet, TCategories, TTransaction } from '../types';
+import useWalletStore from '../stores/walletsStore';
+import {
+  TBudget,
+  TCategories,
+  TTransaction,
+  TTransactionByIds,
+  TWallet,
+} from '../types';
 import { getValidData } from '../utils/validateImportedData';
 import useWallets from './useAccounts';
 import useCategories from './useCategories';
-import useTransactions from './useTransactions';
-import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
-import { sha256 } from 'js-sha256';
-import Stringify from 'fast-json-stable-stringify';
-import useCategoriesStore from '../stores/categoriesStore';
+import useBudgets from './useBudgets';
+import useBudgetStore from '../stores/budgetStore';
 
 const useBackup = () => {
   const { wallets } = useWallets();
   const { categories } = useCategories();
-  const { filteredTransactions: transactions } = useTransactions({});
+  const budgets = useBudgetStore(state => state.budgets);
+  const importBudgets = useBudgetStore(state => state.importBudgets);
+  const transactionsIds = useTransactionsStore(state => state.transactionsIds);
+  const transactionsByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
   const importCategories = useCategoriesStore(state => state.importCategories);
   const importTransactions = useTransactionsStore(
     state => state.importTransactions,
@@ -34,6 +46,7 @@ const useBackup = () => {
     wallets: TWallet[];
     categories: TCategories;
     transactions: TTransaction[];
+    budgets: TBudget[];
   }>(null);
 
   const [isGettingData, setIsGettingData] = useState(false);
@@ -51,11 +64,17 @@ const useBackup = () => {
   const exportData = useCallback(async () => {
     try {
       setIsExporting(true);
-
+      const transactions: TTransaction[] = [];
+      if (transactionsByIds) {
+        transactionsIds.forEach(id => {
+          transactions.push(transactionsByIds[id]);
+        });
+      }
       const dataToExport = {
         wallets,
-        transactions: transactions,
+        transactions,
         categories,
+        budgets,
       };
 
       const serialized = Stringify(dataToExport);
@@ -114,9 +133,11 @@ const useBackup = () => {
     removeBackupDirPath,
     setBackupDirPath,
     pickTheDirectory,
-    transactions,
+    transactionsIds,
     wallets,
     categories,
+    transactionsByIds,
+    budgets,
   ]);
 
   const getDataToImport = useCallback(async () => {
@@ -147,10 +168,10 @@ const useBackup = () => {
 
         const { validData, itemsSkipped } = getValidData(data.data);
 
-        const accountIds = new Set(validData.accounts?.map(a => a.id));
+        const accountIds = new Set(validData.wallets?.map(a => a.id));
 
         validData.transactions = validData.transactions?.filter(t => {
-          if (!accountIds.has(t.accountId)) {
+          if (!accountIds.has(t.walletId)) {
             itemsSkipped.transactions += 1;
             return false;
           }
@@ -158,9 +179,10 @@ const useBackup = () => {
         });
 
         setDataToImport({
-          wallets: validData.accounts ?? [],
+          wallets: validData.wallets ?? [],
           categories: validData.categories ?? [],
           transactions: validData.transactions ?? [],
+          budgets: validData.budgets ?? [],
         });
       } else {
         throw new Error('No data found');
@@ -179,12 +201,29 @@ const useBackup = () => {
       setIsImporting(true);
       importWallets(dataToImport.wallets);
       importCategories(dataToImport.categories);
-      importTransactions(dataToImport.transactions);
+      importBudgets(dataToImport.budgets);
+      let data: TTransactionByIds = null;
+      const ids: string[] = [];
+      dataToImport.transactions.forEach(tr => {
+        if (!data) {
+          data = { [tr.id]: tr };
+        } else {
+          data[tr.id] = tr;
+        }
+        ids.push(tr.id);
+      });
+      importTransactions(ids, data);
       setDataToImport(null);
       setIsImporting(false);
       ToastAndroid.show('Imported successfully', ToastAndroid.LONG);
     }
-  }, [dataToImport, importWallets, importCategories, importTransactions]);
+  }, [
+    dataToImport,
+    importWallets,
+    importCategories,
+    importTransactions,
+    importBudgets,
+  ]);
 
   return {
     exportData,

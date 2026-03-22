@@ -9,6 +9,8 @@ export type TAttachment = {
   extension: string;
 };
 
+export type TTransactionsIds = string[];
+
 export type TTransaction = {
   id: string;
   walletId: string; // ID associated with wallet to which this transaction is added
@@ -22,7 +24,11 @@ export type TTransaction = {
   isSelected?: boolean;
 };
 
+export type TTransactionByIds = Record<string, TTransaction> | null;
+
 export type TFilterTypes = 'date' | 'type' | 'category';
+
+export type TSelectedTransactionIds = Set<string>;
 
 export type TDateFilter = {
   isToday?: boolean;

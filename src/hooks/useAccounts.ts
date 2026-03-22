@@ -10,10 +10,10 @@ const useWallets = () => {
   const deleteTransactionForAWallet = useTransactionsStore(
     state => state.deleteForAnAcc,
   );
-  const { filteredTransactions: transactions } = useTransactions({});
+  const { filteredTransactions: transactions, transactionsByIds } =
+    useTransactions({});
   const defaultWalletId = useWalletStore(state => state.defaultWalletId);
   const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
-
   const setSelectedWalletId = useWalletStore(
     state => state.setSelectedWalletId,
   );
@@ -54,16 +54,25 @@ const useWallets = () => {
   const getIncomeExpenseForWallet = useCallback(
     (id: string) => {
       const wallet = wallets.find(w => w.id === id);
-      const transactionsForWallet = transactions.filter(t => t.walletId === id);
+      if (!transactionsByIds)
+        return {
+          expense: 0,
+          income: 0,
+          balance: wallet?.initBalance ?? 0,
+        };
+
+      const transactionsForWallet = transactions.filter(
+        t => transactionsByIds[t].walletId === id,
+      );
       let expense = 0;
       let income = 0;
       let balance = 0;
       if (wallet) {
         transactionsForWallet.forEach(t => {
-          if (t.type === 'expense') {
-            expense += t.amount;
+          if (transactionsByIds[t].type === 'expense') {
+            expense += transactionsByIds[t].amount;
           } else {
-            income += t.amount;
+            income += transactionsByIds[t].amount;
           }
         });
         balance = (wallet.initBalance ?? 0) + income - expense;
@@ -75,7 +84,7 @@ const useWallets = () => {
         balance: roundValue(balance, 2),
       };
     },
-    [wallets, transactions],
+    [wallets, transactionsByIds, transactions],
   );
 
   const getWalletNameById = useCallback(
@@ -94,6 +103,7 @@ const useWallets = () => {
     setSelectedWalletId,
     getIncomeExpenseForWallet,
     getWalletNameById,
+    setDefaultWalletId,
     defaultWalletId: defaultWalletId
       ? defaultWalletId
       : wallets.length > 0

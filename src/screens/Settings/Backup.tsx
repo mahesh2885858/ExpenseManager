@@ -14,7 +14,7 @@ import useBackup from '../../hooks/useBackup';
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const heightExpanded = 200;
 const heightCollapsed = 65;
-const heightDoubleExpanded = 420;
+const heightDoubleExpanded = 450;
 type TProps = {
   scrollRef: React.RefObject<ScrollView | null>;
   onItemPress: (item: string | null) => void;
@@ -187,6 +187,11 @@ const Backup = (props: TProps) => {
             style={[styles.importSummaryText, { color: colors.onBackground }]}
           >
             Categories: {dataToImport?.categories.length}
+          </Text>
+          <Text
+            style={[styles.importSummaryText, { color: colors.onBackground }]}
+          >
+            Budgets: {dataToImport?.budgets.length}
           </Text>
         </View>
         <Text style={[{ color: colors.onBackground }]}>

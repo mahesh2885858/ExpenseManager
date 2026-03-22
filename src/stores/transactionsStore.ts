@@ -2,24 +2,35 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
-import { TFilters, TSort, TTransaction } from '../types';
+import {
+  TFilters,
+  TSelectedTransactionIds,
+  TSort,
+  TTransaction,
+  TTransactionByIds,
+  TTransactionsIds,
+} from '../types';
 
 type TTransactionsStore = {
-  transactions: TTransaction[];
+  transactionsByIds: TTransactionByIds;
   filters: TFilters;
   sort: TSort;
   pendingDelete: TTransaction | null;
+  transactionsIds: TTransactionsIds;
+  selectedTransactionIds: TSelectedTransactionIds;
 };
 
 type TTransactionsStoreActions = {
-  addTransaction: (account: TTransaction) => void;
+  addTransaction: (transaction: TTransaction) => void;
   updateTransaction: (id: string, transaction: TTransaction) => void;
   toggleSelection: (id: string) => void;
+  selectTransaction: (id: string) => void;
+  deSelectTransaction: (id: string) => void;
   removeTransaction: (id: string) => void;
   setFilters: (filter: Partial<TFilters>) => void;
   resetFilters: () => void;
   deleteForAnAcc: (accId: string) => void;
-  importTransactions: (t: TTransaction[]) => void;
+  importTransactions: (ids: TTransactionsIds, data: TTransactionByIds) => void;
   setSort: (sort: TSort) => void;
   requestDelete: (t: TTransaction) => void;
   undoDelete: () => void;
@@ -31,13 +42,15 @@ type PositionStore = TTransactionsStore & TTransactionsStoreActions;
 const useTransactionsStore = create<PositionStore>()(
   persist(
     (set, get) => ({
-      transactions: [],
+      transactionsIds: [],
+      selectedTransactionIds: new Set(),
       categories: [
         {
           name: 'General',
           id: DEFAULT_CATEGORY_ID,
         },
       ],
+      transactionsByIds: null,
       defaultCategoryId: DEFAULT_CATEGORY_ID,
       filters: {
         date: {
@@ -49,34 +62,67 @@ const useTransactionsStore = create<PositionStore>()(
       sort: 'dateNewFirst',
       pendingDelete: null,
       addTransaction: transaction => {
-        set(state => ({ transactions: [...state.transactions, transaction] }));
+        set(state => ({
+          transactionsIds: [...state.transactionsIds, transaction.id],
+          transactionsByIds: state.transactionsByIds
+            ? {
+                ...state.transactionsByIds,
+                [transaction.id]: { ...transaction },
+              }
+            : { [transaction.id]: { ...transaction } },
+        }));
       },
       updateTransaction: (id, transaction) => {
         set(state => ({
           ...state,
-          transactions: state.transactions.map(t => {
-            if (t.id === id) return { ...t, ...transaction };
-            return t;
-          }),
+
+          transactionsByIds: {
+            ...state.transactionsByIds,
+            [id]: { ...transaction },
+          },
         }));
       },
 
       toggleSelection: id => {
-        set(state => ({
-          transactions: state.transactions.map(t => {
-            if (t.id === id) {
-              return { ...t, isSelected: !t.isSelected };
-            } else {
-              return t;
-            }
-          }),
-        }));
+        set(state => {
+          const selectedIds = new Set(state.selectedTransactionIds);
+          const isSelected = state.selectedTransactionIds.has(id);
+          if (isSelected) {
+            selectedIds.delete(id);
+          } else {
+            selectedIds.add(id);
+          }
+
+          return {
+            selectedTransactionIds: selectedIds,
+          };
+        });
       },
       removeTransaction: id => {
-        const updatedTransactions = get().transactions.filter(t => t.id !== id);
+        const updatedTransactionIds = get().transactionsIds.filter(
+          t => t !== id,
+        );
+        const updatedTransactionByIds = { ...get().transactionsByIds };
+
+        delete updatedTransactionByIds[id];
         set(() => ({
-          transactions: updatedTransactions,
+          transactionsByIds: updatedTransactionByIds,
+          transactionsIds: updatedTransactionIds,
         }));
+      },
+      selectTransaction: id => {
+        set(() => ({
+          selectedTransactionIds: get().selectedTransactionIds.add(id),
+        }));
+      },
+      deSelectTransaction: id => {
+        set(() => {
+          const t = new Set(get().selectedTransactionIds);
+          t.delete(id);
+          return {
+            selectedTransactionIds: t,
+          };
+        });
       },
       setFilters: filter => {
         if (filter) {
@@ -95,16 +141,25 @@ const useTransactionsStore = create<PositionStore>()(
         }));
       },
       deleteForAnAcc: accId => {
-        const updatedTransaction = get().transactions.filter(
-          t => t.walletId !== accId,
-        );
+        const totalTransactionByIds = get().transactionsByIds;
+        const updatedTransactionIds: TTransactionsIds = [];
+        const updatedTransactionsByIds: TTransactionByIds = {};
+        get().transactionsIds.forEach(id => {
+          const t = totalTransactionByIds ? totalTransactionByIds[id] : null;
+
+          if (t && t.walletId !== accId) {
+            updatedTransactionIds.push(id);
+            updatedTransactionsByIds[id] = t;
+          }
+        });
         set({
-          transactions: updatedTransaction,
+          transactionsByIds: updatedTransactionsByIds,
+          transactionsIds: updatedTransactionIds,
         });
       },
 
-      importTransactions: transactions => {
-        set({ transactions });
+      importTransactions: (transactionsIds, transactionsByIds) => {
+        set({ transactionsIds, transactionsByIds });
       },
 
       setSort: sort => {
@@ -113,21 +168,27 @@ const useTransactionsStore = create<PositionStore>()(
       requestDelete: transaction => {
         set({
           pendingDelete: transaction,
-          transactions: get().transactions.filter(t => t.id !== transaction.id),
+          transactionsIds: get().transactionsIds.filter(
+            t => t !== transaction.id,
+          ),
         });
       },
       confirmDelete: () => {
         const pending = get().pendingDelete;
         if (!pending) return;
+        const t = { ...get().transactionsByIds };
+        delete t[pending.id];
         set({
           pendingDelete: null,
+          transactionsByIds: t,
         });
       },
       undoDelete: () => {
         const pending = get().pendingDelete;
         if (!pending) return;
+        const ids = [...get().transactionsIds, pending.id];
         set({
-          transactions: [pending, ...get().transactions],
+          transactionsIds: ids,
           pendingDelete: null,
         });
       },
@@ -135,6 +196,12 @@ const useTransactionsStore = create<PositionStore>()(
     {
       name: 'transactions-storage',
       storage: createJSONStorage(zustandStorage),
+      partialize: state => ({
+        transactionsIds: state.transactionsIds,
+        transactionsByIds: state.transactionsByIds,
+        filters: state.filters,
+        sort: state.sort,
+      }),
     },
   ),
 );

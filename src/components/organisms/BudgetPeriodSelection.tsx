@@ -3,54 +3,37 @@ import {
   BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetProps,
-  BottomSheetTextInput,
   useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useCategories from '../../hooks/useCategories';
-import { TCategory } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import CreateNewCategory from './CreateNewCategory';
+import { uCFirst } from 'commonutil-core';
 
 type TProps = {
   ref: any;
   handleSheetChanges: BottomSheetProps['onChange'];
-  selectCategory: (id: string) => void;
-  selectedCategory?: string | null;
+  selectBudgetPeriod: (
+    id: 'weekly' | 'monthly' | 'yearly' | 'one time',
+  ) => void;
+  selectedPeriod?: 'weekly' | 'monthly' | 'yearly' | 'one time';
   forFilter?: boolean;
-  allowMultiple?: boolean;
 };
 
 const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
   return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
 };
 
-const CategorySelectionModal = (props: TProps) => {
-  const { categories } = useCategories();
+const BudgetPeriodSelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
-  const [search, setSearch] = useState('');
-
-  const categoriesToRender = useMemo(() => {
-    return search.trim().length === 0
-      ? categories
-      : categories.filter(cat =>
-          cat.name.toLowerCase().includes(search.trim().toLowerCase()),
-        );
-  }, [categories, search]);
-
-  const sortedCategories = useMemo(() => {
-    return categoriesToRender.sort((a, b) => a.name.localeCompare(b.name));
-  }, [categoriesToRender]);
+  const budgetPeriods = ['weekly', 'monthly', 'yearly', 'one time'] as const;
 
   return (
     <BottomSheetModal
@@ -77,60 +60,25 @@ const CategorySelectionModal = (props: TProps) => {
                   },
                 ]}
               >
-                Select Category
+                Select Period
               </Text>
-              <PressableWithFeedback
-                hidden={props.forFilter}
-                onPress={handlePresent}
-                style={[
-                  {
-                    paddingLeft: spacing.md,
-                  },
-                ]}
-              >
-                <Icon
-                  source={'plus'}
-                  size={textSize.xxxl}
-                  color={colors.onTertiaryContainer}
-                />
-              </PressableWithFeedback>
             </View>
-            {categories.length > 5 && (
-              <View style={[{ marginTop: spacing.sm }]}>
-                <BottomSheetTextInput
-                  value={search}
-                  onChangeText={setSearch}
-                  placeholderTextColor={colors.onSurfaceDisabled}
-                  placeholder="Search categories"
-                  style={[
-                    styles.searchInput,
-                    {
-                      color: colors.onBackground,
-                      borderColor: colors.outlineVariant,
-                    },
-                  ]}
-                />
-              </View>
-            )}
+
             <FlashList
               style={[styles.listStyle]}
-              numColumns={2}
+              data={budgetPeriods}
               renderScrollComponent={BottomSheetScrollable}
-              keyExtractor={(item: TCategory) => item.id}
+              keyExtractor={item => item}
               showsVerticalScrollIndicator={false}
-              data={sortedCategories}
               masonry
               contentContainerStyle={[styles.listContainer]}
-              renderItem={({ item }: { item: TCategory }) => {
-                const isSelected = props.selectedCategory === item.id;
-
+              renderItem={({ item }) => {
+                const isSelected = props.selectedPeriod === item;
                 return (
                   <PressableWithFeedback
                     onPress={() => {
-                      props.selectCategory(item.id);
-                      if (!props.allowMultiple) {
-                        props.ref.current?.dismiss();
-                      }
+                      props.selectBudgetPeriod(item);
+                      props.ref.current?.dismiss();
                     }}
                     style={[
                       gs.flexRow,
@@ -142,13 +90,13 @@ const CategorySelectionModal = (props: TProps) => {
                           : colors.onSurfaceDisabled,
                       },
                     ]}
-                    key={item.id}
+                    key={item}
                   >
-                    {/* <RadioButton.Android
+                    <RadioButton.Android
                       status={isSelected ? 'checked' : 'unchecked'}
                       color={colors.inversePrimary}
-                      value={item.name}
-                    /> */}
+                      value={item}
+                    />
                     <Text
                       style={[
                         gs.fullFlex,
@@ -158,7 +106,7 @@ const CategorySelectionModal = (props: TProps) => {
                         },
                       ]}
                     >
-                      {item.name}
+                      {uCFirst(item)}
                     </Text>
                     {isSelected && (
                       <Icon
@@ -174,15 +122,11 @@ const CategorySelectionModal = (props: TProps) => {
           </View>
         </View>
       </View>
-      <CreateNewCategory
-        handleSheetChanges={handleSheetChange}
-        ref={btmShtRef}
-      />
     </BottomSheetModal>
   );
 };
 
-export default CategorySelectionModal;
+export default BudgetPeriodSelectionModal;
 
 const styles = StyleSheet.create({
   container: {

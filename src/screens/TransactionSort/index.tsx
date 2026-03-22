@@ -98,9 +98,8 @@ const TransactionSort = () => {
               {/* date sort */}
               <View
                 style={[
+                  styles.dateSort,
                   {
-                    borderBottomWidth: 0.5,
-
                     borderBottomColor: colors.surfaceDisabled,
                     paddingBottom: spacing.md,
                   },
@@ -288,5 +287,8 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.lg,
+  },
+  dateSort: {
+    borderBottomWidth: 0.5,
   },
 });

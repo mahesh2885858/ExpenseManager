@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import AccountSelectionModal from '../../components/organisms/AccountSelectionModal';
 import CommonHeader from '../../components/organisms/CommonHeader';
+import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import RenderTransactions from '../../components/RenderTransactions';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
@@ -25,6 +25,9 @@ const Transactions = () => {
   const setFilters = useTransactionsStore(state => state.setFilters);
   const selectedSort = useTransactionsStore(state => state.sort);
   const onSortChange = useTransactionsStore(state => state.setSort);
+  const transactionByIds = useTransactionsStore(
+    state => state.transactionsByIds,
+  );
   const [search, setSearch] = useState('');
 
   const {
@@ -63,14 +66,17 @@ const Transactions = () => {
   }, [navigation]);
 
   const transactionsToRender = useMemo(() => {
+    if (!transactionByIds) return [];
     return search.trim().length === 0
       ? filteredTransactions
       : filteredTransactions.filter(
           t =>
-            t.amount.toString().includes(search) ||
-            t.description?.toLowerCase().includes(search.toLowerCase()),
+            transactionByIds[t].amount.toString().includes(search) ||
+            transactionByIds[t].description
+              ?.toLowerCase()
+              .includes(search.toLowerCase()),
         );
-  }, [filteredTransactions, search]);
+  }, [filteredTransactions, search, transactionByIds]);
 
   const dateFilterText = useMemo(() => {
     if (filters.date) {
@@ -302,7 +308,6 @@ const Transactions = () => {
               {
                 backgroundColor: colors.surface,
                 gap: spacing.xs,
-                elevation: 3,
               },
             ]}
           >
@@ -407,16 +412,15 @@ const Transactions = () => {
           {
             paddingHorizontal: spacing.md,
             marginTop: spacing.md,
-            overflow: 'hidden',
           },
         ]}
       >
         <View
           style={[
             styles.search,
+            gs.borderOne,
             {
               backgroundColor: colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -441,9 +445,9 @@ const Transactions = () => {
           onPress={navigateToFilters}
           style={[
             styles.filter,
+            gs.borderOne,
             {
               backgroundColor: colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -462,11 +466,11 @@ const Transactions = () => {
           }
           style={[
             styles.filter,
+            gs.borderOne,
             {
               backgroundColor: isSortApplied
                 ? colors.primaryContainer
                 : colors.surface,
-              borderWidth: 1,
               borderColor: colors.outlineVariant,
             },
           ]}
@@ -493,11 +497,11 @@ const Transactions = () => {
         </View>
       </View>
 
-      <AccountSelectionModal
+      <WalletSelectionModal
         handleSheetChanges={handleSheetChange}
-        onAccountChange={id => setSelectedAccountId(id)}
+        onWalletChange={id => setSelectedAccountId(id)}
         ref={btmShtRef}
-        selectedAccountId={selectedAccount?.id ?? ''}
+        selectedWalletId={selectedAccount?.id ?? ''}
       />
     </View>
   );
@@ -522,6 +526,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     maxHeight: 35,
     width: '40%',
+    elevation: 3,
   },
   totalBalance: {
     width: '100%',
@@ -563,6 +568,7 @@ const styles = StyleSheet.create({
   },
   searchAndFilter: {
     flexDirection: 'row',
+    overflow: 'hidden',
     alignItems: 'center',
     gap: spacing.md,
   },

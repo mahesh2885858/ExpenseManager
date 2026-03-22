@@ -8,7 +8,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import { DEFAULT_CATEGORY_ID, gs } from '../../common';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useCategoriesStore from '../../stores/categoriesStore';
@@ -148,6 +148,7 @@ const RenderCategoryCard = (props: TProps) => {
       </View>
       <View style={[styles.actionBox]}>
         <PressableWithFeedback
+          hidden={props.item.id === DEFAULT_CATEGORY_ID}
           onPress={() => {
             setOpenDelDesc(true);
           }}

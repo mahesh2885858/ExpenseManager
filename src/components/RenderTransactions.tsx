@@ -1,22 +1,23 @@
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Snackbar } from 'react-native-paper';
 import { spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
-import { TBottomTabParamList, TTransaction } from '../types';
-import RenderTransaction from './RenderTransaction';
 import useBottomSheetModal from '../hooks/useBottomSheetModal';
-import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 import TransactionDetailsSheet from '../screens/TransactionDetails/TransactionDetailsSheet';
-import { Snackbar } from 'react-native-paper';
 import useTransactionsStore from '../stores/transactionsStore';
+import { TBottomTabParamList, TTransaction, TTransactionsIds } from '../types';
+import RenderTransaction from './RenderTransaction';
+import useTransactions from '../hooks/useTransactions';
 
 const RenderTransactions = ({
   transactions,
   renderSeeAll = false,
 }: {
-  transactions: TTransaction[];
+  transactions: TTransactionsIds;
   renderSeeAll?: boolean;
 }) => {
   const theme = useAppTheme();
@@ -24,9 +25,8 @@ const RenderTransactions = ({
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
   const { dismissAll } = useBottomSheetR();
-  const requestDelete = useTransactionsStore(state => state.requestDelete);
+  const { deleteTransaction, undoTransactionDelete } = useTransactions();
   const pendingDelete = useTransactionsStore(state => state.pendingDelete);
-  const undoDelete = useTransactionsStore(state => state.undoDelete);
   const confirmDelete = useTransactionsStore(state => state.confirmDelete);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
@@ -40,11 +40,10 @@ const RenderTransactions = ({
 
   const onDeletePress = useCallback(
     (t: TTransaction) => {
-      setSelectedTransaction(null);
-      requestDelete(t);
+      deleteTransaction(t.id);
       dismissAll();
     },
-    [dismissAll, requestDelete],
+    [dismissAll, deleteTransaction],
   );
 
   useEffect(() => {
@@ -76,7 +75,7 @@ const RenderTransactions = ({
         renderItem={props => (
           <RenderTransaction onItemPress={onItemPress} item={props.item} />
         )}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item}
         ListFooterComponent={
           renderSeeAll && transactions.length === 10 ? (
             <TouchableOpacity
@@ -107,11 +106,11 @@ const RenderTransactions = ({
         onDeletePress={onDeletePress}
       />
       <Snackbar
+        duration={1500}
         action={{
           label: 'undo',
           onPress: () => {
-            console.log('cancelling dleete');
-            undoDelete();
+            undoTransactionDelete();
           },
           textColor: theme.colors.onSurfaceVariant,
         }}
@@ -120,7 +119,6 @@ const RenderTransactions = ({
           { backgroundColor: theme.colors.surfaceVariant },
         ]}
         onDismiss={() => {
-          console.log('deleting hte trnx');
           confirmDelete();
         }}
         visible={!!pendingDelete}

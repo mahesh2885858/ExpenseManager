@@ -1,10 +1,12 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { TTransaction } from './transactions';
+import { TBudget } from './budget';
 
 export type TBottomTabParamList = {
   Home: undefined;
   CustomButton: undefined;
   Transactions: undefined;
+  Budgets: undefined;
   Reports: undefined;
 };
 
@@ -35,6 +37,10 @@ export type TRootStackParamList = {
     type: 'account' | 'category';
     id: string;
   };
+  BudgetDetails: {
+    budget: TBudget;
+  };
+  AddOrEditBudget: { mode: 'new' } | { mode: 'edit'; budget: TBudget };
 };
 
 declare global {

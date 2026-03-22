@@ -143,7 +143,6 @@ const TransactionFilters = () => {
   }, [setFilters]);
 
   const setCatFilter = (categoryId: string) => {
-    console.log('Category filter is being set here: ', categoryId);
     setFilters({
       categoryId: categoryId,
     });
