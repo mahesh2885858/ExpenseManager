@@ -12,6 +12,7 @@ type TBudgetActions = {
   removeBudget: (id: string) => void;
   updateBudget: (budget: TBudget) => void;
   updateMulitpleBudgets: (budgets: TBudget[]) => void;
+  importBudgets: (budgets: TBudget[]) => void;
 };
 
 type PositionStore = TBudgetStore & TBudgetActions;
@@ -41,6 +42,9 @@ const useBudgetStore = create<PositionStore>()(
             return found ? found : b;
           }),
         }));
+      },
+      importBudgets(budgets) {
+        set(() => ({ budgets }));
       },
     }),
     {

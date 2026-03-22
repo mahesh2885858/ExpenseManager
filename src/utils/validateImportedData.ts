@@ -1,16 +1,18 @@
-import { TWallet, TCategories, TTransaction } from '../types';
+import { TWallet, TCategories, TTransaction, TBudget } from '../types';
 import { getUniqueData } from './getUniqueData';
 
 type TData = {
   wallets?: TWallet[];
   transactions?: TTransaction[];
   categories?: TCategories;
+  budgets?: TBudget[];
 };
 
 type TItemsSkipped = {
   wallets: number;
   transactions: number;
   categories: number;
+  budgets: number;
 };
 
 type TReturnResults = {
@@ -23,18 +25,21 @@ export const getValidData = (data: TData): TReturnResults => {
     wallets: [],
     categories: [],
     transactions: [],
+    budgets: [],
   };
   const itemsSkipped: TItemsSkipped = {
     wallets: 0,
     categories: 0,
     transactions: 0,
+    budgets: 0,
   };
 
   if (
     !data ||
     ((!data.wallets || data.wallets.length === 0) &&
       (!data.categories || data.categories.length === 0) &&
-      (!data.transactions || data.transactions.length === 0))
+      (!data.transactions || data.transactions.length === 0) &&
+      (!data.budgets || data.budgets.length === 0))
   ) {
     throw new Error('No valid data provided');
   }
@@ -68,6 +73,17 @@ export const getValidData = (data: TData): TReturnResults => {
         validData.transactions?.push({ ...tr, walletId: tr.walletId });
       } else {
         itemsSkipped.transactions += 1;
+      }
+    });
+  }
+
+  if (data.budgets && data.budgets.length > 0) {
+    const uniqueBudgetData = getUniqueData(data.budgets, 'id');
+    uniqueBudgetData.forEach(budget => {
+      if (budget.id && budget.name) {
+        validData.budgets?.push(budget);
+      } else {
+        itemsSkipped.budgets += 1;
       }
     });
   }
