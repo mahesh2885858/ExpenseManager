@@ -116,8 +116,6 @@ const AddTransaction = () => {
     }
   }, [route, defaultWalletId, categories, defaultCategoryId]);
 
-  console.log({ initData });
-
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
     initData.type,

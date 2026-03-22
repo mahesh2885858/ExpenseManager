@@ -78,9 +78,7 @@ const BudgetDetails = () => {
 
   const progress = budget ? budget.spent / budget.amount : 0;
 
-  console.log({ budget });
   const transactionIds = budget ? getTransactionIdsForBudget(budget.id) : [];
-  console.log({ transactionIds });
 
   return (
     <View style={[styles.container, { marginTop: top }]}>

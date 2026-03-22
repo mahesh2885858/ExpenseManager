@@ -20,7 +20,6 @@ const RenderTransactions = ({
   transactions: TTransactionsIds;
   renderSeeAll?: boolean;
 }) => {
-  console.log({ transactions });
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const [selectedTransaction, setSelectedTransaction] =
