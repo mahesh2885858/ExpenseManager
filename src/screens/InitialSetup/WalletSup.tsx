@@ -76,7 +76,7 @@ const WalletSetup = () => {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.container, {}]}>
-      <View style={styles.headingContainer}>
+      <View>
         <AppText.SemiBold style={[styles.getStarted]}>
           {t('walletSetup.getYouStarted')}
         </AppText.SemiBold>
@@ -214,7 +214,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       paddingBottom: insets.bottom,
       backgroundColor: colors.background,
     },
-    headingContainer: {},
+
     getStarted: {
       color: colors.onBackground,
       fontSize: textSize.xxxl,
@@ -255,15 +255,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       color: colors.onSurface,
       flex: 1,
     },
-    nextButton: { width: '40%' },
-    nextButtonLabel: { fontSize: textSize.md },
-    amountBox: {
-      borderWidth: 1,
-      borderRadius: borderRadius.sm,
-      fontSize: textSize.lg - 2,
-      paddingVertical: spacing.sm + 5,
-      paddingLeft: spacing.xs,
-    },
+
     continueButton: {
       backgroundColor: colors.primary,
       height: 60,

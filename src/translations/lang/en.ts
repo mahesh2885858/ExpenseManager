@@ -28,4 +28,7 @@ export default {
     currency: 'Currency',
     initBalance: 'Initial Balance',
   },
+  currencyList: {
+    select: 'Select Currency',
+  },
 };
