@@ -22,7 +22,7 @@ import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
 import { TRootStackParamList } from '../../types';
 
-const InitialAccountAmountSetup = () => {
+const WalletSetup = () => {
   const { bottom, top } = useSafeAreaInsets();
   const route = useRoute<RouteProp<TRootStackParamList, 'AmountInput'>>();
   const theme = useTheme();
@@ -238,7 +238,7 @@ const InitialAccountAmountSetup = () => {
   );
 };
 
-export default InitialAccountAmountSetup;
+export default WalletSetup;
 
 const styles = StyleSheet.create({
   container: {

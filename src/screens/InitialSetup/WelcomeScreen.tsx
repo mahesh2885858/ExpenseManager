@@ -13,12 +13,18 @@ import {
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText from '../../components/molecules/AppText';
+import { useNavigation } from '@react-navigation/native';
 
 const WelcomeScreen = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const styles = createStyles(theme.colors, insets);
+
+  const navigateToWalletSetup = () => {
+    navigation.navigate('WalletSetup');
+  };
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.container]}>
@@ -39,7 +45,10 @@ const WelcomeScreen = () => {
         <AppText.Regular style={[styles.welcomSubText]}>
           {t('common.welcomeSubText')}
         </AppText.Regular>
-        <PressableWithFeedback style={[styles.getStartedButton]}>
+        <PressableWithFeedback
+          onPress={navigateToWalletSetup}
+          style={[styles.getStartedButton]}
+        >
           <AppText.SemiBold style={[styles.getStartedText]}>
             {t('common.getStarted')}
           </AppText.SemiBold>
