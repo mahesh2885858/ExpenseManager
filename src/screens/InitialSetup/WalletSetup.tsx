@@ -35,7 +35,7 @@ const WalletSetup = () => {
   const styles = createStyles(theme.colors, insets);
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
-  const [accName, setAccName] = useState('');
+  const [walletName, setWalletName] = useState('');
   const addAccount = useWalletStore(state => state.addWallet);
   const currency = useWalletStore(state => state.currency);
   const setIsInitialSetupDone = useWalletStore(
@@ -57,7 +57,7 @@ const WalletSetup = () => {
     const id = uuid();
     const amt = parseFloat(amount) || 0;
     addAccount({
-      name: accName,
+      name: walletName,
       initBalance: amt,
       id,
     });
@@ -67,7 +67,7 @@ const WalletSetup = () => {
     setIsInitialSetupDone(true);
   }, [
     addAccount,
-    accName,
+    walletName,
     setDefaultAcc,
     setSelectedAccountId,
     amount,
@@ -109,8 +109,8 @@ const WalletSetup = () => {
             placeholder={t('walletSetup.name')}
             placeholderTextColor={theme.colors.onSurfaceDisabled}
             keyboardType="default"
-            value={accName}
-            onChangeText={setAccName}
+            value={walletName}
+            onChangeText={setWalletName}
           />
         </View>
         {/*wallet name ends*/}
@@ -182,7 +182,11 @@ const WalletSetup = () => {
           </PressableWithFeedback>
         </View>
         {/*Initial balance ends*/}
-        <PressableWithFeedback style={[styles.continueButton]}>
+        <PressableWithFeedback
+          disabled={walletName.trim().length === 0}
+          style={[styles.continueButton]}
+          onPress={saveAccount}
+        >
           <AppText.SemiBold style={[styles.continueText]}>
             {t('common.continue')}
           </AppText.SemiBold>

@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import WalletSetup from '../screens/InitialSetup/WalletSup';
+import WalletSetup from '../screens/InitialSetup/WalletSetup';
 import WelcomeScreen from '../screens/InitialSetup/WelcomeScreen';
 import useWalletStore from '../stores/walletsStore';
 import { TRootStackParamList } from '../types';
