@@ -8,10 +8,17 @@ import {
 import React, { RefObject, useMemo } from 'react';
 import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 import { gs, MAX_AMOUNT } from '../../common';
 import useTransactions from '../../hooks/useTransactions';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import AppText from '../molecules/AppText';
 
 type TProps = {
   ref: RefObject<BottomSheetModal | null>;
@@ -26,22 +33,22 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const AmountInputBoard = (props: TProps) => {
   const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const { getFormattedAmount } = useTransactions();
   const { amountInput: input, setAmountInput: setInput } = props;
   const buttonStyles = StyleSheet.create({
     button: {
       flex: 1,
-      borderRadius: borderRadius.lg,
-      paddingHorizontal: spacing.sm,
-      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: spacing.md,
+      paddingVertical: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.onSurface,
     },
     buttonText: {
-      color: colors.onPrimary,
-      fontSize: textSize.xxl,
-      fontWeight: '600',
+      color: colors.onSurface,
+      fontSize: textSize.xl,
     },
   });
 
@@ -90,28 +97,27 @@ const AmountInputBoard = (props: TProps) => {
       stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
-        backgroundColor: colors.inverseOnSurface,
+        backgroundColor: colors.surfaceContainer,
       }}
       ref={props.ref}
       onChange={props.handleSheetChanges}
-      maxDynamicContentSize={500}
+      maxDynamicContentSize={520}
     >
       <BottomSheetView style={[styles.container]}>
         <View style={[styles.content]}>
           <View>
             <View style={[gs.flexRow, gs.itemsCenter]}>
-              <Text
+              <AppText.SemiBold
                 style={[
-                  gs.fontBold,
                   gs.fullFlex,
                   {
                     fontSize: textSize.lg,
-                    color: colors.onBackground,
+                    color: colors.onSurface,
                   },
                 ]}
               >
                 Enter Amount
-              </Text>
+              </AppText.SemiBold>
             </View>
             {/*amount display start*/}
             <View
@@ -122,7 +128,7 @@ const AmountInputBoard = (props: TProps) => {
                 },
               ]}
             >
-              <Text
+              <AppText.Bold
                 style={[
                   styles.amountText,
                   {
@@ -130,8 +136,8 @@ const AmountInputBoard = (props: TProps) => {
                   },
                 ]}
               >
-                {getFormattedAmount(input)}
-              </Text>
+                {getFormattedAmount(input, false)}
+              </AppText.Bold>
             </View>
             {/*amount display end*/}
             {/*Board Starts*/}
@@ -143,7 +149,9 @@ const AmountInputBoard = (props: TProps) => {
                     style={[buttonStyles.button]}
                     onPress={() => onButtonPress(String(item))}
                   >
-                    <Text style={[buttonStyles.buttonText]}>{item}</Text>
+                    <AppText.SemiBold style={[buttonStyles.buttonText]}>
+                      {item}
+                    </AppText.SemiBold>
                   </PressableWithFeedback>
                 ))}
               </View>
@@ -154,7 +162,9 @@ const AmountInputBoard = (props: TProps) => {
                     style={[buttonStyles.button]}
                     onPress={() => onButtonPress(String(item))}
                   >
-                    <Text style={[buttonStyles.buttonText]}>{item}</Text>
+                    <AppText.SemiBold style={[buttonStyles.buttonText]}>
+                      {item}
+                    </AppText.SemiBold>
                   </PressableWithFeedback>
                 ))}
               </View>
@@ -165,7 +175,9 @@ const AmountInputBoard = (props: TProps) => {
                     style={[buttonStyles.button]}
                     onPress={() => onButtonPress(String(item))}
                   >
-                    <Text style={[buttonStyles.buttonText]}>{item}</Text>
+                    <AppText.SemiBold style={[buttonStyles.buttonText]}>
+                      {item}
+                    </AppText.SemiBold>
                   </PressableWithFeedback>
                 ))}
               </View>
@@ -175,31 +187,35 @@ const AmountInputBoard = (props: TProps) => {
                   onPress={() => onButtonPress('.')}
                   style={[buttonStyles.button]}
                 >
-                  <Text style={[buttonStyles.buttonText]}>.</Text>
+                  <AppText.SemiBold style={[buttonStyles.buttonText]}>
+                    .
+                  </AppText.SemiBold>
                 </PressableWithFeedback>
                 <PressableWithFeedback
                   onPress={() => onButtonPress(String(0))}
                   style={[buttonStyles.button]}
                 >
-                  <Text style={[buttonStyles.buttonText]}>0</Text>
+                  <AppText.SemiBold style={[buttonStyles.buttonText]}>
+                    0
+                  </AppText.SemiBold>
                 </PressableWithFeedback>
                 <PressableWithFeedback
                   onPress={() => onButtonPress('back')}
-                  style={[buttonStyles.button]}
+                  style={[buttonStyles.button, { height: 59 }]}
                 >
                   <Icon
                     source={'backspace'}
-                    size={36}
-                    color={colors.onPrimary}
+                    size={28}
+                    color={colors.onSurface}
                   />
                 </PressableWithFeedback>
-                <PressableWithFeedback
-                  onPress={() => onButtonPress('save')}
-                  style={[buttonStyles.button]}
-                >
-                  <Icon source={'check'} size={36} color={colors.onPrimary} />
-                </PressableWithFeedback>
               </View>
+              <PressableWithFeedback
+                onPress={() => onButtonPress('save')}
+                style={[styles.saveButton]}
+              >
+                <AppText.Bold style={[styles.okText]}>OK</AppText.Bold>
+              </PressableWithFeedback>
             </View>
             {/*Board ends*/}
           </View>
@@ -211,38 +227,49 @@ const AmountInputBoard = (props: TProps) => {
 
 export default AmountInputBoard;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    paddingBottom: spacing.xxxl,
-  },
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: spacing.md,
+    },
+    content: {
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.md,
+      paddingBottom: spacing.xxxl,
+    },
 
-  headerText: {
-    fontSize: textSize.lg,
-  },
-  amountDisplay: {
-    padding: spacing.sm,
-    marginTop: spacing.sm,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    paddingTop: spacing.md,
-  },
-  amountText: {
-    fontSize: textSize.xxl,
-    fontWeight: '600',
-  },
-  board: {
-    paddingTop: spacing.md,
-    gap: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-});
+    headerText: {
+      fontSize: textSize.lg,
+    },
+    amountDisplay: {
+      borderRadius: borderRadius.md,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    amountText: {
+      fontSize: textSize.xxxl,
+    },
+    board: {
+      paddingTop: spacing.md,
+      gap: spacing.md,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      justifyContent: 'space-around',
+      alignItems: 'center',
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+      flex: 1,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.sm,
+    },
+    okText: {
+      color: colors.onPrimary,
+      fontSize: textSize.lg,
+    },
+  });
