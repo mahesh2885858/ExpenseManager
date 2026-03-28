@@ -1,78 +1,66 @@
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { uCFirst } from 'commonutil-core';
+import { useEffect, useMemo } from 'react';
+import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../../../theme';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
+import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import AppText from '../molecules/AppText';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('screen');
+const GAP = 4;
 
 function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useAppTheme();
-  const { bottom } = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(colors, insets);
+  const EACH_ROUTE_WIDTH = useMemo(() => {
+    return (
+      (SCREEN_WIDTH - (state.routes.length + 1) * GAP) / state.routes.length
+    );
+  }, [state.routes]);
 
-  // Filter out 'CustomButton' routes to get actual tabs
-  const filteredRoutes = state.routes.filter(
-    route => route.name !== 'CustomButton',
-  );
-  const focusedIndex = filteredRoutes.findIndex(route => {
+  const focusedIndex = state.routes.findIndex(route => {
     const originalIndex = state.routes.findIndex(r => r.key === route.key);
     return state.index === originalIndex;
   });
 
-  // Animated value for slider position
+  // Update slider position based on focused index
   const sliderPosition = useSharedValue(0);
 
-  // Update slider position when focused tab changes
   useEffect(() => {
-    sliderPosition.value = withTiming(focusedIndex, {
-      duration: 100,
-    });
-  }, [focusedIndex, sliderPosition]);
-
-  // Animated style for the slider background
-  const sliderStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      sliderPosition.value,
-      [0, filteredRoutes.length - 1],
-      [0, (filteredRoutes.length - 1) * (300 / filteredRoutes.length)],
+    sliderPosition.value = withTiming(
+      GAP + focusedIndex * (EACH_ROUTE_WIDTH + GAP),
+      {
+        duration: 100,
+      },
     );
-
-    return {
-      transform: [{ translateX: `${translateX}%` }],
-    };
-  });
+  }, [focusedIndex, sliderPosition, EACH_ROUTE_WIDTH]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          bottom: bottom,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.box,
-          {
-            backgroundColor: colors.surfaceVariant,
-          },
-        ]}
-      >
+    <View style={[styles.container, {}]}>
+      <View style={[styles.box]}>
         {/* Animated slider background */}
         <Animated.View
           style={[
             styles.slider,
             {
-              backgroundColor: colors.primary,
-              width: `${100 / filteredRoutes.length}%`,
+              backgroundColor: colors.surfaceContainerHighest,
+              width: EACH_ROUTE_WIDTH,
+              transform: [
+                {
+                  translateX: sliderPosition,
+                },
+              ],
             },
-            sliderStyle,
           ]}
         />
 
@@ -87,7 +75,6 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               target: route.key,
               canPreventDefault: true,
             });
-
             if (!isFocused && !event.defaultPrevented) {
               navigation.navigate(route.name, route.params);
             }
@@ -101,14 +88,33 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           };
 
           if (route.name === 'CustomButton') {
-            return null;
+            return (
+              <View
+                style={[
+                  styles.navigationItem,
+                  {
+                    position: 'relative',
+                  },
+                ]}
+              >
+                <PressableWithFeedback style={[styles.addIcon]}>
+                  <Icon
+                    source={'plus'}
+                    size={textSize.xxxl}
+                    color={colors.onPrimary}
+                  />
+                </PressableWithFeedback>
+              </View>
+            );
           }
 
           const routeIcon =
-            route.name === 'Transactions'
-              ? 'home'
+            route.name === 'Home'
+              ? 'home-outline'
+              : route.name === 'Transactions'
+              ? 'history'
               : route.name === 'Budgets'
-              ? 'hand-coin'
+              ? 'hand-coin-outline'
               : 'chart-arc';
 
           return (
@@ -124,14 +130,18 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 {
                   opacity: pressed ? 0.5 : 1,
                   transform: [{ scale: pressed ? 0.7 : 1 }],
+                  width: EACH_ROUTE_WIDTH,
                 },
               ]}
             >
-              <Icon
-                source={routeIcon}
-                size={30}
-                color={isFocused ? colors.onPrimary : colors.onSurfaceVariant}
-              />
+              <Icon source={routeIcon} size={27} color={colors.onSurface} />
+              <AppText.Regular
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.routeName]}
+              >
+                {uCFirst(route.name)}
+              </AppText.Regular>
             </Pressable>
           );
         })}
@@ -165,41 +175,58 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 export default MyTabBar;
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    flexDirection: 'row',
-    height: 60,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  box: {
-    flexDirection: 'row',
-    borderRadius: 25,
-    width: '60%',
-    gap: 10,
-    position: 'relative',
-  },
-  slider: {
-    position: 'absolute',
-    height: 50,
-    borderRadius: 100,
-  },
-  navigationItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 100,
-    height: 50,
-    width: 50,
-    zIndex: 1,
-  },
-  fab: {
-    borderRadius: 100,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
+  StyleSheet.create({
+    container: {
+      position: 'absolute',
+      flexDirection: 'row',
+      paddingTop: spacing.sm,
+      bottom: 0,
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+      backgroundColor: colors.surfaceContainer,
+      paddingBottom: insets.bottom + 10,
+      borderRadius: spacing.sm,
+    },
+    box: {
+      flexDirection: 'row',
+      width: '100%',
+      gap: GAP,
+      position: 'relative',
+      paddingHorizontal: spacing.xs,
+    },
+    slider: {
+      position: 'absolute',
+      height: 65,
+      borderRadius: borderRadius.md,
+    },
+    navigationItem: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.sm,
+      zIndex: 1,
+    },
+    fab: {
+      borderRadius: 100,
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    routeName: {
+      fontSize: 10,
+      color: colors.onSurface,
+    },
+    addIcon: {
+      position: 'absolute',
+      width: 65,
+      height: 65,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.round,
+      bottom: '70%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });

@@ -36,8 +36,24 @@ const MainBottomTabs = () => {
       }}
     >
       <BottomTab.Screen
+        name="Home"
+        component={Transactions}
+        options={{
+          tabBarIcon: props => tabBarIcon(props, 'history'),
+          headerShown: false,
+        }}
+      />
+      <BottomTab.Screen
         name="Transactions"
         component={Transactions}
+        options={{
+          tabBarIcon: props => tabBarIcon(props, 'history'),
+          headerShown: false,
+        }}
+      />
+      <BottomTab.Screen
+        name="CustomButton"
+        component={() => null}
         options={{
           tabBarIcon: props => tabBarIcon(props, 'history'),
           headerShown: false,
