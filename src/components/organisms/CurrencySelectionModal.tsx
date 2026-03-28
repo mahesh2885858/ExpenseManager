@@ -103,7 +103,6 @@ const CurrencySelectionModal = (props: TProps) => {
               contentContainerStyle={[styles.listContainer]}
               renderItem={({ item }: { item: TCurrency }) => {
                 const isSelected = item.code === currency.code;
-
                 return (
                   <PressableWithFeedback
                     onPress={() => {
@@ -125,7 +124,7 @@ const CurrencySelectionModal = (props: TProps) => {
                     ]}
                     key={item.code}
                   >
-                    <Text
+                    <AppText.Regular
                       style={[
                         gs.fullFlex,
                         {
@@ -137,7 +136,7 @@ const CurrencySelectionModal = (props: TProps) => {
                       ]}
                     >
                       {item.name} ({item.symbol})
-                    </Text>
+                    </AppText.Regular>
                     {isSelected && (
                       <Icon
                         source={'check'}
