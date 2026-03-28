@@ -1,4 +1,3 @@
-import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,12 +5,20 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  TextInput,
+  TextInputBase,
   View,
 } from 'react-native';
-import { Button, Icon, TextInput, useTheme } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Button, Icon, useTheme } from 'react-native-paper';
+import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
-import { borderRadius, spacing, textSize } from '../../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
@@ -20,17 +27,16 @@ import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
-import { TRootStackParamList } from '../../types';
+import AppText from '../../components/molecules/AppText';
 
 const WalletSetup = () => {
-  const { bottom, top } = useSafeAreaInsets();
-  const route = useRoute<RouteProp<TRootStackParamList, 'AmountInput'>>();
-  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
+  const styles = createStyles(theme.colors, insets);
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [accName, setAccName] = useState('');
   const addAccount = useWalletStore(state => state.addWallet);
-  const setUsername = useWalletStore(state => state.setUsername);
   const currency = useWalletStore(state => state.currency);
   const setIsInitialSetupDone = useWalletStore(
     state => state.setIsInitialSetupDone,
@@ -49,181 +55,140 @@ const WalletSetup = () => {
 
   const saveAccount = useCallback(() => {
     const id = uuid();
-    if (route.params?.userName) {
-      setUsername(route.params.userName);
-      const amt = parseFloat(amount) || 0;
-      addAccount({
-        name: accName,
-        initBalance: amt,
-        id,
-      });
-      setDefaultAcc(id);
-      setSelectedAccountId(id);
-      Keyboard.dismiss();
-      setIsInitialSetupDone(true);
-    }
+    const amt = parseFloat(amount) || 0;
+    addAccount({
+      name: accName,
+      initBalance: amt,
+      id,
+    });
+    setDefaultAcc(id);
+    setSelectedAccountId(id);
+    Keyboard.dismiss();
+    setIsInitialSetupDone(true);
   }, [
     addAccount,
-    setUsername,
     accName,
     setDefaultAcc,
     setSelectedAccountId,
     amount,
-    route.params?.userName,
     setIsInitialSetupDone,
   ]);
 
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      style={[
-        styles.container,
-        {
-          paddingTop: top,
-          paddingBottom: bottom,
-          backgroundColor: theme.colors.background,
-        },
-      ]}
-    >
+    <KeyboardAvoidingView behavior="padding" style={[styles.container, {}]}>
       <View style={styles.headingContainer}>
-        <View style={[gs.flexRow, gs.itemsCenter]}>
-          <Text
-            style={[
-              gs.fontBold,
-              {
-                color: theme.colors.onBackground,
-                fontSize: textSize.xl,
-              },
-            ]}
-          >
-            {t('common.setupAccount')}
-          </Text>
-          <Icon
-            source={'wallet-bifold'}
-            size={40}
-            color={theme.colors.tertiary}
-          />
-        </View>
-
-        <Text
-          style={[
-            {
-              color: theme.colors.onSurfaceDisabled,
-              fontSize: textSize.sm,
-            },
-          ]}
-        >
-          {t('common.setupAccDesc')}
-        </Text>
+        <AppText.SemiBold style={[styles.getStarted]}>
+          {t('walletSetup.getYouStarted')}
+        </AppText.SemiBold>
       </View>
 
+      <View style={[styles.walletIconBox]}>
+        <Icon source={'wallet'} size={96} />
+      </View>
+
+      <AppText.SemiBold style={[styles.createFirstText]}>
+        {t('walletSetup.createFirst')}
+      </AppText.SemiBold>
+
       <View style={[{ gap: spacing.md }]}>
-        <View style={[{ gap: spacing.sm }]}>
-          <Text
+        {/*wallet name starts*/}
+        <View style={[{ paddingHorizontal: spacing.md, gap: spacing.xs }]}>
+          <AppText.SemiBold
             style={[
-              gs.fontBold,
               {
-                fontSize: textSize.lg,
-                color: theme.colors.onBackground,
+                fontSize: textSize.md,
+                color: theme.colors.onSurfaceVariant,
               },
             ]}
           >
-            {t('common.accName')}
-          </Text>
+            {t('walletSetup.name')}
+          </AppText.SemiBold>
           <TextInput
             autoFocus
-            mode="outlined"
             style={[styles.texInput]}
-            placeholder={t('common.accName')}
+            placeholder={t('walletSetup.name')}
             placeholderTextColor={theme.colors.onSurfaceDisabled}
             keyboardType="default"
             value={accName}
             onChangeText={setAccName}
-            activeOutlineColor={theme.colors.inverseSurface}
           />
         </View>
-        <View style={[{ gap: spacing.sm }]}>
-          <Text
+        {/*wallet name ends*/}
+
+        {/*Currency starts*/}
+        <View style={[{ paddingHorizontal: spacing.md, gap: spacing.xs }]}>
+          <AppText.SemiBold
             style={[
-              gs.fontBold,
               {
-                fontSize: textSize.lg,
-                color: theme.colors.onBackground,
+                fontSize: textSize.md,
+                color: theme.colors.onSurfaceVariant,
               },
             ]}
           >
-            {t('common.amountPlaceholder')}
-          </Text>
-          <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-            <PressableWithFeedback
-              onPress={handlePresent}
+            {t('walletSetup.currency')}
+          </AppText.SemiBold>
+          <PressableWithFeedback
+            onPress={handlePresent}
+            style={[styles.currencyBox]}
+          >
+            <AppText.SemiBold style={[styles.currencyText]}>
+              {currency.code + ' (' + currency.symbol + ')'}
+            </AppText.SemiBold>
+            <Icon
+              source={'chevron-right'}
+              size={textSize.xl}
+              color={theme.colors.onSurface}
+            />
+          </PressableWithFeedback>
+        </View>
+        {/*Currency ends*/}
+
+        {/*Initial balance starts*/}
+        <View style={[{ paddingHorizontal: spacing.md, gap: spacing.xs }]}>
+          <AppText.SemiBold
+            style={[
+              {
+                fontSize: textSize.md,
+                color: theme.colors.onSurfaceVariant,
+              },
+            ]}
+          >
+            {t('walletSetup.initBalance')}
+          </AppText.SemiBold>
+          <PressableWithFeedback
+            onPress={amountBoardPresent}
+            style={[styles.currencyBox]}
+          >
+            <AppText.SemiBold
               style={[
-                gs.centerItems,
+                styles.currencyText,
                 {
-                  paddingHorizontal: spacing.md,
-                  backgroundColor: theme.colors.surfaceVariant,
-                  paddingVertical: spacing.sm,
-                  borderRadius: borderRadius.sm,
+                  color:
+                    amount.length === 0
+                      ? theme.colors.onSurfaceDisabled
+                      : theme.colors.onSurface,
                 },
               ]}
             >
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: theme.colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                {currency.code}
-              </Text>
-              <Text
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: theme.colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                {currency.symbol}
-              </Text>
-            </PressableWithFeedback>
-            <PressableWithFeedback
-              onPress={amountBoardPresent}
-              style={[gs.fullFlex, styles.texInput]}
-            >
-              <Text
-                style={[
-                  styles.amountBox,
-                  {
-                    borderColor: theme.colors.inverseSurface,
-                    color:
-                      amount.length === 0
-                        ? theme.colors.onSurfaceDisabled
-                        : theme.colors.onBackground,
-                  },
-                ]}
-              >
-                {amount.length === 0
-                  ? t('common.amount') + ' (' + t('common.optional') + ')'
-                  : getFormattedAmount(amount, false)}
-              </Text>
-            </PressableWithFeedback>
-          </View>
+              {amount.length === 0
+                ? t('common.amount') + ' (' + t('common.optional') + ')'
+                : getFormattedAmount(amount, false)}
+            </AppText.SemiBold>
+            <Icon
+              source={'chevron-right'}
+              size={textSize.xl}
+              color={theme.colors.onSurface}
+            />
+          </PressableWithFeedback>
         </View>
+        {/*Initial balance ends*/}
+        <PressableWithFeedback style={[styles.continueButton]}>
+          <AppText.SemiBold style={[styles.continueText]}>
+            {t('common.continue')}
+          </AppText.SemiBold>
+        </PressableWithFeedback>
       </View>
 
-      <Button
-        onPress={saveAccount}
-        labelStyle={styles.nextButtonLabel}
-        style={styles.nextButton}
-        mode="contained"
-        disabled={accName.trim().length <= 0}
-        buttonColor={theme.colors.inversePrimary}
-        textColor={theme.colors.onPrimaryContainer}
-      >
-        {t('common.next')}
-      </Button>
       <CurrencySelectionModal
         handleSheetChanges={handleSheetChange}
         ref={btmShtRef}
@@ -240,27 +205,77 @@ const WalletSetup = () => {
 
 export default WalletSetup;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: spacing.lg,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  headingContainer: {
-    marginTop: spacing.md,
-  },
-  texInput: {
-    borderRadius: borderRadius.lg,
-    fontSize: textSize.lg,
-  },
-  nextButton: { width: '40%' },
-  nextButtonLabel: { fontSize: textSize.md },
-  amountBox: {
-    borderWidth: 1,
-    borderRadius: borderRadius.sm,
-    fontSize: textSize.lg - 2,
-    paddingVertical: spacing.sm + 5,
-    paddingLeft: spacing.xs,
-  },
-});
+const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: spacing.md,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom,
+      backgroundColor: colors.background,
+    },
+    headingContainer: {},
+    getStarted: {
+      color: colors.onBackground,
+      fontSize: textSize.xxxl,
+      textAlign: 'center',
+    },
+    walletIconBox: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 50,
+      marginBottom: 50,
+    },
+    createFirstText: {
+      color: colors.onSurface,
+      fontSize: textSize.xxl,
+      textAlign: 'center',
+      marginBottom: spacing.xxl,
+    },
+
+    texInput: {
+      borderRadius: borderRadius.sm,
+      fontSize: textSize.md,
+      backgroundColor: colors.surfaceContainerHigh,
+      fontFamily: 'PoppinsSemiBold',
+      color: colors.onSurface,
+      paddingLeft: spacing.sm,
+    },
+    currencyBox: {
+      borderRadius: borderRadius.sm,
+      backgroundColor: colors.surfaceContainerHigh,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    currencyText: {
+      fontSize: textSize.md,
+      fontFamily: 'PoppinsSemiBold',
+      color: colors.onSurface,
+      flex: 1,
+    },
+    nextButton: { width: '40%' },
+    nextButtonLabel: { fontSize: textSize.md },
+    amountBox: {
+      borderWidth: 1,
+      borderRadius: borderRadius.sm,
+      fontSize: textSize.lg - 2,
+      paddingVertical: spacing.sm + 5,
+      paddingLeft: spacing.xs,
+    },
+    continueButton: {
+      backgroundColor: colors.primary,
+      height: 60,
+      width: '80%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: borderRadius.sm,
+      marginTop: spacing.xl,
+      alignSelf: 'center',
+    },
+    continueText: {
+      fontSize: textSize.lg,
+      color: colors.onPrimary,
+    },
+  });

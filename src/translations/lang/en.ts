@@ -6,6 +6,7 @@ export default {
       'Track expenses privately. No ads. No cloud. Just you and your money.',
     getStarted: 'Get Started',
     alreadyHaveData: 'I already have data',
+
     home: 'Home',
     loading: 'Loading',
     next: 'Next',
@@ -17,7 +18,14 @@ export default {
     pickName: 'What should I call you?',
     amount: 'Amount',
     setupAccount: 'Set up a wallet!',
-    setupAccDesc: 'It can be your bank name, credit or debit card name.',
     accName: 'Wallet name',
+    continue: 'Continue',
+  },
+  walletSetup: {
+    getYouStarted: 'Let’s get you started',
+    createFirst: 'Create Frist Wallet',
+    name: 'Wallet Name',
+    currency: 'Currency',
+    initBalance: 'Initial Balance',
   },
 };
