@@ -89,15 +89,15 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
           if (route.name === 'CustomButton') {
             return (
-              <View
-                style={[
-                  styles.navigationItem,
-                  {
-                    position: 'relative',
-                  },
-                ]}
-              >
-                <PressableWithFeedback style={[styles.addIcon]}>
+              <View style={[styles.navigationItem]}>
+                <PressableWithFeedback
+                  onPress={() => {
+                    navigation.navigate('AddTransaction', {
+                      mode: 'new',
+                    });
+                  }}
+                  style={[styles.addIcon]}
+                >
                   <Icon
                     source={'plus'}
                     size={textSize.xxxl}
@@ -146,29 +146,6 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           );
         })}
       </View>
-      {/* <View> */}
-      <Pressable
-        onPress={() => {
-          navigation.navigate('AddTransaction', {
-            mode: 'new',
-          });
-        }}
-        style={({ pressed }) => [
-          styles.fab,
-          {
-            backgroundColor: colors.primary,
-            opacity: pressed ? 0.8 : 1,
-            transform: [
-              {
-                scale: pressed ? 0.95 : 1,
-              },
-            ],
-          },
-        ]}
-      >
-        <Icon source={'plus'} color={colors.onPrimary} size={30} />
-      </Pressable>
-      {/* </View> */}
     </View>
   );
 }
@@ -203,6 +180,8 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
     },
     navigationItem: {
       flex: 1,
+      position: 'relative',
+
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: spacing.sm,
