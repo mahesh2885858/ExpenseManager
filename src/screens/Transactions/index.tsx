@@ -150,6 +150,7 @@ const Transactions = () => {
         styles.container,
         {
           paddingTop: top + 5,
+          backgroundColor: colors.surface,
         },
       ]}
     >

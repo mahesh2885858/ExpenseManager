@@ -44,7 +44,7 @@ const Main = (props: { theme: ColorSchemeName }) => {
       theme={theme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}
     >
       <BottomSheetModalProvider>
-        <View style={[gs.fullFlex, { backgroundColor: colors.background }]}>
+        <View style={[gs.fullFlex, { backgroundColor: colors.surface }]}>
           <MainStack />
         </View>
       </BottomSheetModalProvider>

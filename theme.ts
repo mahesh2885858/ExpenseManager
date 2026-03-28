@@ -9,7 +9,7 @@ import {
   adaptNavigationTheme,
   useTheme,
 } from 'react-native-paper';
-import MaterialTheme from './theme_one.json';
+import MaterialTheme from './material-theme.json';
 
 export const spacing = {
   xs: 4,
@@ -68,8 +68,8 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationDark: NavigationDarkTheme,
 });
 
-const CombinedDefaultTheme = merge(CustomLight, LightTheme);
-const CombinedDarkTheme = merge(CustomDark, DarkTheme);
+const CombinedDefaultTheme = merge(LightTheme, CustomLight);
+const CombinedDarkTheme = merge(DarkTheme, CustomDark);
 
 export { CombinedDarkTheme, CombinedDefaultTheme };
 

@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import InitialAccountAmountSetup from '../screens/InitialSetup/InitialAccountAmountSetup';
-import InitialAccountNameSetup from '../screens/InitialSetup/InitialAccountNameSetup';
+import WelcomeScreen from '../screens/InitialSetup/WelcomeScreen';
 import useWalletStore from '../stores/walletsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
@@ -26,7 +26,7 @@ const MainStack = () => {
           <Stack.Screen
             name="NameInput"
             options={{ headerShown: false }}
-            component={InitialAccountNameSetup}
+            component={WelcomeScreen}
           />
           <Stack.Screen
             name="AmountInput"

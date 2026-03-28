@@ -22,7 +22,7 @@ const Bar = (props: TBarProps) => {
   const { info, bar, xAxisLabel } = props.item;
   const isFocused = props.isFocused;
   const { colors } = props;
-  const font1 = useFont(require('../../../assets/fonts/Inter-Medium.ttf'));
+  const font1 = useFont(require('../../../assets/fonts/PoppinsMedium.ttf'));
 
   const textWidth = font1?.measureText(String(props.item.xAxisLabel.text));
   const centeredX = info.x + info.width / 2 - (textWidth?.width ?? 0) / 2;
