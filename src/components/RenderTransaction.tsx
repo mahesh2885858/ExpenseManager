@@ -11,6 +11,9 @@ import useCategoriesStore from '../stores/categoriesStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
+import Card from './atoms/Card';
+import withOpacity from '../utils/withOpacity';
+import AppText from './molecules/AppText';
 
 const RenderTransaction = (props: {
   item: string;
@@ -42,127 +45,60 @@ const RenderTransaction = (props: {
       onPress={() => {
         props.onItemPress(transaction);
       }}
-      style={[
-        gs.flexRow,
-        {
-          gap: spacing.md,
-          marginBottom: spacing.md,
-        },
-      ]}
+      style={[{ marginBottom: spacing.sm }]}
     >
-      <View
-        style={[
-          {
-            padding: spacing.sm,
-            paddingHorizontal: spacing.md,
-            borderRadius: borderRadius.lg,
-            backgroundColor: theme.colors.surfaceVariant,
-          },
-          gs.centerItems,
-        ]}
-      >
-        {(transaction.attachments?.length ?? 0) > 0 && (
-          <View style={styles.icon}>
-            <Icon source={'paperclip'} size={10} />
-          </View>
-        )}
-
-        <Text
-          style={[
-            {
-              color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.sm,
-            },
-            gs.fontBold,
-          ]}
-        >
-          {format(transaction.transactionDate, 'MMM')}
-        </Text>
-        <Text
-          style={[
-            {
-              color: theme.colors.onSurfaceVariant,
-              fontSize: textSize.sm,
-            },
-            gs.fontBold,
-          ]}
-        >
-          {getDate(transaction.transactionDate)}
-        </Text>
-      </View>
-      <View style={[gs.fullFlex, gs.justifyCenter]}>
-        <Text
-          style={[
-            {
-              fontSize: textSize.md,
-              color: theme.colors.onSurface,
-            },
-          ]}
-        >
-          {categoryName}
-        </Text>
-        {transaction.description && (
-          <Text
+      <Card>
+        <View style={[gs.flexRow]}>
+          <View
             style={[
               {
-                fontSize: textSize.sm,
-                color: theme.colors.onSurfaceVariant,
+                backgroundColor: withOpacity(theme.colors.primary, 0.15),
+                borderRadius: borderRadius.round,
+                padding: spacing.sm,
               },
             ]}
           >
-            {getMaxText(
-              transaction.description.replace(/[\r\n]+/g, ' ') ?? '',
-              20,
-            )}
-          </Text>
-        )}
-      </View>
-      <View
-        style={[
-          gs.flexRow,
-          // gs.centerItems,
-          gs.itemsCenter,
-          transaction.isSelected && styles.actionsBox,
-        ]}
-      >
-        <Text
-          style={[
-            gs.fontBold,
-            {
-              fontSize: textSize.md,
-              color:
-                transaction.type === 'expense'
-                  ? theme.colors.error
-                  : theme.colors.tertiary,
-            },
-          ]}
-        >
-          {getFormattedAmount(transaction.amount)}
-        </Text>
-        {selectedTransactions.has(props.item) && (
-          <Animated.View
-            entering={ZoomIn}
-            exiting={ZoomOut}
-            style={[gs.flexRow, { gap: spacing.xs }]}
-          >
-            <PressableWithFeedback
-              onPress={() => requestDelete(transaction)}
+            <Icon
+              source={'gas-station-outline'}
+              size={28}
+              color={theme.colors.primary}
+            />
+          </View>
+          <View style={[gs.fullFlex, { marginLeft: spacing.sm }]}>
+            <AppText.Regular
               style={[
-                styles.action,
                 {
-                  backgroundColor: theme.colors.errorContainer,
+                  color: theme.colors.onSurface,
+                  fontSize: textSize.sm,
                 },
               ]}
             >
-              <Icon
-                source={'delete'}
-                size={25}
-                color={theme.colors.onErrorContainer}
-              />
-            </PressableWithFeedback>
-          </Animated.View>
-        )}
-      </View>
+              {categoryName}
+            </AppText.Regular>
+            <AppText.Regular
+              style={[
+                {
+                  color: theme.colors.onSurfaceVariant,
+                  fontSize: textSize.xs,
+                },
+              ]}
+            >
+              {categoryName}
+            </AppText.Regular>
+          </View>
+          <AppText.Medium
+            style={[
+              {
+                fontSize: textSize.sm,
+                color: theme.colors.onSurface,
+                textAlignVertical: 'center',
+              },
+            ]}
+          >
+            {getFormattedAmount(transaction.amount)}
+          </AppText.Medium>
+        </View>
+      </Card>
     </PressableWithFeedback>
   );
 };

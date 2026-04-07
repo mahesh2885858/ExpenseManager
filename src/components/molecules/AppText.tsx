@@ -13,6 +13,7 @@ const fontsMap = {
   ExtraLightItalic: 'PoppinsExtraLightItalic',
   Thin: 'PoppinsThin',
   ThinItalic: 'PoppinsThinItalic',
+  Medium: 'PoppinsMedium',
 } as const;
 
 const AppTextBase = (weight: keyof typeof fontsMap) => {

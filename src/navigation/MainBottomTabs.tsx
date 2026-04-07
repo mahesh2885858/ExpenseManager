@@ -9,6 +9,7 @@ import Reports from '../screens/Reports';
 import Transactions from '../screens/Transactions';
 import { TBottomTabParamList } from '../types';
 import Budget from '../screens/Budgets';
+import Home from '../screens/Home';
 const BottomTab = createBottomTabNavigator<TBottomTabParamList>();
 
 const tabBarIcon = (
@@ -37,7 +38,7 @@ const MainBottomTabs = () => {
     >
       <BottomTab.Screen
         name="Home"
-        component={Transactions}
+        component={Home}
         options={{
           tabBarIcon: props => tabBarIcon(props, 'history'),
           headerShown: false,

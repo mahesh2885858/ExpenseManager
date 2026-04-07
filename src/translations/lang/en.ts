@@ -20,6 +20,8 @@ export default {
     setupAccount: 'Set up a wallet!',
     accName: 'Wallet name',
     continue: 'Continue',
+    budgets: 'Budgets',
+    viewAll: 'View All',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',
@@ -30,5 +32,10 @@ export default {
   },
   currencyList: {
     select: 'Select Currency',
+  },
+  home: {
+    appName: 'Expense Manager',
+    totalBalance: 'Total Balance',
+    recentTransactions: 'Recent Transactions',
   },
 };

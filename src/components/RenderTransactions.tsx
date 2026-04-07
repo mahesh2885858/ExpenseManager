@@ -142,7 +142,7 @@ export default RenderTransactions;
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 100,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
   },
   snackBar: {
     bottom: 60,
