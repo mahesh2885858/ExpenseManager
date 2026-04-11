@@ -14,7 +14,7 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import RenderTransactions from '../../components/RenderTransactions';
+import RenderTransactionList from '../../components/RenderTransactionList';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
@@ -33,6 +33,10 @@ import {
   Svg,
 } from 'react-native-svg';
 import CircularProgressBar from '../../components/molecules/CircularProgressBar';
+import RenderBudget from '../../components/organisms/RenderBudget';
+import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
+import useBudgets from '../../hooks/useBudgets';
+import useBudgetStore from '../../stores/budgetStore';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -54,6 +58,7 @@ const Home = () => {
     getIncomeExpenseForWallet: getIncomeExpenseForAcc,
   } = useWallets();
 
+  const budgets = useBudgetStore(state => state.budgets);
   const {
     totalExpenses,
     totalIncome,
@@ -162,7 +167,7 @@ const Home = () => {
   }, [navigation]);
 
   return (
-    <View style={[styles.container, {}]}>
+    <ScrollView style={[styles.container, {}]}>
       {/* header section */}
       <CommonHeader heading={t('home.appName')} />
 
@@ -338,105 +343,7 @@ const Home = () => {
             />
           </PressableWithFeedback>
         </View>
-        <View
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            {
-              backgroundColor: colors.surfaceContainer,
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.sm,
-              borderRadius: borderRadius.md,
-            },
-          ]}
-        >
-          <View style={[gs.fullFlex]}>
-            <AppText.Regular
-              style={[
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.xs,
-                },
-              ]}
-            >
-              MonthlyGroceris
-            </AppText.Regular>
-            <AppText.Regular
-              style={[
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.xs,
-                },
-              ]}
-            >
-              {getFormattedAmount('123455') +
-                '/' +
-                getFormattedAmount('345678')}
-            </AppText.Regular>
-          </View>
-          <View>
-            <CircularProgressBar
-              strokeWidth={5}
-              height={45}
-              width={45}
-              progress={80}
-              size={45}
-              background={'transparent'}
-              completedColor={colors.primary}
-              remainingColor={colors.surfaceVariant}
-            />
-          </View>
-        </View>
-        <View
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            {
-              backgroundColor: colors.surfaceContainer,
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.sm,
-              borderRadius: borderRadius.md,
-              marginTop: spacing.sm,
-            },
-          ]}
-        >
-          <View style={[gs.fullFlex]}>
-            <AppText.Regular
-              style={[
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.xs,
-                },
-              ]}
-            >
-              MonthlyGroceris
-            </AppText.Regular>
-            <AppText.Regular
-              style={[
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.xs,
-                },
-              ]}
-            >
-              {getFormattedAmount('123455') +
-                '/' +
-                getFormattedAmount('345678')}
-            </AppText.Regular>
-          </View>
-          <View>
-            <CircularProgressBar
-              strokeWidth={5}
-              height={45}
-              width={45}
-              progress={50}
-              size={45}
-              background={'transparent'}
-              completedColor={colors.primary}
-              remainingColor={colors.surfaceVariant}
-            />
-          </View>
-        </View>
+        <RenderBudgetList budgets={budgets} />
       </View>
       {/*Budget ends*/}
 
@@ -488,7 +395,10 @@ const Home = () => {
           </PressableWithFeedback>
         </View>
         <View style={[gs.fullFlex]}>
-          <RenderTransactions transactions={transactionsToRender} />
+          <RenderTransactionList
+            scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
+            transactions={transactionsToRender}
+          />
         </View>
       </View>
 
@@ -498,7 +408,7 @@ const Home = () => {
         ref={btmShtRef}
         selectedWalletId={selectedAccount?.id ?? ''}
       />
-    </View>
+    </ScrollView>
   );
 };
 

@@ -12,7 +12,7 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import RenderTransactions from '../../components/RenderTransactions';
+import RenderTransactionList from '../../components/RenderTransactionList';
 import useTransactions from '../../hooks/useTransactions';
 import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import useBudgetStore from '../../stores/budgetStore';
@@ -181,7 +181,7 @@ const BudgetDetails = () => {
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactions transactions={transactionIds} />
+        <RenderTransactionList transactions={transactionIds} />
       </View>
       {/*Transactions for this budget ends*/}
     </View>

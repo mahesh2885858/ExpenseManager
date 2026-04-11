@@ -8,7 +8,7 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import RenderTransactions from '../../components/RenderTransactions';
+import RenderTransactionList from '../../components/RenderTransactionList';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
@@ -494,7 +494,7 @@ const Transactions = () => {
         ]}
       >
         <View style={[gs.fullFlex]}>
-          <RenderTransactions transactions={transactionsToRender} />
+          <RenderTransactionList transactions={transactionsToRender} />
         </View>
       </View>
 

@@ -12,13 +12,16 @@ import useTransactionsStore from '../stores/transactionsStore';
 import { TBottomTabParamList, TTransaction, TTransactionsIds } from '../types';
 import RenderTransaction from './RenderTransaction';
 import useTransactions from '../hooks/useTransactions';
+import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
 
-const RenderTransactions = ({
+const RenderTransactionList = ({
   transactions,
   renderSeeAll = false,
+  scrollDisabled = false,
 }: {
   transactions: TTransactionsIds;
   renderSeeAll?: boolean;
+  scrollDisabled?: boolean;
 }) => {
   const theme = useAppTheme();
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
@@ -54,50 +57,15 @@ const RenderTransactions = ({
   return (
     <>
       <FlashList
+        scrollEnabled={!scrollDisabled}
         contentContainerStyle={styles.container}
-        ListEmptyComponent={
-          <Text
-            style={[
-              gs.fontBold,
-              gs.centerText,
-              {
-                color: theme.colors.onSurfaceDisabled,
-                fontSize: textSize.lg,
-                marginTop: spacing.lg,
-              },
-            ]}
-          >
-            No transactions!!
-          </Text>
-        }
+        ListEmptyComponent={EmptyTransactionsComponent}
         data={transactions}
         showsVerticalScrollIndicator={false}
         renderItem={props => (
           <RenderTransaction onItemPress={onItemPress} item={props.item} />
         )}
         keyExtractor={item => item}
-        ListFooterComponent={
-          renderSeeAll && transactions.length === 10 ? (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Transactions');
-              }}
-            >
-              <Text
-                style={[
-                  gs.fontBold,
-                  gs.centerText,
-                  {
-                    fontSize: textSize.lg,
-                    color: theme.colors.primary,
-                  },
-                ]}
-              >
-                See all
-              </Text>
-            </TouchableOpacity>
-          ) : null
-        }
       />
       <TransactionDetailsSheet
         handleSheetChanges={handleSheetChange}
@@ -137,7 +105,7 @@ const RenderTransactions = ({
   );
 };
 
-export default RenderTransactions;
+export default RenderTransactionList;
 
 const styles = StyleSheet.create({
   container: {

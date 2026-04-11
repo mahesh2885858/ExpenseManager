@@ -37,5 +37,11 @@ export default {
     appName: 'Expense Manager',
     totalBalance: 'Total Balance',
     recentTransactions: 'Recent Transactions',
+    noBudgets: 'No budgets created yet',
+    noBudgetHelp: 'Budgets help you stay on track with your spending.',
+    createFirstBudget: 'Create First budget',
+    noTransactions: 'No transactions yet',
+    noTransactionsHelp: 'Add your first expense or income to get started.',
+    addFirstTransactions: 'Add First Transaction',
   },
 };
