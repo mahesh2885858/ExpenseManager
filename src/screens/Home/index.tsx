@@ -167,7 +167,10 @@ const Home = () => {
   }, [navigation]);
 
   return (
-    <ScrollView style={[styles.container, {}]}>
+    <ScrollView
+      contentContainerStyle={[styles.contentContainer]}
+      style={[styles.container]}
+    >
       {/* header section */}
       <CommonHeader heading={t('home.appName')} />
 
@@ -222,7 +225,7 @@ const Home = () => {
         <AppText.Regular
           style={[
             {
-              fontSize: textSize.md,
+              fontSize: textSize.sm,
               color: colors.onSurface,
               lineHeight: 16,
             },
@@ -257,7 +260,7 @@ const Home = () => {
             <AppText.Regular
               style={[
                 {
-                  fontSize: textSize.md,
+                  fontSize: textSize.sm,
                   color: colors.onSurface,
                   lineHeight: 14,
                 },
@@ -265,7 +268,7 @@ const Home = () => {
             >
               Income
             </AppText.Regular>
-            <AppText.Medium
+            <AppText.Bold
               style={[
                 {
                   fontSize: textSize.md,
@@ -274,7 +277,7 @@ const Home = () => {
               ]}
             >
               {getFormattedAmount('23456')}
-            </AppText.Medium>
+            </AppText.Bold>
           </PressableWithFeedback>
           <PressableWithFeedback
             style={[
@@ -289,7 +292,7 @@ const Home = () => {
             <AppText.Regular
               style={[
                 {
-                  fontSize: textSize.md,
+                  fontSize: textSize.sm,
                   color: colors.onSurface,
                   lineHeight: 14,
                 },
@@ -297,7 +300,7 @@ const Home = () => {
             >
               Expense
             </AppText.Regular>
-            <AppText.Medium
+            <AppText.Bold
               style={[
                 {
                   fontSize: textSize.md,
@@ -306,7 +309,7 @@ const Home = () => {
               ]}
             >
               {getFormattedAmount('23456')}
-            </AppText.Medium>
+            </AppText.Bold>
           </PressableWithFeedback>
         </View>
       </View>
@@ -352,7 +355,7 @@ const Home = () => {
         style={[
           gs.fullFlex,
           {
-            paddingHorizontal: spacing.lg,
+            paddingHorizontal: spacing.md,
           },
         ]}
       >
@@ -416,6 +419,7 @@ export default Home;
 
 const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
   StyleSheet.create({
+    contentContainer: { paddingBottom: 100 },
     container: {
       paddingTop: insets.top + 5,
       backgroundColor: colors.surface,
@@ -462,6 +466,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
     budgets: {
       paddingHorizontal: spacing.md,
       marginTop: spacing.md,
+      gap: spacing.xs,
     },
     summaryText: {
       fontSize: textSize.lg,

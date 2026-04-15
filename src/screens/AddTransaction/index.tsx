@@ -47,7 +47,7 @@ import {
   TWallet,
 } from '../../types';
 import { useTranslation } from 'react-i18next';
-import AppText from '../../components/molecules/AppText';
+import AppText, { fontsMap } from '../../components/molecules/AppText';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -800,7 +800,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       fontSize: textSize.md,
       borderColor: colors.outlineVariant,
       color: colors.onSurface,
-      fontFamily: 'PoppinsRegular',
+      fontFamily: fontsMap.Regular,
     },
     fab: {
       position: 'absolute',

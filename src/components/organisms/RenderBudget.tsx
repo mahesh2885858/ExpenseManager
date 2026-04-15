@@ -17,7 +17,7 @@ const RenderBudget = () => {
   const styles = createStyles(colors);
   return (
     <View style={[styles.container]}>
-      <View style={[gs.fullFlex]}>
+      <View style={[gs.fullFlex, gs.justifyCenter]}>
         <AppText.Regular style={[styles.budgetName]}>
           MonthlyGroceris
         </AppText.Regular>
@@ -55,7 +55,7 @@ const createStyles = (colors: AppTheme['colors']) =>
     },
     budgetName: {
       color: colors.onSurface,
-      fontSize: textSize.xs,
+      fontSize: textSize.sm,
     },
     budgetAmount: {
       color: colors.onSurface,

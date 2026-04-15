@@ -27,7 +27,7 @@ import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
-import AppText from '../../components/molecules/AppText';
+import AppText, { fontsMap } from '../../components/molecules/AppText';
 
 const WalletSetup = () => {
   const insets = useSafeAreaInsets();
@@ -241,7 +241,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       borderRadius: borderRadius.sm,
       fontSize: textSize.md,
       backgroundColor: colors.surfaceContainerHigh,
-      fontFamily: 'PoppinsSemiBold',
+      fontFamily: fontsMap.SemiBold,
       color: colors.onSurface,
       paddingLeft: spacing.sm,
     },

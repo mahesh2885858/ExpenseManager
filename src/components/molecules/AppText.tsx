@@ -1,31 +1,34 @@
 import { JSX } from 'react';
 import { Text, TextProps } from 'react-native';
 
-const fontsMap = {
-  SemiBold: 'PoppinsSemiBold',
-  Bold: 'PoppinsBold',
-  Light: 'PoppinsLight',
-  Regular: 'PoppinsRegular',
-  BoldItalic: 'PoppinsBoldItalic',
-  SemiBoldItalic: 'PoppinsSemiBoldItalic',
-  LightItalic: 'PoppinsLightItalic',
-  ExtraLight: 'PoppinsExtraLight',
-  ExtraLightItalic: 'PoppinsExtraLightItalic',
-  Thin: 'PoppinsThin',
-  ThinItalic: 'PoppinsThinItalic',
-  Medium: 'PoppinsMedium',
+export const fontsMap = {
+  Thin: '100',
+  ExtraLight: '200',
+  Light: '300',
+  Regular: '400',
+  Medium: '500',
+  SemiBold: '600',
+  Bold: '700',
 } as const;
 
 const AppTextBase = (weight: keyof typeof fontsMap) => {
   return ({ children, style, ...rest }: TextProps) => {
     return (
-      <Text style={[{ fontFamily: fontsMap[weight] }, style]} {...rest}>
+      <Text
+        style={[
+          {
+            fontFamily: 'Inter',
+            fontWeight: fontsMap[weight],
+          },
+          style,
+        ]}
+        {...rest}
+      >
         {children}
       </Text>
     );
   };
 };
-
 const AppText: Record<
   keyof typeof fontsMap,
   ({ children, ...rest }: TextProps) => JSX.Element

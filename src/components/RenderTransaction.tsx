@@ -64,7 +64,15 @@ const RenderTransaction = (props: {
               color={theme.colors.primary}
             />
           </View>
-          <View style={[gs.fullFlex, { marginLeft: spacing.sm }]}>
+          <View
+            style={[
+              gs.fullFlex,
+              {
+                marginLeft: spacing.sm,
+                justifyContent: 'center',
+              },
+            ]}
+          >
             <AppText.Regular
               style={[
                 {
