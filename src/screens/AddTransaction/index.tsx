@@ -18,10 +18,16 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { useSharedValue, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { v4 as uuid } from 'uuid';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
@@ -40,6 +46,8 @@ import {
   TTransactionType,
   TWallet,
 } from '../../types';
+import { useTranslation } from 'react-i18next';
+import AppText from '../../components/molecules/AppText';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -51,9 +59,11 @@ type TValidatedInputs = {
 
 const AddTransaction = () => {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
-
+  const insets = useSafeAreaInsets();
+  const style = createStyles(colors, insets);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
   const { addNewTransaction, getFormattedAmount, updateATransaction } =
@@ -272,7 +282,7 @@ const AddTransaction = () => {
 
     return {
       marginTop: spacing.md,
-      backgroundColor: colors.surfaceVariant,
+      backgroundColor: colors.surfaceContainer,
       borderColor: hasError ? colors.error : 'transparent',
       borderWidth: hasError ? 1 : 0,
     };
@@ -304,16 +314,14 @@ const AddTransaction = () => {
             style={[gs.flexRow, gs.itemsCenter, gs.fullFlex, style.headerLeft]}
           >
             <PressableWithFeedback onPress={navigation.goBack}>
-              <Icon source="arrow-left" size={ICON_SIZE} />
+              <Icon
+                source="arrow-left"
+                size={ICON_SIZE}
+                color={colors.onSurface}
+              />
             </PressableWithFeedback>
-            <Text
-              style={[
-                gs.fontBold,
-                style.headerTitle,
-                { color: colors.onBackground },
-              ]}
-            >
-              Add Transaction
+            <Text style={[gs.fontBold, style.headerTitle]}>
+              {t('add.addTransaction')}
             </Text>
           </View>
         </View>
@@ -344,7 +352,7 @@ const AddTransaction = () => {
           ]}
         >
           <View style={[gs.flexRow]}>
-            <Text
+            <AppText.Regular
               style={[
                 gs.fullFlex,
                 {
@@ -353,10 +361,10 @@ const AddTransaction = () => {
                 },
               ]}
             >
-              Amount
-            </Text>
+              {t('common.amount')}
+            </AppText.Regular>
           </View>
-          <Text
+          <AppText.SemiBold
             style={[
               style.textInput,
               {
@@ -367,7 +375,7 @@ const AddTransaction = () => {
             {getFormattedAmount(
               amountInput.length > 0 ? parseFloat(amountInput) : 0,
             )}
-          </Text>
+          </AppText.SemiBold>
         </PressableWithFeedback>
 
         {/* Category Selection */}
@@ -379,42 +387,42 @@ const AddTransaction = () => {
               <Icon
                 source={'shape'}
                 size={textSize.md}
-                color={colors.onSurfaceVariant}
+                color={colors.onSurfaceDisabled}
               />
               <View style={[gs.flexRow, gs.fullFlex]}>
-                <Text
+                <AppText.Regular
                   style={[
                     gs.fullFlex,
                     {
                       fontSize: textSize.md,
-                      color: colors.onSurfaceVariant,
+                      color: colors.onSurfaceDisabled,
                     },
                   ]}
                 >
-                  Category
-                </Text>
+                  {t('add.category')}
+                </AppText.Regular>
               </View>
             </View>
 
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Text
+              <AppText.Regular
                 style={[
                   gs.fullFlex,
                   style.categoryText,
                   {
                     color: errorFields?.some(f => f === 'category')
                       ? colors.error
-                      : colors.onBackground,
+                      : colors.onSurface,
                   },
                 ]}
               >
                 {categories.filter(c => c.id === selectedCategoryId)[0]?.name ??
-                  'Select category'}
-              </Text>
+                  t('add.selectCategory')}
+              </AppText.Regular>
               <Icon
-                color={colors.onSurfaceVariant}
+                color={colors.onSurface}
                 source="chevron-right"
-                size={textSize.md}
+                size={textSize.lg}
               />
             </View>
           </View>
@@ -426,31 +434,31 @@ const AddTransaction = () => {
               {
                 marginTop: spacing.md,
 
-                backgroundColor: colors.surfaceVariant,
+                backgroundColor: colors.surfaceContainer,
               },
               style.categoryContainer,
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Icon
-                color={colors.onSurfaceVariant}
+                color={colors.onSurfaceDisabled}
                 source={'wallet'}
                 size={textSize.md}
               />
               <View style={[gs.flexRow, gs.fullFlex]}>
-                <Text
+                <AppText.Regular
                   style={[
                     gs.fullFlex,
                     {
                       fontSize: textSize.md,
-                      color: colors.onSurfaceVariant,
+                      color: colors.onSurfaceDisabled,
                     },
                   ]}
                 >
-                  Wallet
-                </Text>
+                  {t('add.wallet')}
+                </AppText.Regular>
                 {errorFields?.some(f => f === 'wallet') && (
-                  <Text
+                  <AppText.Thin
                     style={[
                       {
                         fontSize: textSize.sm,
@@ -458,13 +466,13 @@ const AddTransaction = () => {
                       },
                     ]}
                   >
-                    Required
-                  </Text>
+                    {t('add.required')}
+                  </AppText.Thin>
                 )}
               </View>
             </View>
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-              <Text
+              <AppText.Regular
                 style={[
                   gs.fullFlex,
                   style.categoryText,
@@ -474,11 +482,11 @@ const AddTransaction = () => {
                 ]}
               >
                 {selectedWallet?.name ?? 'Select a wallet'}
-              </Text>
+              </AppText.Regular>
               <Icon
-                color={colors.onSurfaceVariant}
+                color={colors.onSurface}
                 source="chevron-right"
-                size={textSize.md}
+                size={textSize.lg}
               />
             </View>
           </View>
@@ -500,77 +508,77 @@ const AddTransaction = () => {
             style={[
               gs.fullFlex,
               {
-                backgroundColor: colors.surfaceVariant,
+                backgroundColor: colors.surfaceContainer,
               },
               style.categoryContainer,
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Icon
-                color={colors.onSurfaceVariant}
+                color={colors.onSurfaceDisabled}
                 source="calendar"
                 size={textSize.md}
               />
-              <Text
+              <AppText.Regular
                 style={[
                   {
-                    color: colors.onSurfaceVariant,
+                    color: colors.onSurfaceDisabled,
                     fontSize: textSize.md,
                   },
                 ]}
               >
                 Date
-              </Text>
+              </AppText.Regular>
             </View>
-            <Text
+            <AppText.Regular
               style={[
                 {
-                  color: colors.onBackground,
+                  color: colors.onSurface,
                   fontSize: textSize.md,
                 },
               ]}
             >
               {format(dateToRender ?? new Date(), DATE_FORMAT).toUpperCase()}
-            </Text>
+            </AppText.Regular>
           </PressableWithFeedback>
           <PressableWithFeedback
             onPress={() => setOpenTimePicker(true)}
             style={[
               gs.fullFlex,
               {
-                backgroundColor: colors.surfaceVariant,
+                backgroundColor: colors.surfaceContainer,
               },
               style.categoryContainer,
             ]}
           >
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
               <Icon
-                color={colors.onSurfaceVariant}
+                color={colors.onSurfaceDisabled}
                 source="clock"
                 size={textSize.md}
               />
 
-              <Text
+              <AppText.Regular
                 style={[
                   {
-                    color: colors.onSurfaceVariant,
+                    color: colors.onSurfaceDisabled,
                     fontSize: textSize.md,
                   },
                 ]}
               >
                 Time
-              </Text>
+              </AppText.Regular>
             </View>
-            <Text
+            <AppText.Regular
               style={[
                 {
-                  color: colors.onBackground,
+                  color: colors.onSurface,
                   fontSize: textSize.md,
                 },
               ]}
             >
               {format(dateToRender ?? new Date(), 'hh:mm aa').toUpperCase()}
-            </Text>
+            </AppText.Regular>
           </PressableWithFeedback>
         </View>
 
@@ -616,14 +624,8 @@ const AddTransaction = () => {
 
         {/* Description section */}
         <TextInput
-          style={[
-            style.descBox,
-            {
-              borderColor: colors.onSurfaceDisabled,
-              color: colors.onBackground,
-            },
-          ]}
-          placeholder="Additional details (optional)"
+          style={[style.descBox]}
+          placeholder={t('add.additional')}
           multiline
           maxLength={MAX_DESCRIPTION_LIMIT}
           onChangeText={setDesc}
@@ -705,112 +707,117 @@ const AddTransaction = () => {
 
 export default AddTransaction;
 
-const style = StyleSheet.create({
-  scrollViewContent: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: 50,
-  },
-  header: {
-    paddingVertical: spacing.sm,
-  },
-  headerLeft: {
-    gap: spacing.sm,
-  },
-  headerTitle: {
-    fontSize: textSize.lg,
-  },
-  transactionTypeContainer: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-    marginTop: spacing.md,
-  },
-  tractionTypeButton: {
-    width: 100,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.md,
-  },
-  pill: {
-    borderWidth: 1,
-    borderRadius: borderRadius.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-  },
-  amountInputContainer: {
-    marginTop: spacing.md,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    paddingLeft: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  textInput: {
-    fontSize: textSize.lg,
-    paddingVertical: spacing.sm,
-  },
-  categoryContainer: {
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.sm,
-  },
-  categoryText: {
-    fontSize: textSize.lg,
-  },
+const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
+  StyleSheet.create({
+    scrollViewContent: {
+      paddingHorizontal: spacing.md,
+      paddingBottom: 50,
+    },
+    header: {
+      paddingVertical: spacing.sm,
+    },
+    headerLeft: {
+      gap: spacing.sm,
+    },
+    headerTitle: {
+      fontSize: textSize.lg,
+      color: colors.onSurface,
+    },
+    transactionTypeContainer: {
+      flexDirection: 'row',
+      gap: spacing.lg,
+      marginTop: spacing.md,
+    },
+    tractionTypeButton: {
+      width: 100,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.md,
+    },
+    pill: {
+      borderWidth: 1,
+      borderRadius: borderRadius.pill,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.sm,
+    },
+    amountInputContainer: {
+      marginTop: spacing.md,
+      borderWidth: 1,
+      borderRadius: borderRadius.md,
+      paddingLeft: spacing.sm,
+      paddingTop: spacing.xs,
+    },
+    textInput: {
+      fontSize: textSize.lg,
+      paddingVertical: spacing.sm,
+    },
+    categoryContainer: {
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.md,
+      paddingHorizontal: spacing.sm,
+    },
+    categoryText: {
+      fontSize: textSize.lg,
+    },
 
-  dateAttachmentContainer: {
-    gap: spacing.lg,
-  },
-  dateButton: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    gap: spacing.sm,
-    flex: 2,
-  },
-  dateTextContainer: {
-    gap: spacing.md,
-  },
-  dateText: {
-    fontSize: textSize.md,
-  },
-  attachmentButton: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    gap: spacing.sm,
-  },
-  attachmentContainer: {
-    marginTop: spacing.xs,
-    paddingVertical: spacing.sm,
-  },
-  descBox: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-    minHeight: 100,
-    borderWidth: 1,
-    textAlignVertical: 'top',
-    borderRadius: borderRadius.md,
-    paddingLeft: spacing.sm,
-    fontSize: textSize.md,
-  },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 5,
-    bottom: 40,
-  },
-  cameraToolbar: {
-    bottom: 0,
-    height: 200,
-    position: 'absolute',
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-});
+    dateAttachmentContainer: {
+      gap: spacing.lg,
+    },
+    dateButton: {
+      marginTop: spacing.lg,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.md,
+      gap: spacing.sm,
+      flex: 2,
+    },
+    dateTextContainer: {
+      gap: spacing.md,
+    },
+    dateText: {
+      fontSize: textSize.md,
+    },
+    attachmentButton: {
+      marginTop: spacing.lg,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.md,
+      gap: spacing.sm,
+    },
+    attachmentContainer: {
+      marginTop: spacing.xs,
+      paddingVertical: spacing.sm,
+    },
+    descBox: {
+      marginTop: spacing.lg,
+      paddingVertical: spacing.sm,
+      minHeight: 100,
+      borderWidth: 1,
+      textAlignVertical: 'top',
+      borderRadius: borderRadius.md,
+      paddingLeft: spacing.sm,
+      fontSize: textSize.md,
+      borderColor: colors.outlineVariant,
+      color: colors.onSurface,
+      fontFamily: 'PoppinsRegular',
+    },
+    fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 5,
+      bottom: 40,
+    },
+    cameraToolbar: {
+      bottom: 0,
+      height: 200,
+      position: 'absolute',
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    contentContainer: {
+      flex: 1,
+      alignItems: 'center',
+    },
+  });

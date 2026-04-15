@@ -5,9 +5,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { borderRadius, useAppTheme } from '../../../theme';
+import { AppTheme, borderRadius, useAppTheme } from '../../../theme';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { TTransactionType } from '../../types';
+import AppText from '../molecules/AppText';
+import { useTranslation } from 'react-i18next';
 const sectionHeight = 50;
 
 type TProps = {
@@ -17,6 +19,8 @@ type TProps = {
 
 const TransactionTypeSwitch = (props: TProps) => {
   const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+  const { t } = useTranslation();
   const [width, setWidth] = useState(0);
   const highlightX = useSharedValue(2);
 
@@ -39,21 +43,14 @@ const TransactionTypeSwitch = (props: TProps) => {
       onLayout={e => {
         setWidth(e.nativeEvent.layout.width);
       }}
-      style={[
-        styles.container,
-        {
-          borderColor: colors.onSurfaceDisabled,
-        },
-      ]}
+      style={[styles.container]}
     >
       <Animated.View
         style={[
           highlightAnimStyle,
           styles.highlighter,
           {
-            backgroundColor: colors.primary,
             height: sectionHeight - 5,
-            borderRadius: borderRadius.md,
           },
         ]}
       />
@@ -64,35 +61,35 @@ const TransactionTypeSwitch = (props: TProps) => {
         }}
         style={[styles.button]}
       >
-        <Text
+        <AppText.Medium
           style={[
             {
               color:
                 props.type === 'income'
-                  ? colors.onPrimary
-                  : colors.onSurfaceDisabled,
+                  ? colors.onPrimaryContainer
+                  : colors.onSurface,
             },
           ]}
         >
-          Income
-        </Text>
+          {t('common.income')}
+        </AppText.Medium>
       </PressableWithFeedback>
       <PressableWithFeedback
         onPress={() => props.onChange('expense')}
         style={[styles.button]}
       >
-        <Text
+        <AppText.Medium
           style={[
             {
               color:
                 props.type === 'expense'
-                  ? colors.onPrimary
-                  : colors.onSurfaceDisabled,
+                  ? colors.onPrimaryContainer
+                  : colors.onSurface,
             },
           ]}
         >
-          Expense
-        </Text>
+          {t('common.expense')}
+        </AppText.Medium>
       </PressableWithFeedback>
     </View>
   );
@@ -100,23 +97,27 @@ const TransactionTypeSwitch = (props: TProps) => {
 
 export default TransactionTypeSwitch;
 
-const styles = StyleSheet.create({
-  container: {
-    height: sectionHeight,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  highlighter: {
-    width: '50%',
-    position: 'absolute',
-  },
-  button: {
-    flex: 1,
-    alignItems: 'center',
-    flexDirection: 'column',
-    height: '100%',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    container: {
+      height: sectionHeight,
+      borderWidth: 1,
+      borderRadius: borderRadius.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderColor: colors.outline,
+    },
+    highlighter: {
+      width: '50%',
+      position: 'absolute',
+      backgroundColor: colors.primaryContainer,
+      borderRadius: borderRadius.md,
+    },
+    button: {
+      flex: 1,
+      alignItems: 'center',
+      flexDirection: 'column',
+      height: '100%',
+      justifyContent: 'center',
+    },
+  });

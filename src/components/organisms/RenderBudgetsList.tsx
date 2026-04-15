@@ -1,13 +1,10 @@
-import { FlashList } from '@shopify/flash-list';
-import { StyleSheet, View } from 'react-native';
-import { TBudget } from '../../types';
-import { gs } from '../../common';
-import { AppTheme, useAppTheme } from '../../../theme';
-import { roundValue } from 'commonutil-core';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { useNavigation } from '@react-navigation/native';
-import RenderBudget from './RenderBudget';
+import { FlashList } from '@shopify/flash-list';
+import { gs } from '../../common';
+import { TBudget } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import EmptyBudgetComponent from './EmptyBudgetsComponent';
+import RenderBudget from './RenderBudget';
 
 type TProps = {
   budgets: TBudget[];
@@ -15,8 +12,6 @@ type TProps = {
 
 const RenderBudgetList = (props: TProps) => {
   const { budgets } = props;
-  const { colors } = useAppTheme();
-  const styles = createStyles(colors);
   const navigation = useNavigation();
   return (
     <FlashList
@@ -25,7 +20,6 @@ const RenderBudgetList = (props: TProps) => {
       contentContainerStyle={[gs.fullFlex]}
       keyExtractor={item => item.id}
       renderItem={({ item: budget }) => {
-        const progress = roundValue(budget.spent / budget.amount, 2);
         return (
           <PressableWithFeedback
             onPress={() => {
@@ -34,7 +28,6 @@ const RenderBudgetList = (props: TProps) => {
               });
             }}
             key={budget.id}
-            // style={[styles.budgetCard]}
           >
             <RenderBudget />
           </PressableWithFeedback>
@@ -44,4 +37,3 @@ const RenderBudgetList = (props: TProps) => {
   );
 };
 export default RenderBudgetList;
-const createStyles = (colors: AppTheme['colors']) => StyleSheet.create({});

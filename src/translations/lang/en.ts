@@ -6,7 +6,6 @@ export default {
       'Track expenses privately. No ads. No cloud. Just you and your money.',
     getStarted: 'Get Started',
     alreadyHaveData: 'I already have data',
-
     home: 'Home',
     loading: 'Loading',
     next: 'Next',
@@ -22,6 +21,8 @@ export default {
     continue: 'Continue',
     budgets: 'Budgets',
     viewAll: 'View All',
+    income: 'Income',
+    expense: 'Expense',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',
@@ -43,5 +44,13 @@ export default {
     noTransactions: 'No transactions yet',
     noTransactionsHelp: 'Add your first expense or income to get started.',
     addFirstTransactions: 'Add First Transaction',
+  },
+  add: {
+    addTransaction: 'Add Transaction',
+    category: 'Category',
+    selectCategory: 'Select category',
+    wallet: 'Wallet',
+    required: 'Required',
+    additional: 'Additional details (optional)',
   },
 };
