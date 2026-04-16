@@ -2,8 +2,6 @@ import { ColorValue } from 'react-native';
 import Svg, { Circle, Text } from 'react-native-svg';
 import { useAppTheme } from '../../../theme';
 type TProps = {
-  height: number;
-  width: number;
   progress: number;
   strokeWidth: number;
   size: number;
@@ -12,8 +10,6 @@ type TProps = {
   remainingColor?: ColorValue;
 };
 const CircularProgressBar = ({
-  height,
-  width,
   progress,
   strokeWidth,
   size,
@@ -27,7 +23,7 @@ const CircularProgressBar = ({
 
   const progressLength = (circumference * progress) / 100;
   return (
-    <Svg height={height} width={width}>
+    <Svg height={size} width={size}>
       {/* Background */}
       <Circle
         stroke={remainingColor ? remainingColor : colors.onSurfaceVariant}
@@ -56,7 +52,7 @@ const CircularProgressBar = ({
         textAnchor="middle"
         dy=".3em"
         dx="-0.2em"
-        fontSize="12"
+        fontSize="11"
         fill={colors.onSurface}
       >
         {progress}%

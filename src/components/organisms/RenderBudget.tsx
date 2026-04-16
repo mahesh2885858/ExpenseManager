@@ -17,21 +17,32 @@ const RenderBudget = () => {
   const styles = createStyles(colors);
   return (
     <View style={[styles.container]}>
-      <View style={[gs.fullFlex, gs.justifyCenter]}>
+      <View style={[gs.fullFlex, gs.justifyCenter, { gap: spacing.xs }]}>
         <AppText.Regular style={[styles.budgetName]}>
           MonthlyGroceris
         </AppText.Regular>
-        <AppText.Regular style={[styles.budgetAmount]}>
-          {getFormattedAmount('123455') + '/' + getFormattedAmount('345678')}
-        </AppText.Regular>
+        <View style={[gs.flexRow, gs.itemsCenter]}>
+          <AppText.Regular style={[styles.budgetAmount]}>
+            {getFormattedAmount('123455')}
+          </AppText.Regular>
+          <AppText.Regular
+            style={[styles.budgetAmount, styles.budgetAmountTotal]}
+          >
+            {' / ' + getFormattedAmount('345678')}
+          </AppText.Regular>
+        </View>
       </View>
-      <View>
+      <View
+        style={[
+          {
+            paddingVertical: spacing.xs,
+          },
+        ]}
+      >
         <CircularProgressBar
           strokeWidth={5}
-          height={45}
-          width={45}
           progress={80}
-          size={45}
+          size={40}
           background={'transparent'}
           completedColor={colors.primary}
           remainingColor={colors.surfaceVariant}
@@ -59,6 +70,9 @@ const createStyles = (colors: AppTheme['colors']) =>
     },
     budgetAmount: {
       color: colors.onSurface,
-      fontSize: textSize.xs,
+      fontSize: textSize.sm,
+    },
+    budgetAmountTotal: {
+      color: colors.onSurfaceDisabled,
     },
   });

@@ -167,251 +167,256 @@ const Home = () => {
   }, [navigation]);
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.contentContainer]}
-      style={[styles.container]}
-    >
+    <View style={[styles.container]}>
       {/* header section */}
       <CommonHeader heading={t('home.appName')} />
-
-      {/* active filters section starts */}
-      <View
-        style={[gs.flexRow, gs.itemsCenter, { paddingHorizontal: spacing.lg }]}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.contentContainer]}
       >
-        <PressableWithFeedback
-          style={[
-            {
-              backgroundColor: colors.surfaceContainer,
-              borderRadius: borderRadius.md,
-            },
-          ]}
-        >
-          <Icon
-            color={colors.onSurface}
-            source={'chevron-left'}
-            size={textSize.xl}
-          />
-        </PressableWithFeedback>
-        <AppText.SemiBold
-          style={[
-            gs.fullFlex,
-            gs.centerText,
-            {
-              color: colors.onSurface,
-            },
-          ]}
-        >
-          This Month
-        </AppText.SemiBold>
-        <PressableWithFeedback
-          style={[
-            {
-              backgroundColor: colors.surfaceContainer,
-              borderRadius: borderRadius.md,
-            },
-          ]}
-        >
-          <Icon
-            source={'chevron-right'}
-            color={colors.onSurface}
-            size={textSize.xl}
-          />
-        </PressableWithFeedback>
-      </View>
-      {/* active filters section ends */}
-
-      {/* summary starts */}
-      <View style={[styles.summary]}>
-        <AppText.Regular
-          style={[
-            {
-              fontSize: textSize.sm,
-              color: colors.onSurface,
-              lineHeight: 16,
-            },
-          ]}
-        >
-          {t('home.totalBalance')}
-        </AppText.Regular>
-        <AppText.Bold
-          style={[{ fontSize: textSize.md, color: colors.onSurface }]}
-        >
-          {getFormattedAmount('1233423')}
-        </AppText.Bold>
-        <View
-          style={[
-            gs.flexRow,
-            {
-              marginTop: spacing.md,
-              gap: spacing.md,
-            },
-          ]}
-        >
-          <PressableWithFeedback
-            style={[
-              gs.fullFlex,
-              {
-                backgroundColor: colors.surfaceContainerHighest,
-                padding: spacing.sm,
-                borderRadius: borderRadius.sm,
-              },
-            ]}
-          >
-            <AppText.Regular
-              style={[
-                {
-                  fontSize: textSize.sm,
-                  color: colors.onSurface,
-                  lineHeight: 14,
-                },
-              ]}
-            >
-              Income
-            </AppText.Regular>
-            <AppText.Bold
-              style={[
-                {
-                  fontSize: textSize.md,
-                  color: colors.onSurface,
-                },
-              ]}
-            >
-              {getFormattedAmount('23456')}
-            </AppText.Bold>
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            style={[
-              gs.fullFlex,
-              {
-                backgroundColor: colors.surfaceContainerHighest,
-                padding: spacing.sm,
-                borderRadius: borderRadius.sm,
-              },
-            ]}
-          >
-            <AppText.Regular
-              style={[
-                {
-                  fontSize: textSize.sm,
-                  color: colors.onSurface,
-                  lineHeight: 14,
-                },
-              ]}
-            >
-              Expense
-            </AppText.Regular>
-            <AppText.Bold
-              style={[
-                {
-                  fontSize: textSize.md,
-                  color: colors.onSurface,
-                },
-              ]}
-            >
-              {getFormattedAmount('23456')}
-            </AppText.Bold>
-          </PressableWithFeedback>
-        </View>
-      </View>
-      {/* summary ends */}
-      {/*Budget Start*/}
-      <View style={[styles.budgets]}>
-        <View style={[gs.flexRow, gs.itemsCenter]}>
-          <AppText.Medium
-            style={[
-              gs.fullFlex,
-              {
-                color: colors.onSurface,
-                fontSize: textSize.sm,
-              },
-            ]}
-          >
-            {t('common.budgets')}
-          </AppText.Medium>
-          <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
-            <AppText.Medium
-              style={[
-                {
-                  color: colors.onSurface,
-                  fontSize: textSize.sm,
-                },
-              ]}
-            >
-              {t('common.viewAll')}
-            </AppText.Medium>
-            <Icon
-              source={'chevron-right'}
-              size={textSize.xl}
-              color={colors.onSurface}
-            />
-          </PressableWithFeedback>
-        </View>
-        <RenderBudgetList budgets={budgets} />
-      </View>
-      {/*Budget ends*/}
-
-      {/* transactions section */}
-      <View
-        style={[
-          gs.fullFlex,
-          {
-            paddingHorizontal: spacing.md,
-          },
-        ]}
-      >
+        {/* active filters section starts */}
         <View
           style={[
             gs.flexRow,
             gs.itemsCenter,
-            {
-              marginTop: spacing.lg,
-            },
+            { paddingHorizontal: spacing.lg },
           ]}
         >
-          <AppText.Medium
+          <PressableWithFeedback
             style={[
-              gs.fullFlex,
               {
-                color: colors.onSurface,
-                fontSize: textSize.sm,
+                backgroundColor: colors.surfaceContainer,
+                borderRadius: borderRadius.md,
               },
             ]}
           >
-            {t('home.recentTransactions')}
-          </AppText.Medium>
-          <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
+            <Icon
+              color={colors.onSurface}
+              source={'chevron-left'}
+              size={textSize.xl}
+            />
+          </PressableWithFeedback>
+          <AppText.SemiBold
+            style={[
+              gs.fullFlex,
+              gs.centerText,
+              {
+                color: colors.onSurface,
+              },
+            ]}
+          >
+            This Month
+          </AppText.SemiBold>
+          <PressableWithFeedback
+            style={[
+              {
+                backgroundColor: colors.surfaceContainer,
+                borderRadius: borderRadius.md,
+              },
+            ]}
+          >
+            <Icon
+              source={'chevron-right'}
+              color={colors.onSurface}
+              size={textSize.xl}
+            />
+          </PressableWithFeedback>
+        </View>
+        {/* active filters section ends */}
+
+        {/* summary starts */}
+        <View style={[styles.summary]}>
+          <AppText.Regular
+            style={[
+              {
+                fontSize: textSize.sm,
+                color: colors.onSurface,
+                lineHeight: 16,
+              },
+            ]}
+          >
+            {t('home.totalBalance')}
+          </AppText.Regular>
+          <AppText.Bold
+            style={[{ fontSize: textSize.md, color: colors.onSurface }]}
+          >
+            {getFormattedAmount('1233423')}
+          </AppText.Bold>
+          <View
+            style={[
+              gs.flexRow,
+              {
+                marginTop: spacing.md,
+                gap: spacing.md,
+              },
+            ]}
+          >
+            <PressableWithFeedback
+              style={[
+                gs.fullFlex,
+                {
+                  backgroundColor: colors.surfaceContainerLow,
+                  padding: spacing.sm,
+                  borderRadius: borderRadius.sm,
+                },
+              ]}
+            >
+              <AppText.Regular
+                style={[
+                  {
+                    fontSize: textSize.sm,
+                    color: colors.onSurface,
+                    lineHeight: 14,
+                  },
+                ]}
+              >
+                Income
+              </AppText.Regular>
+              <AppText.Bold
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: colors.onSurface,
+                  },
+                ]}
+              >
+                {getFormattedAmount('23456')}
+              </AppText.Bold>
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              style={[
+                gs.fullFlex,
+                {
+                  backgroundColor: colors.surfaceContainerLow,
+                  padding: spacing.sm,
+                  borderRadius: borderRadius.sm,
+                },
+              ]}
+            >
+              <AppText.Regular
+                style={[
+                  {
+                    fontSize: textSize.sm,
+                    color: colors.onSurface,
+                    lineHeight: 14,
+                  },
+                ]}
+              >
+                Expense
+              </AppText.Regular>
+              <AppText.Bold
+                style={[
+                  {
+                    fontSize: textSize.md,
+                    color: colors.onSurface,
+                  },
+                ]}
+              >
+                {getFormattedAmount('23456')}
+              </AppText.Bold>
+            </PressableWithFeedback>
+          </View>
+        </View>
+        {/* summary ends */}
+        {/*Budget Start*/}
+        <View style={[styles.budgets]}>
+          <View style={[gs.flexRow, gs.itemsCenter]}>
             <AppText.Medium
               style={[
+                gs.fullFlex,
                 {
                   color: colors.onSurface,
                   fontSize: textSize.sm,
                 },
               ]}
             >
-              {t('common.viewAll')}
+              {t('common.budgets')}
             </AppText.Medium>
-            <Icon
-              source={'chevron-right'}
-              size={textSize.xl}
-              color={colors.onSurface}
-            />
-          </PressableWithFeedback>
+            <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
+              <AppText.Medium
+                style={[
+                  {
+                    color: colors.onSurface,
+                    fontSize: textSize.sm,
+                  },
+                ]}
+              >
+                {t('common.viewAll')}
+              </AppText.Medium>
+              <Icon
+                source={'chevron-right'}
+                size={textSize.xl}
+                color={colors.onSurface}
+              />
+            </PressableWithFeedback>
+          </View>
+          <RenderBudgetList budgets={budgets} />
         </View>
-        <View style={[gs.fullFlex]}>
-          <RenderTransactionList
-            scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
-            transactions={transactionsToRender}
-          />
-        </View>
-      </View>
+        {/*Budget ends*/}
 
-      <WalletSelectionModal
-        handleSheetChanges={handleSheetChange}
-        onWalletChange={id => setSelectedAccountId(id)}
-        ref={btmShtRef}
-        selectedWalletId={selectedAccount?.id ?? ''}
-      />
-    </ScrollView>
+        {/* transactions section */}
+        <View
+          style={[
+            gs.fullFlex,
+            {
+              paddingHorizontal: spacing.md,
+            },
+          ]}
+        >
+          <View
+            style={[
+              gs.flexRow,
+              gs.itemsCenter,
+              {
+                marginTop: spacing.lg,
+              },
+            ]}
+          >
+            <AppText.Medium
+              style={[
+                gs.fullFlex,
+                {
+                  color: colors.onSurface,
+                  fontSize: textSize.sm,
+                },
+              ]}
+            >
+              {t('home.recentTransactions')}
+            </AppText.Medium>
+            <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
+              <AppText.Medium
+                style={[
+                  {
+                    color: colors.onSurface,
+                    fontSize: textSize.sm,
+                  },
+                ]}
+              >
+                {t('common.viewAll')}
+              </AppText.Medium>
+              <Icon
+                source={'chevron-right'}
+                size={textSize.xl}
+                color={colors.onSurface}
+              />
+            </PressableWithFeedback>
+          </View>
+          <View style={[gs.fullFlex]}>
+            <RenderTransactionList
+              scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
+              transactions={transactionsToRender}
+            />
+          </View>
+        </View>
+
+        <WalletSelectionModal
+          handleSheetChanges={handleSheetChange}
+          onWalletChange={id => setSelectedAccountId(id)}
+          ref={btmShtRef}
+          selectedWalletId={selectedAccount?.id ?? ''}
+        />
+      </ScrollView>
+    </View>
   );
 };
 
