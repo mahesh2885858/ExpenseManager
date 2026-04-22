@@ -53,4 +53,10 @@ export default {
     required: 'Required',
     additional: 'Additional details (optional)',
   },
+  newCat: {
+    newCat: 'New Category',
+    name: 'Category Name',
+    namePlaceholder: 'e.g. Groceries, Salary, Fuel',
+    selectIcon: 'Select Icon',
+  },
 };

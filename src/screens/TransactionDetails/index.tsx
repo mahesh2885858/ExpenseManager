@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import ScreenWithoutHeader from '../../components/molecules/ScreenWithoutHeader';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import useWalletStore from '../../stores/walletsStore';
 import useCategoriesStore from '../../stores/categoriesStore';
 import { TRootStackParamList } from '../../types';
@@ -30,7 +30,7 @@ const TransactionDetails = () => {
   }, [transaction, accounts]);
 
   return (
-    <ScreenWithoutHeader>
+    <ScreenWrapper>
       <View
         style={[
           {
@@ -275,7 +275,7 @@ const TransactionDetails = () => {
           </View>
         )}
       </View>
-    </ScreenWithoutHeader>
+    </ScreenWrapper>
   );
 };
 

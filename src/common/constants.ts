@@ -1,4 +1,4 @@
-import { TCurrency } from '../types';
+import { TCategory, TCurrency } from '../types';
 
 export const MAX_AMOUNT = 100000000;
 export const DEFAULT_CATEGORY_ID = 'default_category_327065';
@@ -217,5 +217,218 @@ export const currencies: TCurrency[] = [
     symbol: '﷼',
     decimal_digits: 2,
     countries: ['Saudi Arabia'],
+  },
+];
+
+export const CATEGORIES: TCategory[] = [
+  // general
+  {
+    id: 'general',
+    name: 'General',
+    icon: 'shape-outline',
+    color: '#9E9E9E',
+    type: 'expense',
+  },
+  // 🍔 Food & Dining
+  {
+    id: 'food',
+    name: 'Food',
+    icon: 'silverware-fork-knife',
+    color: '#FF7043',
+    type: 'expense',
+  },
+  {
+    id: 'coffee',
+    name: 'Coffee',
+    icon: 'coffee',
+    color: '#6D4C41',
+    type: 'expense',
+  },
+  {
+    id: 'groceries',
+    name: 'Groceries',
+    icon: 'cart',
+    color: '#66BB6A',
+    type: 'expense',
+  },
+
+  // 🚗 Transport
+  { id: 'fuel', name: 'Fuel', icon: 'fuel', color: '#FFA726', type: 'expense' },
+  { id: 'car', name: 'Car', icon: 'car', color: '#42A5F5', type: 'expense' },
+  {
+    id: 'public_transport',
+    name: 'Public Transport',
+    icon: 'bus',
+    color: '#26C6DA',
+    type: 'expense',
+  },
+  {
+    id: 'flight',
+    name: 'Flights',
+    icon: 'airplane',
+    color: '#29B6F6',
+    type: 'expense',
+  },
+
+  // 🏠 Home
+  { id: 'rent', name: 'Rent', icon: 'home', color: '#AB47BC', type: 'expense' },
+  {
+    id: 'utilities',
+    name: 'Utilities',
+    icon: 'lightbulb',
+    color: '#FFCA28',
+    type: 'expense',
+  },
+  {
+    id: 'internet',
+    name: 'Internet',
+    icon: 'wifi',
+    color: '#26A69A',
+    type: 'expense',
+  },
+
+  // 🛍️ Shopping
+  {
+    id: 'shopping',
+    name: 'Shopping',
+    icon: 'shopping',
+    color: '#EC407A',
+    type: 'expense',
+  },
+  {
+    id: 'clothing',
+    name: 'Clothing',
+    icon: 'hanger',
+    color: '#8D6E63',
+    type: 'expense',
+  },
+  {
+    id: 'electronics',
+    name: 'Electronics',
+    icon: 'laptop',
+    color: '#5C6BC0',
+    type: 'expense',
+  },
+
+  // 🧾 Bills & Finance
+  {
+    id: 'bills',
+    name: 'Bills',
+    icon: 'file-document',
+    color: '#78909C',
+    type: 'expense',
+  },
+  {
+    id: 'subscriptions',
+    name: 'Subscriptions',
+    icon: 'receipt',
+    color: '#7E57C2',
+    type: 'expense',
+  },
+  {
+    id: 'insurance',
+    name: 'Insurance',
+    icon: 'shield-check',
+    color: '#66BB6A',
+    type: 'expense',
+  },
+
+  // 🏥 Health
+  {
+    id: 'health',
+    name: 'Health',
+    icon: 'hospital',
+    color: '#EF5350',
+    type: 'expense',
+  },
+  {
+    id: 'pharmacy',
+    name: 'Pharmacy',
+    icon: 'pill',
+    color: '#EC407A',
+    type: 'expense',
+  },
+  {
+    id: 'fitness',
+    name: 'Fitness',
+    icon: 'dumbbell',
+    color: '#26A69A',
+    type: 'expense',
+  },
+
+  // 🎮 Entertainment
+  {
+    id: 'movies',
+    name: 'Movies',
+    icon: 'movie',
+    color: '#5C6BC0',
+    type: 'expense',
+  },
+  {
+    id: 'music',
+    name: 'Music',
+    icon: 'music',
+    color: '#AB47BC',
+    type: 'expense',
+  },
+  {
+    id: 'games',
+    name: 'Games',
+    icon: 'gamepad-variant',
+    color: '#42A5F5',
+    type: 'expense',
+  },
+
+  // 🎓 Education
+  {
+    id: 'education',
+    name: 'Education',
+    icon: 'school',
+    color: '#29B6F6',
+    type: 'expense',
+  },
+  {
+    id: 'books',
+    name: 'Books',
+    icon: 'book-open-variant',
+    color: '#8D6E63',
+    type: 'expense',
+  },
+
+  // 💰 Income
+  {
+    id: 'salary',
+    name: 'Salary',
+    icon: 'cash-plus',
+    color: '#66BB6A',
+    type: 'income',
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    icon: 'briefcase',
+    color: '#42A5F5',
+    type: 'income',
+  },
+  {
+    id: 'freelance',
+    name: 'Freelance',
+    icon: 'laptop',
+    color: '#26A69A',
+    type: 'income',
+  },
+  {
+    id: 'investments',
+    name: 'Investments',
+    icon: 'trending-up',
+    color: '#AB47BC',
+    type: 'income',
+  },
+  {
+    id: 'gifts',
+    name: 'Gifts',
+    icon: 'gift',
+    color: '#EC407A',
+    type: 'income',
   },
 ];

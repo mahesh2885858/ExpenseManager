@@ -7,7 +7,7 @@ import {
   useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
@@ -17,6 +17,7 @@ import useCategories from '../../hooks/useCategories';
 import { TCategory } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import CreateNewCategory from './CreateNewCategory';
+import { useNavigation } from '@react-navigation/native';
 
 type TProps = {
   ref: any;
@@ -34,6 +35,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const CategorySelectionModal = (props: TProps) => {
   const { categories } = useCategories();
   const { colors } = useAppTheme();
+  const navigation = useNavigation();
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
 
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
@@ -51,6 +53,11 @@ const CategorySelectionModal = (props: TProps) => {
   const sortedCategories = useMemo(() => {
     return categoriesToRender.sort((a, b) => a.name.localeCompare(b.name));
   }, [categoriesToRender]);
+
+  const goToAddCategory = useCallback(() => {
+    props.ref.current?.dismiss();
+    navigation.navigate('AddCategory');
+  }, [navigation, props.ref]);
 
   return (
     <BottomSheetModal
@@ -81,7 +88,7 @@ const CategorySelectionModal = (props: TProps) => {
               </Text>
               <PressableWithFeedback
                 hidden={props.forFilter}
-                onPress={handlePresent}
+                onPress={goToAddCategory}
                 style={[
                   {
                     paddingLeft: spacing.md,

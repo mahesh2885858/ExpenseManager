@@ -39,6 +39,7 @@ export type TRootStackParamList = {
     budget: TBudget;
   };
   AddOrEditBudget: { mode: 'new' } | { mode: 'edit'; budget: TBudget };
+  AddCategory: undefined;
 };
 
 declare global {

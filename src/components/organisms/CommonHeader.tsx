@@ -1,9 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import HeaderText from '../atoms/HeaderText';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 type TProps = {
   heading?: string;
@@ -21,17 +22,7 @@ const CommonHeader = ({
     <View style={styles.container}>
       <View style={[styles.header]}>
         <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
-          <Text
-            style={[
-              gs.fontBold,
-              {
-                color: colors.onBackground,
-                fontSize: textSize.lg,
-              },
-            ]}
-          >
-            {heading}
-          </Text>
+          <HeaderText header={heading} />
         </View>
 
         <View style={styles.headerRight}>

@@ -15,6 +15,7 @@ import ManageCategories from '../screens/ManageCategories';
 import TransactionSort from '../screens/TransactionSort';
 import BudgetDetails from '../screens/BudgetDetails';
 import AddOrEditBudget from '../screens/AddOrEditBudget';
+import AddCategory from '../screens/AddCategory';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -114,6 +115,13 @@ const MainStack = () => {
           <Stack.Screen
             name="AddOrEditBudget"
             component={AddOrEditBudget}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="AddCategory"
+            component={AddCategory}
             options={{
               headerShown: false,
             }}
