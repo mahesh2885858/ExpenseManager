@@ -1,18 +1,15 @@
-import { getMaxText } from 'commonutil-core';
-import { format, getDate } from 'date-fns';
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
 import useTransactions from '../hooks/useTransactions';
 import useCategoriesStore from '../stores/categoriesStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
-import PressableWithFeedback from './atoms/PressableWithFeedback';
-import Card from './atoms/Card';
 import withOpacity from '../utils/withOpacity';
+import Card from './atoms/Card';
+import PressableWithFeedback from './atoms/PressableWithFeedback';
 import AppText from './molecules/AppText';
 
 const RenderTransaction = (props: {
@@ -31,11 +28,10 @@ const RenderTransaction = (props: {
     state => state.selectedTransactionIds,
   );
 
-  const categoryName = useMemo(() => {
-    if (!transactionsByIds) return 'Unknown';
+  const category = useMemo(() => {
+    if (!transactionsByIds) return undefined;
     const cId = transactionsByIds[props.item].categoryIds[0];
-    const category = categories.find(c => c.id === cId);
-    return category?.name ?? 'Unknown';
+    return categories.find(c => c.id === cId);
   }, [props, categories, transactionsByIds]);
 
   if (!transactionsByIds) return <View>No Transaction found</View>;
@@ -52,16 +48,19 @@ const RenderTransaction = (props: {
           <View
             style={[
               {
-                backgroundColor: withOpacity(theme.colors.primary, 0.15),
+                backgroundColor: withOpacity(
+                  category?.icon.color ?? theme.colors.primary,
+                  0.15,
+                ),
                 borderRadius: borderRadius.round,
                 padding: spacing.sm,
               },
             ]}
           >
             <Icon
-              source={'gas-station-outline'}
+              source={category?.icon.icon ?? 'shape-outline'}
               size={28}
-              color={theme.colors.primary}
+              color={category?.icon.color ?? theme.colors.primary}
             />
           </View>
           <View
@@ -81,7 +80,7 @@ const RenderTransaction = (props: {
                 },
               ]}
             >
-              {categoryName}
+              {category?.name ?? ''}
             </AppText.Regular>
             <AppText.Regular
               style={[
@@ -91,7 +90,7 @@ const RenderTransaction = (props: {
                 },
               ]}
             >
-              {categoryName}
+              {category?.name ?? ''}
             </AppText.Regular>
           </View>
           <AppText.Medium
