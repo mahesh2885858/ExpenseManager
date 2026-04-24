@@ -1,4 +1,4 @@
-import { TCategory, TCurrency } from '../types';
+import { TCategory, TCategoryIcon, TCurrency } from '../types';
 
 export const MAX_AMOUNT = 100000000;
 export const DEFAULT_CATEGORY_ID = 'default_category_327065';
@@ -220,215 +220,154 @@ export const currencies: TCurrency[] = [
   },
 ];
 
-export const CATEGORIES: TCategory[] = [
-  // general
-  {
-    id: 'general',
-    name: 'General',
-    icon: 'shape-outline',
-    color: '#9E9E9E',
-    type: 'expense',
-  },
-  // 🍔 Food & Dining
+export const CATEGORY_ICONS: TCategoryIcon[] = [
+  { id: 'general', icon: 'shape-outline', color: '#9E9E9E' },
+
+  // Food & Dining
+  { id: 'food', icon: 'silverware-fork-knife', color: '#FF7043' },
+  { id: 'coffee', icon: 'coffee', color: '#6D4C41' },
+  { id: 'groceries', icon: 'cart', color: '#66BB6A' },
+
+  // Transport
+  { id: 'fuel', icon: 'fuel', color: '#FFA726' },
+  { id: 'car', icon: 'car', color: '#42A5F5' },
+  { id: 'bus', icon: 'bus', color: '#26C6DA' },
+  { id: 'flight', icon: 'airplane', color: '#29B6F6' },
+
+  // Home
+  { id: 'home', icon: 'home', color: '#AB47BC' },
+  { id: 'utilities', icon: 'lightbulb', color: '#FFCA28' },
+  { id: 'internet', icon: 'wifi', color: '#26A69A' },
+
+  // Shopping
+  { id: 'shopping', icon: 'shopping', color: '#EC407A' },
+  { id: 'clothing', icon: 'hanger', color: '#8D6E63' },
+  { id: 'electronics', icon: 'laptop', color: '#5C6BC0' },
+
+  // Bills
+  { id: 'bills', icon: 'file-document', color: '#78909C' },
+  { id: 'subscriptions', icon: 'receipt', color: '#7E57C2' },
+  { id: 'insurance', icon: 'shield-check', color: '#66BB6A' },
+
+  // Health
+  { id: 'health', icon: 'hospital', color: '#EF5350' },
+  { id: 'pharmacy', icon: 'pill', color: '#EC407A' },
+  { id: 'fitness', icon: 'dumbbell', color: '#26A69A' },
+
+  // Entertainment
+  { id: 'movies', icon: 'movie', color: '#5C6BC0' },
+  { id: 'music', icon: 'music', color: '#AB47BC' },
+  { id: 'games', icon: 'gamepad-variant', color: '#42A5F5' },
+
+  // Education / Work
+  { id: 'education', icon: 'school', color: '#29B6F6' },
+  { id: 'books', icon: 'book-open-variant', color: '#8D6E63' },
+  { id: 'work', icon: 'briefcase', color: '#42A5F5' },
+
+  // Finance / Income visuals (still useful visually)
+  { id: 'salary', icon: 'cash-plus', color: '#66BB6A' },
+  { id: 'investment', icon: 'trending-up', color: '#AB47BC' },
+  { id: 'gift', icon: 'gift', color: '#EC407A' },
+];
+
+export const CATEGORY_ICON_MAP = Object.fromEntries(
+  CATEGORY_ICONS.map(icon => [icon.id, icon]),
+);
+
+export const DEFAULT_CATEGORIES: TCategory[] = [
+  //Core expenses
   {
     id: 'food',
     name: 'Food',
-    icon: 'silverware-fork-knife',
-    color: '#FF7043',
+    icon: CATEGORY_ICON_MAP.food,
     type: 'expense',
   },
   {
-    id: 'coffee',
-    name: 'Coffee',
-    icon: 'coffee',
-    color: '#6D4C41',
+    id: 'transport',
+    name: 'Transport',
+    icon: CATEGORY_ICON_MAP.car,
     type: 'expense',
   },
-  {
-    id: 'groceries',
-    name: 'Groceries',
-    icon: 'cart',
-    color: '#66BB6A',
-    type: 'expense',
-  },
-
-  // 🚗 Transport
-  { id: 'fuel', name: 'Fuel', icon: 'fuel', color: '#FFA726', type: 'expense' },
-  { id: 'car', name: 'Car', icon: 'car', color: '#42A5F5', type: 'expense' },
-  {
-    id: 'public_transport',
-    name: 'Public Transport',
-    icon: 'bus',
-    color: '#26C6DA',
-    type: 'expense',
-  },
-  {
-    id: 'flight',
-    name: 'Flights',
-    icon: 'airplane',
-    color: '#29B6F6',
-    type: 'expense',
-  },
-
-  // 🏠 Home
-  { id: 'rent', name: 'Rent', icon: 'home', color: '#AB47BC', type: 'expense' },
-  {
-    id: 'utilities',
-    name: 'Utilities',
-    icon: 'lightbulb',
-    color: '#FFCA28',
-    type: 'expense',
-  },
-  {
-    id: 'internet',
-    name: 'Internet',
-    icon: 'wifi',
-    color: '#26A69A',
-    type: 'expense',
-  },
-
-  // 🛍️ Shopping
   {
     id: 'shopping',
     name: 'Shopping',
-    icon: 'shopping',
-    color: '#EC407A',
+    icon: CATEGORY_ICON_MAP.shopping,
     type: 'expense',
   },
-  {
-    id: 'clothing',
-    name: 'Clothing',
-    icon: 'hanger',
-    color: '#8D6E63',
-    type: 'expense',
-  },
-  {
-    id: 'electronics',
-    name: 'Electronics',
-    icon: 'laptop',
-    color: '#5C6BC0',
-    type: 'expense',
-  },
-
-  // 🧾 Bills & Finance
   {
     id: 'bills',
     name: 'Bills',
-    icon: 'file-document',
-    color: '#78909C',
-    type: 'expense',
-  },
-  {
-    id: 'subscriptions',
-    name: 'Subscriptions',
-    icon: 'receipt',
-    color: '#7E57C2',
-    type: 'expense',
-  },
-  {
-    id: 'insurance',
-    name: 'Insurance',
-    icon: 'shield-check',
-    color: '#66BB6A',
+    icon: CATEGORY_ICON_MAP.bills,
     type: 'expense',
   },
 
-  // 🏥 Health
+  //Living
+  {
+    id: 'rent',
+    name: 'Rent',
+    icon: CATEGORY_ICON_MAP.home,
+    type: 'expense',
+  },
+  {
+    id: 'utilities',
+    name: 'Utilities',
+    icon: CATEGORY_ICON_MAP.utilities,
+    type: 'expense',
+  },
+
+  //Health & lifestyle
   {
     id: 'health',
     name: 'Health',
-    icon: 'hospital',
-    color: '#EF5350',
+    icon: CATEGORY_ICON_MAP.health,
     type: 'expense',
   },
   {
-    id: 'pharmacy',
-    name: 'Pharmacy',
-    icon: 'pill',
-    color: '#EC407A',
-    type: 'expense',
-  },
-  {
-    id: 'fitness',
-    name: 'Fitness',
-    icon: 'dumbbell',
-    color: '#26A69A',
+    id: 'entertainment',
+    name: 'Entertainment',
+    icon: CATEGORY_ICON_MAP.movies,
     type: 'expense',
   },
 
-  // 🎮 Entertainment
-  {
-    id: 'movies',
-    name: 'Movies',
-    icon: 'movie',
-    color: '#5C6BC0',
-    type: 'expense',
-  },
-  {
-    id: 'music',
-    name: 'Music',
-    icon: 'music',
-    color: '#AB47BC',
-    type: 'expense',
-  },
-  {
-    id: 'games',
-    name: 'Games',
-    icon: 'gamepad-variant',
-    color: '#42A5F5',
-    type: 'expense',
-  },
-
-  // 🎓 Education
+  //Personal growth
   {
     id: 'education',
     name: 'Education',
-    icon: 'school',
-    color: '#29B6F6',
-    type: 'expense',
-  },
-  {
-    id: 'books',
-    name: 'Books',
-    icon: 'book-open-variant',
-    color: '#8D6E63',
+    icon: CATEGORY_ICON_MAP.education,
     type: 'expense',
   },
 
-  // 💰 Income
+  //Income
   {
     id: 'salary',
     name: 'Salary',
-    icon: 'cash-plus',
-    color: '#66BB6A',
+    icon: CATEGORY_ICON_MAP.salary,
     type: 'income',
   },
   {
     id: 'business',
     name: 'Business',
-    icon: 'briefcase',
-    color: '#42A5F5',
-    type: 'income',
-  },
-  {
-    id: 'freelance',
-    name: 'Freelance',
-    icon: 'laptop',
-    color: '#26A69A',
+    icon: CATEGORY_ICON_MAP.work,
     type: 'income',
   },
   {
     id: 'investments',
     name: 'Investments',
-    icon: 'trending-up',
-    color: '#AB47BC',
+    icon: CATEGORY_ICON_MAP.investment,
     type: 'income',
   },
   {
     id: 'gifts',
     name: 'Gifts',
-    icon: 'gift',
-    color: '#EC407A',
+    icon: CATEGORY_ICON_MAP.gift,
     type: 'income',
+  },
+
+  //Fallback (important)
+  {
+    id: 'general',
+    name: 'General',
+    icon: CATEGORY_ICON_MAP.general,
+    type: 'expense',
   },
 ];

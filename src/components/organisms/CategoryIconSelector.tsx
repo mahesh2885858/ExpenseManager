@@ -1,27 +1,32 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { CATEGORIES } from '../../common';
+import { CATEGORY_ICONS } from '../../common';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import { TCategory } from '../../types';
+import { TCategory, TCategoryIcon } from '../../types';
 import withOpacity from '../../utils/withOpacity';
 import { AppTheme, borderRadius, spacing, useAppTheme } from '../../../theme';
 
-const chunkIntoColumns = (data: TCategory[], rows = 2) => {
-  const result: TCategory[][] = [];
+const chunkIntoColumns = (data: TCategoryIcon[], rows = 2) => {
+  const result: TCategoryIcon[][] = [];
   for (let i = 0; i < data.length; i += rows) {
     result.push(data.slice(i, i + rows));
   }
   return result;
 };
 
-const CategoryIconSelector = () => {
+type TProps = {
+  selectedId: string | null;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+const CategoryIconSelector = (props: TProps) => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
 
   const [selectedId, setSelectedId] = useState<string | null>('general');
 
-  const columnData = useMemo(() => chunkIntoColumns(CATEGORIES, 2), []);
+  const columnData = useMemo(() => chunkIntoColumns(CATEGORY_ICONS, 2), []);
 
   return (
     <FlatList
@@ -33,12 +38,12 @@ const CategoryIconSelector = () => {
       renderItem={({ item }) => (
         <View style={styles.column}>
           {item.map(cat => {
-            const isSelected = selectedId === cat.id;
+            const isSelected = props.selectedId === cat.id;
 
             return (
               <PressableWithFeedback
                 key={cat.id}
-                onPress={() => setSelectedId(cat.id)}
+                onPress={() => props.setSelectedId(cat.id)}
                 style={[
                   styles.item,
                   {

@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import useTransactionsStore from '../stores/transactionsStore';
 import { v4 as uuid } from 'uuid';
-import { TCategorySummary } from '../types';
+import { TCategoryIcon, TCategorySummary, TCategoryType } from '../types';
 import useCategoriesStore from '../stores/categoriesStore';
+import { ToastAndroid } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const useCategories = () => {
+  const { t } = useTranslation();
   const categories = useCategoriesStore(state => state.categories);
   const addCategory = useCategoriesStore(state => state.addCategory);
   const updateCategory = useCategoriesStore(state => state.updateCategory);
@@ -27,11 +30,24 @@ const useCategories = () => {
     setSelectedCategory(id);
   };
 
-  const addNewCategory = (name: string, makeDefault = false) => {
+  const addNewCategory = (
+    name: string,
+    icon: TCategoryIcon,
+    type: TCategoryType,
+    makeDefault = false,
+  ) => {
+    const categoryExists = categories.find(
+      c => c.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (categoryExists) {
+      throw new Error(t('newCat.catExists'));
+    }
     const id = uuid();
     addCategory({
       id,
       name,
+      icon,
+      type,
     });
     if (makeDefault) {
       setDefaultCategoryId(id);

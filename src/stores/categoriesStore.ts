@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { DEFAULT_CATEGORY_ID } from '../common';
+import { DEFAULT_CATEGORIES, DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
 import { TCategories, TCategory } from '../types';
 
@@ -23,12 +23,7 @@ type PositionStore = TTransactionsStore & TTransactionsStoreActions;
 const useCategoriesStore = create<PositionStore>()(
   persist(
     (set, get) => ({
-      categories: [
-        {
-          name: 'General',
-          id: DEFAULT_CATEGORY_ID,
-        },
-      ],
+      categories: DEFAULT_CATEGORIES,
       defaultCategoryId: DEFAULT_CATEGORY_ID,
 
       addCategory: category => {

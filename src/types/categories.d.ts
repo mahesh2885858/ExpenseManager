@@ -1,10 +1,14 @@
-export type CategoryType = 'expense' | 'income';
+export type TCategoryType = 'expense' | 'income';
+export type TCategoryIcon = {
+  id: string;
+  icon: string;
+  color: string;
+};
 export type TCategory = {
   id: string;
   name: string;
-  icon: string; // MDI icon name
-  color: string; // background color
-  type: CategoryType;
+  icon: TCategoryIcon;
+  type: TCategoryType;
 };
 
 export type TCategorySummary = {

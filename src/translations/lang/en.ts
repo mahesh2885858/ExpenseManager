@@ -58,5 +58,7 @@ export default {
     name: 'Category Name',
     namePlaceholder: 'e.g. Groceries, Salary, Fuel',
     selectIcon: 'Select Icon',
+    type: 'Category Type',
+    catExists: 'Category already exists.',
   },
 };
