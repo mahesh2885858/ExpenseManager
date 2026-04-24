@@ -59,6 +59,7 @@ const AddOrEditBudget = () => {
     end: undefined,
   });
   const [openDatePicker, setOpenDatePicker] = useState(false);
+  const [renderCategoryList, setRenderCategoryList] = useState(false);
 
   const [errors, setErrors] = useState({
     name: '',
@@ -261,7 +262,7 @@ const AddOrEditBudget = () => {
         <View style={[styles.categorySelectionBox]}>
           <Text style={[styles.selectCatText]}>Select Category</Text>
           <PressableWithFeedback
-            onPress={handlePresent}
+            onPress={() => renderCategoryList(true)}
             style={[styles.addCatBox]}
           >
             {selectedCatIds.length > 0 ? (
@@ -367,9 +368,9 @@ const AddOrEditBudget = () => {
 
       {/*All modals used*/}
       <CategorySelectionModal
-        handleSheetChanges={handleSheetChange}
-        ref={btmShtRef}
+        onClose={() => setRenderCategoryList(false)}
         selectCategory={onCatSelected}
+        visible={renderCategoryList}
       />
       <AmountInputBoard
         ref={amtShtRef}
