@@ -10,11 +10,13 @@ import { Icon } from 'react-native-paper';
 import AppText from '../molecules/AppText';
 import { useTranslation } from 'react-i18next';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import { useNavigation } from '@react-navigation/native';
 
 const EmptyBudgetComponent = () => {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const styles = createStyles(colors);
+  const { navigate } = useNavigation();
   return (
     <View style={[styles.container]}>
       <Icon source={'hand-coin-outline'} size={35} color={colors.primary} />
@@ -24,7 +26,14 @@ const EmptyBudgetComponent = () => {
       <AppText.Regular style={[styles.noBudgetSub]}>
         {t('home.noBudgetHelp')}
       </AppText.Regular>
-      <PressableWithFeedback style={[styles.button]}>
+      <PressableWithFeedback
+        onPress={() =>
+          navigate('AddOrEditBudget', {
+            mode: 'new',
+          })
+        }
+        style={[styles.button]}
+      >
         <AppText.SemiBold style={[styles.buttonText]}>
           {t('home.createFirstBudget')}
         </AppText.SemiBold>
@@ -46,7 +55,6 @@ const createStyles = (colors: AppTheme['colors']) =>
     noBudgetText: {
       fontSize: textSize.sm,
       color: colors.onSurface,
-      lineHeight: 12,
       marginTop: spacing.sm,
     },
     noBudgetSub: {

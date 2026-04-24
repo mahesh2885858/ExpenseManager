@@ -37,7 +37,7 @@ const useCategories = () => {
     makeDefault = false,
   ) => {
     const categoryExists = categories.find(
-      c => c.name.toLowerCase() === name.toLowerCase(),
+      c => c.name.trim().toLowerCase() === name.trim().toLowerCase(),
     );
     if (categoryExists) {
       throw new Error(t('newCat.catExists'));

@@ -1,233 +1,210 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetProps,
-  BottomSheetTextInput,
-  useBottomSheetScrollableCreator,
-} from '@gorhom/bottom-sheet';
-import { FlashList } from '@shopify/flash-list';
-import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Modal, View, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useCategories from '../../hooks/useCategories';
-import { TCategory } from '../../types';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import CreateNewCategory from './CreateNewCategory';
 import { useNavigation } from '@react-navigation/native';
 
-type TProps = {
-  ref: any;
-  handleSheetChanges: BottomSheetProps['onChange'];
-  selectCategory: (id: string) => void;
+import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
+import HeaderWithBackButton from '../../components/atoms/HeaderWithBackButton';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText from '../../components/molecules/AppText';
+
+import useCategories from '../../hooks/useCategories';
+import { gs } from '../../common';
+import { TCategory } from '../../types';
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
   selectedCategory?: string | null;
-  forFilter?: boolean;
-  allowMultiple?: boolean;
+  selectCategory: (id: string) => void;
 };
 
-const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
-  return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
-};
-
-const CategorySelectionModal = (props: TProps) => {
-  const { categories } = useCategories();
+const CategorySelectionModal = ({
+  visible,
+  onClose,
+  selectedCategory,
+  selectCategory,
+}: Props) => {
   const { colors } = useAppTheme();
-  const navigation = useNavigation();
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const styles = createStyles(colors);
 
-  const BottomSheetScrollable = useBottomSheetScrollableCreator();
+  const navigation = useNavigation();
+  const { categories } = useCategories();
 
   const [search, setSearch] = useState('');
 
-  const categoriesToRender = useMemo(() => {
-    return search.trim().length === 0
-      ? categories
-      : categories.filter(cat =>
-          cat.name.toLowerCase().includes(search.trim().toLowerCase()),
-        );
+  // 🔍 Filter + sort (same logic, cleaner)
+  const filteredCategories = useMemo(() => {
+    const list =
+      search.trim().length === 0
+        ? categories
+        : categories.filter(c =>
+            c.name.toLowerCase().includes(search.toLowerCase()),
+          );
+
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
   }, [categories, search]);
 
-  const sortedCategories = useMemo(() => {
-    return categoriesToRender.sort((a, b) => a.name.localeCompare(b.name));
-  }, [categoriesToRender]);
-
   const goToAddCategory = useCallback(() => {
-    props.ref.current?.dismiss();
+    onClose();
     navigation.navigate('AddCategory');
-  }, [navigation, props.ref]);
+  }, [navigation, onClose]);
 
   return (
-    <BottomSheetModal
-      stackBehavior="push"
-      backdropComponent={pr => BottomCBackdrop(pr)}
-      backgroundStyle={{
-        backgroundColor: colors.inverseOnSurface,
-      }}
-      ref={props.ref}
-      onChange={props.handleSheetChanges}
-      maxDynamicContentSize={500}
+    <Modal
+      onRequestClose={onClose}
+      statusBarTranslucent
+      visible={visible}
+      animationType="slide"
     >
-      <View style={[styles.container]}>
-        <View style={[styles.content]}>
-          <View>
-            <View style={[gs.flexRow, gs.itemsCenter]}>
-              <Text
-                style={[
-                  gs.fontBold,
-                  gs.fullFlex,
-                  {
-                    fontSize: textSize.lg,
-                    color: colors.onBackground,
-                  },
-                ]}
-              >
-                Select Category
-              </Text>
-              <PressableWithFeedback
-                hidden={props.forFilter}
-                onPress={goToAddCategory}
-                style={[
-                  {
-                    paddingLeft: spacing.md,
-                  },
-                ]}
-              >
-                <Icon
-                  source={'plus'}
-                  size={textSize.xxxl}
-                  color={colors.onTertiaryContainer}
-                />
-              </PressableWithFeedback>
-            </View>
-            {categories.length > 5 && (
-              <View style={[{ marginTop: spacing.sm }]}>
-                <BottomSheetTextInput
-                  value={search}
-                  onChangeText={setSearch}
-                  placeholderTextColor={colors.onSurfaceDisabled}
-                  placeholder="Search categories"
-                  style={[
-                    styles.searchInput,
-                    {
-                      color: colors.onBackground,
-                      borderColor: colors.outlineVariant,
-                    },
-                  ]}
-                />
-              </View>
-            )}
-            <FlashList
-              style={[styles.listStyle]}
-              numColumns={2}
-              renderScrollComponent={BottomSheetScrollable}
-              keyExtractor={(item: TCategory) => item.id}
-              showsVerticalScrollIndicator={false}
-              data={sortedCategories}
-              masonry
-              contentContainerStyle={[styles.listContainer]}
-              renderItem={({ item }: { item: TCategory }) => {
-                const isSelected = props.selectedCategory === item.id;
-
-                return (
-                  <PressableWithFeedback
-                    onPress={() => {
-                      props.selectCategory(item.id);
-                      if (!props.allowMultiple) {
-                        props.ref.current?.dismiss();
-                      }
-                    }}
-                    style={[
-                      gs.flexRow,
-                      gs.itemsCenter,
-                      styles.item,
-                      {
-                        borderColor: isSelected
-                          ? colors.onPrimaryContainer
-                          : colors.onSurfaceDisabled,
-                      },
-                    ]}
-                    key={item.id}
-                  >
-                    {/* <RadioButton.Android
-                      status={isSelected ? 'checked' : 'unchecked'}
-                      color={colors.inversePrimary}
-                      value={item.name}
-                    /> */}
-                    <Text
-                      style={[
-                        gs.fullFlex,
-                        {
-                          color: colors.onSurface,
-                          fontSize: textSize.md,
-                        },
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                    {isSelected && (
-                      <Icon
-                        source={'check'}
-                        size={textSize.md}
-                        color={colors.onPrimaryContainer}
-                      />
-                    )}
-                  </PressableWithFeedback>
-                );
-              }}
-            />
+      <ScreenWrapper>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={gs.fullFlex}>
+            <HeaderWithBackButton headerText="Select Category" />
           </View>
+
+          <PressableWithFeedback onPress={goToAddCategory}>
+            <View style={styles.addBtn}>
+              <Icon source="plus" size={20} color={colors.onPrimary} />
+              <AppText.Regular style={styles.addText}>New</AppText.Regular>
+            </View>
+          </PressableWithFeedback>
         </View>
-      </View>
-      <CreateNewCategory
-        handleSheetChanges={handleSheetChange}
-        ref={btmShtRef}
-      />
-    </BottomSheetModal>
+
+        {/* 🔍 Search */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search categories"
+            placeholderTextColor={colors.onSurfaceDisabled}
+            style={styles.searchInput}
+          />
+        </View>
+
+        {/* 📂 List */}
+        <ScrollView contentContainerStyle={styles.listContainer}>
+          {filteredCategories.map((item: TCategory) => {
+            const isSelected = selectedCategory === item.id;
+
+            return (
+              <PressableWithFeedback
+                key={item.id}
+                onPress={() => {
+                  selectCategory(item.id);
+                  onClose();
+                }}
+                style={styles.item}
+              >
+                {/* Icon */}
+                <View
+                  style={[
+                    styles.iconBox,
+                    { backgroundColor: item.icon.color + '22' },
+                  ]}
+                >
+                  <Icon
+                    source={item.icon.icon}
+                    size={20}
+                    color={item.icon.color}
+                  />
+                </View>
+
+                {/* Name */}
+                <AppText.Regular style={styles.name}>
+                  {item.name}
+                </AppText.Regular>
+
+                {/* Right side */}
+                {isSelected ? (
+                  <Icon source="check" size={20} color={colors.primary} />
+                ) : (
+                  <Icon
+                    source="chevron-right"
+                    size={20}
+                    color={colors.onSurfaceDisabled}
+                  />
+                )}
+              </PressableWithFeedback>
+            );
+          })}
+        </ScrollView>
+      </ScreenWrapper>
+    </Modal>
   );
 };
 
 export default CategorySelectionModal;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-  },
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+      paddingRight: spacing.md,
+    },
 
-  headerText: {
-    fontSize: textSize.lg,
-  },
+    addBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
+    },
 
-  categoryText: {
-    fontSize: textSize.lg,
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.sm,
-  },
-  listContainer: {
-    marginTop: spacing.md,
-    paddingBottom: 100,
-  },
-  item: {
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    marginRight: 10,
-  },
-  manageText: {
-    fontWeight: '600',
-  },
-  listStyle: {
-    maxHeight: 500,
-  },
-});
+    addText: {
+      color: colors.onPrimary,
+      fontSize: textSize.sm,
+    },
+
+    searchContainer: {
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+
+    searchInput: {
+      borderWidth: 1,
+      borderColor: colors.outline,
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.sm,
+      color: colors.onSurface,
+      fontSize: textSize.sm,
+    },
+
+    listContainer: {
+      paddingHorizontal: spacing.md,
+      gap: spacing.sm,
+      paddingBottom: 150,
+    },
+
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.surfaceContainer,
+      gap: spacing.md,
+      // marginBottom: spacing.sm,
+    },
+
+    iconBox: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    name: {
+      flex: 1,
+      fontSize: textSize.md,
+      color: colors.onSurface,
+    },
+  });

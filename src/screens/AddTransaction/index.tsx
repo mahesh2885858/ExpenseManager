@@ -148,6 +148,8 @@ const AddTransaction = () => {
     'amount' | 'wallet' | 'category' | 'date' | 'time'
   > | null>(null);
 
+  const [renderCategoryList, setRenderCategoryList] = useState(false);
+
   const progress = useSharedValue(0);
 
   const selectedWallet = useMemo(() => {
@@ -266,12 +268,6 @@ const AddTransaction = () => {
   } = useBottomSheetModal();
 
   const {
-    btmShtRef: categoryBtmSheet,
-    handlePresent: handlePresentCategories,
-    handleSheetChange: handleCategorySheetChanges,
-  } = useBottomSheetModal();
-
-  const {
     btmShtRef: amountInputSheetRef,
     handlePresent: handleAmountInputPresent,
     handleSheetChange: handleAmountSheetChange,
@@ -379,7 +375,7 @@ const AddTransaction = () => {
         </PressableWithFeedback>
 
         {/* Category Selection */}
-        <PressableWithFeedback onPress={() => handlePresentCategories()}>
+        <PressableWithFeedback onPress={() => setRenderCategoryList(true)}>
           <View
             style={[{ ...categoryContainerStyle }, style.categoryContainer]}
           >
@@ -684,13 +680,13 @@ const AddTransaction = () => {
       />
 
       <CategorySelectionModal
-        handleSheetChanges={handleCategorySheetChanges}
-        ref={categoryBtmSheet}
+        onClose={() => setRenderCategoryList(false)}
         selectCategory={id => {
           setSelectedCategoryId(id);
           setErrorFields(p => (!p ? p : p.filter(f => f !== 'category')));
         }}
         selectedCategory={selectedCategoryId}
+        visible={renderCategoryList}
       />
       <WalletSelectionModal
         onWalletChange={id => {

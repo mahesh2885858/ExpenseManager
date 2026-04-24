@@ -46,7 +46,6 @@ const createStyles = (colors: AppTheme['colors']) =>
     noTransactionsText: {
       fontSize: textSize.sm,
       color: colors.onSurface,
-      lineHeight: 13,
       marginTop: spacing.sm,
     },
     noTransactionsSubText: {
