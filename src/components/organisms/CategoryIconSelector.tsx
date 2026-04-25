@@ -17,14 +17,12 @@ const chunkIntoColumns = (data: TCategoryIcon[], rows = 2) => {
 
 type TProps = {
   selectedId: string | null;
-  setSelectedId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const CategoryIconSelector = (props: TProps) => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
-
-  const [selectedId, setSelectedId] = useState<string | null>('general');
 
   const columnData = useMemo(() => chunkIntoColumns(CATEGORY_ICONS, 2), []);
 

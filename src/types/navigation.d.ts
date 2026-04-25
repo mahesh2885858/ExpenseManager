@@ -1,6 +1,7 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { TTransaction } from './transactions';
 import { TBudget } from './budget';
+import { TCategory } from './categories';
 
 export type TBottomTabParamList = {
   Home: undefined;
@@ -39,7 +40,7 @@ export type TRootStackParamList = {
     budget: TBudget;
   };
   AddOrEditBudget: { mode: 'new' } | { mode: 'edit'; budget: TBudget };
-  AddCategory: undefined;
+  AddCategory: undefined | { category: TCategory };
 };
 
 declare global {

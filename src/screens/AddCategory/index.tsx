@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, ToastAndroid, View } from 'react-native';
@@ -17,28 +17,33 @@ import AppText from '../../components/molecules/AppText';
 import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import CategoryIconSelector from '../../components/organisms/CategoryIconSelector';
 import useCategories from '../../hooks/useCategories';
-import { TCategoryType } from '../../types';
+import { TCategoryType, TRootStackParamList } from '../../types';
 
 const AddCategory = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<TRootStackParamList, 'AddCategory'>>();
 
-  const { addCategory } = useCategories();
-
-  const [catName, setCatName] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>('general');
-  const [catType, setCatType] = useState<TCategoryType>('expense');
-
+  const { addCategory, updateCategory } = useCategories();
+  const [catName, setCatName] = useState(
+    route.params?.category ? route.params.category.name : '',
+  );
+  const [selectedIconId, setSelectedIconId] = useState<string>(
+    route.params?.category ? route.params.category.icon.id : 'general',
+  );
+  const [catType, setCatType] = useState<TCategoryType>(
+    route.params?.category ? route.params.category.type : 'expense',
+  );
   const selectedCategory = useMemo(() => {
-    return CATEGORY_ICONS.find(c => c.id === selectedId);
-  }, [selectedId]);
+    return CATEGORY_ICONS.find(c => c.id === selectedIconId);
+  }, [selectedIconId]);
 
   const createNew = useCallback(() => {
     try {
-      if (selectedId) {
-        addCategory(catName, CATEGORY_ICON_MAP[selectedId], catType);
+      if (selectedIconId) {
+        addCategory(catName, CATEGORY_ICON_MAP[selectedIconId], catType);
         navigation.goBack();
       }
     } catch (e) {
@@ -47,8 +52,25 @@ const AddCategory = () => {
         2000,
       );
     }
-  }, [addCategory, catName, selectedId, catType, navigation]);
+  }, [addCategory, catName, selectedIconId, catType, navigation]);
 
+  const editCat = useCallback(() => {
+    if (!route.params?.category) return;
+    updateCategory({
+      icon: CATEGORY_ICON_MAP[selectedIconId],
+      id: route.params?.category.id,
+      name: catName,
+      type: catType,
+    });
+    navigation.goBack();
+  }, [
+    route.params,
+    navigation,
+    selectedIconId,
+    updateCategory,
+    catName,
+    catType,
+  ]);
   return (
     <ScreenWrapper>
       {/*Header starts*/}
@@ -56,7 +78,16 @@ const AddCategory = () => {
         <View style={[gs.fullFlex]}>
           <HeaderWithBackButton headerText={t('newCat.newCat')} />
         </View>
-        <PressableWithFeedback onPress={createNew} style={[styles.saveBtn]}>
+        <PressableWithFeedback
+          onPress={() => {
+            if (route.params?.category) {
+              editCat();
+            } else {
+              createNew();
+            }
+          }}
+          style={[styles.saveBtn]}
+        >
           <AppText.Bold style={[styles.saveBtnText]}>
             {t('common.save')}
           </AppText.Bold>
@@ -145,8 +176,8 @@ const AddCategory = () => {
           {t('newCat.selectIcon')}
         </AppText.Regular>
         <CategoryIconSelector
-          selectedId={selectedId}
-          setSelectedId={setSelectedId}
+          selectedId={selectedIconId}
+          setSelectedId={setSelectedIconId}
         />
       </View>
       {/*Icon selection ends*/}

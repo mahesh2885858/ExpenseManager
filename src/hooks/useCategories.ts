@@ -1,10 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import useTransactionsStore from '../stores/transactionsStore';
-import { v4 as uuid } from 'uuid';
-import { TCategoryIcon, TCategorySummary, TCategoryType } from '../types';
-import useCategoriesStore from '../stores/categoriesStore';
-import { ToastAndroid } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuid } from 'uuid';
+import useCategoriesStore from '../stores/categoriesStore';
+import useTransactionsStore from '../stores/transactionsStore';
+import { TCategoryIcon, TCategorySummary, TCategoryType } from '../types';
 
 const useCategories = () => {
   const { t } = useTranslation();
@@ -57,6 +56,7 @@ const useCategories = () => {
     return categories.map(cat => {
       if (!transactionsByIds)
         return {
+          ...cat,
           name: cat.name,
           id: cat.id,
           income: 0,
@@ -68,6 +68,7 @@ const useCategories = () => {
           transactionsByIds[id].categoryIds.includes(cat.id),
         );
       return {
+        ...cat,
         name: cat.name,
         id: cat.id,
         income: ids.reduce((prev, item) => {

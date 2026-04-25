@@ -11,9 +11,7 @@ export type TCategory = {
   type: TCategoryType;
 };
 
-export type TCategorySummary = {
-  id: string;
-  name: string;
+export type TCategorySummary = TCategory & {
   income: number;
   expense: number;
 };

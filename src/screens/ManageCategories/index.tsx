@@ -9,9 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CreateNewCategory from '../../components/organisms/CreateNewCategory';
 import RenderCategoryCard from '../../components/organisms/RenderCategoryCard';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 
@@ -19,10 +17,8 @@ const ManageCategories = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useAppTheme();
-  //   const accounts = useAccountStore(state => state.accounts);
   const { categoriesSummary: categories } = useCategories();
   const { kbHeight } = useGetKeyboardHeight();
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const [focusedId, setFocusedId] = useState('');
 
   const changeFocusId = useCallback((id: string) => {
@@ -97,13 +93,9 @@ const ManageCategories = () => {
                 bottom: kbHeight + 20,
               },
             ]}
-            onPress={() => handlePresent()}
+            onPress={() => navigation.navigate('AddCategory')}
           />
         </View>
-        <CreateNewCategory
-          handleSheetChanges={handleSheetChange}
-          ref={btmShtRef}
-        />
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );

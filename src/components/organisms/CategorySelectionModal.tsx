@@ -14,6 +14,7 @@ import useCategories from '../../hooks/useCategories';
 import { gs } from '../../common';
 import { TCategory } from '../../types';
 import { useTranslation } from 'react-i18next';
+import withOpacity from '../../utils/withOpacity';
 
 type Props = {
   visible: boolean;
@@ -41,7 +42,6 @@ const CategorySelectionModal = (props: Props) => {
 
   const [search, setSearch] = useState('');
 
-  // 🔍 Filter + sort (same logic, cleaner)
   const filteredCategories = useMemo(() => {
     const list =
       search.trim().length === 0
@@ -126,7 +126,7 @@ const CategorySelectionModal = (props: Props) => {
                 <View
                   style={[
                     styles.iconBox,
-                    { backgroundColor: item.icon.color + '22' },
+                    { backgroundColor: withOpacity(item.icon.color, 0.22) },
                   ]}
                 >
                   <Icon
