@@ -77,7 +77,6 @@ const AddOrEditBudget = () => {
     }),
     [],
   );
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const {
     btmShtRef: amtShtRef,
     handlePresent: amtShtPresent,
@@ -97,7 +96,9 @@ const AddOrEditBudget = () => {
   const onCatSelected = useCallback(
     (id: string) => {
       removeError('category');
-      setSelectedCatIds(p => Array.from(new Set([...p, id])));
+      setSelectedCatIds(p =>
+        p.find(cat => cat === id) ? p.filter(cat => cat !== id) : [...p, id],
+      );
     },
     [removeError],
   );
@@ -262,7 +263,7 @@ const AddOrEditBudget = () => {
         <View style={[styles.categorySelectionBox]}>
           <Text style={[styles.selectCatText]}>Select Category</Text>
           <PressableWithFeedback
-            onPress={() => renderCategoryList(true)}
+            onPress={() => setRenderCategoryList(true)}
             style={[styles.addCatBox]}
           >
             {selectedCatIds.length > 0 ? (
@@ -371,6 +372,8 @@ const AddOrEditBudget = () => {
         onClose={() => setRenderCategoryList(false)}
         selectCategory={onCatSelected}
         visible={renderCategoryList}
+        allowMultiple={true}
+        selectedCategories={selectedCatIds}
       />
       <AmountInputBoard
         ref={amtShtRef}

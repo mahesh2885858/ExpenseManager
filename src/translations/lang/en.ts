@@ -23,6 +23,7 @@ export default {
     viewAll: 'View All',
     income: 'Income',
     expense: 'Expense',
+    new: 'New',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',

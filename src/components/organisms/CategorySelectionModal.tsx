@@ -13,22 +13,28 @@ import AppText from '../../components/molecules/AppText';
 import useCategories from '../../hooks/useCategories';
 import { gs } from '../../common';
 import { TCategory } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  selectedCategory?: string | null;
   selectCategory: (id: string) => void;
-};
+} & (
+  | {
+      allowMultiple: false;
+      selectedCategory?: string | null;
+    }
+  | {
+      allowMultiple: true;
+      selectedCategories?: string[] | [];
+    }
+);
 
-const CategorySelectionModal = ({
-  visible,
-  onClose,
-  selectedCategory,
-  selectCategory,
-}: Props) => {
+const CategorySelectionModal = (props: Props) => {
+  const { onClose, selectCategory, visible } = props;
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
+  const { t } = useTranslation();
 
   const navigation = useNavigation();
   const { categories } = useCategories();
@@ -65,16 +71,29 @@ const CategorySelectionModal = ({
           <View style={gs.fullFlex}>
             <HeaderWithBackButton headerText="Select Category" />
           </View>
-
-          <PressableWithFeedback onPress={goToAddCategory}>
-            <View style={styles.addBtn}>
-              <Icon source="plus" size={20} color={colors.onPrimary} />
-              <AppText.Regular style={styles.addText}>New</AppText.Regular>
-            </View>
-          </PressableWithFeedback>
+          <View style={[styles.btnContainer]}>
+            <PressableWithFeedback onPress={goToAddCategory}>
+              <View style={styles.addBtn}>
+                <Icon source="plus" size={20} color={colors.onPrimary} />
+                <AppText.Regular style={styles.addText}>
+                  {t('common.new')}
+                </AppText.Regular>
+              </View>
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              hidden={!props.allowMultiple}
+              onPress={onClose}
+            >
+              <View style={styles.addBtn}>
+                <AppText.Regular style={styles.addText}>
+                  {t('common.done')}
+                </AppText.Regular>
+              </View>
+            </PressableWithFeedback>
+          </View>
         </View>
 
-        {/* 🔍 Search */}
+        {/*Search */}
         <View style={styles.searchContainer}>
           <TextInput
             value={search}
@@ -85,17 +104,21 @@ const CategorySelectionModal = ({
           />
         </View>
 
-        {/* 📂 List */}
+        {/*List */}
         <ScrollView contentContainerStyle={styles.listContainer}>
           {filteredCategories.map((item: TCategory) => {
-            const isSelected = selectedCategory === item.id;
+            const isSelected = props.allowMultiple
+              ? !!props.selectedCategories?.find(cat => cat === item.id)
+              : props.selectedCategory === item.id;
 
             return (
               <PressableWithFeedback
                 key={item.id}
                 onPress={() => {
                   selectCategory(item.id);
-                  onClose();
+                  if (!props.allowMultiple) {
+                    onClose();
+                  }
                 }}
                 style={styles.item}
               >
@@ -206,5 +229,10 @@ const createStyles = (colors: any) =>
       flex: 1,
       fontSize: textSize.md,
       color: colors.onSurface,
+    },
+    btnContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
     },
   });
