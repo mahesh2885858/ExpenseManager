@@ -182,7 +182,7 @@ const Home = () => {
             { paddingHorizontal: spacing.lg },
           ]}
         >
-          <PressableWithFeedback
+          {/*<PressableWithFeedback
             style={[
               {
                 backgroundColor: colors.surfaceContainer,
@@ -195,7 +195,7 @@ const Home = () => {
               source={'chevron-left'}
               size={textSize.xl}
             />
-          </PressableWithFeedback>
+          </PressableWithFeedback>*/}
           <AppText.SemiBold
             style={[
               gs.fullFlex,
@@ -207,7 +207,7 @@ const Home = () => {
           >
             This Month
           </AppText.SemiBold>
-          <PressableWithFeedback
+          {/*<PressableWithFeedback
             style={[
               {
                 backgroundColor: colors.surfaceContainer,
@@ -220,7 +220,7 @@ const Home = () => {
               color={colors.onSurface}
               size={textSize.xl}
             />
-          </PressableWithFeedback>
+          </PressableWithFeedback>*/}
         </View>
         {/* active filters section ends */}
 

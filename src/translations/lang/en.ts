@@ -24,6 +24,7 @@ export default {
     income: 'Income',
     expense: 'Expense',
     new: 'New',
+    create: 'Create',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',
@@ -61,5 +62,15 @@ export default {
     selectIcon: 'Select Icon',
     type: 'Category Type',
     catExists: 'Category already exists.',
+  },
+  budget: {
+    addCat: 'Add a category',
+    createBudget: 'Create Budget',
+    updateBudget: 'Update Budget',
+    budgetName: 'Budget Name',
+    budgetNamePlaceholder: 'Choose a name for this budget',
+    selectCat: 'Select category',
+    setBudgetAmt: 'Set Budget Amount',
+    budgetPeriod: 'Budget Period',
   },
 };

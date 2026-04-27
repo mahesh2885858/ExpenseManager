@@ -49,7 +49,42 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Inter-VariableFont_opsz,wght.ttf</string>
+		<string>Inter-LightItalic.ttf</string>
+		<string>Inter-ExtraBoldItalic.ttf</string>
+		<string>Inter-ThinItalic.ttf</string>
+		<string>InterDisplay-Regular.ttf</string>
+		<string>InterDisplay-BlackItalic.ttf</string>
+		<string>InterDisplay-SemiBoldItalic.ttf</string>
+		<string>InterDisplay-Bold.ttf</string>
+		<string>Inter-SemiBold.ttf</string>
+		<string>InterDisplay-MediumItalic.ttf</string>
+		<string>InterDisplay-Light.ttf</string>
+		<string>InterDisplay-ExtraBold.ttf</string>
+		<string>Inter-BoldItalic.ttf</string>
+		<string>Inter-ExtraLight.ttf</string>
+		<string>InterDisplay-ExtraLightItalic.ttf</string>
+		<string>Inter-ExtraBold.ttf</string>
+		<string>Inter-Medium.ttf</string>
+		<string>Inter-Black.ttf</string>
+		<string>InterDisplay-SemiBold.ttf</string>
+		<string>InterDisplay-ThinItalic.ttf</string>
+		<string>Inter-MediumItalic.ttf</string>
+		<string>Inter-ExtraLightItalic.ttf</string>
+		<string>Inter-Bold.ttf</string>
+		<string>InterDisplay-Medium.ttf</string>
+		<string>Inter-SemiBoldItalic.ttf</string>
+		<string>InterDisplay-Italic.ttf</string>
+		<string>Inter-BlackItalic.ttf</string>
+		<string>InterDisplay-LightItalic.ttf</string>
+		<string>Inter-Light.ttf</string>
+		<string>InterDisplay-Thin.ttf</string>
+		<string>Inter-Thin.ttf</string>
+		<string>InterDisplay-ExtraLight.ttf</string>
+		<string>Inter-Italic.ttf</string>
+		<string>InterDisplay-BoldItalic.ttf</string>
+		<string>Inter-Regular.ttf</string>
+		<string>InterDisplay-Black.ttf</string>
+		<string>InterDisplay-ExtraBoldItalic.ttf</string>
 	</array>
 </dict>
 </plist>
