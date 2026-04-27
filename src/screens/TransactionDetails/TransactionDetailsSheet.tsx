@@ -38,7 +38,7 @@ const TransactionDetailsSheet = (props: TProps) => {
   const { dismissAll } = useBottomSheetModal();
   const { getFormattedAmount } = useTransactions({});
   const categoryName =
-    categories.find(c => c.id === props.selectedTransaction?.categoryIds[0])
+    categories.find(c => c.id === props.selectedTransaction?.categoryId)
       ?.name ?? 'Unknown';
 
   const accName =

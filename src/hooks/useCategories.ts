@@ -65,7 +65,7 @@ const useCategories = () => {
       const ids =
         transactionsByIds &&
         transactionIds.filter(id =>
-          transactionsByIds[id].categoryIds.includes(cat.id),
+          transactionsByIds[id].categoryId ===cat.id,
         );
       return {
         ...cat,

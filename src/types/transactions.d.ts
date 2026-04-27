@@ -18,7 +18,7 @@ export type TTransaction = {
   amount: number;
   createdAt: string; // ISO string format - when the transaction record created
   transactionDate: string; // ISO string format - when the transaction took place
-  categoryIds: string[]; // Category IDs (initially single category per transaction)
+  categoryId: string; // Category IDs (initially single category per transaction)
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
   isSelected?: boolean;

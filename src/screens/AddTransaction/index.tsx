@@ -92,7 +92,7 @@ const AddTransaction = () => {
         date: new Date(tr.transactionDate),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
-        selectedCatId: tr.categoryIds[0],
+        selectedCatId: tr.categoryId,
         walletId: tr.walletId,
         time: {
           hours: new Date(tr.transactionDate).getHours(),
@@ -229,7 +229,7 @@ const AddTransaction = () => {
         const updated: TTransaction = {
           ...route.params.transaction,
           amount: result.amount,
-          categoryIds: [selectedCategoryId],
+          categoryId: selectedCategoryId,
           transactionDate: dateToAdd.toISOString(),
           type: transactionType,
           attachments: attachments,
@@ -240,7 +240,7 @@ const AddTransaction = () => {
         addNewTransaction({
           walletId: selectedWalletId,
           amount: result.amount,
-          categoryIds: [selectedCategoryId],
+          categoryId: selectedCategoryId,
           createdAt: new Date().toISOString(),
           transactionDate: dateToAdd.toISOString(),
           id,

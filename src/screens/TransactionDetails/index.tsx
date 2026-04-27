@@ -21,7 +21,7 @@ const TransactionDetails = () => {
   const accounts = useWalletStore(state => state.wallets);
 
   const categoryName = useMemo(() => {
-    const category = categories.find(c => c.id === transaction.categoryIds[0]);
+    const category = categories.find(c => c.id === transaction.categoryId);
     return category?.name ?? 'General';
   }, [categories, transaction]);
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import './src/translations/i18n';
 import { CombinedDarkTheme, CombinedDefaultTheme } from './theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { gs } from './src/common';
+import { initDB } from './src/db/init';
 const App = () => {
   const theme = useUIStore(state => state.theme);
   const systemTheme = useColorScheme();
@@ -19,6 +20,9 @@ const App = () => {
     }
   }, [theme, systemTheme]);
 
+  useEffect(() => {
+    initDB()
+  },[])
   return (
     <SafeAreaProvider>
       <PaperProvider

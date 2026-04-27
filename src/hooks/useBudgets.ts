@@ -33,7 +33,7 @@ const useBudgets = () => {
             trDate.getTime() <= periodRange.end.getTime() &&
             tr.type === 'expense'
           ) {
-            if (budget.categoryIds.includes(tr.categoryIds[0])) {
+            if (budget.categoryIds.includes(tr.categoryId)) {
               budgetTransactionIds.push(trId);
             }
           }
@@ -53,7 +53,7 @@ const useBudgets = () => {
         if (!period.end || !period.start) return;
         const tDate = new Date(t.transactionDate);
         if (
-          b.categoryIds.includes(t.categoryIds[0]) &&
+          b.categoryIds.includes(t.categoryId) &&
           period.start.getTime() <= tDate.getTime() &&
           period.end.getTime() >= tDate.getTime()
         ) {
@@ -73,7 +73,7 @@ const useBudgets = () => {
     ) => {
       if (transaction.type === 'income') return budgets;
       const budgetsForThisCat = budgets.filter(b =>
-        b.categoryIds.includes(transaction.categoryIds[0]),
+        b.categoryIds.includes(transaction.categoryId),
       );
       if (budgetsForThisCat.length > 0) {
         // does this budget covers the given transaction period

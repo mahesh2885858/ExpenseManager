@@ -93,7 +93,7 @@ const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
   const matchesCategory = useCallback(
     (t: TTransaction) => {
       if (!filters || !filters.categoryId) return true;
-      return t.categoryIds.includes(filters.categoryId);
+      return t.categoryId ===filters.categoryId;
     },
     [filters],
   );

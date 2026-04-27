@@ -30,7 +30,7 @@ const RenderTransaction = (props: {
 
   const category = useMemo(() => {
     if (!transactionsByIds) return undefined;
-    const cId = transactionsByIds[props.item].categoryIds[0];
+    const cId = transactionsByIds[props.item].categoryId;
     return categories.find(c => c.id === cId);
   }, [props, categories, transactionsByIds]);
 
