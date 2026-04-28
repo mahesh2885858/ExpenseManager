@@ -3,9 +3,9 @@ import { db } from '../index';
 
 export const addWallet = async (wallet: TWallet) => {
   await db.execute(
-    `INSERT INTO wallets (id, name, init_balance, created_at)
-     VALUES (?, ?, ?, ?)`,
-    [wallet.id, wallet.name, wallet.initBalance,]
+    `INSERT INTO wallets (id, name, init_balance, created_at,is_default)
+     VALUES (?, ?, ?, ?,?)`,
+    [wallet.id, wallet.name, wallet.initBalance,wallet.isDefault??0]
   );
 };
 

@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  StyleSheet,
+  TextInput,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import { Icon } from 'react-native-paper';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -10,60 +16,107 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
-import { gs } from '../../common';
+import {
+  gs,
+  MAX_PROFILE_NAME_LENGTH,
+  MIN_PROFILE_NAME_LENGTH,
+} from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import AppText from '../../components/molecules/AppText';
+import AppText, { fontsMap } from '../../components/molecules/AppText';
 import { useNavigation } from '@react-navigation/native';
+import useProfiles from '../../hooks/useProfiles';
 
-const WelcomeScreen = () => {
+const ProfileSetup = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const styles = createStyles(theme.colors, insets);
+  const { createProfile } = useProfiles();
 
-  const navigateToWalletSetup = () => {
-    navigation.navigate('ProfileSetup');
-  };
+  const [profileName, setProfileName] = useState('');
+
+  const navigateToWalletSetup = useCallback(() => {
+    navigation.navigate('WalletSetup');
+  }, [navigation]);
+
+  const next = useCallback(async () => {
+    try {
+      if (profileName.trim().length < MIN_PROFILE_NAME_LENGTH) {
+        throw new Error(
+          t('profileSetup.minNameLengthErr', {
+            minLength: MIN_PROFILE_NAME_LENGTH,
+          }),
+        );
+      }
+      if (profileName.trim().length > MAX_PROFILE_NAME_LENGTH) {
+        throw new Error(
+          t('profileSetup.maxNameLengthErr', {
+            maxLength: MAX_PROFILE_NAME_LENGTH,
+          }),
+        );
+      }
+      await createProfile(profileName);
+      navigateToWalletSetup();
+    } catch (e) {
+      console.log({ e });
+      const message = e instanceof Error ? e.message : t('common.unknownErr');
+      ToastAndroid.show(message, 2000);
+    }
+  }, [profileName, t, createProfile, navigateToWalletSetup]);
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.container]}>
       <View style={styles.headingContainer}>
         <View style={[gs.flexRow, gs.centerItems]}>
           <AppText.SemiBold style={[styles.appName]}>
-            {t('common.appName')}
+            {t('profileSetup.title')}
           </AppText.SemiBold>
         </View>
       </View>
       <View style={[styles.walletIconBox]}>
-        <Icon source={'wallet'} size={96} />
+        <Icon source={'account-plus-outline'} size={96} />
       </View>
       <View style={[styles.details]}>
         <AppText.Bold style={[styles.welcomeText]}>
           {t('common.welcomeText')}
         </AppText.Bold>
-        <AppText.Regular style={[styles.welcomSubText]}>
-          {t('common.welcomeSubText')}
-        </AppText.Regular>
-        <PressableWithFeedback
-          onPress={navigateToWalletSetup}
-          style={[styles.getStartedButton]}
-        >
-          <AppText.SemiBold style={[styles.getStartedText]}>
-            {t('common.getStarted')}
+
+        {/*profile name strats*/}
+        <View style={[{ paddingHorizontal: spacing.md, gap: spacing.xs }]}>
+          <AppText.SemiBold
+            style={[
+              {
+                fontSize: textSize.md,
+                color: theme.colors.onSurfaceVariant,
+              },
+            ]}
+          >
+            {t('profileSetup.name')}
           </AppText.SemiBold>
-        </PressableWithFeedback>
-        <PressableWithFeedback>
-          <AppText.Regular style={[styles.alreadyHaveDataText]}>
-            {t('common.alreadyHaveData')}
-          </AppText.Regular>
+          <TextInput
+            autoFocus
+            style={[styles.texInput]}
+            placeholder={t('profileSetup.placeholder')}
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+            keyboardType="default"
+            value={profileName}
+            onChangeText={setProfileName}
+          />
+        </View>
+        {/*profile name ends*/}
+
+        <PressableWithFeedback onPress={next} style={[styles.getStartedButton]}>
+          <AppText.SemiBold style={[styles.getStartedText]}>
+            {t('common.next')}
+          </AppText.SemiBold>
         </PressableWithFeedback>
       </View>
     </KeyboardAvoidingView>
   );
 };
 
-export default WelcomeScreen;
+export default ProfileSetup;
 
 const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
   StyleSheet.create({
@@ -99,6 +152,15 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       color: colors.onSurfaceVariant,
       textAlign: 'center',
       paddingHorizontal: spacing.xxl,
+    },
+    texInput: {
+      borderRadius: borderRadius.sm,
+      fontSize: textSize.md,
+      backgroundColor: colors.surfaceContainerHigh,
+      fontFamily: fontsMap.SemiBold,
+      color: colors.onSurface,
+      paddingLeft: spacing.sm,
+      width: '80%',
     },
     getStartedButton: {
       backgroundColor: colors.primary,

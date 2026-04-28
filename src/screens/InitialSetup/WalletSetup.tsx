@@ -4,12 +4,10 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
-  Text,
   TextInput,
-  TextInputBase,
   View,
 } from 'react-native';
-import { Button, Icon, useTheme } from 'react-native-paper';
+import { Icon } from 'react-native-paper';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 import {
@@ -19,15 +17,14 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
-import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText, { fontsMap } from '../../components/molecules/AppText';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
-import AppText, { fontsMap } from '../../components/molecules/AppText';
 
 const WalletSetup = () => {
   const insets = useSafeAreaInsets();

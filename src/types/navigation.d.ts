@@ -13,6 +13,7 @@ export type TBottomTabParamList = {
 
 export type TRootStackParamList = {
   Welcome: undefined;
+  ProfileSetup: undefined;
   WalletSetup: undefined;
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
   AddTransaction:

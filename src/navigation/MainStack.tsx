@@ -16,6 +16,7 @@ import TransactionSort from '../screens/TransactionSort';
 import BudgetDetails from '../screens/BudgetDetails';
 import AddOrEditBudget from '../screens/AddOrEditBudget';
 import AddCategory from '../screens/AddCategory';
+import ProfileSetup from '../screens/InitialSetup/ProfileSetup';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
@@ -28,6 +29,11 @@ const MainStack = () => {
             name="Welcome"
             options={{ headerShown: false }}
             component={WelcomeScreen}
+          />
+          <Stack.Screen
+            name="ProfileSetup"
+            options={{ headerShown: false }}
+            component={ProfileSetup}
           />
           <Stack.Screen
             name="WalletSetup"

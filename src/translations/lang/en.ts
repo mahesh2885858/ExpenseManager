@@ -25,6 +25,14 @@ export default {
     expense: 'Expense',
     new: 'New',
     create: 'Create',
+    unknownErr: 'Unknown Error',
+  },
+  profileSetup: {
+    title: 'Setup Profile',
+    name: 'Profile Name',
+    placeholder: 'Give your profile a name',
+    minNameLengthErr: 'Minimum {{minLength}} characters are required',
+    maxNameLengthErr: 'Maximum {{maxLength}} characters are allowed',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',

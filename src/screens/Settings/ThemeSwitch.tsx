@@ -34,7 +34,7 @@ const ThemeSwitch = (props: Props) => {
 
   // const [expandTheme, setExpandTheme] = useState(false);
   const theme = useUIStore(state => state.theme);
-  const setTheme = useUIStore(state => state.setThem);
+  const setTheme = useUIStore(state => state.setTheme);
   const highlightX = useSharedValue(
     (themeOptions.indexOf(theme) - 1) * (themeOptionWidth + themeOptionSpacing),
   ); // x position of highlight

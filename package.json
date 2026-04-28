@@ -12,18 +12,8 @@
     "postinstall": "patch-package"
   },
   "op-sqlite": {
-      "sqlcipher": false
-      // "crsqlite": false,
-      // "performanceMode": true,
-      // "iosSqlite": false,
-      // "sqliteFlags": "-DSQLITE_DQS=0 -DSQLITE_MY_FLAG=1",
-      // "fts5": true,
-      // "rtree": true,
-      // "libsql": true,
-      // "turso": true,
-      // "sqliteVec": true,
-      // "tokenizers": ["simple_tokenizer"]
-    }
+    "sqlcipher": false
+  },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",
     "@op-engineering/op-sqlite": "^15.2.12",
