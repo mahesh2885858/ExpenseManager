@@ -70,20 +70,32 @@ const ProfileSetup = () => {
       <View style={styles.headingContainer}>
         <View style={[gs.flexRow, gs.centerItems]}>
           <AppText.SemiBold style={[styles.appName]}>
-            {t('profileSetup.title')}
+            {t('common.appName')}
           </AppText.SemiBold>
         </View>
       </View>
       <View style={[styles.walletIconBox]}>
-        <Icon source={'account-plus-outline'} size={96} />
+        <Icon source={'account-outline'} size={96} />
       </View>
       <View style={[styles.details]}>
-        <AppText.Bold style={[styles.welcomeText]}>
-          {t('common.welcomeText')}
-        </AppText.Bold>
+        <View>
+          <AppText.Bold style={[styles.welcomeText]}>
+            {t('profileSetup.heroText')}
+          </AppText.Bold>
+          <AppText.Regular style={[styles.welcomSubText]}>
+            {t('profileSetup.subText')}
+          </AppText.Regular>
+        </View>
 
         {/*profile name strats*/}
-        <View style={[{ paddingHorizontal: spacing.md, gap: spacing.xs }]}>
+        <View
+          style={[
+            {
+              paddingHorizontal: spacing.xl,
+              gap: spacing.xs,
+            },
+          ]}
+        >
           <AppText.SemiBold
             style={[
               {
@@ -136,22 +148,22 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
     },
     walletIconBox: { flex: 2, alignItems: 'center', justifyContent: 'center' },
     details: {
-      flex: 3,
+      flex: 4,
       width: '100%',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
     },
     welcomeText: {
-      fontSize: textSize.xxxl,
+      fontSize: textSize.xxl,
       color: colors.onSurface,
       textAlign: 'center',
-      paddingHorizontal: spacing.xxl,
+      paddingHorizontal: spacing.xl,
     },
+
     welcomSubText: {
-      fontSize: textSize.lg,
+      fontSize: textSize.md,
       color: colors.onSurfaceVariant,
       textAlign: 'center',
       paddingHorizontal: spacing.xxl,
+      marginBottom: spacing.md,
     },
     texInput: {
       borderRadius: borderRadius.sm,
@@ -160,7 +172,6 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       fontFamily: fontsMap.SemiBold,
       color: colors.onSurface,
       paddingLeft: spacing.sm,
-      width: '80%',
     },
     getStartedButton: {
       backgroundColor: colors.primary,
@@ -170,6 +181,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       alignItems: 'center',
       borderRadius: borderRadius.sm,
       marginTop: spacing.xl,
+      alignSelf: 'center',
     },
     getStartedText: {
       fontSize: textSize.lg,

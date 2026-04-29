@@ -29,6 +29,8 @@ export default {
   },
   profileSetup: {
     title: 'Setup Profile',
+    heroText: "Let's setup your profile",
+    subText: 'Enter you name to keep your expenses organized',
     name: 'Profile Name',
     placeholder: 'Give your profile a name',
     minNameLengthErr: 'Minimum {{minLength}} characters are required',
