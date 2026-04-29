@@ -32,13 +32,14 @@ const ProfileSetup = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const styles = createStyles(theme.colors, insets);
-  const { createProfile } = useProfiles();
 
   const [profileName, setProfileName] = useState('');
 
   const navigateToWalletSetup = useCallback(() => {
-    navigation.navigate('WalletSetup');
-  }, [navigation]);
+    navigation.navigate('WalletSetup', {
+      profileName,
+    });
+  }, [navigation, profileName]);
 
   const next = useCallback(async () => {
     try {
@@ -56,14 +57,14 @@ const ProfileSetup = () => {
           }),
         );
       }
-      await createProfile(profileName);
+      // await createProfile(profileName);
       navigateToWalletSetup();
     } catch (e) {
       console.log({ e });
       const message = e instanceof Error ? e.message : t('common.unknownErr');
       ToastAndroid.show(message, 2000);
     }
-  }, [profileName, t, createProfile, navigateToWalletSetup]);
+  }, [profileName, t, navigateToWalletSetup]);
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.container]}>

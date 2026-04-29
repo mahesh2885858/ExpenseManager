@@ -20,7 +20,6 @@ export const initDB = async () => {
       name TEXT NOT NULL,
       init_balance REAL NOT NULL DEFAULT 0,
       profile_id TEXT NOT NULL,
-      is_default INTEGER CHECK(is_default IN (1, 0)) NOT NULL,
       FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
 
     );

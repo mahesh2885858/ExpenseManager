@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   TextInput,
+  ToastAndroid,
   View,
 } from 'react-native';
 import { Icon } from 'react-native-paper';
@@ -25,10 +26,15 @@ import useWallets from '../../hooks/useAccounts';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { TRootStackParamList } from '../../types';
+import useProfiles from '../../hooks/useProfiles';
+import useProfileStore from '../../stores/profileStore';
 
 const WalletSetup = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
+  const route = useRoute<RouteProp<TRootStackParamList, 'WalletSetup'>>();
   const styles = createStyles(theme.colors, insets);
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
@@ -40,8 +46,11 @@ const WalletSetup = () => {
   );
   const setDefaultAcc = useWalletStore(state => state.setDefaultWalletId);
   const { setSelectedWalletId: setSelectedAccountId } = useWallets();
-
+  const { createProfile } = useProfiles();
   const { getFormattedAmount } = useTransactions();
+  const setSelectedProfile = useProfileStore(
+    state => state.setSelectedProfileId,
+  );
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const {
@@ -50,20 +59,33 @@ const WalletSetup = () => {
     handleSheetChange: amountBoardSheetChange,
   } = useBottomSheetModal();
 
-  const saveAccount = useCallback(() => {
-    const id = uuid();
-    const amt = parseFloat(amount) || 0;
-    addAccount({
-      name: walletName,
-      initBalance: amt,
-      id,
-    });
-    setDefaultAcc(id);
-    setSelectedAccountId(id);
-    Keyboard.dismiss();
-    setIsInitialSetupDone(true);
+  const saveAccount = useCallback(async () => {
+    try {
+      const profile = await createProfile(route.params.profileName);
+      setSelectedProfile(profile.id);
+      const id = uuid();
+      const amt = parseFloat(amount) || 0;
+      addAccount({
+        name: walletName,
+        initBalance: amt,
+        id,
+      });
+      setDefaultAcc(id);
+      setSelectedAccountId(id);
+      Keyboard.dismiss();
+      setIsInitialSetupDone(true);
+    } catch (e) {
+      console.log({ e });
+      ToastAndroid.show(
+        e instanceof Error ? e.message : t('common.unknownErr'),
+        2000,
+      );
+    }
   }, [
     addAccount,
+    createProfile,
+    route.params.profileName,
+    t,
     walletName,
     setDefaultAcc,
     setSelectedAccountId,
