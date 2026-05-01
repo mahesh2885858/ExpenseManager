@@ -1,4 +1,4 @@
-import { TWallet } from '../../types';
+import { TProfile, TWallet } from '../../types';
 import { db } from '../index';
 const table = 'wallets';
 const addWallet = async (wallet: TWallet) => {
@@ -14,9 +14,21 @@ const getWallets = async () => {
   return res.rows;
 };
 
-const updateWalletBalance = async (id: string, balance: number) => {
-  await db.execute(`UPDATE ${table} SET balance = ? WHERE id = ?`, [
-    balance,
+const updateWallet = async (
+  id: string,
+  profile: Partial<Omit<TWallet, 'id'>>,
+) => {
+  const keys = Object.keys(profile);
+  const values: (string | number)[] = [];
+  let query = '';
+
+  keys.forEach(key => {
+    query += `${key}=? `;
+    values.push([profile[key]]);
+  });
+
+  await db.execute(`UPDATE ${table} SET ${query} WHERE id = ?`, [
+    ...values,
     id,
   ]);
 };
@@ -28,6 +40,6 @@ const deleteWallet = async (id: string) => {
 export const walletRepo = {
   get: getWallets,
   delete: deleteWallet,
-  update: updateWalletBalance,
+  update: updateWallet,
   create: addWallet,
 };
