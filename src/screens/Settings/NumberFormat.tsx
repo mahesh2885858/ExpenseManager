@@ -14,7 +14,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import useUIStore from '../../stores/uiStore';
 import { TNumberFormat } from '../../types';
 import { formatAmount } from '../../utils';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);

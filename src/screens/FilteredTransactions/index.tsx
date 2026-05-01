@@ -8,7 +8,7 @@ import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderTransactionList from '../../components/RenderTransactionList';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useCategories from '../../hooks/useCategories';
 
 const FilteredTransactions = () => {

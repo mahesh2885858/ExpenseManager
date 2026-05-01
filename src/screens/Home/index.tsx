@@ -15,7 +15,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import CommonHeader from '../../components/organisms/CommonHeader';
 import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
 import RenderTransactionList from '../../components/RenderTransactionList';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';

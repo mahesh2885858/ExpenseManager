@@ -9,7 +9,7 @@ import {
 } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import { TWallet } from '../../types';

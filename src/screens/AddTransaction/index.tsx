@@ -34,7 +34,7 @@ import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
 import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';

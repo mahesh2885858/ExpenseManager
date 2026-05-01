@@ -14,7 +14,7 @@ import { Icon } from 'react-native-paper';
 import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import { TTransaction } from '../../types';

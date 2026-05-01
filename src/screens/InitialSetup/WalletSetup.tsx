@@ -22,7 +22,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import AppText, { fontsMap } from '../../components/molecules/AppText';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import useWalletStore from '../../stores/walletsStore';
@@ -39,13 +39,13 @@ const WalletSetup = () => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [walletName, setWalletName] = useState('');
-  const addAccount = useWalletStore(state => state.addWallet);
+  const { createNewWallet } = useWallets();
   const currency = useWalletStore(state => state.currency);
   const setIsInitialSetupDone = useWalletStore(
     state => state.setIsInitialSetupDone,
   );
-  const setDefaultAcc = useWalletStore(state => state.setDefaultWalletId);
-  const { setSelectedWalletId: setSelectedAccountId } = useWallets();
+  const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
+  const { setSelectedWalletId } = useWallets();
   const { createProfile } = useProfiles();
   const { getFormattedAmount } = useTransactions();
   const setSelectedProfile = useProfileStore(
@@ -65,13 +65,14 @@ const WalletSetup = () => {
       setSelectedProfile(profile.id);
       const id = uuid();
       const amt = parseFloat(amount) || 0;
-      addAccount({
+      createNewWallet({
         name: walletName,
         initBalance: amt,
         id,
+        profileId: profile.id,
       });
-      setDefaultAcc(id);
-      setSelectedAccountId(id);
+      setDefaultWalletId(id);
+      setSelectedWalletId(id);
       Keyboard.dismiss();
       setIsInitialSetupDone(true);
     } catch (e) {
@@ -82,13 +83,14 @@ const WalletSetup = () => {
       );
     }
   }, [
-    addAccount,
+    setSelectedProfile,
+    createNewWallet,
     createProfile,
     route.params.profileName,
     t,
     walletName,
-    setDefaultAcc,
-    setSelectedAccountId,
+    setDefaultWalletId,
+    setSelectedWalletId,
     amount,
     setIsInitialSetupDone,
   ]);

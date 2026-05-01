@@ -9,7 +9,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import Backup from './Backup';
 import ThemeSwitch from './ThemeSwitch';
 import { Icon } from 'react-native-paper';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 import NumberFormat from './NumberFormat';

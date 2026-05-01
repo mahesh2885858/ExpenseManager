@@ -17,7 +17,7 @@ import {
   TWallet,
 } from '../types';
 import { getValidData } from '../utils/validateImportedData';
-import useWallets from './useAccounts';
+import useWallets from './useWallets';
 import useCategories from './useCategories';
 import useBudgets from './useBudgets';
 import useBudgetStore from '../stores/budgetStore';

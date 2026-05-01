@@ -8,7 +8,7 @@ type TProfileStore = {
   // actions
   setProfiles: (profiles: TProfile[]) => void;
   addProfile: (profile: TProfile) => void;
-  setSelectedProfileId: (id: string) => void;
+  setSelectedProfileId: (id: TProfile['id']) => void;
 };
 
 const useProfileStore = create<TProfileStore>((set, get) => ({
