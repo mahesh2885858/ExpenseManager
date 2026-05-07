@@ -19,6 +19,9 @@ import useWalletStore from '../../stores/walletsStore';
 import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AmountInputBoard from './AmountInputBoard';
+import useHelpers from '../../hooks/useHelpers';
+import useWallets from '../../hooks/useWallets';
+import useProfileStore from '../../stores/profileStore';
 
 const screenHeight = Dimensions.get('screen').height;
 
@@ -42,9 +45,10 @@ const CreateNewAccount = (props: TProps) => {
   const [balance, setBalance] = useState('');
   const { topPadding } = usePaddingKeyboard();
   const accounts = useWalletStore(state => state.wallets);
-  const addAccount = useWalletStore(state => state.addWallet);
+  const { createNewWallet } = useWallets();
   const updateAccount = useWalletStore(state => state.updateWallet);
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
 
   const { btmShtRef, handlePresent, handleSheetChange, open } =
     useBottomSheetModal();
@@ -53,7 +57,7 @@ const CreateNewAccount = (props: TProps) => {
     return accName.trim().length > 0;
   }, [accName]);
 
-  const addNewAcc = useCallback(() => {
+  const addNewAcc = useCallback(async () => {
     // check for existing acc name
     const isExist = accounts.some(
       item => item.name.toLowerCase().trim() === accName.trim().toLowerCase(),
@@ -66,18 +70,19 @@ const CreateNewAccount = (props: TProps) => {
       return;
     } else {
       const id = v4();
-      addAccount({
+      await createNewWallet({
         initBalance: parseFloat(
           balance.trim().length > 0 ? getDigits(balance) : '0',
         ),
         id,
         name: accName,
+        profileId: selectedProfileId,
       });
       setAccName('');
       setBalance('');
       props.ref.current?.dismiss();
     }
-  }, [accName, accounts, addAccount, balance, props]);
+  }, [accName, selectedProfileId, createNewWallet, accounts, balance, props]);
 
   const editAccount = useCallback(() => {
     if (!props.accToEdit) return;

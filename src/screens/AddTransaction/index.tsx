@@ -48,6 +48,10 @@ import {
 } from '../../types';
 import { useTranslation } from 'react-i18next';
 import AppText, { fontsMap } from '../../components/molecules/AppText';
+import useHelpers from '../../hooks/useHelpers';
+import useProfileStore from '../../stores/profileStore';
+import { getUniqueData } from '../../utils/getUniqueData';
+import { getCurrentUTCTimeStamp } from '../../utils';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -66,9 +70,9 @@ const AddTransaction = () => {
   const style = createStyles(colors, insets);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
-  const { addNewTransaction, getFormattedAmount, updateATransaction } =
-    useTransactions({});
-
+  const { getFormattedAmount } = useHelpers();
+  const { addTransaction, updateATransaction } = useTransactions();
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   const { wallets, defaultWalletId } = useWallets();
 
   const initData: {
@@ -211,7 +215,7 @@ const AddTransaction = () => {
     }
   };
 
-  const saveTransaction = () => {
+  const saveTransaction = async () => {
     try {
       const id =
         route.params.mode === 'edit' ? route.params.transaction.id : uuid();
@@ -237,16 +241,17 @@ const AddTransaction = () => {
         };
         updateATransaction(route.params.transaction.id, updated, original);
       } else {
-        addNewTransaction({
+        await addTransaction({
           walletId: selectedWalletId,
           amount: result.amount,
           categoryId: selectedCategoryId,
-          createdAt: new Date().toISOString(),
-          transactionDate: dateToAdd.toISOString(),
+          createdAt: getCurrentUTCTimeStamp(),
+          transactionDate: dateToAdd.getTime(),
           id,
           type: transactionType,
           attachments: attachments,
           description: desc,
+          profileId: selectedProfileId,
         });
       }
       navigation.reset({
@@ -680,6 +685,7 @@ const AddTransaction = () => {
       />
 
       <CategorySelectionModal
+        allowMultiple={false}
         onClose={() => setRenderCategoryList(false)}
         selectCategory={id => {
           setSelectedCategoryId(id);

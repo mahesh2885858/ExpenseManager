@@ -1,27 +1,27 @@
-import { TTransaction } from "../../types";
-import { db } from "../index";
+import { TTransaction } from '../../types';
+import { db } from '../index';
 
-//  Insert
-export const addTransaction = async (tx: TTransaction) => {
-  await db.execute(
+const addTransaction = async (tx: TTransaction) => {
+  return await db.execute(
     `INSERT INTO transactions
-     (id, amount, category_id, wallet_id, type, description, transaction_date, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     (id, amount, category_id, wallet_id, type, description, transaction_date, created_at,profile_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`,
     [
       tx.id,
       tx.amount,
       tx.categoryId,
       tx.walletId,
       tx.type,
-      tx.description??"",
+      tx.description ?? '',
       tx.transactionDate,
       tx.createdAt,
-    ]
+      tx.profileId,
+    ],
   );
 };
 
 //  Cursor-based pagination
-export const getTransactions = async ({
+const getTransactions = async ({
   limit = 20,
   cursor,
 }: {
@@ -33,7 +33,7 @@ export const getTransactions = async ({
       `SELECT * FROM transactions
        ORDER BY date DESC, id DESC
        LIMIT ?`,
-      [limit]
+      [limit],
     );
 
     return res.rows;
@@ -44,13 +44,18 @@ export const getTransactions = async ({
      WHERE (date < ? OR (date = ? AND id < ?))
      ORDER BY date DESC, id DESC
      LIMIT ?`,
-    [cursor.date, cursor.date, cursor.id, limit]
+    [cursor.date, cursor.date, cursor.id, limit],
   );
 
   return res.rows;
 };
 
-//Delete
-export const deleteTransaction = async (id: string) => {
+const deleteTransaction = async (id: string) => {
   await db.execute(`DELETE FROM transactions WHERE id = ?`, [id]);
+};
+
+export const txnRepo = {
+  create: addTransaction,
+  delete: deleteTransaction,
+  get: getTransactions,
 };

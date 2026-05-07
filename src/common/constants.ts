@@ -2,7 +2,7 @@ import { TCategory, TCategoryIcon, TCurrency } from '../types';
 export const MIN_PROFILE_NAME_LENGTH = 3;
 export const MAX_PROFILE_NAME_LENGTH = 20;
 export const MAX_AMOUNT = 100000000;
-export const DEFAULT_CATEGORY_ID = 'default_category_327065';
+export const DEFAULT_CATEGORY_ID = 'general';
 export const CURRENCY_SYMBOL = '₹';
 export const MAX_DESCRIPTION_LIMIT = 150;
 export const MAX_AMOUNT_LENGTH_INCLUDING_SYMBOL = 15;

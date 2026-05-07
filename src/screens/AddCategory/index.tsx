@@ -40,10 +40,10 @@ const AddCategory = () => {
     return CATEGORY_ICONS.find(c => c.id === selectedIconId);
   }, [selectedIconId]);
 
-  const createNew = useCallback(() => {
+  const createNew = useCallback(async () => {
     try {
       if (selectedIconId) {
-        addCategory(catName, CATEGORY_ICON_MAP[selectedIconId], catType);
+        await addCategory(catName, CATEGORY_ICON_MAP[selectedIconId], catType);
         navigation.goBack();
       }
     } catch (e) {

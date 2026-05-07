@@ -1,19 +1,22 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuid } from 'uuid';
+import { catRepo } from '../db/repositories/categories.repo';
 import useCategoriesStore from '../stores/categoriesStore';
+import useProfileStore from '../stores/profileStore';
 import useTransactionsStore from '../stores/transactionsStore';
 import { TCategoryIcon, TCategorySummary, TCategoryType } from '../types';
+import useFetchRecords from './useFetchRecords';
 
 const useCategories = () => {
   const { t } = useTranslation();
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   const categories = useCategoriesStore(state => state.categories);
-  const addCategory = useCategoriesStore(state => state.addCategory);
   const updateCategory = useCategoriesStore(state => state.updateCategory);
   const transactionIds = useTransactionsStore(state => state.transactionsIds);
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
   );
+  const { fetchCategories } = useFetchRecords();
   const setDefaultCategoryId = useCategoriesStore(
     state => state.setDefaultCategoryId,
   );
@@ -29,7 +32,7 @@ const useCategories = () => {
     setSelectedCategory(id);
   };
 
-  const addNewCategory = (
+  const addNewCategory = async (
     name: string,
     icon: TCategoryIcon,
     type: TCategoryType,
@@ -41,17 +44,22 @@ const useCategories = () => {
     if (categoryExists) {
       throw new Error(t('newCat.catExists'));
     }
-    const id = uuid();
-    addCategory({
-      id,
+    const iconString = JSON.stringify(icon);
+    await catRepo.create({
+      icon: iconString,
       name,
-      icon,
+      id: name.toLowerCase(),
       type,
+      profileId: selectedProfileId,
     });
+
+    await fetchCategories();
+
     if (makeDefault) {
-      setDefaultCategoryId(id);
+      setDefaultCategoryId(name.toLowerCase());
     }
   };
+
   const categoriesSummary: TCategorySummary[] = useMemo(() => {
     return categories.map(cat => {
       if (!transactionsByIds)
@@ -64,8 +72,8 @@ const useCategories = () => {
         };
       const ids =
         transactionsByIds &&
-        transactionIds.filter(id =>
-          transactionsByIds[id].categoryId ===cat.id,
+        transactionIds.filter(
+          id => transactionsByIds[id].categoryId === cat.id,
         );
       return {
         ...cat,

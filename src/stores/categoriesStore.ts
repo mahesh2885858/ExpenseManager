@@ -16,6 +16,7 @@ type TTransactionsStoreActions = {
   removeCategory: (catId: string) => void;
   importCategories: (cats: TCategories) => void;
   setDefaultCategoryId: (catId: string | null) => void;
+  setCategories: (categories: TCategories) => void;
 };
 
 type PositionStore = TTransactionsStore & TTransactionsStoreActions;
@@ -23,9 +24,8 @@ type PositionStore = TTransactionsStore & TTransactionsStoreActions;
 const useCategoriesStore = create<PositionStore>()(
   persist(
     (set, get) => ({
-      categories: DEFAULT_CATEGORIES,
+      categories: [],
       defaultCategoryId: DEFAULT_CATEGORY_ID,
-
       addCategory: category => {
         set(state => {
           return { categories: [...state.categories, category] };
@@ -52,6 +52,9 @@ const useCategoriesStore = create<PositionStore>()(
       },
       setDefaultCategoryId: catId => {
         set({ defaultCategoryId: catId });
+      },
+      setCategories: categories => {
+        set({ categories });
       },
     }),
     {

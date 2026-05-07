@@ -11,31 +11,37 @@ import withOpacity from '../utils/withOpacity';
 import Card from './atoms/Card';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 import AppText from './molecules/AppText';
+import useHelpers from '../hooks/useHelpers';
 
 const RenderTransaction = (props: {
-  item: string;
+  item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
   const categories = useCategoriesStore(state => state.categories);
-  const { getFormattedAmount } = useTransactions({});
-  const requestDelete = useTransactionsStore(state => state.requestDelete);
+  const { getFormattedAmount } = useHelpers();
+  // const requestDelete = useTransactionsStore(state => state.requestDelete);
 
-  const transactionsByIds = useTransactionsStore(
-    state => state.transactionsByIds,
-  );
-  const selectedTransactions = useTransactionsStore(
-    state => state.selectedTransactionIds,
-  );
+  // const transactionsByIds = useTransactionsStore(
+  //   state => state.transactionsByIds,
+  // );
+  // const selectedTransactions = useTransactionsStore(
+  //   state => state.selectedTransactionIds,
+  // );
 
-  const category = useMemo(() => {
-    if (!transactionsByIds) return undefined;
-    const cId = transactionsByIds[props.item].categoryId;
-    return categories.find(c => c.id === cId);
-  }, [props, categories, transactionsByIds]);
+  // const category = useMemo(() => {
+  //   if (!transactionsByIds) return undefined;
+  //   const cId = transactionsByIds[props.item].categoryId;
+  //   return categories.find(c => c.id === cId);
+  // }, [props, categories, transactionsByIds]);
 
-  if (!transactionsByIds) return <View>No Transaction found</View>;
-  const transaction = transactionsByIds[props.item];
+  // if (!transactionsByIds) return <View>No Transaction found</View>;
+  // const transaction = transactionsByIds[props.item];
+  const category = {
+    icon: {
+      color: '#fff',
+    },
+  };
   return (
     <PressableWithFeedback
       onPress={() => {
@@ -102,7 +108,7 @@ const RenderTransaction = (props: {
               },
             ]}
           >
-            {getFormattedAmount(transaction.amount)}
+            {getFormattedAmount(props.item.amount)}
           </AppText.Medium>
         </View>
       </Card>

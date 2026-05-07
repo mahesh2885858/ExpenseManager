@@ -3,7 +3,6 @@ import { TProfile } from '../../types';
 const tableName = 'profiles';
 
 const addProfile = async (profile: TProfile) => {
-  console.log({ profile });
   const stmt =
     db.prepareStatement(`INSERT INTO ${tableName} (id,name,created_at)
     VALUES (?, ?, ?)`);
@@ -18,6 +17,6 @@ const getProfiles = async () => {
 };
 
 export const profileRepository = {
-  add: addProfile,
+  create: addProfile,
   getAll: getProfiles,
 };

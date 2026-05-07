@@ -19,7 +19,7 @@ const RenderTransactionList = ({
   renderSeeAll = false,
   scrollDisabled = false,
 }: {
-  transactions: TTransactionsIds;
+  transactions: TTransaction[];
   renderSeeAll?: boolean;
   scrollDisabled?: boolean;
 }) => {
@@ -28,9 +28,9 @@ const RenderTransactionList = ({
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
   const { dismissAll } = useBottomSheetR();
-  const { deleteTransaction, undoTransactionDelete } = useTransactions();
+  // const { deleteTransaction, undoTransactionDelete } = useTransactions();
   const pendingDelete = useTransactionsStore(state => state.pendingDelete);
-  const confirmDelete = useTransactionsStore(state => state.confirmDelete);
+  // const confirmDelete = useTransactionsStore(state => state.confirmDelete);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
       setSelectedTransaction(null);
@@ -43,10 +43,10 @@ const RenderTransactionList = ({
 
   const onDeletePress = useCallback(
     (t: TTransaction) => {
-      deleteTransaction(t.id);
+      // deleteTransaction(t.id);
       dismissAll();
     },
-    [dismissAll, deleteTransaction],
+    [dismissAll],
   );
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const RenderTransactionList = ({
         renderItem={props => (
           <RenderTransaction onItemPress={onItemPress} item={props.item} />
         )}
-        keyExtractor={item => item}
+        keyExtractor={item => item.id}
       />
       <TransactionDetailsSheet
         handleSheetChanges={handleSheetChange}
@@ -78,7 +78,7 @@ const RenderTransactionList = ({
         action={{
           label: 'undo',
           onPress: () => {
-            undoTransactionDelete();
+            // undoTransactionDelete();
           },
           textColor: theme.colors.onSurfaceVariant,
         }}
@@ -87,7 +87,7 @@ const RenderTransactionList = ({
           { backgroundColor: theme.colors.surfaceVariant },
         ]}
         onDismiss={() => {
-          confirmDelete();
+          // confirmDelete();
         }}
         visible={!!pendingDelete}
       >

@@ -18,6 +18,7 @@ import useWallets from '../../hooks/useWallets';
 import useCategories from '../../hooks/useCategories';
 import useTransactions from '../../hooks/useTransactions';
 import { TTransaction } from '../../types';
+import useHelpers from '../../hooks/useHelpers';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -36,7 +37,7 @@ const TransactionDetailsSheet = (props: TProps) => {
   const { wallets: accounts } = useWallets();
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
-  const { getFormattedAmount } = useTransactions({});
+  const { getFormattedAmount } = useHelpers();
   const categoryName =
     categories.find(c => c.id === props.selectedTransaction?.categoryId)
       ?.name ?? 'Unknown';

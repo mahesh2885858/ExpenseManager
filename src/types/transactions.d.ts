@@ -22,6 +22,7 @@ export type TTransaction = {
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
   isSelected?: boolean;
+  profileId: string;
 };
 
 export type TTransactionByIds = Record<string, TTransaction> | null;

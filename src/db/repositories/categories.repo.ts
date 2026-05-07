@@ -1,21 +1,26 @@
-import { TCategory } from '../../types';
+import { TCategoryPayload } from '../../types';
 import { db } from '../index';
-//Insert
-export const addCategory = async (category: TCategory) => {
-  await db.execute(
-    `INSERT INTO categories (id, name, icon, type)
+
+const addCategory = async (category: TCategoryPayload) => {
+  return await db.execute(
+    `INSERT INTO categories (id, name, icon, type,profile_id)
      VALUES (?, ?, ?, ?, ?)`,
     [
       category.id,
       category.name,
-      category.icon.id,
+      category.icon,
       category.type,
-    ]
+      category.profileId ?? '',
+    ],
   );
 };
 
-// 📄 Get all
-export const getCategories = async () => {
+const getCategories = async () => {
   const res = await db.execute(`SELECT * FROM categories`);
   return res.rows;
+};
+
+export const catRepo = {
+  getAll: getCategories,
+  create: addCategory,
 };

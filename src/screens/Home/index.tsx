@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Badge, Icon } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppTheme,
@@ -12,159 +12,59 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CommonHeader from '../../components/organisms/CommonHeader';
-import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import RenderTransactionList from '../../components/RenderTransactionList';
-import useWallets from '../../hooks/useWallets';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useCategories from '../../hooks/useCategories';
-import useTransactions from '../../hooks/useTransactions';
-import useTransactionsStore from '../../stores/transactionsStore';
-import { TTypeFilter } from '../../types';
-import { getDateFilterText } from '../../utils';
-import { useTranslation } from 'react-i18next';
 import AppText from '../../components/molecules/AppText';
-import {
-  Circle,
-  Defs,
-  LinearGradient,
-  RadialGradient,
-  Stop,
-  Svg,
-} from 'react-native-svg';
-import CircularProgressBar from '../../components/molecules/CircularProgressBar';
-import RenderBudget from '../../components/organisms/RenderBudget';
+import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
-import useBudgets from '../../hooks/useBudgets';
+import RenderTransactionList from '../../components/RenderTransactionList';
+import useHelpers from '../../hooks/useHelpers';
+import { useRecentTransactions } from '../../hooks/useRecentTransactions';
+import useWallets from '../../hooks/useWallets';
 import useBudgetStore from '../../stores/budgetStore';
+import useFetchRecords from '../../hooks/useFetchRecords';
+import useProfileStore from '../../stores/profileStore';
+import { TTransaction } from '../../types';
+import useCategories from '../../hooks/useCategories';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   const { t } = useTranslation();
   const { colors } = theme;
   const styles = createStyles(colors, insets);
-  const filters = useTransactionsStore(state => state.filters);
-  const setFilters = useTransactionsStore(state => state.setFilters);
-  const selectedSort = useTransactionsStore(state => state.sort);
-  const onSortChange = useTransactionsStore(state => state.setSort);
-  const transactionByIds = useTransactionsStore(
-    state => state.transactionsByIds,
+  const { fetchWallets, fetchCategories } = useFetchRecords();
+  const { getCategories } = useCategories();
+  const [recentTransactions, setRecentTransactions] = useState<TTransaction[]>(
+    [],
   );
-  const [search, setSearch] = useState('');
+  const [summary, setSummary] = useState({ income: 0, expense: 0 });
+  const { getRecentTransactions, getMonthlySummary } = useRecentTransactions();
 
-  const {
-    selectedWallet: selectedAccount,
-    setSelectedWalletId: setSelectedAccountId,
-    getIncomeExpenseForWallet: getIncomeExpenseForAcc,
-  } = useWallets();
-
+  const { getFormattedAmount } = useHelpers();
   const budgets = useBudgetStore(state => state.budgets);
-  const {
-    totalExpenses,
-    totalIncome,
-    filteredTransactions,
-    getFormattedAmount,
-  } = useTransactions({
-    filter: { ...filters, accId: selectedAccount?.id },
-    sort: selectedSort,
-  });
 
-  const navigation = useNavigation();
-
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
-
-  const { categories } = useCategories();
-
-  const accountName = useMemo(() => {
-    return selectedAccount?.name ?? 'None';
-  }, [selectedAccount]);
-
-  const accountBalance = useMemo(() => {
-    return getIncomeExpenseForAcc(selectedAccount?.id ?? '').balance;
-  }, [selectedAccount, getIncomeExpenseForAcc]);
-
-  const navigateToFilters = useCallback(() => {
-    navigation.navigate('TransactionFilters');
-  }, [navigation]);
-
-  const transactionsToRender = useMemo(() => {
-    if (!transactionByIds) return [];
-    return search.trim().length === 0
-      ? filteredTransactions
-      : filteredTransactions.filter(
-          t =>
-            transactionByIds[t].amount.toString().includes(search) ||
-            transactionByIds[t].description
-              ?.toLowerCase()
-              .includes(search.toLowerCase()),
-        );
-  }, [filteredTransactions, search, transactionByIds]);
-
-  const dateFilterText = useMemo(() => {
-    if (filters.date) {
-      return getDateFilterText(filters.date);
-    } else return 'This Month';
-  }, [filters]);
-
-  const categoryFilterText = useMemo(() => {
-    if (filters.categoryId) {
-      return categories.find(cat => cat.id === filters.categoryId)?.name ?? '';
-    } else return '';
-  }, [filters, categories]);
-
-  const typeFilterText = useMemo(() => {
-    return filters.type === 'income'
-      ? 'Income'
-      : filters.type === 'expense'
-      ? 'Expense'
-      : '';
-  }, [filters]);
-
-  const resetTypeFilter = useCallback(() => {
-    setFilters({
-      type: null,
-    });
-  }, [setFilters]);
-
-  const resetCategoryFilter = useCallback(() => {
-    setFilters({
-      categoryId: null,
-    });
-  }, [setFilters]);
-
-  const isExpenseFilterOn = useMemo(() => {
-    return filters.type === 'expense';
-  }, [filters]);
-
-  const isIncomeFilterOn = useMemo(() => {
-    return filters.type === 'income';
-  }, [filters]);
-
-  const toggleTypeFilter = useCallback(
-    (type: TTypeFilter) => {
-      if (type === filters.type) {
-        setFilters({ type: null });
-      } else {
-        setFilters({
-          type: type,
-        });
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const txs = await getRecentTransactions();
+        const sum = await getMonthlySummary();
+        console.log({ txs });
+        setRecentTransactions(txs);
+        setSummary(sum);
+      } catch (e) {
+        console.log({ e, ma: 'mah' });
       }
-    },
-    [setFilters, filters],
-  );
-
-  const isAnyFilterApplied = useMemo(() => {
-    const { date, type, categoryId } = filters;
-    return (!!date && !date.isThisMonth) || !!type || !!categoryId;
-  }, [filters]);
-
-  const isSortApplied = useMemo(() => {
-    return selectedSort && selectedSort !== 'dateNewFirst';
-  }, [selectedSort]);
-
-  const navigateToSort = useCallback(() => {
-    navigation.navigate('TransactionSort');
-  }, [navigation]);
+    };
+    console.log({ selectedProfileId });
+    load();
+    fetchWallets();
+    fetchCategories();
+  }, [
+    selectedProfileId,
+    fetchWallets,
+    getMonthlySummary,
+    getRecentTransactions,
+    fetchCategories,
+  ]);
 
   return (
     <View style={[styles.container]}>
@@ -404,17 +304,10 @@ const Home = () => {
           <View style={[gs.fullFlex]}>
             <RenderTransactionList
               scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
-              transactions={transactionsToRender}
+              transactions={recentTransactions}
             />
           </View>
         </View>
-
-        <WalletSelectionModal
-          handleSheetChanges={handleSheetChange}
-          onWalletChange={id => setSelectedAccountId(id)}
-          ref={btmShtRef}
-          selectedWalletId={selectedAccount?.id ?? ''}
-        />
       </ScrollView>
     </View>
   );

@@ -6,7 +6,7 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { RefObject, useMemo } from 'react';
-import { StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { StyleSheet, ToastAndroid, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
   AppTheme,
@@ -19,6 +19,7 @@ import { gs, MAX_AMOUNT } from '../../common';
 import useTransactions from '../../hooks/useTransactions';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AppText from '../molecules/AppText';
+import useHelpers from '../../hooks/useHelpers';
 
 type TProps = {
   ref: RefObject<BottomSheetModal | null>;
@@ -34,7 +35,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 const AmountInputBoard = (props: TProps) => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
   const { amountInput: input, setAmountInput: setInput } = props;
   const buttonStyles = StyleSheet.create({
     button: {

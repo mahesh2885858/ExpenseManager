@@ -9,6 +9,10 @@ export type TCategory = {
   name: string;
   icon: TCategoryIcon;
   type: TCategoryType;
+  profileId?: string;
+};
+export type TCategoryPayload = Omit<TCategory, 'icon'> & {
+  icon: string;
 };
 
 export type TCategorySummary = TCategory & {

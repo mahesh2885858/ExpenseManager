@@ -15,7 +15,7 @@ const useProfiles = () => {
       id: generateRecordId(),
       createdAt: getCurrentUTCTimeStamp(),
     };
-    const profileCreateResults = await profileRepository.add(profile);
+    const profileCreateResults = await profileRepository.create(profile);
     console.log({ t: profileCreateResults });
     addProfile(profile);
     return profile;

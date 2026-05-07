@@ -30,6 +30,8 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { TRootStackParamList } from '../../types';
 import useProfiles from '../../hooks/useProfiles';
 import useProfileStore from '../../stores/profileStore';
+import useHelpers from '../../hooks/useHelpers';
+import { seedDefaultCategories } from '../../db/helpers/seedDefaultCategories';
 
 const WalletSetup = () => {
   const insets = useSafeAreaInsets();
@@ -47,7 +49,7 @@ const WalletSetup = () => {
   const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
   const { setSelectedWalletId } = useWallets();
   const { createProfile } = useProfiles();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
   const setSelectedProfile = useProfileStore(
     state => state.setSelectedProfileId,
   );
@@ -59,13 +61,13 @@ const WalletSetup = () => {
     handleSheetChange: amountBoardSheetChange,
   } = useBottomSheetModal();
 
-  const saveAccount = useCallback(async () => {
+  const saveWallet = useCallback(async () => {
     try {
       const profile = await createProfile(route.params.profileName);
       setSelectedProfile(profile.id);
       const id = uuid();
       const amt = parseFloat(amount) || 0;
-      createNewWallet({
+      await createNewWallet({
         name: walletName,
         initBalance: amt,
         id,
@@ -73,6 +75,7 @@ const WalletSetup = () => {
       });
       setDefaultWalletId(id);
       setSelectedWalletId(id);
+      await seedDefaultCategories(profile.id);
       Keyboard.dismiss();
       setIsInitialSetupDone(true);
     } catch (e) {
@@ -206,7 +209,7 @@ const WalletSetup = () => {
         <PressableWithFeedback
           disabled={walletName.trim().length === 0}
           style={[styles.continueButton]}
-          onPress={saveAccount}
+          onPress={saveWallet}
         >
           <AppText.SemiBold style={[styles.continueText]}>
             {t('common.continue')}

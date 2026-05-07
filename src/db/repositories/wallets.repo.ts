@@ -1,16 +1,24 @@
-import { TProfile, TWallet } from '../../types';
+import { TWallet } from '../../types';
+import { getCurrentUTCTimeStamp } from '../../utils';
 import { db } from '../index';
 const table = 'wallets';
 const addWallet = async (wallet: TWallet) => {
   await db.execute(
     `INSERT INTO ${table} (id, name, init_balance, created_at,profile_id)
      VALUES (?, ?, ?, ?,?)`,
-    [wallet.id, wallet.name, wallet.initBalance, wallet.profileId],
+    [
+      wallet.id,
+      wallet.name,
+      wallet.initBalance,
+      getCurrentUTCTimeStamp(),
+      wallet.profileId,
+    ],
   );
 };
 
-const getWallets = async () => {
-  const res = await db.execute(`SELECT * FROM ${table}`);
+const getWallets = async (profileId: string) => {
+  const res = await db.execute(`SELECT * FROM ${table}`, [profileId]);
+  console.log({ res });
   return res.rows;
 };
 
@@ -38,7 +46,7 @@ const deleteWallet = async (id: string) => {
 };
 
 export const walletRepo = {
-  get: getWallets,
+  getAll: getWallets,
   delete: deleteWallet,
   update: updateWallet,
   create: addWallet,
