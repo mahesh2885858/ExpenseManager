@@ -1,13 +1,14 @@
 import { useCallback } from 'react';
+import { db } from '../db';
 import {
   getStartOfMonth,
   getStartOfNextMonth,
 } from '../db/helpers/transactions';
-import { db } from '../db';
 import { TTransaction } from '../types';
 type TTransactionRow = Omit<TTransaction, 'category'> & {
   category: string;
 };
+
 export const useRecentTransactions = () => {
   const getRecentTransactions = useCallback(async (walletId?: string) => {
     try {
@@ -38,7 +39,11 @@ export const useRecentTransactions = () => {
           : [getStartOfMonth(), getStartOfNextMonth()],
       );
       const rows = result.rows as unknown as TTransactionRow[];
-      return rows.map(t => ({ ...t, category: JSON.parse(t.category) }));
+      return rows.map(t => {
+        const category = JSON.parse(t.category);
+        const icon = JSON.parse(category.icon);
+        return { ...t, category: { ...category, icon } };
+      });
     } catch (err) {
       console.log('Error while fetching recent transactions: ', err);
       return []; //safely return empty array

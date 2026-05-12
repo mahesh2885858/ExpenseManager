@@ -1,4 +1,5 @@
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
+import { TCategory } from './categories';
 
 export type TTransactionType = 'income' | 'expense';
 
@@ -19,6 +20,7 @@ export type TTransaction = {
   createdAt: string; // ISO string format - when the transaction record created
   transactionDate: string; // ISO string format - when the transaction took place
   categoryId: string; // Category IDs (initially single category per transaction)
+  category?: TCategory;
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
   isSelected?: boolean;

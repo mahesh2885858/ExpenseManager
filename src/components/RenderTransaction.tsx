@@ -1,51 +1,26 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
 import { gs } from '../common';
-import useTransactions from '../hooks/useTransactions';
-import useCategoriesStore from '../stores/categoriesStore';
-import useTransactionsStore from '../stores/transactionsStore';
+import useHelpers from '../hooks/useHelpers';
 import { TTransaction } from '../types';
 import withOpacity from '../utils/withOpacity';
 import Card from './atoms/Card';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 import AppText from './molecules/AppText';
-import useHelpers from '../hooks/useHelpers';
 
 const RenderTransaction = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
   const theme = useAppTheme();
-  const categories = useCategoriesStore(state => state.categories);
   const { getFormattedAmount } = useHelpers();
-  // const requestDelete = useTransactionsStore(state => state.requestDelete);
 
-  // const transactionsByIds = useTransactionsStore(
-  //   state => state.transactionsByIds,
-  // );
-  // const selectedTransactions = useTransactionsStore(
-  //   state => state.selectedTransactionIds,
-  // );
-
-  // const category = useMemo(() => {
-  //   if (!transactionsByIds) return undefined;
-  //   const cId = transactionsByIds[props.item].categoryId;
-  //   return categories.find(c => c.id === cId);
-  // }, [props, categories, transactionsByIds]);
-
-  // if (!transactionsByIds) return <View>No Transaction found</View>;
-  // const transaction = transactionsByIds[props.item];
-  const category = {
-    icon: {
-      color: '#fff',
-    },
-  };
   return (
     <PressableWithFeedback
       onPress={() => {
-        props.onItemPress(transaction);
+        props.onItemPress(props.item);
       }}
       style={[{ marginBottom: spacing.sm }]}
     >
@@ -55,7 +30,7 @@ const RenderTransaction = (props: {
             style={[
               {
                 backgroundColor: withOpacity(
-                  category?.icon.color ?? theme.colors.primary,
+                  props.item.category?.icon.color ?? theme.colors.primary,
                   0.15,
                 ),
                 borderRadius: borderRadius.round,
@@ -64,9 +39,9 @@ const RenderTransaction = (props: {
             ]}
           >
             <Icon
-              source={category?.icon.icon ?? 'shape-outline'}
+              source={props.item.category?.icon.icon ?? 'shape-outline'}
               size={28}
-              color={category?.icon.color ?? theme.colors.primary}
+              color={props.item.category?.icon.color ?? theme.colors.primary}
             />
           </View>
           <View
@@ -86,7 +61,7 @@ const RenderTransaction = (props: {
                 },
               ]}
             >
-              {category?.name ?? ''}
+              {props.item.category?.name ?? ''}
             </AppText.Regular>
             <AppText.Regular
               style={[
@@ -96,7 +71,7 @@ const RenderTransaction = (props: {
                 },
               ]}
             >
-              {category?.name ?? ''}
+              {props.item.category?.name ?? ''}
             </AppText.Regular>
           </View>
           <AppText.Medium
