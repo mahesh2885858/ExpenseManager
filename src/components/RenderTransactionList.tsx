@@ -2,17 +2,15 @@ import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { Snackbar } from 'react-native-paper';
-import { spacing, textSize, useAppTheme } from '../../theme';
-import { gs } from '../common';
+import { spacing, useAppTheme } from '../../theme';
 import useBottomSheetModal from '../hooks/useBottomSheetModal';
 import TransactionDetailsSheet from '../screens/TransactionDetails/TransactionDetailsSheet';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TBottomTabParamList, TTransaction, TTransactionsIds } from '../types';
-import RenderTransaction from './RenderTransaction';
-import useTransactions from '../hooks/useTransactions';
+import { TBottomTabParamList, TTransaction } from '../types';
 import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
+import RenderTransaction from './RenderTransaction';
 
 const RenderTransactionList = ({
   transactions,

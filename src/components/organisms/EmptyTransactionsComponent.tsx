@@ -10,11 +10,13 @@ import { Icon } from 'react-native-paper';
 import AppText from '../molecules/AppText';
 import { useTranslation } from 'react-i18next';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import { useNavigation } from '@react-navigation/native';
 
 const EmptyTransactionsComponent = () => {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const styles = createStyles(colors);
+  const navigation = useNavigation();
   return (
     <View style={[styles.container]}>
       <Icon source={'invoice-list-outline'} size={35} color={colors.primary} />
@@ -24,7 +26,14 @@ const EmptyTransactionsComponent = () => {
       <AppText.Regular style={[styles.noTransactionsSubText]}>
         {t('home.noTransactionsHelp')}
       </AppText.Regular>
-      <PressableWithFeedback style={[styles.button]}>
+      <PressableWithFeedback
+        onPress={() => {
+          navigation.navigate('AddTransaction', {
+            mode: 'new',
+          });
+        }}
+        style={[styles.button]}
+      >
         <AppText.SemiBold style={[styles.buttonText]}>
           {t('home.addFirstTransactions')}
         </AppText.SemiBold>
