@@ -171,7 +171,7 @@ const useBackup = () => {
         const accountIds = new Set(validData.wallets?.map(a => a.id));
 
         validData.transactions = validData.transactions?.filter(t => {
-          if (!accountIds.has(t.walletId)) {
+          if (!accountIds.has(t.wallet_id)) {
             itemsSkipped.transactions += 1;
             return false;
           }

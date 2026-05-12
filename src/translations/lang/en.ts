@@ -26,6 +26,9 @@ export default {
     new: 'New',
     create: 'Create',
     unknownErr: 'Unknown Error',
+    category: 'Category',
+    unknownCat: 'Unknown category',
+    wallet: 'Wallet',
   },
   profileSetup: {
     title: 'Setup Profile',
@@ -82,5 +85,8 @@ export default {
     selectCat: 'Select category',
     setBudgetAmt: 'Set Budget Amount',
     budgetPeriod: 'Budget Period',
+  },
+  txnDetails: {
+    amount: 'Amount',
   },
 };

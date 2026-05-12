@@ -69,8 +69,8 @@ export const getValidData = (data: TData): TReturnResults => {
   if (data.transactions && data.transactions.length > 0) {
     const uniqueTransactions = getUniqueData(data.transactions, 'id');
     uniqueTransactions.forEach(tr => {
-      if (tr.id && tr.walletId && tr.type && tr.transactionDate) {
-        validData.transactions?.push({ ...tr, walletId: tr.walletId });
+      if (tr.id && tr.wallet_id && tr.type && tr.transaction_date) {
+        validData.transactions?.push({ ...tr, wallet_id: tr.wallet_id });
       } else {
         itemsSkipped.transactions += 1;
       }

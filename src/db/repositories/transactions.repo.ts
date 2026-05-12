@@ -9,12 +9,12 @@ const addTransaction = async (tx: TTransaction) => {
     [
       tx.id,
       tx.amount,
-      tx.categoryId,
-      tx.walletId,
+      tx.category_id,
+      tx.wallet_id,
       tx.type,
       tx.description ?? '',
-      tx.transactionDate,
-      tx.createdAt,
+      tx.transaction_date,
+      tx.created_at,
       tx.profileId,
     ],
   );
@@ -54,8 +54,35 @@ const deleteTransaction = async (id: string) => {
   await db.execute(`DELETE FROM transactions WHERE id = ?`, [id]);
 };
 
+const updateTransaction = async (
+  id: string,
+  transaction: Partial<TTransaction>,
+) => {
+  const entries = Object.entries(transaction).filter(
+    ([_, value]) => value !== undefined,
+  );
+
+  if (entries.length === 0) {
+    return;
+  }
+
+  const setClause = entries.map(([key]) => `${key} = ?`).join(', ');
+
+  const values = entries.map(([_, value]) => value);
+
+  await db.execute(
+    `
+    UPDATE transactions
+    SET ${setClause}
+    WHERE id = ?
+    `,
+    [...values, id],
+  );
+};
+
 export const txnRepo = {
   create: addTransaction,
   delete: deleteTransaction,
   get: getTransactions,
+  update: updateTransaction,
 };

@@ -14,12 +14,12 @@ export type TTransactionsIds = string[];
 
 export type TTransaction = {
   id: string;
-  walletId: string; // ID associated with wallet to which this transaction is added
+  wallet_id: string; // ID associated with wallet to which this transaction is added
   type: TTransactionType; // Only either income or expense
   amount: number;
-  createdAt: string; // ISO string format - when the transaction record created
-  transactionDate: string; // ISO string format - when the transaction took place
-  categoryId: string; // Category IDs (initially single category per transaction)
+  created_at: string; // ISO string format - when the transaction record created
+  transaction_date: string; // ISO string format - when the transaction took place
+  category_id: string; // Category IDs (initially single category per transaction)
   category?: TCategory;
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)

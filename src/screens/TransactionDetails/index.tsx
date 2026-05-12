@@ -21,12 +21,12 @@ const TransactionDetails = () => {
   const accounts = useWalletStore(state => state.wallets);
 
   const categoryName = useMemo(() => {
-    const category = categories.find(c => c.id === transaction.categoryId);
+    const category = categories.find(c => c.id === transaction.category_id);
     return category?.name ?? 'General';
   }, [categories, transaction]);
 
   const accountName = useMemo(() => {
-    return accounts.find(acc => acc.id === transaction.walletId)?.name ?? '';
+    return accounts.find(acc => acc.id === transaction.wallet_id)?.name ?? '';
   }, [transaction, accounts]);
 
   return (
@@ -223,7 +223,7 @@ const TransactionDetails = () => {
                 },
               ]}
             >
-              {format(transaction.transactionDate, 'MMM dd yyyy')}
+              {format(transaction.transaction_date, 'MMM dd yyyy')}
             </Text>
           </View>
           <View
@@ -254,7 +254,7 @@ const TransactionDetails = () => {
                 },
               ]}
             >
-              {format(transaction.transactionDate, 'HH:mm a')}
+              {format(transaction.transaction_date, 'HH:mm a')}
             </Text>
           </View>
         </View>

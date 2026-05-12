@@ -20,6 +20,7 @@ import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calen
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useTranslation } from 'react-i18next';
 import { v4 as uuid } from 'uuid';
 import {
   AppTheme,
@@ -30,15 +31,18 @@ import {
 } from '../../../theme';
 import { gs, MAX_DESCRIPTION_LIMIT } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText, { fontsMap } from '../../components/molecules/AppText';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import TransactionTypeSwitch from '../../components/organisms/TransactionTypeSwitch';
 import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
+import useHelpers from '../../hooks/useHelpers';
 import useTransactions from '../../hooks/useTransactions';
+import useWallets from '../../hooks/useWallets';
+import useProfileStore from '../../stores/profileStore';
 import {
   TAttachment,
   TRootStackParamList,
@@ -46,11 +50,6 @@ import {
   TTransactionType,
   TWallet,
 } from '../../types';
-import { useTranslation } from 'react-i18next';
-import AppText, { fontsMap } from '../../components/molecules/AppText';
-import useHelpers from '../../hooks/useHelpers';
-import useProfileStore from '../../stores/profileStore';
-import { getUniqueData } from '../../utils/getUniqueData';
 import { getCurrentUTCTimeStamp } from '../../utils';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
@@ -71,7 +70,7 @@ const AddTransaction = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
   const { getFormattedAmount } = useHelpers();
-  const { addTransaction, updateATransaction } = useTransactions();
+  const { addTransaction, updateTransaction } = useTransactions();
   const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   const { wallets, defaultWalletId } = useWallets();
 
@@ -81,7 +80,7 @@ const AddTransaction = () => {
     date: CalendarDate;
     desc: string;
     attachments: TAttachment[];
-    walletId: string;
+    wallet_id: string;
     selectedCatId: string | null;
     time: {
       hours: number;
@@ -93,14 +92,14 @@ const AddTransaction = () => {
       return {
         type: tr.type,
         amountInput: tr.amount.toString(),
-        date: new Date(tr.transactionDate),
+        date: new Date(tr.transaction_date),
         desc: tr.description ?? '',
         attachments: tr.attachments ?? [],
-        selectedCatId: tr.categoryId,
-        walletId: tr.walletId,
+        selectedCatId: tr.category_id,
+        wallet_id: tr.wallet_id,
         time: {
-          hours: new Date(tr.transactionDate).getHours(),
-          minutes: new Date(tr.transactionDate).getMinutes(),
+          hours: new Date(tr.transaction_date).getHours(),
+          minutes: new Date(tr.transaction_date).getMinutes(),
         },
       };
     } else {
@@ -113,7 +112,7 @@ const AddTransaction = () => {
         amountInput: '',
         date: new Date(),
         desc: '',
-        walletId: defaultWalletId,
+        wallet_id: defaultWalletId,
 
         attachments: [],
         selectedCatId:
@@ -129,7 +128,6 @@ const AddTransaction = () => {
       };
     }
   }, [route, defaultWalletId, categories, defaultCategoryId]);
-
   // State
   const [transactionType, setTransactionType] = useState<TTransactionType>(
     initData.type,
@@ -147,7 +145,7 @@ const AddTransaction = () => {
     initData.selectedCatId,
   );
   const { kbHeight } = useGetKeyboardHeight();
-  const [walletId, setWalletId] = useState(initData.walletId);
+  const [walletId, setWalletId] = useState(initData.wallet_id);
   const [errorFields, setErrorFields] = useState<Array<
     'amount' | 'wallet' | 'category' | 'date' | 'time'
   > | null>(null);
@@ -164,7 +162,6 @@ const AddTransaction = () => {
       return fitleredWallets[0] ?? null;
     }
   }, [walletId, wallets]);
-
   const onDismissSingle = useCallback(() => {
     setOpenDatePicker(false);
   }, [setOpenDatePicker]);
@@ -214,7 +211,6 @@ const AddTransaction = () => {
       } satisfies TValidatedInputs;
     }
   };
-
   const saveTransaction = async () => {
     try {
       const id =
@@ -233,20 +229,20 @@ const AddTransaction = () => {
         const updated: TTransaction = {
           ...route.params.transaction,
           amount: result.amount,
-          categoryId: selectedCategoryId,
-          transactionDate: dateToAdd.toISOString(),
+          category_id: selectedCategoryId,
+          transaction_date: dateToAdd.toISOString(),
           type: transactionType,
           attachments: attachments,
           description: desc,
         };
-        updateATransaction(route.params.transaction.id, updated, original);
+        await updateTransaction(updated);
       } else {
         await addTransaction({
-          walletId: selectedWalletId,
+          wallet_id: selectedWalletId,
           amount: result.amount,
-          categoryId: selectedCategoryId,
-          createdAt: getCurrentUTCTimeStamp(),
-          transactionDate: dateToAdd.getTime(),
+          category_id: selectedCategoryId,
+          created_at: getCurrentUTCTimeStamp(),
+          transaction_date: dateToAdd.getTime(),
           id,
           type: transactionType,
           attachments: attachments,
@@ -294,7 +290,6 @@ const AddTransaction = () => {
       duration: 250,
     });
   }, [transactionType, progress]);
-
   return (
     <KeyboardAvoidingView
       behavior="padding"

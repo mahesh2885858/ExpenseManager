@@ -51,9 +51,9 @@ const useBudgets = () => {
       allBudgets.forEach(b => {
         const period = getRangeForBudgetPeriod(b.period);
         if (!period.end || !period.start) return;
-        const tDate = new Date(t.transactionDate);
+        const tDate = new Date(t.transaction_date);
         if (
-          b.categoryIds.includes(t.categoryId) &&
+          b.categoryIds.includes(t.category_id) &&
           period.start.getTime() <= tDate.getTime() &&
           period.end.getTime() >= tDate.getTime()
         ) {
@@ -73,13 +73,13 @@ const useBudgets = () => {
     ) => {
       if (transaction.type === 'income') return budgets;
       const budgetsForThisCat = budgets.filter(b =>
-        b.categoryIds.includes(transaction.categoryId),
+        b.categoryIds.includes(transaction.category_id),
       );
       if (budgetsForThisCat.length > 0) {
         // does this budget covers the given transaction period
 
         const updatedBudgets: TBudget[] = [];
-        const trDate = new Date(transaction.transactionDate);
+        const trDate = new Date(transaction.transaction_date);
         budgetsForThisCat.forEach(b => {
           const period = getRangeForBudgetPeriod(b.period);
           if (!period.start || !period.end) return;

@@ -9,16 +9,16 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import useWallets from '../../hooks/useWallets';
-import useCategories from '../../hooks/useCategories';
-import useTransactions from '../../hooks/useTransactions';
-import { TTransaction } from '../../types';
+import AppText from '../../components/molecules/AppText';
 import useHelpers from '../../hooks/useHelpers';
+import useWallets from '../../hooks/useWallets';
+import { TTransaction } from '../../types';
 
 type TProps = {
   ref: React.RefObject<BottomSheetModal | null>;
@@ -33,17 +33,18 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const TransactionDetailsSheet = (props: TProps) => {
   const { colors } = useAppTheme();
-  const { categories } = useCategories();
-  const { wallets: accounts } = useWallets();
+  const { t } = useTranslation();
+  const { wallets } = useWallets();
+  console.log({ t: wallets });
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
   const { getFormattedAmount } = useHelpers();
-  const categoryName =
-    categories.find(c => c.id === props.selectedTransaction?.categoryId)
-      ?.name ?? 'Unknown';
+  const categoryName = props.selectedTransaction
+    ? props.selectedTransaction.category?.name ?? t('common.unknownCat')
+    : t('common.unknownCat');
 
-  const accName =
-    accounts.find(acc => acc.id === props.selectedTransaction?.walletId)
+  const walletName =
+    wallets.find(acc => acc.id === props.selectedTransaction?.wallet_id)
       ?.name ?? '';
 
   const navigateToEdit = useCallback(() => {
@@ -78,14 +79,14 @@ const TransactionDetailsSheet = (props: TProps) => {
             gs.itemsCenter,
           ]}
         >
-          <Text
+          <AppText.Medium
             style={[
               gs.fullFlex,
               { fontSize: textSize.lg, color: colors.onBackground },
             ]}
           >
-            Amount
-          </Text>
+            {t('txnDetails.amount')}
+          </AppText.Medium>
           <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.lg }]}>
             <PressableWithFeedback
               onPress={() =>
@@ -111,24 +112,23 @@ const TransactionDetailsSheet = (props: TProps) => {
             gs.itemsCenter,
           ]}
         >
-          <Text
+          <AppText.Bold
             style={[
               gs.fullFlex,
-              gs.fontBold,
               {
                 fontSize: textSize.xxxl,
                 color:
                   props.selectedTransaction?.type === 'expense'
                     ? colors.error
-                    : colors.success,
+                    : colors.primary,
               },
             ]}
           >
             {getFormattedAmount(props.selectedTransaction?.amount ?? 0)}
-          </Text>
+          </AppText.Bold>
         </View>
         <View style={[{ paddingHorizontal: spacing.md }]}>
-          <Text
+          <AppText.Regular
             style={[
               {
                 fontSize: textSize.md,
@@ -137,10 +137,10 @@ const TransactionDetailsSheet = (props: TProps) => {
             ]}
           >
             {format(
-              props.selectedTransaction?.transactionDate ?? new Date(),
+              props.selectedTransaction?.transaction_date ?? new Date(),
               'MMM dd, yyyy - hh:mm a',
             )}
-          </Text>
+          </AppText.Regular>
         </View>
         <View
           style={[
@@ -161,7 +161,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                   color={colors.onBackground}
                 />
               </View>
-              <Text
+              <AppText.Regular
                 style={[
                   styles.dimText,
                   {
@@ -170,10 +170,10 @@ const TransactionDetailsSheet = (props: TProps) => {
                   },
                 ]}
               >
-                Category
-              </Text>
+                {t('common.category')}
+              </AppText.Regular>
             </View>
-            <Text
+            <AppText.Regular
               style={[
                 {
                   color: colors.onBackground,
@@ -182,7 +182,7 @@ const TransactionDetailsSheet = (props: TProps) => {
               ]}
             >
               {categoryName}
-            </Text>
+            </AppText.Regular>
           </View>
           <View style={[gs.fullFlex]}>
             <View style={[gs.flexRow, gs.itemsCenter, { gap: spacing.sm }]}>
@@ -193,7 +193,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                   color={colors.onBackground}
                 />
               </View>
-              <Text
+              <AppText.Regular
                 style={[
                   styles.dimText,
                   {
@@ -202,10 +202,10 @@ const TransactionDetailsSheet = (props: TProps) => {
                   },
                 ]}
               >
-                Wallet
-              </Text>
+                {t('common.wallet')}
+              </AppText.Regular>
             </View>
-            <Text
+            <AppText.Regular
               style={[
                 {
                   color: colors.onBackground,
@@ -213,8 +213,8 @@ const TransactionDetailsSheet = (props: TProps) => {
                 },
               ]}
             >
-              {accName}
-            </Text>
+              {walletName}
+            </AppText.Regular>
           </View>
         </View>
         {props.selectedTransaction &&

@@ -34,7 +34,7 @@ type Actions = {
   requestDelete: (t: TTransaction) => void;
   undoDelete: () => void;
   confirmDeleteLocal: () => void;
-
+  updateTransaction: (id: string, txn: TTransaction) => void;
   setLoading: (loading: boolean) => void;
 };
 
@@ -99,6 +99,11 @@ const useTransactionsStore = create<TTransactionsStore & Actions>(
         pendingDelete: t,
         transactions: state.transactions.filter(tx => tx.id !== t.id),
       })),
+    updateTransaction: (id, txn) => {
+      set(state => ({
+        transactions: state.transactions.map(t => (t.id === id ? txn : t)),
+      }));
+    },
 
     undoDelete: () => {
       const pending = get().pendingDelete;

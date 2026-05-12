@@ -23,6 +23,7 @@ const useTransactions = (walletId?: string, search?: string) => {
     isLoading,
     setLoading,
   } = useTransactionsStore();
+  const updateTxn = useTransactionsStore(state => state.updateTransaction);
   const loadInitial = useCallback(async () => {
     setLoading(true);
 
@@ -79,7 +80,7 @@ const useTransactions = (walletId?: string, search?: string) => {
       console.log({ tx });
       // 1. Optimistic UI update (only if it matches current list)
       const shouldShow =
-        (!walletId || tx.walletId === walletId) &&
+        (!walletId || tx.wallet_id === walletId) &&
         (!filters?.type || filters.type === tx.type);
 
       if (shouldShow) {
@@ -99,12 +100,22 @@ const useTransactions = (walletId?: string, search?: string) => {
     [walletId, filters],
   );
 
+  const updateTransaction = useCallback(
+    async (txn: TTransaction) => {
+      const resultUpdate = await txnRepo.update(txn.id, txn);
+      console.log({ resultAdd: resultUpdate });
+      updateTxn(txn.id, txn);
+    },
+    [updateTxn],
+  );
+
   return {
     transactions,
     loadInitial,
     loadMore,
     refresh: loadInitial,
     addTransaction,
+    updateTransaction,
   };
 };
 

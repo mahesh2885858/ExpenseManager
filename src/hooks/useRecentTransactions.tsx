@@ -75,7 +75,7 @@ export const useRecentTransactions = () => {
         COALESCE(SUM(balance), 0) as balance
       FROM (
         -- Initial wallet balances
-        SELECT initial_balance as balance
+        SELECT init_balance as balance
         FROM wallets
         ${walletId ? 'WHERE id = ?' : ''}
 
