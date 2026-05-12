@@ -37,7 +37,9 @@ const Home = () => {
     [],
   );
   const [summary, setSummary] = useState({ income: 0, expense: 0 });
-  const { getRecentTransactions, getMonthlySummary } = useRecentTransactions();
+  const [balance, setBalance] = useState(0);
+  const { getRecentTransactions, getMonthlySummary, getBalance } =
+    useRecentTransactions();
 
   const { getFormattedAmount } = useHelpers();
   const budgets = useBudgetStore(state => state.budgets);
@@ -47,9 +49,12 @@ const Home = () => {
       try {
         const txs = await getRecentTransactions();
         const sum = await getMonthlySummary();
-        console.log({ txs });
+        const bal = await getBalance();
+
+        console.log({ txs, sum, bal });
         setRecentTransactions(txs);
-        setSummary(sum);
+        setSummary(sum as unknown as typeof summary);
+        setBalance(bal);
       } catch (e) {
         console.log({ e, ma: 'mah' });
       }
@@ -61,6 +66,8 @@ const Home = () => {
   }, [
     selectedProfileId,
     fetchWallets,
+    setBalance,
+    getBalance,
     getMonthlySummary,
     getRecentTransactions,
     fetchCategories,
@@ -140,7 +147,7 @@ const Home = () => {
           <AppText.Bold
             style={[{ fontSize: textSize.md, color: colors.onSurface }]}
           >
-            {getFormattedAmount('1233423')}
+            {getFormattedAmount(balance)}
           </AppText.Bold>
           <View
             style={[
@@ -180,7 +187,7 @@ const Home = () => {
                   },
                 ]}
               >
-                {getFormattedAmount('23456')}
+                {getFormattedAmount(summary.income ?? 0)}
               </AppText.Bold>
             </PressableWithFeedback>
             <PressableWithFeedback
@@ -212,7 +219,7 @@ const Home = () => {
                   },
                 ]}
               >
-                {getFormattedAmount('23456')}
+                {getFormattedAmount(summary.expense ?? 0)}
               </AppText.Bold>
             </PressableWithFeedback>
           </View>

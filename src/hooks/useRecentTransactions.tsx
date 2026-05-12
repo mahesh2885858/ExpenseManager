@@ -68,8 +68,39 @@ export const useRecentTransactions = () => {
     return result.rows[0];
   }, []);
 
+  const getBalance = useCallback(async (walletId?: string) => {
+    const result = await db.execute(
+      `
+      SELECT
+        COALESCE(SUM(balance), 0) as balance
+      FROM (
+        -- Initial wallet balances
+        SELECT initial_balance as balance
+        FROM wallets
+        ${walletId ? 'WHERE id = ?' : ''}
+
+        UNION ALL
+
+        -- Transaction balance changes
+        SELECT
+          CASE
+            WHEN type = 'income' THEN amount
+            WHEN type = 'expense' THEN -amount
+            ELSE 0
+          END as balance
+        FROM transactions
+        ${walletId ? 'WHERE wallet_id = ?' : ''}
+      )
+      `,
+      walletId ? [walletId, walletId] : [],
+    );
+
+    return Number(result.rows[0]?.balance ?? 0);
+  }, []);
+
   return {
     getRecentTransactions,
     getMonthlySummary,
+    getBalance,
   };
 };
