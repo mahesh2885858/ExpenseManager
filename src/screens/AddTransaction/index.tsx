@@ -18,7 +18,7 @@ import {
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 
 import { useSharedValue, withTiming } from 'react-native-reanimated';
-import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTranslation } from 'react-i18next';
 import { v4 as uuid } from 'uuid';
@@ -65,8 +65,7 @@ const AddTransaction = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
-  const insets = useSafeAreaInsets();
-  const style = createStyles(colors, insets);
+  const style = createStyles(colors);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddTransaction'>>();
   const { categories, defaultCategoryId } = useCategories();
   const { getFormattedAmount } = useHelpers();
@@ -704,7 +703,7 @@ const AddTransaction = () => {
 
 export default AddTransaction;
 
-const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
+const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     scrollViewContent: {
       paddingHorizontal: spacing.md,
