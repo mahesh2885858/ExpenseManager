@@ -58,9 +58,20 @@ const updateTransaction = async (
   id: string,
   transaction: Partial<TTransaction>,
 ) => {
-  const entries = Object.entries(transaction).filter(
-    ([_, value]) => value !== undefined,
-  );
+  console.log({ transaction });
+  const entries = Object.entries(transaction).filter(entry => {
+    const key = entry[0];
+    const ignoredKeys = [
+      'id',
+      'created_at',
+      'category',
+      'attachments',
+      'profile_id',
+    ];
+    if (ignoredKeys.includes(key)) {
+      return false;
+    } else return true;
+  });
 
   if (entries.length === 0) {
     return;
@@ -69,7 +80,7 @@ const updateTransaction = async (
   const setClause = entries.map(([key]) => `${key} = ?`).join(', ');
 
   const values = entries.map(([_, value]) => value);
-
+  console.log({ values, setClause });
   await db.execute(
     `
     UPDATE transactions

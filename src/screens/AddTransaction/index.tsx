@@ -230,7 +230,7 @@ const AddTransaction = () => {
           ...route.params.transaction,
           amount: result.amount,
           category_id: selectedCategoryId,
-          transaction_date: dateToAdd.toISOString(),
+          transaction_date: dateToAdd.getTime(),
           type: transactionType,
           attachments: attachments,
           description: desc,
