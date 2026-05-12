@@ -4,6 +4,7 @@ import useWalletStore from '../stores/walletsStore';
 import useTransactions from './useTransactions';
 import { walletRepo } from '../db/repositories/wallets.repo';
 import { TWallet } from '../types';
+import { ToastAndroid } from 'react-native';
 
 const useWallets = () => {
   const wallets = useWalletStore(state => state.wallets);
@@ -99,10 +100,16 @@ const useWallets = () => {
 
   const createNewWallet = useCallback(
     async (wallet: TWallet) => {
-      console.log({ wallet });
-      const result = await walletRepo.create(wallet);
-      console.log(result);
-      addWallet(wallet);
+      try {
+        await walletRepo.create(wallet);
+        addWallet(wallet);
+      } catch (e) {
+        console.log('Error while creating a new wallet', e);
+        ToastAndroid.show(
+          e instanceof Error ? e.message : 'error while creating new wallet',
+          2000,
+        );
+      }
     },
     [addWallet],
   );

@@ -17,8 +17,8 @@ export type TTransaction = {
   wallet_id: string; // ID associated with wallet to which this transaction is added
   type: TTransactionType; // Only either income or expense
   amount: number;
-  created_at: string; // ISO string format - when the transaction record created
-  transaction_date: string; // ISO string format - when the transaction took place
+  created_at: number; //  when the transaction record created
+  transaction_date: number; // when the transaction took place
   category_id: string; // Category IDs (initially single category per transaction)
   category?: TCategory;
   description?: string; // Optional field

@@ -14,7 +14,7 @@ import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
 import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import CreateNewAccount from './CreateNewAccount';
+import CreateNewWallet from './CreateNewWallet';
 
 type TProps = {
   item: TWallet;
@@ -249,7 +249,7 @@ const RenderAccountCard = (props: TProps) => {
           </PressableWithFeedback>
         </View>
       </View>
-      <CreateNewAccount
+      <CreateNewWallet
         accToEdit={props.item}
         handleSheetChanges={handleSheetChange}
         ref={btmShtRef}

@@ -15,7 +15,7 @@ import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useWalletStore from '../../stores/walletsStore';
 import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import CreateNewAccount from './CreateNewAccount';
+import CreateNewWallet from './CreateNewWallet';
 
 type TProps = {
   ref: any;
@@ -182,7 +182,7 @@ const WalletSelectionModal = (props: TProps) => {
           }}
         />
       </View>
-      <CreateNewAccount
+      <CreateNewWallet
         handleSheetChanges={handleNewWalletSheetChanges}
         ref={newWalletBtmSheet}
       />

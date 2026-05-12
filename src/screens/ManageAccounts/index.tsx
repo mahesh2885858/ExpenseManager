@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CreateNewAccount from '../../components/organisms/CreateNewAccount';
+import CreateNewWallet from '../../components/organisms/CreateNewWallet';
 import RenderAccountCard from '../../components/organisms/RenderAccountCard';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
@@ -99,7 +99,7 @@ const ManageAccounts = () => {
             onPress={() => handlePresent()}
           />
         </View>
-        <CreateNewAccount
+        <CreateNewWallet
           handleSheetChanges={handleSheetChange}
           ref={btmShtRef}
         />

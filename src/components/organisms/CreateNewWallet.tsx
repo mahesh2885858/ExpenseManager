@@ -13,15 +13,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 } from 'uuid';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useHelpers from '../../hooks/useHelpers';
 import usePaddingKeyboard from '../../hooks/usePaddingKeyboard';
-import useTransactions from '../../hooks/useTransactions';
+import useWallets from '../../hooks/useWallets';
+import useProfileStore from '../../stores/profileStore';
 import useWalletStore from '../../stores/walletsStore';
 import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AmountInputBoard from './AmountInputBoard';
-import useHelpers from '../../hooks/useHelpers';
-import useWallets from '../../hooks/useWallets';
-import useProfileStore from '../../stores/profileStore';
 
 const screenHeight = Dimensions.get('screen').height;
 
@@ -35,7 +34,7 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
   return <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />;
 };
 
-const CreateNewAccount = (props: TProps) => {
+const CreateNewWallet = (props: TProps) => {
   const { colors } = useAppTheme();
   const { top, bottom } = useSafeAreaInsets();
   const availableScreenHeight = screenHeight - top - bottom;
@@ -244,7 +243,7 @@ const CreateNewAccount = (props: TProps) => {
   );
 };
 
-export default CreateNewAccount;
+export default CreateNewWallet;
 
 const styles = StyleSheet.create({
   container: {

@@ -18,7 +18,7 @@ export const initDB = async () => {
     await db.execute(`
     CREATE TABLE IF NOT EXISTS wallets (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
+      name TEXT NOT NULL UNIQUE,
       init_balance REAL NOT NULL DEFAULT 0,
       profile_id TEXT NOT NULL,
       created_at INTEGER NOT NULL,
@@ -31,7 +31,7 @@ export const initDB = async () => {
     await db.execute(`
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
+      name TEXT NOT NULL UNIQUE,
       icon TEXT,
       profile_id TEXT NOT NULL,
       type TEXT CHECK(type IN ('income', 'expense')) NOT NULL,
