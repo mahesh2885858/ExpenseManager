@@ -1,4 +1,5 @@
 import { TTransaction } from '../../types';
+import { money } from '../../utils';
 import { db } from '../index';
 
 const addTransaction = async (tx: TTransaction) => {
@@ -8,7 +9,7 @@ const addTransaction = async (tx: TTransaction) => {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`,
     [
       tx.id,
-      tx.amount,
+      money.toStored(tx.amount),
       tx.category_id,
       tx.wallet_id,
       tx.type,
@@ -79,7 +80,9 @@ const updateTransaction = async (
 
   const setClause = entries.map(([key]) => `${key} = ?`).join(', ');
 
-  const values = entries.map(([_, value]) => value);
+  const values = entries.map(([key, value]) =>
+    key === 'amount' ? money.toStored(value as number) : value,
+  );
   console.log({ values, setClause });
   await db.execute(
     `

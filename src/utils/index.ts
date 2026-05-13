@@ -3,3 +3,4 @@ export * from './text';
 export * from './formatAmount';
 export * from './getDateFilterText';
 export * from './common';
+export * from './money';

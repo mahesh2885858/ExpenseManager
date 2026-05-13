@@ -11,11 +11,13 @@ import useHelpers from '../../hooks/useHelpers';
 import AppText from '../molecules/AppText';
 import CircularProgressBar from '../molecules/CircularProgressBar';
 import { TBudget } from '../../types';
+import { roundValue } from 'commonutil-core';
 type TProps = {
   budget: TBudget;
 };
 const RenderBudget = (props: TProps) => {
   const { colors } = useAppTheme();
+  console.log({ props });
   const { getFormattedAmount } = useHelpers();
   const styles = createStyles(colors);
   return (
@@ -44,7 +46,12 @@ const RenderBudget = (props: TProps) => {
       >
         <CircularProgressBar
           strokeWidth={5}
-          progress={(props.budget.spent / props.budget.amount) * 100}
+          progress={roundValue(
+            (props.budget.spent === undefined
+              ? 0
+              : props.budget.spent / props.budget.amount) * 100,
+            1,
+          )}
           size={40}
           background={'transparent'}
           completedColor={colors.primary}

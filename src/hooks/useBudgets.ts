@@ -22,7 +22,7 @@ const useBudgets = () => {
 
   const addNewBudget = useCallback(
     async (budget: TBudgetPayload) => {
-      await budgetRepo.create({ ...budget, amount: budget.amount * 100 });
+      await budgetRepo.create({ ...budget });
       const selectedCats = budget.category_ids
         .map(id => categories.find(cat => cat.id === id))
         .filter(c => !!c);

@@ -96,7 +96,6 @@ const useTransactions = (walletId?: string, search?: string) => {
       // 2. Persist to DB
       await txnRepo.create({
         ...tx,
-        amount: tx.amount * 100,
       });
 
       // 3. Optional: refresh if strict consistency needed
@@ -107,7 +106,7 @@ const useTransactions = (walletId?: string, search?: string) => {
 
   const updateTransaction = useCallback(
     async (txn: TTransaction) => {
-      await txnRepo.update(txn.id, { ...txn, amount: txn.amount * 100 });
+      await txnRepo.update(txn.id, { ...txn });
       updateTxn(txn.id, txn);
     },
     [updateTxn],

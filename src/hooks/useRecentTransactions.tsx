@@ -5,6 +5,7 @@ import {
   getStartOfNextMonth,
 } from '../db/helpers/transactions';
 import { TTransaction } from '../types';
+import { money } from '../utils';
 type TTransactionRow = Omit<TTransaction, 'category'> & {
   category: string;
 };
@@ -44,7 +45,7 @@ export const useRecentTransactions = () => {
         const icon = JSON.parse(category.icon);
         return {
           ...t,
-          amount: t.amount / 100,
+          amount: money.fromStored(t.amount),
           category: { ...category, icon },
         };
       });
@@ -99,7 +100,7 @@ export const useRecentTransactions = () => {
       walletId ? [walletId, walletId] : [],
     );
 
-    return Number(result.rows[0]?.balance ?? 0) / 100;
+    return money.fromStored(Number(result.rows[0]?.balance ?? 0));
   }, []);
 
   return {

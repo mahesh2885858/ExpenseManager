@@ -1,5 +1,5 @@
 import { db } from '../index';
-import { getCurrentUTCTimeStamp } from '../../utils';
+import { getCurrentUTCTimeStamp, money } from '../../utils';
 import { TBudget, TBudgetPayload } from '../../types';
 import { getRangeForBudgetPeriod } from '../../utils/getRangeForBudgetPeriod';
 
@@ -29,7 +29,7 @@ const getBudgetSpent = async (budgetId: string, start: number, end: number) => {
     [budgetId, start, end],
   );
 
-  return Number(result.rows[0]?.spent ?? 0);
+  return money.fromStored(Number(result.rows[0]?.spent ?? 0));
 };
 
 const addBudget = async (budget: TBudgetPayload) => {
@@ -53,7 +53,7 @@ const addBudget = async (budget: TBudgetPayload) => {
       `,
       [
         budget.id,
-        budget.amount,
+        money.toStored(budget.amount),
         budget.name,
         budget.recurring_type,
         now,
@@ -138,10 +138,10 @@ const getBudgets = async (profileId: string) => {
 
       return {
         ...row,
-        amount: row.amount / 100,
+        amount: money.fromStored(row.amount),
         categories,
         spent,
-        remaining: row.amount - spent,
+        remaining: money.fromStored(row.amount) - spent,
       };
     }),
   );
@@ -180,7 +180,9 @@ const updateBudget = async (
         })
         .join(', ');
 
-      const values = entries.map(([, value]) => value);
+      const values = entries.map(([key, value]) =>
+        key === 'amount' ? money.toStored(value as number) : value,
+      );
 
       await tx.execute(
         `
@@ -284,7 +286,7 @@ const getBudgetTransactions = async ({
 
   return result.rows.map((row: any) => ({
     ...row,
-
+    amount: money.fromStored(row.amount),
     category: {
       ...JSON.parse(row.category),
       icon: JSON.parse(JSON.parse(row.category).icon),

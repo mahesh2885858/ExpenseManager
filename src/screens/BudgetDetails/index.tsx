@@ -21,6 +21,7 @@ import useHelpers from '../../hooks/useHelpers';
 import useBudgetStore from '../../stores/budgetStore';
 import { TRootStackParamList, TTransaction } from '../../types';
 import { budgetRepo } from '../../db/repositories/budgets.repo';
+import AppText from '../../components/molecules/AppText';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -90,6 +91,7 @@ const BudgetDetails = () => {
         end_date: budget.end_date,
       });
       console.log({ data });
+      setTransactions(data);
     };
     fetch();
   }, [budget]);
@@ -105,7 +107,7 @@ const BudgetDetails = () => {
             color={colors.onBackground}
           />
         </PressableWithFeedback>
-        <Text style={[styles.headerText]}>{budgetName}</Text>
+        <AppText.Bold style={[styles.headerText]}>{budgetName}</AppText.Bold>
         <PressableWithFeedback onPress={expand}>
           <Icon
             source={isDeleteAlertOpen ? 'close' : 'delete'}
@@ -125,22 +127,28 @@ const BudgetDetails = () => {
           },
         ]}
       >
-        <Text style={[styles.deleteBoxText]}>This can not be undone.</Text>
-        <Text style={[styles.deleteBoxText]}>
+        <AppText.Regular style={[styles.deleteBoxText]}>
+          This can not be undone.
+        </AppText.Regular>
+        <AppText.Regular style={[styles.deleteBoxText]}>
           Are you sure you want to delete this budget?
-        </Text>
+        </AppText.Regular>
         <View style={[styles.deleteBtnBox]}>
           <PressableWithFeedback
             onPress={collapse}
             style={[styles.deleteBtn, styles.cancelBtn]}
           >
-            <Text style={[styles.cancelBtnText]}>Cancel</Text>
+            <AppText.Regular style={[styles.cancelBtnText]}>
+              Cancel
+            </AppText.Regular>
           </PressableWithFeedback>
           <PressableWithFeedback
             onPress={deleteItem}
             style={[styles.deleteBtn, styles.dltBtn]}
           >
-            <Text style={[styles.dltBtnText]}>Delete</Text>
+            <AppText.Regular style={[styles.dltBtnText]}>
+              Delete
+            </AppText.Regular>
           </PressableWithFeedback>
         </View>
       </Animated.View>
@@ -242,10 +250,10 @@ const createStyles = (colors: AppTheme['colors']) => {
       borderRadius: borderRadius.sm,
     },
     cancelBtn: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.secondary,
     },
     cancelBtnText: {
-      color: colors.onPrimary,
+      color: colors.onSecondary,
       fontSize: textSize.md,
     },
     dltBtn: {
