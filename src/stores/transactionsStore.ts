@@ -8,6 +8,7 @@ export type Cursor = {
 
 type TTransactionsStore = {
   transactions: TTransaction[];
+  recents: TTransaction[];
   cursor: Cursor | null;
   hasMore: boolean;
 
@@ -22,6 +23,7 @@ type TTransactionsStore = {
 
 type Actions = {
   setTransactions: (txs: TTransaction[], cursor: Cursor | null) => void;
+  setRecents: (txs: TTransaction[]) => void;
   appendTransactions: (txs: TTransaction[], cursor: Cursor | null) => void;
   reset: () => void;
 
@@ -36,11 +38,13 @@ type Actions = {
   confirmDeleteLocal: () => void;
   updateTransaction: (id: string, txn: TTransaction) => void;
   setLoading: (loading: boolean) => void;
+  delete: (id: string) => void;
 };
 
 const useTransactionsStore = create<TTransactionsStore & Actions>(
   (set, get) => ({
     transactions: [],
+    recents: [],
     cursor: null,
     hasMore: true,
 
@@ -63,6 +67,7 @@ const useTransactionsStore = create<TTransactionsStore & Actions>(
         cursor,
         hasMore: txs.length > 0,
       }),
+    setRecents: txns => set({ recents: txns }),
 
     appendTransactions: (txs, cursor) =>
       set(state => ({
@@ -118,6 +123,8 @@ const useTransactionsStore = create<TTransactionsStore & Actions>(
     confirmDeleteLocal: () => set({ pendingDelete: null }),
 
     setLoading: v => set({ isLoading: v }),
+    delete: id =>
+      set({ transactions: get().transactions.filter(t => t.id !== id) }),
   }),
 );
 

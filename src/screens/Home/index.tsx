@@ -24,6 +24,7 @@ import useFetchRecords from '../../hooks/useFetchRecords';
 import useProfileStore from '../../stores/profileStore';
 import { TTransaction } from '../../types';
 import useCategories from '../../hooks/useCategories';
+import useTransactionsStore from '../../stores/transactionsStore';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -31,37 +32,30 @@ const Home = () => {
   const { t } = useTranslation();
   const { colors } = theme;
   const styles = createStyles(colors, insets);
-  const { fetchWallets, fetchCategories } = useFetchRecords();
-  const { getCategories } = useCategories();
-  const [recentTransactions, setRecentTransactions] = useState<TTransaction[]>(
-    [],
-  );
+  const { fetchWallets, fetchCategories, fetchRecents } = useFetchRecords();
+
   const [summary, setSummary] = useState({ income: 0, expense: 0 });
   const [balance, setBalance] = useState(0);
-  const { getRecentTransactions, getMonthlySummary, getBalance } =
-    useRecentTransactions();
-
+  const { getMonthlySummary, getBalance } = useRecentTransactions();
+  const recents = useTransactionsStore(state => state.recents);
   const { getFormattedAmount } = useHelpers();
   const budgets = useBudgetStore(state => state.budgets);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const txs = await getRecentTransactions();
         const sum = await getMonthlySummary();
         const bal = await getBalance();
 
-        console.log({ txs, sum, bal });
-        setRecentTransactions(txs);
         setSummary(sum as unknown as typeof summary);
         setBalance(bal);
       } catch (e) {
         console.log({ e, ma: 'mah' });
       }
     };
-    console.log({ selectedProfileId });
     load();
     fetchWallets();
+    fetchRecents();
     fetchCategories();
   }, [
     selectedProfileId,
@@ -69,8 +63,8 @@ const Home = () => {
     setBalance,
     getBalance,
     getMonthlySummary,
-    getRecentTransactions,
     fetchCategories,
+    fetchRecents,
   ]);
 
   return (
@@ -187,7 +181,7 @@ const Home = () => {
                   },
                 ]}
               >
-                {getFormattedAmount(summary.income ?? 0)}
+                {getFormattedAmount(summary.income / 100 ?? 0)}
               </AppText.Bold>
             </PressableWithFeedback>
             <PressableWithFeedback
@@ -219,7 +213,7 @@ const Home = () => {
                   },
                 ]}
               >
-                {getFormattedAmount(summary.expense ?? 0)}
+                {getFormattedAmount(summary.expense / 100 ?? 0)}
               </AppText.Bold>
             </PressableWithFeedback>
           </View>
@@ -311,7 +305,7 @@ const Home = () => {
           <View style={[gs.fullFlex]}>
             <RenderTransactionList
               scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
-              transactions={recentTransactions}
+              transactions={recents}
             />
           </View>
         </View>

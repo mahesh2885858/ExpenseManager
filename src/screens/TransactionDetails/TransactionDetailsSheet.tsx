@@ -35,7 +35,6 @@ const TransactionDetailsSheet = (props: TProps) => {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const { wallets } = useWallets();
-  console.log({ t: wallets });
   const navigation = useNavigation();
   const { dismissAll } = useBottomSheetModal();
   const { getFormattedAmount } = useHelpers();

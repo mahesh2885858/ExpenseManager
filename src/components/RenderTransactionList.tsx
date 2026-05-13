@@ -11,6 +11,8 @@ import useTransactionsStore from '../stores/transactionsStore';
 import { TBottomTabParamList, TTransaction } from '../types';
 import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
 import RenderTransaction from './RenderTransaction';
+import useTransactions from '../hooks/useTransactions';
+import useFetchRecords from '../hooks/useFetchRecords';
 
 const RenderTransactionList = ({
   transactions,
@@ -25,8 +27,9 @@ const RenderTransactionList = ({
   const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
+  const { fetchRecents } = useFetchRecords();
   const { dismissAll } = useBottomSheetR();
-  // const { deleteTransaction, undoTransactionDelete } = useTransactions();
+  const { deleteTxn } = useTransactions();
   const pendingDelete = useTransactionsStore(state => state.pendingDelete);
   // const confirmDelete = useTransactionsStore(state => state.confirmDelete);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
@@ -41,10 +44,11 @@ const RenderTransactionList = ({
 
   const onDeletePress = useCallback(
     (t: TTransaction) => {
-      // deleteTransaction(t.id);
+      deleteTxn(t.id);
       dismissAll();
+      fetchRecents();
     },
-    [dismissAll],
+    [dismissAll, fetchRecents, deleteTxn],
   );
 
   useEffect(() => {

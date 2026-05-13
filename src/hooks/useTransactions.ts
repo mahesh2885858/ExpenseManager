@@ -8,6 +8,7 @@ import {
 import { db } from '../db';
 import { TTransaction } from '../types';
 import { txnRepo } from '../db/repositories/transactions.repo';
+import { ToastAndroid } from 'react-native';
 
 const LIMIT = 50;
 
@@ -24,6 +25,7 @@ const useTransactions = (walletId?: string, search?: string) => {
     setLoading,
   } = useTransactionsStore();
   const updateTxn = useTransactionsStore(state => state.updateTransaction);
+  const deleteTransaction = useTransactionsStore(state => state.delete);
   const loadInitial = useCallback(async () => {
     setLoading(true);
 
@@ -75,6 +77,7 @@ const useTransactions = (walletId?: string, search?: string) => {
     setLoading,
     walletId,
   ]);
+
   const addTransaction = useCallback(
     async (tx: TTransaction) => {
       console.log({ tx });
@@ -91,8 +94,10 @@ const useTransactions = (walletId?: string, search?: string) => {
       }
 
       // 2. Persist to DB
-      const resultAdd = await txnRepo.create(tx);
-      console.log({ resultAdd });
+      await txnRepo.create({
+        ...tx,
+        amount: tx.amount * 100,
+      });
 
       // 3. Optional: refresh if strict consistency needed
       // await loadInitial(); // uncomment if you want exact DB sync
@@ -102,11 +107,26 @@ const useTransactions = (walletId?: string, search?: string) => {
 
   const updateTransaction = useCallback(
     async (txn: TTransaction) => {
-      const resultUpdate = await txnRepo.update(txn.id, txn);
-      console.log({ resultAdd: resultUpdate });
+      await txnRepo.update(txn.id, { ...txn, amount: txn.amount * 100 });
       updateTxn(txn.id, txn);
     },
     [updateTxn],
+  );
+
+  const deleteTxn = useCallback(
+    async (id: string) => {
+      try {
+        await txnRepo.delete(id);
+        deleteTransaction(id);
+      } catch (e) {
+        console.log('Error while deleting the transaction: ', e);
+        ToastAndroid.show(
+          e instanceof Error ? e.message : 'Error while deleting transaction',
+          2000,
+        );
+      }
+    },
+    [deleteTransaction],
   );
 
   return {
@@ -116,6 +136,7 @@ const useTransactions = (walletId?: string, search?: string) => {
     refresh: loadInitial,
     addTransaction,
     updateTransaction,
+    deleteTxn,
   };
 };
 

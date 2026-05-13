@@ -42,7 +42,11 @@ export const useRecentTransactions = () => {
       return rows.map(t => {
         const category = JSON.parse(t.category);
         const icon = JSON.parse(category.icon);
-        return { ...t, category: { ...category, icon } };
+        return {
+          ...t,
+          amount: t.amount / 100,
+          category: { ...category, icon },
+        };
       });
     } catch (err) {
       console.log('Error while fetching recent transactions: ', err);
@@ -95,7 +99,7 @@ export const useRecentTransactions = () => {
       walletId ? [walletId, walletId] : [],
     );
 
-    return Number(result.rows[0]?.balance ?? 0);
+    return Number(result.rows[0]?.balance ?? 0) / 100;
   }, []);
 
   return {
