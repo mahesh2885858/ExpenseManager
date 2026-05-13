@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import { gs } from '../../common';
 import {
   AppTheme,
   borderRadius,
@@ -7,28 +6,32 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
+import { gs } from '../../common';
+import useHelpers from '../../hooks/useHelpers';
 import AppText from '../molecules/AppText';
 import CircularProgressBar from '../molecules/CircularProgressBar';
-import useTransactions from '../../hooks/useTransactions';
-
-const RenderBudget = () => {
+import { TBudget } from '../../types';
+type TProps = {
+  budget: TBudget;
+};
+const RenderBudget = (props: TProps) => {
   const { colors } = useAppTheme();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
   const styles = createStyles(colors);
   return (
     <View style={[styles.container]}>
       <View style={[gs.fullFlex, gs.justifyCenter, { gap: spacing.xs }]}>
         <AppText.Regular style={[styles.budgetName]}>
-          MonthlyGroceris
+          {props.budget.name}
         </AppText.Regular>
         <View style={[gs.flexRow, gs.itemsCenter]}>
           <AppText.Regular style={[styles.budgetAmount]}>
-            {getFormattedAmount('123455')}
+            {getFormattedAmount(props.budget.spent ?? 0)}
           </AppText.Regular>
           <AppText.Regular
             style={[styles.budgetAmount, styles.budgetAmountTotal]}
           >
-            {' / ' + getFormattedAmount('345678')}
+            {' / ' + getFormattedAmount(props.budget.amount)}
           </AppText.Regular>
         </View>
       </View>
@@ -41,7 +44,7 @@ const RenderBudget = () => {
       >
         <CircularProgressBar
           strokeWidth={5}
-          progress={80}
+          progress={(props.budget.spent / props.budget.amount) * 100}
           size={40}
           background={'transparent'}
           completedColor={colors.primary}

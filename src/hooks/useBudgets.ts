@@ -1,17 +1,40 @@
 import { useCallback } from 'react';
 import useBudgetStore from '../stores/budgetStore';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TBudget, TTransaction } from '../types';
+import { TBudget, TBudgetPayload, TTransaction } from '../types';
 import { getRangeForBudgetPeriod } from '../utils/getRangeForBudgetPeriod';
+import useHelpers from './useHelpers';
+import { budgetRepo } from '../db/repositories/budgets.repo';
+import useCategories from './useCategories';
 
 const useBudgets = () => {
   const allBudgets = useBudgetStore(state => state.budgets);
+  const addBudget = useBudgetStore(state => state.addBudget);
+
   const updateMultipleBudgets = useBudgetStore(
     state => state.updateMulitpleBudgets,
   );
+  const { showErrorToast } = useHelpers();
   const transactionsIds = useTransactionsStore(state => state.transactionsIds);
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
+  );
+  const { categories } = useCategories();
+
+  const addNewBudget = useCallback(
+    async (budget: TBudgetPayload) => {
+      try {
+        await budgetRepo.create(budget);
+        const selectedCats = budget.category_ids
+          .map(id => categories.find(cat => cat.id === id))
+          .filter(c => !!c);
+        addBudget({ ...budget, category_ids: selectedCats });
+      } catch (e) {
+        console.log('Error while adding budget: ', e);
+        showErrorToast(e);
+      }
+    },
+    [showErrorToast, addBudget, categories],
   );
 
   const getTransactionIdsForBudget = useCallback(
@@ -147,6 +170,7 @@ const useBudgets = () => {
     updateBudgetForTransactionUpdate,
     getBudgetForAGivenTransactions,
     getBudgetById,
+    addNewBudget,
   };
 };
 export default useBudgets;

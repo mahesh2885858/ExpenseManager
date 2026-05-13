@@ -7,6 +7,8 @@ import useTransactionsStore from '../stores/transactionsStore';
 import useWalletStore from '../stores/walletsStore';
 import { TCategories, TWallet } from '../types';
 import { useRecentTransactions } from './useRecentTransactions';
+import { budgetRepo } from '../db/repositories/budgets.repo';
+import useBudgetStore from '../stores/budgetStore';
 
 const useFetchRecords = () => {
   const selectedProfileId = useProfileStore(state => state.selectedProfileId);
@@ -14,6 +16,7 @@ const useFetchRecords = () => {
   const setCategories = useCategoriesStore(state => state.setCategories);
   const { getRecentTransactions } = useRecentTransactions();
   const setRecents = useTransactionsStore(state => state.setRecents);
+  const setBudgets = useBudgetStore(state => state.setBudgets);
 
   const fetchWallets = useCallback(async () => {
     try {
@@ -45,10 +48,16 @@ const useFetchRecords = () => {
       console.log('Error fetching Recents: ', e);
     }
   }, [getRecentTransactions, setRecents]);
+  const fetchBudgets = useCallback(async () => {
+    const rows = await budgetRepo.getAll(selectedProfileId);
+    console.log({ rows });
+    setBudgets(rows);
+  }, [selectedProfileId, setBudgets]);
   return {
     fetchWallets,
     fetchCategories,
     fetchRecents,
+    fetchBudgets,
   };
 };
 export default useFetchRecords;

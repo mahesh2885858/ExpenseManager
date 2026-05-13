@@ -58,6 +58,41 @@ export const initDB = async () => {
     );
   `);
 
+    // budgets
+    console.log('creating budgets....');
+    await db.execute(`
+    CREATE TABLE IF NOT EXISTS budgets (
+      id TEXT PRIMARY KEY,
+      amount INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      recurring_type TEXT CHECK(recurring_type IN ('weekly', 'monthly','yearly','one-time')) NOT NULL,
+      created_at INTEGER NOT NULL,
+      start_date INTEGER NOT NULL,
+      end_date INTEGER,
+      profile_id TEXT NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+      UNIQUE (profile_id,name)
+    );
+  `);
+
+    // junction table for budgets and categories
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS budget_categories (
+          budget_id TEXT NOT NULL,
+          category_id TEXT NOT NULL,
+
+          PRIMARY KEY (budget_id, category_id),
+
+          FOREIGN KEY (budget_id)
+              REFERENCES budgets(id)
+              ON DELETE CASCADE,
+
+          FOREIGN KEY (category_id)
+              REFERENCES categories(id)
+              ON DELETE CASCADE
+      );
+  `);
+
     // Index for pagination
     console.log('creating indexes.....');
     await db.execute(`

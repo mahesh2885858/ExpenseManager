@@ -3,6 +3,7 @@ import { FlashList } from '@shopify/flash-list';
 import { roundValue, uCFirst } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-paper';
@@ -11,7 +12,6 @@ import {
   CalendarDate,
   RangeChange,
 } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 import {
   AppTheme,
@@ -22,33 +22,35 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText from '../../components/molecules/AppText';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
-import useTransactions from '../../hooks/useTransactions';
-import useBudgetStore from '../../stores/budgetStore';
+import useHelpers from '../../hooks/useHelpers';
+import useProfileStore from '../../stores/profileStore';
 import {
   TBudget,
-  TBudgetPeriod,
+  TBudgetPayload,
   TBudgetPeriods,
   TRootStackParamList,
 } from '../../types';
-import ScreenWrapper from '../../components/molecules/ScreenWrapper';
-import AppText from '../../components/molecules/AppText';
-import { useTranslation } from 'react-i18next';
+import { getCurrentUTCTimeStamp } from '../../utils';
+import useBudgets from '../../hooks/useBudgets';
 
 const dateFormatString = 'do MMM yyyy';
 const AddOrEditBudget = () => {
   const { colors } = useAppTheme();
+  const profile_id = useProfileStore(state => state.selectedProfileId);
   const { t } = useTranslation();
+  const { addNewBudget } = useBudgets();
   const styles = createStyles(colors);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddOrEditBudget'>>();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
   const navigation = useNavigation();
   const { categories } = useCategories();
-  const addBudget = useBudgetStore(state => state.addBudget);
 
   const [name, setName] = useState('');
   const [selectedCatIds, setSelectedCatIds] = useState<string[]>([]);
@@ -163,38 +165,38 @@ const AddOrEditBudget = () => {
     [removeError],
   );
 
-  const addNew = useCallback(() => {
+  const addNew = useCallback(async () => {
     const id = uuid();
     const amount = roundValue(parseFloat(budgetAmount), 2);
-    let period: TBudgetPeriod = {} as TBudgetPeriod;
+    let recurring_type: TBudgetPeriods;
+    let start_date: number;
+    let end_date: number | null = null;
     if (budgetPeriod === 'one time' && customRange.start && customRange.end) {
-      period = {
-        type: 'one time',
-        range: {
-          start: customRange.start,
-          end: customRange.end,
-        },
-      };
+      (recurring_type = 'one time'), (start_date = customRange.start.getTime());
+      end_date = customRange.end.getTime();
     } else {
-      period.type = budgetPeriod;
+      recurring_type = budgetPeriod;
+      start_date = getCurrentUTCTimeStamp();
     }
-    const budget: TBudget = {
+    const budget: TBudgetPayload = {
       id,
       amount,
-      categoryIds: selectedCatIds,
-      createdAt: new Date().toISOString(),
+      category_ids: selectedCatIds,
       name,
-      period,
-      spent: 0,
+      recurring_type,
+      start_date,
+      end_date,
+      profile_id,
     };
-    addBudget(budget);
+    await addNewBudget(budget);
   }, [
     budgetAmount,
     name,
+    addNewBudget,
     selectedCatIds,
     budgetPeriod,
     customRange,
-    addBudget,
+    profile_id,
   ]);
 
   const onSave = useCallback(() => {

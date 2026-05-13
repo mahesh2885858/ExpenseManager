@@ -13,6 +13,7 @@ type TProps = {
 const RenderBudgetList = (props: TProps) => {
   const { budgets } = props;
   const navigation = useNavigation();
+  console.log({ budgets });
   return (
     <FlashList
       data={budgets}
@@ -29,7 +30,7 @@ const RenderBudgetList = (props: TProps) => {
             }}
             key={budget.id}
           >
-            <RenderBudget />
+            <RenderBudget budget={budget} />
           </PressableWithFeedback>
         );
       }}

@@ -16,14 +16,11 @@ import AppText from '../../components/molecules/AppText';
 import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
 import RenderTransactionList from '../../components/RenderTransactionList';
+import useFetchRecords from '../../hooks/useFetchRecords';
 import useHelpers from '../../hooks/useHelpers';
 import { useRecentTransactions } from '../../hooks/useRecentTransactions';
-import useWallets from '../../hooks/useWallets';
 import useBudgetStore from '../../stores/budgetStore';
-import useFetchRecords from '../../hooks/useFetchRecords';
 import useProfileStore from '../../stores/profileStore';
-import { TTransaction } from '../../types';
-import useCategories from '../../hooks/useCategories';
 import useTransactionsStore from '../../stores/transactionsStore';
 const Home = () => {
   const insets = useSafeAreaInsets();
@@ -32,7 +29,8 @@ const Home = () => {
   const { t } = useTranslation();
   const { colors } = theme;
   const styles = createStyles(colors, insets);
-  const { fetchWallets, fetchCategories, fetchRecents } = useFetchRecords();
+  const { fetchWallets, fetchCategories, fetchRecents, fetchBudgets } =
+    useFetchRecords();
 
   const [summary, setSummary] = useState({ income: 0, expense: 0 });
   const [balance, setBalance] = useState(0);
@@ -57,6 +55,7 @@ const Home = () => {
     fetchWallets();
     fetchRecents();
     fetchCategories();
+    fetchBudgets();
   }, [
     selectedProfileId,
     fetchWallets,
@@ -65,6 +64,7 @@ const Home = () => {
     getMonthlySummary,
     fetchCategories,
     fetchRecents,
+    fetchBudgets,
   ]);
 
   return (

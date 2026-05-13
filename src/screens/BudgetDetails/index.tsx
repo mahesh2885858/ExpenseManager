@@ -1,7 +1,10 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { roundValue, uCFirst } from 'commonutil-core';
+import { format } from 'date-fns';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, ProgressBar } from 'react-native-paper';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppTheme,
@@ -13,13 +16,10 @@ import {
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import RenderTransactionList from '../../components/RenderTransactionList';
-import useTransactions from '../../hooks/useTransactions';
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
+import useBudgets from '../../hooks/useBudgets';
+import useHelpers from '../../hooks/useHelpers';
 import useBudgetStore from '../../stores/budgetStore';
 import { TRootStackParamList } from '../../types';
-import { roundValue, uCFirst } from 'commonutil-core';
-import { format } from 'date-fns';
-import useBudgets from '../../hooks/useBudgets';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -28,7 +28,7 @@ const BudgetDetails = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'BudgetDetails'>>();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount } = useHelpers();
   const { getTransactionIdsForBudget, getBudgetById } = useBudgets();
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
@@ -36,8 +36,8 @@ const BudgetDetails = () => {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   const getProgressColor = (progress: number) => {
-    if (progress <= 0.5) return colors.success;
-    if (progress <= 0.8) return colors.primary;
+    if (progress <= 0.5) return colors.primary;
+    if (progress <= 0.8) return colors.secondary;
     return colors.error;
   };
 
@@ -62,23 +62,23 @@ const BudgetDetails = () => {
   }, [route, removeBudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
-  const budget = getBudgetById(route.params.budget.id);
+  const budget = route.params.budget;
   const budgetPeriodLabel = useMemo(() => {
     if (!budget) return 'No budget';
-    if (budget.period.type === 'one time') {
+    if (budget.recurring_type === 'one time') {
       return (
-        format(budget.period.range.start, dateFormatString) +
+        format(budget.start_date, dateFormatString) +
         ' - ' +
-        format(budget.period.range.end, dateFormatString)
+        format(budget.end_date, dateFormatString)
       );
     } else {
-      return uCFirst(budget.period.type);
+      return uCFirst(budget.recurring_type);
     }
   }, [budget]);
 
   const progress = budget ? budget.spent / budget.amount : 0;
 
-  const transactionIds = budget ? getTransactionIdsForBudget(budget.id) : [];
+  const transactionIds = [];
 
   return (
     <View style={[styles.container, { marginTop: top }]}>

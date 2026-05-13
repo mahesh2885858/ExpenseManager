@@ -6,33 +6,34 @@ import {
   startOfWeek,
   startOfYear,
 } from 'date-fns';
-import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import { TBudgetPeriod } from '../types';
 
 export const getRangeForBudgetPeriod = (period: TBudgetPeriod) => {
   const periodRange: {
-    start: CalendarDate;
-    end: CalendarDate;
+    start: number;
+    end: number;
   } = {
-    start: undefined,
-    end: undefined,
+    start: 0,
+    end: 0,
   };
   switch (period.type) {
     case 'monthly':
-      periodRange.end = endOfMonth(new Date());
-      periodRange.start = startOfMonth(new Date());
+      periodRange.end = endOfMonth(new Date()).getTime();
+      periodRange.start = startOfMonth(new Date()).getTime();
       break;
     case 'weekly':
-      periodRange.end = endOfWeek(new Date(), { weekStartsOn: 1 });
-      periodRange.start = startOfWeek(new Date(), { weekStartsOn: 1 });
+      periodRange.end = endOfWeek(new Date(), { weekStartsOn: 1 }).getTime();
+      periodRange.start = startOfWeek(new Date(), {
+        weekStartsOn: 1,
+      }).getTime();
       break;
     case 'yearly':
-      periodRange.end = endOfYear(new Date());
-      periodRange.start = startOfYear(new Date());
+      periodRange.end = endOfYear(new Date()).getTime();
+      periodRange.start = startOfYear(new Date()).getTime();
       break;
     case 'one time':
-      periodRange.end = new Date(period.range.end);
-      periodRange.start = new Date(period.range.start);
+      periodRange.end = new Date(period.range.end).getTime();
+      periodRange.start = new Date(period.range.start).getTime();
       break;
     default:
       break;
