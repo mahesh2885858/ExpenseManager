@@ -97,7 +97,7 @@ const Home = () => {
               size={textSize.xl}
             />
           </PressableWithFeedback>*/}
-          <AppText.SemiBold
+          {/*<AppText.SemiBold
             style={[
               gs.fullFlex,
               gs.centerText,
@@ -107,7 +107,7 @@ const Home = () => {
             ]}
           >
             This Month
-          </AppText.SemiBold>
+          </AppText.SemiBold>*/}
           {/*<PressableWithFeedback
             style={[
               {
@@ -139,83 +139,101 @@ const Home = () => {
             {t('home.totalBalance')}
           </AppText.Regular>
           <AppText.Bold
-            style={[{ fontSize: textSize.md, color: colors.onSurface }]}
+            style={[{ fontSize: textSize.lg, color: colors.onSurface }]}
           >
             {getFormattedAmount(balance)}
           </AppText.Bold>
           <View
             style={[
-              gs.flexRow,
               {
                 marginTop: spacing.md,
-                gap: spacing.md,
               },
             ]}
           >
-            <PressableWithFeedback
+            <AppText.Regular
               style={[
                 gs.fullFlex,
                 {
-                  backgroundColor: colors.surfaceContainerLow,
-                  padding: spacing.sm,
-                  borderRadius: borderRadius.sm,
+                  color: colors.onSurface,
+                  marginBottom: spacing.xs,
                 },
               ]}
             >
-              <AppText.Regular
-                style={[
-                  {
-                    fontSize: textSize.sm,
-                    color: colors.onSurface,
-                    lineHeight: 14,
-                  },
-                ]}
-              >
-                Income
-              </AppText.Regular>
-              <AppText.Bold
-                style={[
-                  {
-                    fontSize: textSize.md,
-                    color: colors.onSurface,
-                  },
-                ]}
-              >
-                {getFormattedAmount(summary.income / 100 ?? 0)}
-              </AppText.Bold>
-            </PressableWithFeedback>
-            <PressableWithFeedback
+              This Month
+            </AppText.Regular>
+            <View
               style={[
-                gs.fullFlex,
+                gs.flexRow,
                 {
-                  backgroundColor: colors.surfaceContainerLow,
-                  padding: spacing.sm,
-                  borderRadius: borderRadius.sm,
+                  gap: spacing.md,
                 },
               ]}
             >
-              <AppText.Regular
+              <PressableWithFeedback
                 style={[
+                  gs.fullFlex,
                   {
-                    fontSize: textSize.sm,
-                    color: colors.onSurface,
-                    lineHeight: 14,
+                    backgroundColor: colors.surfaceContainerHighest,
+                    padding: spacing.sm,
+                    borderRadius: borderRadius.sm,
                   },
                 ]}
               >
-                Expense
-              </AppText.Regular>
-              <AppText.Bold
+                <AppText.Regular
+                  style={[
+                    {
+                      fontSize: textSize.sm,
+                      color: colors.onSurface,
+                      lineHeight: 14,
+                    },
+                  ]}
+                >
+                  Income
+                </AppText.Regular>
+                <AppText.Bold
+                  style={[
+                    {
+                      fontSize: textSize.lg,
+                      color: colors.onSurface,
+                    },
+                  ]}
+                >
+                  {getFormattedAmount(summary.income / 100 ?? 0)}
+                </AppText.Bold>
+              </PressableWithFeedback>
+              <PressableWithFeedback
                 style={[
+                  gs.fullFlex,
                   {
-                    fontSize: textSize.md,
-                    color: colors.onSurface,
+                    backgroundColor: colors.surfaceContainerHighest,
+                    padding: spacing.sm,
+                    borderRadius: borderRadius.sm,
                   },
                 ]}
               >
-                {getFormattedAmount(summary.expense / 100 ?? 0)}
-              </AppText.Bold>
-            </PressableWithFeedback>
+                <AppText.Regular
+                  style={[
+                    {
+                      fontSize: textSize.sm,
+                      color: colors.onSurface,
+                      lineHeight: 14,
+                    },
+                  ]}
+                >
+                  Expense
+                </AppText.Regular>
+                <AppText.Bold
+                  style={[
+                    {
+                      fontSize: textSize.lg,
+                      color: colors.onSurface,
+                    },
+                  ]}
+                >
+                  {getFormattedAmount(summary.expense / 100 ?? 0)}
+                </AppText.Bold>
+              </PressableWithFeedback>
+            </View>
           </View>
         </View>
         {/* summary ends */}
