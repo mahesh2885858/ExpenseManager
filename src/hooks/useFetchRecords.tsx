@@ -50,7 +50,6 @@ const useFetchRecords = () => {
   }, [getRecentTransactions, setRecents]);
   const fetchBudgets = useCallback(async () => {
     const rows = await budgetRepo.getAll(selectedProfileId);
-    console.log({ rows });
     setBudgets(rows);
   }, [selectedProfileId, setBudgets]);
   return {

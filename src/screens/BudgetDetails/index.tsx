@@ -31,7 +31,7 @@ const BudgetDetails = () => {
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount } = useHelpers();
-  const { getTransactionIdsForBudget, getBudgetById } = useBudgets();
+  const { deleteABudget } = useBudgets();
   const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
@@ -58,10 +58,14 @@ const BudgetDetails = () => {
     setIsDeleteAlertOpen(false);
   }, [animHeight]);
 
-  const deleteItem = useCallback(() => {
-    removeBudget(route.params.budget.id);
-    navigation.goBack();
-  }, [route, removeBudget, navigation]);
+  const deleteItem = useCallback(async () => {
+    try {
+      deleteABudget(route.params.budget.id);
+      navigation.goBack();
+    } catch (e) {
+      console.log('Error while deleting budget: ', e);
+    }
+  }, [route, deleteABudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
   const budget = route.params.budget;

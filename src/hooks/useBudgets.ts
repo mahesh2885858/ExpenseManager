@@ -6,10 +6,12 @@ import { getRangeForBudgetPeriod } from '../utils/getRangeForBudgetPeriod';
 import useHelpers from './useHelpers';
 import { budgetRepo } from '../db/repositories/budgets.repo';
 import useCategories from './useCategories';
+import useFetchRecords from './useFetchRecords';
 
 const useBudgets = () => {
   const allBudgets = useBudgetStore(state => state.budgets);
   const addBudget = useBudgetStore(state => state.addBudget);
+  const { fetchBudgets } = useFetchRecords();
 
   const updateMultipleBudgets = useBudgetStore(
     state => state.updateMulitpleBudgets,
@@ -29,36 +31,6 @@ const useBudgets = () => {
       addBudget({ ...budget, category_ids: selectedCats });
     },
     [addBudget, categories],
-  );
-
-  const getTransactionIdsForBudget = useCallback(
-    (id: string) => {
-      if (!transactionsByIds) return [];
-      const budget = allBudgets.find(b => b.id === id);
-      if (!budget) return [];
-      const periodRange = getRangeForBudgetPeriod(budget.period);
-
-      if (!periodRange.end || !periodRange.start) return [];
-      const budgetTransactionIds: string[] = [];
-
-      transactionsIds.forEach(trId => {
-        const tr = transactionsByIds[trId];
-        if (tr) {
-          const trDate = new Date(tr.transactionDate);
-          if (
-            trDate.getTime() >= periodRange.start.getTime() &&
-            trDate.getTime() <= periodRange.end.getTime() &&
-            tr.type === 'expense'
-          ) {
-            if (budget.categoryIds.includes(tr.categoryId)) {
-              budgetTransactionIds.push(trId);
-            }
-          }
-        }
-      });
-      return budgetTransactionIds;
-    },
-    [allBudgets, transactionsIds, transactionsByIds],
   );
 
   const getBudgetForAGivenTransactions = useCallback(
@@ -158,13 +130,21 @@ const useBudgets = () => {
     [allBudgets],
   );
 
+  const deleteABudget = useCallback(
+    async (id: string) => {
+      await budgetRepo.delete(id);
+      await fetchBudgets();
+    },
+    [fetchBudgets],
+  );
+
   return {
-    getTransactionIdsForBudget,
     updateBudgetSpentForTransaction,
     updateBudgetForTransactionUpdate,
     getBudgetForAGivenTransactions,
     getBudgetById,
     addNewBudget,
+    deleteABudget,
   };
 };
 export default useBudgets;
