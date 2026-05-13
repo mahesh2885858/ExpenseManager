@@ -70,7 +70,10 @@ export const useRecentTransactions = () => {
         : [getStartOfMonth(), getStartOfNextMonth()],
     );
 
-    return result.rows[0];
+    return {
+      income: money.fromStored(result.rows[0].income),
+      expense: money.fromStored(result.rows[0].expense),
+    };
   }, []);
 
   const getBalance = useCallback(async (walletId?: string) => {

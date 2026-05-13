@@ -75,56 +75,6 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.contentContainer]}
       >
-        {/* active filters section starts */}
-        <View
-          style={[
-            gs.flexRow,
-            gs.itemsCenter,
-            { paddingHorizontal: spacing.lg },
-          ]}
-        >
-          {/*<PressableWithFeedback
-            style={[
-              {
-                backgroundColor: colors.surfaceContainer,
-                borderRadius: borderRadius.md,
-              },
-            ]}
-          >
-            <Icon
-              color={colors.onSurface}
-              source={'chevron-left'}
-              size={textSize.xl}
-            />
-          </PressableWithFeedback>*/}
-          {/*<AppText.SemiBold
-            style={[
-              gs.fullFlex,
-              gs.centerText,
-              {
-                color: colors.onSurface,
-              },
-            ]}
-          >
-            This Month
-          </AppText.SemiBold>*/}
-          {/*<PressableWithFeedback
-            style={[
-              {
-                backgroundColor: colors.surfaceContainer,
-                borderRadius: borderRadius.md,
-              },
-            ]}
-          >
-            <Icon
-              source={'chevron-right'}
-              color={colors.onSurface}
-              size={textSize.xl}
-            />
-          </PressableWithFeedback>*/}
-        </View>
-        {/* active filters section ends */}
-
         {/* summary starts */}
         <View style={[styles.summary]}>
           <AppText.Regular
@@ -133,6 +83,7 @@ const Home = () => {
                 fontSize: textSize.sm,
                 color: colors.onSurface,
                 lineHeight: 16,
+                opacity: 0.5,
               },
             ]}
           >
@@ -146,7 +97,7 @@ const Home = () => {
           <View
             style={[
               {
-                marginTop: spacing.md,
+                marginTop: spacing.sm,
               },
             ]}
           >
@@ -156,6 +107,7 @@ const Home = () => {
                 {
                   color: colors.onSurface,
                   marginBottom: spacing.xs,
+                  opacity: 0.5,
                 },
               ]}
             >
@@ -198,7 +150,7 @@ const Home = () => {
                     },
                   ]}
                 >
-                  {getFormattedAmount(summary.income / 100 ?? 0)}
+                  {getFormattedAmount(summary.income ?? 0)}
                 </AppText.Bold>
               </PressableWithFeedback>
               <PressableWithFeedback
@@ -230,7 +182,7 @@ const Home = () => {
                     },
                   ]}
                 >
-                  {getFormattedAmount(summary.expense / 100 ?? 0)}
+                  {getFormattedAmount(summary.expense ?? 0)}
                 </AppText.Bold>
               </PressableWithFeedback>
             </View>
