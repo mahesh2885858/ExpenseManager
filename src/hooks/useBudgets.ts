@@ -14,7 +14,6 @@ const useBudgets = () => {
   const updateMultipleBudgets = useBudgetStore(
     state => state.updateMulitpleBudgets,
   );
-  const { showErrorToast } = useHelpers();
   const transactionsIds = useTransactionsStore(state => state.transactionsIds);
   const transactionsByIds = useTransactionsStore(
     state => state.transactionsByIds,
@@ -23,18 +22,13 @@ const useBudgets = () => {
 
   const addNewBudget = useCallback(
     async (budget: TBudgetPayload) => {
-      try {
-        await budgetRepo.create(budget);
-        const selectedCats = budget.category_ids
-          .map(id => categories.find(cat => cat.id === id))
-          .filter(c => !!c);
-        addBudget({ ...budget, category_ids: selectedCats });
-      } catch (e) {
-        console.log('Error while adding budget: ', e);
-        showErrorToast(e);
-      }
+      await budgetRepo.create({ ...budget, amount: budget.amount * 100 });
+      const selectedCats = budget.category_ids
+        .map(id => categories.find(cat => cat.id === id))
+        .filter(c => !!c);
+      addBudget({ ...budget, category_ids: selectedCats });
     },
-    [showErrorToast, addBudget, categories],
+    [addBudget, categories],
   );
 
   const getTransactionIdsForBudget = useCallback(

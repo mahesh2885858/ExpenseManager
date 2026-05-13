@@ -18,9 +18,9 @@ type TProps = {
   ref: any;
   handleSheetChanges: BottomSheetProps['onChange'];
   selectBudgetPeriod: (
-    id: 'weekly' | 'monthly' | 'yearly' | 'one time',
+    id: 'weekly' | 'monthly' | 'yearly' | 'one-time',
   ) => void;
-  selectedPeriod?: 'weekly' | 'monthly' | 'yearly' | 'one time';
+  selectedPeriod?: 'weekly' | 'monthly' | 'yearly' | 'one-time';
   forFilter?: boolean;
 };
 
@@ -33,7 +33,7 @@ const BudgetPeriodSelectionModal = (props: TProps) => {
 
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
 
-  const budgetPeriods = ['weekly', 'monthly', 'yearly', 'one time'] as const;
+  const budgetPeriods = ['weekly', 'monthly', 'yearly', 'one-time'] as const;
 
   return (
     <BottomSheetModal

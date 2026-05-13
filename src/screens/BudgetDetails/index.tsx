@@ -1,7 +1,7 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { roundValue, uCFirst } from 'commonutil-core';
 import { format } from 'date-fns';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, ProgressBar } from 'react-native-paper';
 import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
@@ -19,7 +19,8 @@ import RenderTransactionList from '../../components/RenderTransactionList';
 import useBudgets from '../../hooks/useBudgets';
 import useHelpers from '../../hooks/useHelpers';
 import useBudgetStore from '../../stores/budgetStore';
-import { TRootStackParamList } from '../../types';
+import { TRootStackParamList, TTransaction } from '../../types';
+import { budgetRepo } from '../../db/repositories/budgets.repo';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -78,7 +79,20 @@ const BudgetDetails = () => {
 
   const progress = budget ? budget.spent / budget.amount : 0;
 
-  const transactionIds = [];
+  const [transactions, setTransactions] = useState<TTransaction[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const data = await budgetRepo.getBudgetTransactions({
+        budgetId: budget.id,
+        recurring_type: budget.recurring_type,
+        start_date: budget.start_date,
+        end_date: budget.end_date,
+      });
+      console.log({ data });
+    };
+    fetch();
+  }, [budget]);
 
   return (
     <View style={[styles.container, { marginTop: top }]}>
@@ -181,7 +195,7 @@ const BudgetDetails = () => {
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactionList transactions={transactionIds} />
+        <RenderTransactionList transactions={transactions} />
       </View>
       {/*Transactions for this budget ends*/}
     </View>

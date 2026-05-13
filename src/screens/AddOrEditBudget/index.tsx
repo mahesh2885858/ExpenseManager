@@ -28,17 +28,16 @@ import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useBudgets from '../../hooks/useBudgets';
 import useCategories from '../../hooks/useCategories';
 import useHelpers from '../../hooks/useHelpers';
 import useProfileStore from '../../stores/profileStore';
 import {
-  TBudget,
   TBudgetPayload,
   TBudgetPeriods,
   TRootStackParamList,
 } from '../../types';
 import { getCurrentUTCTimeStamp } from '../../utils';
-import useBudgets from '../../hooks/useBudgets';
 
 const dateFormatString = 'do MMM yyyy';
 const AddOrEditBudget = () => {
@@ -48,7 +47,7 @@ const AddOrEditBudget = () => {
   const { addNewBudget } = useBudgets();
   const styles = createStyles(colors);
   const route = useRoute<RouteProp<TRootStackParamList, 'AddOrEditBudget'>>();
-  const { getFormattedAmount } = useHelpers();
+  const { getFormattedAmount, showErrorToast } = useHelpers();
   const navigation = useNavigation();
   const { categories } = useCategories();
 
@@ -75,7 +74,7 @@ const AddOrEditBudget = () => {
 
   const periodInfo: Record<TBudgetPeriods, string> = useMemo(
     () => ({
-      'one time': '',
+      'one-time': '',
       monthly: 'Starts 1st of the month',
       weekly: 'Strats on every Monday',
       yearly: 'Starts on 1st January of year',
@@ -138,7 +137,7 @@ const AddOrEditBudget = () => {
       err.amount = 'Amount can not be empty';
     }
     if (
-      budgetPeriod === 'one time' &&
+      budgetPeriod === 'one-time' &&
       (!customRange.end || !customRange.start)
     ) {
       err.period = 'Both start and end date is required for one time budget';
@@ -171,8 +170,8 @@ const AddOrEditBudget = () => {
     let recurring_type: TBudgetPeriods;
     let start_date: number;
     let end_date: number | null = null;
-    if (budgetPeriod === 'one time' && customRange.start && customRange.end) {
-      (recurring_type = 'one time'), (start_date = customRange.start.getTime());
+    if (budgetPeriod === 'one-time' && customRange.start && customRange.end) {
+      (recurring_type = 'one-time'), (start_date = customRange.start.getTime());
       end_date = customRange.end.getTime();
     } else {
       recurring_type = budgetPeriod;
@@ -199,12 +198,17 @@ const AddOrEditBudget = () => {
     profile_id,
   ]);
 
-  const onSave = useCallback(() => {
-    if (validateInputData()) {
-      addNew();
-      navigation.goBack();
+  const onSave = useCallback(async () => {
+    try {
+      if (validateInputData()) {
+        await addNew();
+        navigation.goBack();
+      }
+    } catch (e) {
+      console.log('Error while adding budget: ', e);
+      showErrorToast(e);
     }
-  }, [validateInputData, addNew, navigation]);
+  }, [validateInputData, showErrorToast, addNew, navigation]);
 
   const heading = useMemo(() => {
     return route.params.mode === 'new'
@@ -213,7 +217,7 @@ const AddOrEditBudget = () => {
   }, [route.params, t]);
 
   const periodInfoText = useMemo(() => {
-    if (budgetPeriod === 'one time') {
+    if (budgetPeriod === 'one-time') {
       if (!customRange.end && !customRange.start) {
         return 'Select start and end dates';
       } else if (customRange.end && !customRange.start) {
@@ -360,7 +364,7 @@ const AddOrEditBudget = () => {
             <AppText.Regular style={[styles.budgetPeriodText]}>
               {uCFirst(budgetPeriod)}
             </AppText.Regular>
-            {budgetPeriod === 'one time' ? (
+            {budgetPeriod === 'one-time' ? (
               <PressableWithFeedback
                 onPress={() => setOpenDatePicker(true)}
                 style={[styles.customDateBox]}

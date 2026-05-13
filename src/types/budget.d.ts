@@ -1,13 +1,13 @@
 import { TCategory } from './categories';
 
-export type TBudgetPeriods = 'weekly' | 'monthly' | 'yearly' | 'one time';
+export type TBudgetPeriods = 'weekly' | 'monthly' | 'yearly' | 'one-time';
 
 export type TBudgetPeriod =
   | {
       type: 'weekly' | 'monthly' | 'yearly';
     }
   | {
-      type: 'one time';
+      type: 'one-time';
       range: {
         start: Date;
         end: Date;

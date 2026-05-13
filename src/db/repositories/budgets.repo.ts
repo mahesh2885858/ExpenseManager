@@ -4,7 +4,12 @@ import { TBudget, TBudgetPayload } from '../../types';
 import { getRangeForBudgetPeriod } from '../../utils/getRangeForBudgetPeriod';
 
 const table = 'budgets';
-
+type GetBudgetTransactionsParams = {
+  budgetId: string;
+  recurring_type: 'weekly' | 'monthly' | 'yearly' | 'one-time';
+  start_date: number;
+  end_date?: number;
+};
 const getBudgetSpent = async (budgetId: string, start: number, end: number) => {
   const result = await db.execute(
     `
@@ -133,6 +138,7 @@ const getBudgets = async (profileId: string) => {
 
       return {
         ...row,
+        amount: row.amount / 100,
         categories,
         spent,
         remaining: row.amount - spent,
@@ -224,9 +230,73 @@ const deleteBudget = async (id: string) => {
   );
 };
 
+const getBudgetTransactions = async ({
+  budgetId,
+  recurring_type,
+  start_date,
+  end_date,
+}: GetBudgetTransactionsParams) => {
+  const { start, end } = getRangeForBudgetPeriod({
+    type: recurring_type,
+    range:
+      recurring_type === 'one-time'
+        ? { end: end_date, start: start_date }
+        : undefined,
+  });
+
+  const result = await db.execute(
+    `
+    SELECT
+      t.*,
+
+      json_object(
+        'id', c.id,
+        'name', c.name,
+        'icon', c.icon,
+        'type', c.type
+      ) as category,
+
+      json_object(
+        'id', w.id,
+        'name', w.name
+      ) as wallet
+
+    FROM transactions t
+
+    INNER JOIN budget_categories bc
+      ON bc.category_id = t.category_id
+
+    LEFT JOIN categories c
+      ON c.id = t.category_id
+
+    LEFT JOIN wallets w
+      ON w.id = t.wallet_id
+
+    WHERE bc.budget_id = ?
+      AND t.type = 'expense'
+      AND t.transaction_date >= ?
+      AND t.transaction_date < ?
+
+    ORDER BY t.transaction_date DESC
+    `,
+    [budgetId, start, end],
+  );
+
+  return result.rows.map((row: any) => ({
+    ...row,
+
+    category: {
+      ...JSON.parse(row.category),
+      icon: JSON.parse(JSON.parse(row.category).icon),
+    },
+
+    wallet: JSON.parse(row.wallet),
+  }));
+};
 export const budgetRepo = {
   create: addBudget,
   getAll: getBudgets,
   update: updateBudget,
   delete: deleteBudget,
+  getBudgetTransactions,
 };
