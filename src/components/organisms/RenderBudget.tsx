@@ -50,7 +50,6 @@ const RenderBudget = (props: TProps) => {
             (props.budget.spent === undefined
               ? 0
               : props.budget.spent / props.budget.amount) * 100,
-            1,
           )}
           size={40}
           background={'transparent'}
@@ -73,6 +72,7 @@ const createStyles = (colors: AppTheme['colors']) =>
       borderRadius: borderRadius.md,
       flexDirection: 'row',
       alignItems: 'center',
+      marginBottom: spacing.sm,
     },
     budgetName: {
       color: colors.onSurface,

@@ -78,7 +78,8 @@ const BudgetDetails = () => {
     }
   }, [budget]);
 
-  const progress = budget ? budget.spent / budget.amount : 0;
+  const progress =
+    (budget.spent === undefined ? 0 : budget.spent) / budget.amount;
 
   const [transactions, setTransactions] = useState<TTransaction[]>([]);
 
@@ -175,30 +176,38 @@ const BudgetDetails = () => {
         />
         <View style={[styles.budgetBottomRow]}>
           <View style={[styles.budgetRemaining]}>
-            <Text style={[styles.budgetRemainText]}>
+            <AppText.Regular style={[styles.budgetRemainText]}>
               {getFormattedAmount(budget.spent)}
-            </Text>
-            <Text style={[styles.budgetRemainTextPrep]}>Spent</Text>
+            </AppText.Regular>
+            <AppText.Regular style={[styles.budgetRemainTextPrep]}>
+              Spent
+            </AppText.Regular>
           </View>
-          <Text style={[styles.budgetSpentPercentage]}>
+          <AppText.Regular style={[styles.budgetSpentPercentage]}>
             {roundValue(progress * 100)}%
-          </Text>
+          </AppText.Regular>
         </View>
       </View>
       <View style={[styles.budgetCard]}>
         <View style={[styles.budgetBottomRow]}>
           <View style={[styles.budgetRemaining]}>
-            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+            <AppText.Regular
+              style={[styles.budgetRemainText, styles.mutedText]}
+            >
               Budget Period -
-            </Text>
-            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+            </AppText.Regular>
+            <AppText.Regular
+              style={[styles.budgetRemainText, styles.mutedText]}
+            >
               {budgetPeriodLabel}
-            </Text>
+            </AppText.Regular>
           </View>
         </View>
       </View>
       <View style={[styles.budgetCard]}>
-        <Text style={[styles.spendingText]}>Spendings</Text>
+        <AppText.Regular style={[styles.spendingText]}>
+          Spendings
+        </AppText.Regular>
       </View>
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
