@@ -16,10 +16,9 @@ import {
   useAppTheme,
 } from '../../../theme';
 import { gs, MAX_AMOUNT } from '../../common';
-import useTransactions from '../../hooks/useTransactions';
+import useHelpers from '../../hooks/useHelpers';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AppText from '../molecules/AppText';
-import useHelpers from '../../hooks/useHelpers';
 
 type TProps = {
   ref: RefObject<BottomSheetModal | null>;
@@ -202,7 +201,7 @@ const AmountInputBoard = (props: TProps) => {
                 </PressableWithFeedback>
                 <PressableWithFeedback
                   onPress={() => onButtonPress('back')}
-                  style={[buttonStyles.button, { height: 59 }]}
+                  style={[buttonStyles.button, styles.backSpaceButton]}
                 >
                   <Icon
                     source={'backspace'}
@@ -272,5 +271,8 @@ const createStyles = (colors: AppTheme['colors']) =>
     okText: {
       color: colors.onPrimary,
       fontSize: textSize.lg,
+    },
+    backSpaceButton: {
+      height: 59,
     },
   });

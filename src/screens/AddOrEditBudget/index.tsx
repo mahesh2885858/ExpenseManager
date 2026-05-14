@@ -171,7 +171,8 @@ const AddOrEditBudget = () => {
     let start_date: number;
     let end_date: number | null = null;
     if (budgetPeriod === 'one-time' && customRange.start && customRange.end) {
-      (recurring_type = 'one-time'), (start_date = customRange.start.getTime());
+      recurring_type = 'one-time';
+      start_date = customRange.start.getTime();
       end_date = customRange.end.getTime();
     } else {
       recurring_type = budgetPeriod;

@@ -1,4 +1,4 @@
-import { addMonths, endOfMonth, startOfMonth } from 'date-fns';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { TFilters, TSort } from '../../types';
 
 export const getStartOfMonth = () => {

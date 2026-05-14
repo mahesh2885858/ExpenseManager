@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,8 +24,6 @@ import {
 } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText, { fontsMap } from '../../components/molecules/AppText';
-import { useNavigation } from '@react-navigation/native';
-import useProfiles from '../../hooks/useProfiles';
 
 const ProfileSetup = () => {
   const insets = useSafeAreaInsets();
@@ -83,7 +82,7 @@ const ProfileSetup = () => {
           <AppText.Bold style={[styles.welcomeText]}>
             {t('profileSetup.heroText')}
           </AppText.Bold>
-          <AppText.Regular style={[styles.welcomSubText]}>
+          <AppText.Regular style={[styles.welcomeSubText]}>
             {t('profileSetup.subText')}
           </AppText.Regular>
         </View>
@@ -159,7 +158,7 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       paddingHorizontal: spacing.xl,
     },
 
-    welcomSubText: {
+    welcomeSubText: {
       fontSize: textSize.md,
       color: colors.onSurfaceVariant,
       textAlign: 'center',

@@ -1,22 +1,21 @@
 import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { spacing, useAppTheme } from '../../theme';
 import useBottomSheetModal from '../hooks/useBottomSheetModal';
+import useFetchRecords from '../hooks/useFetchRecords';
+import useTransactions from '../hooks/useTransactions';
 import TransactionDetailsSheet from '../screens/TransactionDetails/TransactionDetailsSheet';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TBottomTabParamList, TTransaction } from '../types';
+import { TTransaction } from '../types';
+import AppText from './molecules/AppText';
 import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
 import RenderTransaction from './RenderTransaction';
-import useTransactions from '../hooks/useTransactions';
-import useFetchRecords from '../hooks/useFetchRecords';
 
 const RenderTransactionList = ({
   transactions,
-  renderSeeAll = false,
   scrollDisabled = false,
 }: {
   transactions: TTransaction[];
@@ -24,7 +23,6 @@ const RenderTransactionList = ({
   scrollDisabled?: boolean;
 }) => {
   const theme = useAppTheme();
-  const navigation = useNavigation<NavigationProp<TBottomTabParamList>>();
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
   const { fetchRecents } = useFetchRecords();
@@ -93,7 +91,7 @@ const RenderTransactionList = ({
         }}
         visible={!!pendingDelete}
       >
-        <Text
+        <AppText.Regular
           style={[
             {
               color: theme.colors.onSurfaceVariant,
@@ -101,7 +99,7 @@ const RenderTransactionList = ({
           ]}
         >
           Transaction deleted
-        </Text>
+        </AppText.Regular>
       </Snackbar>
     </>
   );

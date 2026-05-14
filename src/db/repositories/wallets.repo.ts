@@ -1,5 +1,5 @@
 import { TWallet } from '../../types';
-import { getCurrentUTCTimeStamp } from '../../utils';
+import { getCurrentUTCTimeStamp, money } from '../../utils';
 import { db } from '../index';
 const table = 'wallets';
 const addWallet = async (wallet: TWallet) => {
@@ -9,7 +9,7 @@ const addWallet = async (wallet: TWallet) => {
     [
       wallet.id,
       wallet.name,
-      wallet.initBalance,
+      money.toStored(wallet.initBalance),
       getCurrentUTCTimeStamp(),
       wallet.profileId,
     ],
@@ -18,7 +18,6 @@ const addWallet = async (wallet: TWallet) => {
 
 const getWallets = async (profileId: string) => {
   const res = await db.execute(`SELECT * FROM ${table}`, [profileId]);
-  console.log({ res });
   return res.rows;
 };
 

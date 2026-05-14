@@ -77,16 +77,7 @@ const Home = () => {
       >
         {/* summary starts */}
         <View style={[styles.summary]}>
-          <AppText.Regular
-            style={[
-              {
-                fontSize: textSize.sm,
-                color: colors.onSurface,
-                lineHeight: 16,
-                opacity: 0.5,
-              },
-            ]}
-          >
+          <AppText.Regular style={[styles.totalBalTitle]}>
             {t('home.totalBalance')}
           </AppText.Regular>
           <AppText.Bold
@@ -101,16 +92,7 @@ const Home = () => {
               },
             ]}
           >
-            <AppText.Regular
-              style={[
-                gs.fullFlex,
-                {
-                  color: colors.onSurface,
-                  marginBottom: spacing.xs,
-                  opacity: 0.5,
-                },
-              ]}
-            >
+            <AppText.Regular style={[gs.fullFlex, styles.thisMonthText]}>
               This Month
             </AppText.Regular>
             <View
@@ -131,16 +113,8 @@ const Home = () => {
                   },
                 ]}
               >
-                <AppText.Regular
-                  style={[
-                    {
-                      fontSize: textSize.sm,
-                      color: colors.onSurface,
-                      lineHeight: 14,
-                    },
-                  ]}
-                >
-                  Income
+                <AppText.Regular style={[styles.summaryExpense]}>
+                  {t('common.income')}
                 </AppText.Regular>
                 <AppText.Bold
                   style={[
@@ -163,16 +137,8 @@ const Home = () => {
                   },
                 ]}
               >
-                <AppText.Regular
-                  style={[
-                    {
-                      fontSize: textSize.sm,
-                      color: colors.onSurface,
-                      lineHeight: 14,
-                    },
-                  ]}
-                >
-                  Expense
+                <AppText.Regular style={[styles.summaryExpense]}>
+                  {t('common.expense')}
                 </AppText.Regular>
                 <AppText.Bold
                   style={[
@@ -312,8 +278,19 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       width: '100%',
       marginTop: -10,
     },
+    totalBalTitle: {
+      fontSize: textSize.sm,
+      color: colors.onSurface,
+      lineHeight: 16,
+      opacity: 0.5,
+    },
     amountText: {
       fontWeight: '700',
+    },
+    thisMonthText: {
+      color: colors.onSurface,
+      marginBottom: spacing.xs,
+      opacity: 0.5,
     },
     ieBox: {
       flex: 1,
@@ -331,6 +308,11 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       paddingVertical: spacing.sm,
       paddingBottom: spacing.md,
       marginTop: spacing.md,
+    },
+    summaryExpense: {
+      fontSize: textSize.sm,
+      color: colors.onSurface,
+      lineHeight: 14,
     },
     budgets: {
       paddingHorizontal: spacing.md,

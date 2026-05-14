@@ -9,7 +9,8 @@ import {
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
   AppTheme,
@@ -19,11 +20,10 @@ import {
   useAppTheme,
 } from '../../../theme';
 import { currencies, gs } from '../../common';
+import useWalletStore from '../../stores/walletsStore';
 import { TCurrency } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import useWalletStore from '../../stores/walletsStore';
 import AppText from '../molecules/AppText';
-import { useTranslation } from 'react-i18next';
 
 type TProps = {
   ref: any;
@@ -57,6 +57,11 @@ const CurrencySelectionModal = (props: TProps) => {
   const sortedCurrencies = useMemo(() => {
     return currenciesToRender.sort((a, b) => a.name.localeCompare(b.name));
   }, [currenciesToRender]);
+
+  const currencyItemBgStyles = (isSelected = false) => ({
+    borderBottomColor: isSelected ? 'transparent' : colors.onSurfaceDisabled,
+    backgroundColor: isSelected ? colors.primary : 'transparent',
+  });
 
   return (
     <BottomSheetModal
@@ -113,14 +118,7 @@ const CurrencySelectionModal = (props: TProps) => {
                       gs.flexRow,
                       gs.itemsCenter,
                       styles.item,
-                      {
-                        borderBottomColor: isSelected
-                          ? 'transparent'
-                          : colors.onSurfaceDisabled,
-                        backgroundColor: isSelected
-                          ? colors.primary
-                          : 'transparent',
-                      },
+                      currencyItemBgStyles(isSelected),
                     ]}
                     key={item.code}
                   >

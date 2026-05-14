@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { DEFAULT_CATEGORIES, DEFAULT_CATEGORY_ID } from '../common';
+import { DEFAULT_CATEGORY_ID } from '../common';
 import zustandStorage from '../storage';
 import { TCategories, TCategory } from '../types';
 

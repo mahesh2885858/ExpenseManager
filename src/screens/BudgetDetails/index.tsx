@@ -15,13 +15,12 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText from '../../components/molecules/AppText';
 import RenderTransactionList from '../../components/RenderTransactionList';
+import { budgetRepo } from '../../db/repositories/budgets.repo';
 import useBudgets from '../../hooks/useBudgets';
 import useHelpers from '../../hooks/useHelpers';
-import useBudgetStore from '../../stores/budgetStore';
 import { TRootStackParamList, TTransaction } from '../../types';
-import { budgetRepo } from '../../db/repositories/budgets.repo';
-import AppText from '../../components/molecules/AppText';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -32,7 +31,6 @@ const BudgetDetails = () => {
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount } = useHelpers();
   const { deleteABudget } = useBudgets();
-  const removeBudget = useBudgetStore(state => state.removeBudget);
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);

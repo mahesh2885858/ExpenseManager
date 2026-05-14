@@ -1,7 +1,13 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../theme';
 import { gs } from '../common';
 import useHelpers from '../hooks/useHelpers';
 import { TTransaction } from '../types';
@@ -16,6 +22,7 @@ const RenderTransaction = (props: {
 }) => {
   const theme = useAppTheme();
   const { getFormattedAmount } = useHelpers();
+  const styles = createStyles(theme.colors);
 
   return (
     <PressableWithFeedback
@@ -44,23 +51,8 @@ const RenderTransaction = (props: {
               color={props.item.category?.icon.color ?? theme.colors.primary}
             />
           </View>
-          <View
-            style={[
-              gs.fullFlex,
-              {
-                marginLeft: spacing.sm,
-                justifyContent: 'center',
-              },
-            ]}
-          >
-            <AppText.Regular
-              style={[
-                {
-                  color: theme.colors.onSurface,
-                  fontSize: textSize.sm,
-                },
-              ]}
-            >
+          <View style={[styles.catBox]}>
+            <AppText.Regular style={[styles.catName]}>
               {props.item.category?.name ?? ''}
             </AppText.Regular>
             <AppText.Regular
@@ -74,15 +66,7 @@ const RenderTransaction = (props: {
               {props.item.category?.name ?? ''}
             </AppText.Regular>
           </View>
-          <AppText.Medium
-            style={[
-              {
-                fontSize: textSize.sm,
-                color: theme.colors.onSurface,
-                textAlignVertical: 'center',
-              },
-            ]}
-          >
+          <AppText.Medium style={[styles.amount]}>
             {getFormattedAmount(props.item.amount)}
           </AppText.Medium>
         </View>
@@ -93,18 +77,33 @@ const RenderTransaction = (props: {
 
 export default RenderTransaction;
 
-const styles = StyleSheet.create({
-  icon: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-  },
-  actionsBox: {
-    gap: spacing.xs,
-  },
-  action: {
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    marginLeft: spacing.sm,
-  },
-});
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    icon: {
+      position: 'absolute',
+      top: 3,
+      left: 3,
+    },
+    actionsBox: {
+      gap: spacing.xs,
+    },
+    action: {
+      padding: spacing.sm,
+      borderRadius: borderRadius.sm,
+      marginLeft: spacing.sm,
+    },
+    catBox: {
+      flex: 1,
+      marginLeft: spacing.sm,
+      justifyContent: 'center',
+    },
+    catName: {
+      color: colors.onSurface,
+      fontSize: textSize.sm,
+    },
+    amount: {
+      fontSize: textSize.sm,
+      color: colors.onSurface,
+      textAlignVertical: 'center',
+    },
+  });

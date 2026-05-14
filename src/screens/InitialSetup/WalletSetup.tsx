@@ -1,3 +1,4 @@
+import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,16 +23,14 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import AppText, { fontsMap } from '../../components/molecules/AppText';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
-import useWallets from '../../hooks/useWallets';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useTransactions from '../../hooks/useTransactions';
-import useWalletStore from '../../stores/walletsStore';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { TRootStackParamList } from '../../types';
-import useProfiles from '../../hooks/useProfiles';
-import useProfileStore from '../../stores/profileStore';
-import useHelpers from '../../hooks/useHelpers';
 import { seedDefaultCategories } from '../../db/helpers/seedDefaultCategories';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useHelpers from '../../hooks/useHelpers';
+import useProfiles from '../../hooks/useProfiles';
+import useWallets from '../../hooks/useWallets';
+import useProfileStore from '../../stores/profileStore';
+import useWalletStore from '../../stores/walletsStore';
+import { TRootStackParamList } from '../../types';
 
 const WalletSetup = () => {
   const insets = useSafeAreaInsets();

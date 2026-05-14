@@ -89,4 +89,8 @@ export default {
   txnDetails: {
     amount: 'Amount',
   },
+  wallets: {
+    select: 'Select Wallet',
+    emptyList: 'No wallets yet. Start by creating one.',
+  },
 };

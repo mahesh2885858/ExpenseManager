@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { AppTheme, borderRadius, useAppTheme } from '../../../theme';
-import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import { TTransactionType } from '../../types';
+import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import AppText from '../molecules/AppText';
-import { useTranslation } from 'react-i18next';
 const sectionHeight = 50;
 
 type TProps = {

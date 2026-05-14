@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import { borderRadius, spacing, textSize } from '../../../theme';
 import { gs } from '../../common';
 import HeaderText from '../atoms/HeaderText';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
@@ -15,8 +15,6 @@ const CommonHeader = ({
   hideSettings = false,
 }: TProps) => {
   const navigation = useNavigation();
-
-  const { colors } = useAppTheme();
 
   return (
     <View style={styles.container}>
