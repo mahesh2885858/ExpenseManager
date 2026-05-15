@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
@@ -22,6 +24,7 @@ import { useRecentTransactions } from '../../hooks/useRecentTransactions';
 import useBudgetStore from '../../stores/budgetStore';
 import useProfileStore from '../../stores/profileStore';
 import useTransactionsStore from '../../stores/transactionsStore';
+import { TBottomTabParamList } from '../../types';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -38,6 +41,16 @@ const Home = () => {
   const recents = useTransactionsStore(state => state.recents);
   const { getFormattedAmount } = useHelpers();
   const budgets = useBudgetStore(state => state.budgets);
+
+  const navigation =
+    useNavigation<BottomTabNavigationProp<TBottomTabParamList>>();
+
+  const navigateToTransactions = useCallback(() => {
+    navigation.navigate('Transactions');
+  }, [navigation]);
+  const navigateToBudgets = useCallback(() => {
+    navigation.navigate('Budgets');
+  }, [navigation]);
 
   useEffect(() => {
     const load = async () => {
@@ -169,7 +182,10 @@ const Home = () => {
             >
               {t('common.budgets')}
             </AppText.Medium>
-            <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
+            <PressableWithFeedback
+              onPress={navigateToBudgets}
+              style={[gs.flexRow, gs.itemsCenter]}
+            >
               <AppText.Medium
                 style={[
                   {
@@ -220,7 +236,10 @@ const Home = () => {
             >
               {t('home.recentTransactions')}
             </AppText.Medium>
-            <PressableWithFeedback style={[gs.flexRow, gs.itemsCenter]}>
+            <PressableWithFeedback
+              onPress={navigateToTransactions}
+              style={[gs.flexRow, gs.itemsCenter]}
+            >
               <AppText.Medium
                 style={[
                   {
