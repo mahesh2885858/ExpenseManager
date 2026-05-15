@@ -93,4 +93,7 @@ export default {
     select: 'Select Wallet',
     emptyList: 'No wallets yet. Start by creating one.',
   },
+  txns: {
+    title: 'Transactions',
+  },
 };

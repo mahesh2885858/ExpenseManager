@@ -1,78 +1,227 @@
-import { useCallback } from 'react';
-import useTransactionsStore from '../stores/transactionsStore';
-import {
-  buildOrderBy,
-  buildWhereClause,
-  getCursor,
-} from '../db/helpers/transactions';
-import { db } from '../db';
-import { TTransaction } from '../types';
-import { txnRepo } from '../db/repositories/transactions.repo';
+import { isSameDay } from 'date-fns/fp';
+import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
-
-const LIMIT = 50;
+import { db } from '../db';
+import { buildOrderBy, buildWhereClause } from '../db/helpers/transactions';
+import { txnRepo } from '../db/repositories/transactions.repo';
+import useTransactionsStore from '../stores/transactionsStore';
+import { TTransaction, TTransactionRow } from '../types';
+import { money } from '../utils';
+type THeaderItem = {
+  type: 'header';
+  item: Date;
+};
+type TTransactionItem = {
+  type: 'txn';
+  item: TTransaction;
+};
+type TGroupedTransactions = Array<THeaderItem | TTransactionItem>;
+const LIMIT = 5;
 
 const useTransactions = (walletId?: string, search?: string) => {
-  const {
-    transactions,
-    cursor,
-    hasMore,
-    filters,
-    sort,
-    setTransactions,
-    appendTransactions,
-    isLoading,
-    setLoading,
-  } = useTransactionsStore();
+  const [cursor, setCursor] = useState<TTransaction | null>(null);
+
+  const [hasMore, setHasMore] = useState(true);
+
+  const [isLoading, setLoading] = useState(false);
+  const filters = useTransactionsStore(s => s.filters);
+  const sort = useTransactionsStore(s => s.sort);
   const updateTxn = useTransactionsStore(state => state.updateTransaction);
   const deleteTransaction = useTransactionsStore(state => state.delete);
+
+  const [transactions, setTransactions] = useState<TGroupedTransactions>([]);
+  const appendTransactionsFromDB = useCallback(
+    (existing: TGroupedTransactions, txns: TTransaction[]) => {
+      const groupedItems: TGroupedTransactions = [...existing];
+
+      let currentDate: Date | null = null;
+
+      // If transactions already exist, initialize with last rendered txn date
+      if (existing.length > 0) {
+        const lastTxn = existing[existing.length - 1] as TTransactionItem;
+
+        currentDate = new Date(lastTxn.item.transaction_date);
+      }
+
+      txns.forEach(t => {
+        const tDate = new Date(t.transaction_date);
+
+        const transformedTxn = {
+          ...t,
+          amount: t.amount,
+        };
+
+        const shouldCreateHeader =
+          !currentDate || !isSameDay(tDate, currentDate);
+
+        if (shouldCreateHeader) {
+          currentDate = tDate;
+
+          groupedItems.push({
+            type: 'header',
+            item: currentDate,
+          });
+        }
+
+        groupedItems.push({
+          type: 'txn',
+          item: transformedTxn,
+        });
+      });
+
+      return groupedItems;
+    },
+    [],
+  );
+
   const loadInitial = useCallback(async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { clause, args } = buildWhereClause(filters, search, walletId);
-    const orderBy = buildOrderBy(sort);
+      const { clause, args } = buildWhereClause(filters, search, walletId);
+      const orderBy = buildOrderBy(sort);
 
-    const result = await db.execute(
-      `
-      SELECT * FROM transactions
+      const result = await db.execute(
+        `
+      SELECT
+        t.*,
+
+        json_object(
+          'id', c.id,
+          'name', c.name,
+          'icon', c.icon
+        ) as category
+
+      FROM transactions t
+
+      LEFT JOIN categories c
+        ON c.id = t.category_id
+
       ${clause}
       ${orderBy}
+
       LIMIT ${LIMIT}
       `,
-      args,
-    );
-
-    setTransactions(result.rows, getCursor(result.rows));
-    setLoading(false);
-  }, [filters, sort, walletId, setLoading, setTransactions, search]);
+        args,
+      );
+      console.log({ result: result });
+      const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
+        const category = JSON.parse(row.category);
+        const icon = JSON.parse(category.icon);
+        return {
+          ...row,
+          amount: money.fromStored(row.amount),
+          category: { ...category, icon },
+        };
+      });
+      setTransactions(() => appendTransactionsFromDB([], rows));
+      console.log({ rows, LIMIT });
+      if (rows.length < LIMIT) {
+        setHasMore(false);
+      }
+      setCursor(rows[rows.length - 1]);
+    } catch (e) {
+      console.log({ e });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    filters,
+    sort,
+    walletId,
+    setLoading,
+    appendTransactionsFromDB,
+    setTransactions,
+    search,
+  ]);
   const loadMore = useCallback(async () => {
-    if (!cursor || !hasMore || isLoading) return;
+    try {
+      if (!cursor || !hasMore || isLoading) return;
 
-    setLoading(true);
+      setLoading(true);
 
-    const { clause, args } = buildWhereClause(filters, search, walletId);
-    const orderBy = buildOrderBy(sort);
+      const { clause, args } = buildWhereClause(
+        { ...filters, date: null },
+        search,
+        walletId,
+      );
+      const orderBy = buildOrderBy(sort);
+      const cursorClause = clause
+        ? `AND (
+            t.transaction_date < ?
+            OR (
+              t.transaction_date = ?
+              AND t.id < ?
+            )
+          )`
+        : `WHERE (
+            t.transaction_date < ?
+            OR (
+              t.transaction_date = ?
+              AND t.id < ?
+            )
+          )`;
 
-    const result = await db.execute(
-      `
-      SELECT * FROM transactions
-      ${clause}
-      AND (transactionDate < ? OR (transactionDate = ? AND id < ?))
-      ${orderBy}
-      LIMIT ${LIMIT}
-      `,
-      [...args, cursor.date, cursor.date, cursor.id],
-    );
+      console.log({ clause, orderBy, args, cursorClause });
+      const result = await db.execute(
+        `
+        SELECT
+          t.*,
 
-    appendTransactions(result.rows, getCursor(result.rows));
-    setLoading(false);
+          json_object(
+            'id', c.id,
+            'name', c.name,
+            'icon', c.icon,
+            'type', c.type
+          ) as category
+
+        FROM transactions t
+
+        LEFT JOIN categories c
+          ON c.id = t.category_id
+
+        ${clause}
+        ${cursorClause}
+
+        ${orderBy}
+
+        LIMIT ${LIMIT}
+        `,
+        [...args, cursor.transaction_date, cursor.transaction_date, cursor.id],
+      );
+      const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
+        const category = JSON.parse(row.category);
+        const icon = JSON.parse(category.icon);
+        return {
+          ...row,
+          amount: money.fromStored(row.amount),
+          category: { ...category, icon },
+        };
+      });
+      console.log({ cursor, rows });
+      setTransactions(prev => {
+        const t = appendTransactionsFromDB(prev, rows);
+        console.log({ t });
+        return t;
+      });
+      if (rows.length < LIMIT) {
+        setHasMore(false);
+      }
+      if (rows.length > 0) {
+        setCursor(rows[rows.length - 1]);
+      }
+    } catch (er) {
+      console.log({ er });
+    } finally {
+      setLoading(false);
+    }
   }, [
     cursor,
     hasMore,
+    appendTransactionsFromDB,
     isLoading,
     filters,
     sort,
-    appendTransactions,
     search,
     setLoading,
     walletId,
@@ -136,6 +285,7 @@ const useTransactions = (walletId?: string, search?: string) => {
     addTransaction,
     updateTransaction,
     deleteTxn,
+    hasMore,
   };
 };
 

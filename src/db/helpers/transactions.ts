@@ -19,7 +19,7 @@ export const buildWhereClause = (
 
   // Month filter (default)
   if (filters?.date?.isThisMonth) {
-    where.push('transactionDate >= ? AND transactionDate < ?');
+    where.push('transaction_date >= ? AND transaction_date < ?');
     args.push(getStartOfMonth(), getStartOfNextMonth());
   }
 
@@ -52,13 +52,13 @@ export const buildWhereClause = (
 export const buildOrderBy = (sort?: TSort) => {
   switch (sort) {
     case 'dateOldFirst':
-      return 'ORDER BY transactionDate ASC, id ASC';
+      return 'ORDER BY transaction_date ASC, id ASC';
     case 'amountHighFirst':
       return 'ORDER BY amount DESC';
     case 'amountLowFirst':
       return 'ORDER BY amount ASC';
     default:
-      return 'ORDER BY transactionDate DESC, id DESC';
+      return 'ORDER BY transaction_date DESC, id DESC';
   }
 };
 

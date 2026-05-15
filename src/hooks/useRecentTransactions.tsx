@@ -4,11 +4,8 @@ import {
   getStartOfMonth,
   getStartOfNextMonth,
 } from '../db/helpers/transactions';
-import { TTransaction } from '../types';
+import { TTransactionRow } from '../types';
 import { money } from '../utils';
-type TTransactionRow = Omit<TTransaction, 'category'> & {
-  category: string;
-};
 
 export const useRecentTransactions = () => {
   const getRecentTransactions = useCallback(async (walletId?: string) => {
@@ -33,7 +30,7 @@ export const useRecentTransactions = () => {
       AND t.transaction_date < ?
 
       ORDER BY t.transaction_date DESC
-      LIMIT 20
+      LIMIT 10
         `,
         walletId
           ? [getStartOfMonth(), getStartOfNextMonth(), walletId]

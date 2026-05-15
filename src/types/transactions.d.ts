@@ -58,3 +58,7 @@ export type TSort =
   | 'dateOldFirst'
   | 'amountHighFirst'
   | 'amountLowFirst';
+
+export type TTransactionRow = Omit<TTransaction, 'category'> & {
+  category: string;
+};
