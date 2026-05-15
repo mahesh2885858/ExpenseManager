@@ -1,41 +1,54 @@
-import { View, Text, StyleSheet } from 'react-native';
-import React, { useEffect, useMemo } from 'react';
-import useTransactions from '../../hooks/useTransactions';
 import { FlashList } from '@shopify/flash-list';
-import AppText from '../../components/molecules/AppText';
-import RenderTransaction from '../../components/RenderTransaction';
-import ScreenWrapper from '../../components/molecules/ScreenWrapper';
-import { gs } from '../../common';
-import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
-import HeaderText from '../../components/atoms/HeaderText';
-import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
+import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
+import { gs } from '../../common';
+import HeaderText from '../../components/atoms/HeaderText';
+import AppText from '../../components/molecules/AppText';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
+import RenderTransaction from '../../components/RenderTransaction';
+import useTransactions from '../../hooks/useTransactions';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import { TTransaction } from '../../types';
+import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { t } = useTranslation();
-  const { loadInitial, transactions, loadMore, hasMore } = useTransactions();
+  const { loadInitial, transactions, loadMore } = useTransactions();
+
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<null | TTransaction>(null);
+
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
+    () => {
+      setSelectedTransaction(null);
+    },
+  );
+
+  const onItemPress = useCallback((txn: TTransaction) => {
+    setSelectedTransaction(txn);
+  }, []);
 
   useEffect(() => {
-    console.log('w');
     loadInitial();
   }, [loadInitial]);
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      handlePresent();
+    }
+  }, [selectedTransaction, handlePresent]);
 
   return (
     <ScreenWrapper style={[gs.fullFlex]}>
       <View style={[styles.header]}>
         <HeaderText header={t('txns.title')} />
       </View>
-      <View
-        style={[
-          {
-            flex: 1,
-            // backgroundColor: 'red',
-            marginBottom: 100,
-          },
-        ]}
-      >
+      <View style={[styles.listContainer]}>
         <FlashList
           contentContainerStyle={{
             paddingHorizontal: spacing.md,
@@ -43,9 +56,6 @@ const Transactions = () => {
           keyExtractor={item =>
             item.type === 'header' ? item.item.toISOString() : item.item.id
           }
-          // stickyHeaderIndices={transactions
-          //   .map((item, index) => (item.type === 'header' ? index : null))
-          //   .filter(i => i !== null)}
           getItemType={item => {
             // To achieve better performance, specify the type based on the item
             return item.type === 'header' ? 'sectionHeader' : 'row';
@@ -59,22 +69,21 @@ const Transactions = () => {
                 </AppText.Medium>
               );
             return (
-              <RenderTransaction
-                item={item.item}
-                onItemPress={t => {
-                  console.log(t);
-                }}
-              />
+              <RenderTransaction item={item.item} onItemPress={onItemPress} />
             );
           }}
           onEndReached={() => {
-            console.log('end reached');
-            console.log({ hasMore });
             loadMore();
           }}
           onEndReachedThreshold={0.2}
         />
       </View>
+      <TransactionDetailsSheet
+        handleSheetChanges={handleSheetChange}
+        ref={btmShtRef}
+        selectedTransaction={selectedTransaction}
+        onDeletePress={() => {}}
+      />
     </ScreenWrapper>
   );
 };
@@ -86,13 +95,15 @@ const createStyles = (colors: AppTheme['colors']) =>
     header: {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      marginBottom: spacing.md,
+    },
+    listContainer: {
+      flex: 1,
+      marginBottom: 100,
     },
     sectionHeaderText: {
       fontSize: textSize.md,
       color: colors.onBackground,
       opacity: 0.5,
       marginBottom: spacing.xs,
-      // paddingHorizontal: spacing.md,
     },
   });
