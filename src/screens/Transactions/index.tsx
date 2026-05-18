@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
+
 import HeaderText from '../../components/atoms/HeaderText';
 import AppText from '../../components/molecules/AppText';
 import ScreenWrapper from '../../components/molecules/ScreenWrapper';
@@ -18,10 +20,11 @@ const Transactions = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { t } = useTranslation();
-  const { loadInitial, transactions, loadMore } = useTransactions();
-
+  const { loadInitial, transactions, loadMore, deleteTxn } = useTransactions();
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
+
+  const { dismissAll } = useBottomSheetR();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
@@ -32,6 +35,14 @@ const Transactions = () => {
   const onItemPress = useCallback((txn: TTransaction) => {
     setSelectedTransaction(txn);
   }, []);
+
+  const onDeletePress = useCallback(
+    (t: TTransaction) => {
+      deleteTxn(t.id);
+      dismissAll();
+    },
+    [dismissAll, deleteTxn],
+  );
 
   useEffect(() => {
     loadInitial();
@@ -82,7 +93,7 @@ const Transactions = () => {
         handleSheetChanges={handleSheetChange}
         ref={btmShtRef}
         selectedTransaction={selectedTransaction}
-        onDeletePress={() => {}}
+        onDeletePress={onDeletePress}
       />
     </ScreenWrapper>
   );

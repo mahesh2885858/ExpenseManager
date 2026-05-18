@@ -13,6 +13,7 @@ import useWallets from '../../hooks/useWallets';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import CurrencySelectionModal from '../../components/organisms/CurrencySelectionModal';
 import NumberFormat from './NumberFormat';
+import AppText from '../../components/molecules/AppText';
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -43,6 +44,7 @@ const Settings = () => {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.Container}>
         <ThemeSwitch expandedItem={expandedItem} onItemPress={onItemPress} />
         <PressableWithFeedback
+          hidden
           onPress={() => {
             navigation.navigate('ManageAccounts');
           }}
@@ -85,6 +87,7 @@ const Settings = () => {
           </View>
         </PressableWithFeedback>
         <PressableWithFeedback
+          hidden
           onPress={() => {
             navigation.navigate('ManageCategories');
           }}
@@ -145,8 +148,8 @@ const Settings = () => {
             size={textSize.xl}
             color={colors.onBackground}
           />
-          <View style={[{ gap: spacing.sm }]}>
-            <Text
+          <View>
+            <AppText.Regular
               style={[
                 styles.settingTitle,
                 {
@@ -155,8 +158,8 @@ const Settings = () => {
               ]}
             >
               Currency
-            </Text>
-            <Text
+            </AppText.Regular>
+            <AppText.Regular
               style={[
                 styles.settingDesc,
                 {
@@ -165,15 +168,15 @@ const Settings = () => {
               ]}
             >
               {currency.name} ({currency.symbol})
-            </Text>
+            </AppText.Regular>
           </View>
         </PressableWithFeedback>
         <NumberFormat expandedItem={expandedItem} onItemPress={onItemPress} />
-        <Backup
+        {/*<Backup
           scrollRef={scrollRef}
           expandedItem={expandedItem}
           onItemPress={onItemPress}
-        />
+        />*/}
         <CurrencySelectionModal
           handleSheetChanges={handleSheetChange}
           ref={btmShtRef}

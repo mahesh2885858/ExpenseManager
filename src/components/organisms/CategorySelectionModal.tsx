@@ -3,7 +3,13 @@ import { Modal, View, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 
 import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import HeaderWithBackButton from '../../components/atoms/HeaderWithBackButton';
@@ -74,10 +80,10 @@ const CategorySelectionModal = (props: Props) => {
           <View style={[styles.btnContainer]}>
             <PressableWithFeedback onPress={goToAddCategory}>
               <View style={styles.addBtn}>
-                <Icon source="plus" size={20} color={colors.onPrimary} />
-                <AppText.Regular style={styles.addText}>
+                <Icon source="plus" size={20} color={colors.inversePrimary} />
+                <AppText.Bold style={styles.addText}>
                   {t('common.new')}
-                </AppText.Regular>
+                </AppText.Bold>
               </View>
             </PressableWithFeedback>
             <PressableWithFeedback
@@ -162,7 +168,7 @@ const CategorySelectionModal = (props: Props) => {
 
 export default CategorySelectionModal;
 
-const createStyles = (colors: any) =>
+const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     header: {
       flexDirection: 'row',
@@ -177,13 +183,13 @@ const createStyles = (colors: any) =>
       gap: 4,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      backgroundColor: colors.primary,
+      // backgroundColor: colors.primary,
       borderRadius: borderRadius.sm,
     },
 
     addText: {
-      color: colors.onPrimary,
-      fontSize: textSize.sm,
+      color: colors.inversePrimary,
+      fontSize: textSize.md,
     },
 
     searchContainer: {

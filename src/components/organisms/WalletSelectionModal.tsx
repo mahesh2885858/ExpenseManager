@@ -64,7 +64,7 @@ const WalletSelectionModal = (props: TProps) => {
             gs.itemsCenter,
             {
               marginBottom: spacing.md,
-              marginTop: spacing.md,
+              marginTop: spacing.xs,
             },
           ]}
         >
@@ -87,11 +87,7 @@ const WalletSelectionModal = (props: TProps) => {
             ]}
             onPress={handlePresentNewWalletBtmSheet}
           >
-            <Icon
-              source={'plus'}
-              size={textSize.xxxl}
-              color={colors.onTertiaryContainer}
-            />
+            <Icon source={'plus'} size={textSize.xxxl} color={colors.primary} />
           </PressableWithFeedback>
         </View>
         <FlashList

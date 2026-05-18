@@ -13,6 +13,7 @@ import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import useUIStore from '../../stores/uiStore';
 import { TTheme } from '../../types';
+import AppText from '../../components/molecules/AppText';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -85,14 +86,8 @@ const ThemeSwitch = (props: Props) => {
           source={'palette'}
           size={textSize.xl}
         />
-        <View
-          style={[
-            {
-              gap: spacing.sm,
-            },
-          ]}
-        >
-          <Text
+        <View>
+          <AppText.Regular
             style={[
               styles.settingTitle,
               {
@@ -101,8 +96,8 @@ const ThemeSwitch = (props: Props) => {
             ]}
           >
             Theme
-          </Text>
-          <Text
+          </AppText.Regular>
+          <AppText.Regular
             style={[
               styles.settingDesc,
               {
@@ -111,7 +106,7 @@ const ThemeSwitch = (props: Props) => {
             ]}
           >
             {uCFirst(theme)}
-          </Text>
+          </AppText.Regular>
         </View>
       </View>
       <View style={[styles.themeOptContainer]}>

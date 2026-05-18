@@ -48,6 +48,7 @@ const Home = () => {
   const navigateToTransactions = useCallback(() => {
     navigation.navigate('Transactions');
   }, [navigation]);
+
   const navigateToBudgets = useCallback(() => {
     navigation.navigate('Budgets');
   }, [navigation]);
