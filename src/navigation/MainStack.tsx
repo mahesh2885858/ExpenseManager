@@ -17,10 +17,13 @@ import BudgetDetails from '../screens/BudgetDetails';
 import AddOrEditBudget from '../screens/AddOrEditBudget';
 import AddCategory from '../screens/AddCategory';
 import ProfileSetup from '../screens/InitialSetup/ProfileSetup';
+import useProfileStore from '../stores/profileStore';
+import SelectProfile from '../screens/SelectProfile';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
   const isInitialSetupDone = useWalletStore(state => state.isInitialSetupDone);
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   return (
     <Stack.Navigator>
       {!isInitialSetupDone ? (
@@ -41,7 +44,7 @@ const MainStack = () => {
             component={WalletSetup}
           />
         </>
-      ) : (
+      ) : selectedProfileId ? (
         <>
           <Stack.Screen
             name="MainBottomTabs"
@@ -132,7 +135,24 @@ const MainStack = () => {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="SelectProfile"
+            component={SelectProfile}
+            options={{
+              headerShown: false,
+              presentation: 'fullScreenModal',
+            }}
+          />
         </>
+      ) : (
+        <Stack.Screen
+          name="SelectProfile"
+          component={SelectProfile}
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+          }}
+        />
       )}
     </Stack.Navigator>
   );

@@ -9,9 +9,11 @@ import { TCategories, TWallet } from '../types';
 import { useRecentTransactions } from './useRecentTransactions';
 import { budgetRepo } from '../db/repositories/budgets.repo';
 import useBudgetStore from '../stores/budgetStore';
+import { profileRepository } from '../db/repositories/profiles.repo';
 
 const useFetchRecords = () => {
   const selectedProfileId = useProfileStore(state => state.selectedProfileId);
+  const setProfiles = useProfileStore(state => state.setProfiles);
   const setWallets = useWalletStore(state => state.setWallets);
   const setCategories = useCategoriesStore(state => state.setCategories);
   const { getRecentTransactions } = useRecentTransactions();
@@ -52,10 +54,15 @@ const useFetchRecords = () => {
     const rows = await budgetRepo.getAll(selectedProfileId);
     setBudgets(rows);
   }, [selectedProfileId, setBudgets]);
+  const fetchProfiles = useCallback(async () => {
+    const rows = await profileRepository.getAll();
+    setProfiles(rows.rows);
+  }, [setProfiles]);
   return {
     fetchWallets,
     fetchCategories,
     fetchRecents,
+    fetchProfiles,
     fetchBudgets,
   };
 };

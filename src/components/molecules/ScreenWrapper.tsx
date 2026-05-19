@@ -23,5 +23,6 @@ const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     container: {
       backgroundColor: colors.surface,
+      flex: 1,
     },
   });

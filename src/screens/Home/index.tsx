@@ -25,6 +25,7 @@ import useBudgetStore from '../../stores/budgetStore';
 import useProfileStore from '../../stores/profileStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TBottomTabParamList } from '../../types';
+import useProfiles from '../../hooks/useProfiles';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -41,7 +42,7 @@ const Home = () => {
   const recents = useTransactionsStore(state => state.recents);
   const { getFormattedAmount } = useHelpers();
   const budgets = useBudgetStore(state => state.budgets);
-
+  const { selectedProfile } = useProfiles();
   const navigation =
     useNavigation<BottomTabNavigationProp<TBottomTabParamList>>();
 
@@ -51,6 +52,9 @@ const Home = () => {
 
   const navigateToBudgets = useCallback(() => {
     navigation.navigate('Budgets');
+  }, [navigation]);
+  const openProfileSelector = useCallback(() => {
+    navigation.navigate('SelectProfile');
   }, [navigation]);
 
   useEffect(() => {
@@ -83,8 +87,23 @@ const Home = () => {
 
   return (
     <View style={[styles.container]}>
-      {/* header section */}
-      <CommonHeader heading={t('home.appName')} />
+      {/* header section starts */}
+      <View style={[styles.header]}>
+        <PressableWithFeedback
+          onPress={openProfileSelector}
+          style={[styles.headerLeft]}
+        >
+          <AppText.Bold
+            style={[styles.headerText]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {selectedProfile?.name ?? ''}
+          </AppText.Bold>
+          <Icon source={'menu-down'} size={40} color={colors.onSurface} />
+        </PressableWithFeedback>
+      </View>
+      {/*header section ends*/}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.contentContainer]}
@@ -279,6 +298,19 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
       paddingTop: insets.top + 5,
       backgroundColor: colors.surface,
       flex: 1,
+    },
+    header: {
+      paddingHorizontal: spacing.md,
+    },
+    headerLeft: {
+      maxWidth: 250,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+    },
+    headerText: {
+      fontSize: textSize.lg,
+      color: colors.onSurface,
     },
     avatar: {
       height: 45,

@@ -162,7 +162,6 @@ const useTransactions = (walletId?: string, search?: string) => {
             )
           )`;
 
-      console.log({ clause, orderBy, args, cursorClause });
       const result = await db.execute(
         `
         SELECT

@@ -17,6 +17,7 @@ export type TRootStackParamList = {
   WalletSetup: {
     profileName: string;
   };
+  SelectProfile: undefined;
   MainBottomTabs: NavigatorScreenParams<TBottomTabParamList>;
   AddTransaction:
     | {

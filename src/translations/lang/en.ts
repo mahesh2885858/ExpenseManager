@@ -29,6 +29,7 @@ export default {
     category: 'Category',
     unknownCat: 'Unknown category',
     wallet: 'Wallet',
+    cancel: 'Cancel',
   },
   profileSetup: {
     title: 'Setup Profile',
@@ -38,6 +39,11 @@ export default {
     placeholder: 'Give your profile a name',
     minNameLengthErr: 'Minimum {{minLength}} characters are required',
     maxNameLengthErr: 'Maximum {{maxLength}} characters are allowed',
+    chooseAProfile: 'Choose a Profile',
+    chooseAProfileSub: 'Select the profile you want to continue with',
+    yourProfiles: 'YOUR PROFILES',
+    addNew: 'Add New Profile',
+    create: 'Create Profile',
   },
   walletSetup: {
     getYouStarted: 'Let’s get you started',
