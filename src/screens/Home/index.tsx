@@ -61,8 +61,8 @@ const Home = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const sum = await getMonthlySummary();
-        const bal = await getBalance();
+        const sum = await getMonthlySummary(selectedProfileId);
+        const bal = await getBalance(selectedProfileId);
 
         setSummary(sum as unknown as typeof summary);
         setBalance(bal);

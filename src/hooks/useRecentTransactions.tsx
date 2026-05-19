@@ -61,56 +61,75 @@ export const useRecentTransactions = () => {
     [],
   );
 
-  const getMonthlySummary = useCallback(async (walletId?: string) => {
-    const result = await db.execute(
-      `
-      SELECT
-        SUM(CASE WHEN type='income' THEN amount ELSE 0 END) as income,
-        SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) as expense
-      FROM transactions
-      WHERE transaction_date >= ? AND transaction_date < ?
-      ${walletId ? 'AND wallet_id = ?' : ''}
+  const getMonthlySummary = useCallback(
+    async (profileId: string, walletId?: string) => {
+      const result = await db.execute(
+        `
+        SELECT
+          SUM(CASE WHEN type='income' THEN amount ELSE 0 END) as income,
+          SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) as expense
+
+        FROM transactions
+
+        WHERE transaction_date >= ?
+        AND transaction_date < ?
+        ${walletId ? 'AND wallet_id = ?' : ''}
+        ${profileId ? 'AND profile_id = ?' : ''}
       `,
-      walletId
-        ? [getStartOfMonth(), getStartOfNextMonth(), walletId]
-        : [getStartOfMonth(), getStartOfNextMonth()],
-    );
+        [
+          getStartOfMonth(),
+          getStartOfNextMonth(),
+          ...(walletId ? [walletId] : []),
+          ...(profileId ? [profileId] : []),
+        ],
+      );
 
-    return {
-      income: money.fromStored(result.rows[0].income),
-      expense: money.fromStored(result.rows[0].expense),
-    };
-  }, []);
+      return {
+        income: money.fromStored(result.rows[0].income),
+        expense: money.fromStored(result.rows[0].expense),
+      };
+    },
+    [],
+  );
 
-  const getBalance = useCallback(async (walletId?: string) => {
-    const result = await db.execute(
-      `
+  const getBalance = useCallback(
+    async (profileId: string, walletId?: string) => {
+      const result = await db.execute(
+        `
       SELECT
         COALESCE(SUM(balance), 0) as balance
       FROM (
-        -- Initial wallet balances
+
         SELECT init_balance as balance
         FROM wallets
         ${walletId ? 'WHERE id = ?' : ''}
 
         UNION ALL
 
-        -- Transaction balance changes
         SELECT
           CASE
-            WHEN type = 'income' THEN amount
-            WHEN type = 'expense' THEN -amount
+            WHEN type='income' THEN amount
+            WHEN type='expense' THEN -amount
             ELSE 0
           END as balance
+
         FROM transactions
-        ${walletId ? 'WHERE wallet_id = ?' : ''}
+        WHERE 1=1
+        ${walletId ? 'AND wallet_id = ?' : ''}
+        ${profileId ? 'AND profile_id = ?' : ''}
       )
       `,
-      walletId ? [walletId, walletId] : [],
-    );
-
-    return money.fromStored(Number(result.rows[0]?.balance ?? 0));
-  }, []);
+        [
+          ...(walletId ? [walletId] : []),
+          ...(walletId ? [walletId] : []),
+          ...(profileId ? [profileId] : []),
+        ],
+      );
+      console.log({ result });
+      return money.fromStored(Number(result.rows[0]?.balance ?? 0));
+    },
+    [],
+  );
 
   return {
     getRecentTransactions,
