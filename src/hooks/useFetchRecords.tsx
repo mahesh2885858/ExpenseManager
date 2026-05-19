@@ -44,12 +44,12 @@ const useFetchRecords = () => {
   }, [setCategories]);
   const fetchRecents = useCallback(async () => {
     try {
-      const txs = await getRecentTransactions();
+      const txs = await getRecentTransactions(selectedProfileId);
       setRecents(txs);
     } catch (e) {
       console.log('Error fetching Recents: ', e);
     }
-  }, [getRecentTransactions, setRecents]);
+  }, [getRecentTransactions, setRecents, selectedProfileId]);
   const fetchBudgets = useCallback(async () => {
     const rows = await budgetRepo.getAll(selectedProfileId);
     setBudgets(rows);

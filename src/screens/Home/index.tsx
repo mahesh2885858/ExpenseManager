@@ -53,6 +53,7 @@ const Home = () => {
   const navigateToBudgets = useCallback(() => {
     navigation.navigate('Budgets');
   }, [navigation]);
+
   const openProfileSelector = useCallback(() => {
     navigation.navigate('SelectProfile');
   }, [navigation]);
@@ -66,7 +67,7 @@ const Home = () => {
         setSummary(sum as unknown as typeof summary);
         setBalance(bal);
       } catch (e) {
-        console.log({ e, ma: 'mah' });
+        console.log({ e });
       }
     };
     load();

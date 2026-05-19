@@ -8,49 +8,58 @@ import { TTransactionRow } from '../types';
 import { money } from '../utils';
 
 export const useRecentTransactions = () => {
-  const getRecentTransactions = useCallback(async (walletId?: string) => {
-    try {
-      const result = await db.execute(
-        `
-      SELECT
-        t.*,
-        json_object(
-          'id', c.id,
-          'name', c.name,
-          'icon', c.icon,
-          'type', c.type
-        ) as category
+  const getRecentTransactions = useCallback(
+    async (profileId: string, walletId?: string) => {
+      try {
+        const result = await db.execute(
+          `
+        SELECT
+          t.*,
+          json_object(
+            'id', c.id,
+            'name', c.name,
+            'icon', c.icon,
+            'type', c.type
+          ) as category
 
-      FROM transactions t
+        FROM transactions t
 
-      LEFT JOIN categories c
-      ON t.category_id = c.id
+        LEFT JOIN categories c
+        ON t.category_id = c.id
 
-      WHERE t.transaction_date >= ?
-      AND t.transaction_date < ?
+        WHERE t.transaction_date >= ?
+        AND t.transaction_date < ?
+        ${walletId ? 'AND t.wallet_id = ?' : ''}
+        ${profileId ? 'AND t.profile_id = ?' : ''}
 
-      ORDER BY t.transaction_date DESC
-      LIMIT 10
+        ORDER BY t.transaction_date DESC
+        LIMIT 10
         `,
-        walletId
-          ? [getStartOfMonth(), getStartOfNextMonth(), walletId]
-          : [getStartOfMonth(), getStartOfNextMonth()],
-      );
-      const rows = result.rows as unknown as TTransactionRow[];
-      return rows.map(t => {
-        const category = JSON.parse(t.category);
-        const icon = JSON.parse(category.icon);
-        return {
-          ...t,
-          amount: money.fromStored(t.amount),
-          category: { ...category, icon },
-        };
-      });
-    } catch (err) {
-      console.log('Error while fetching recent transactions: ', err);
-      return []; //safely return empty array
-    }
-  }, []);
+          [
+            getStartOfMonth(),
+            getStartOfNextMonth(),
+            ...(walletId ? [walletId] : []),
+            ...(profileId ? [profileId] : []),
+          ],
+        );
+        console.log({ profileId, t: result.rows });
+        const rows = result.rows as unknown as TTransactionRow[];
+        return rows.map(t => {
+          const category = JSON.parse(t.category);
+          const icon = JSON.parse(category.icon);
+          return {
+            ...t,
+            amount: money.fromStored(t.amount),
+            category: { ...category, icon },
+          };
+        });
+      } catch (err) {
+        console.log('Error while fetching recent transactions: ', err);
+        return []; //safely return empty array
+      }
+    },
+    [],
+  );
 
   const getMonthlySummary = useCallback(async (walletId?: string) => {
     const result = await db.execute(
