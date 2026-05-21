@@ -25,12 +25,6 @@ const useProfiles = () => {
     return profiles.find(p => p.id === selectedProfileId);
   }, [profiles, selectedProfileId]);
 
-  useEffect(() => {
-    profileRepository.getAll().then(data => {
-      console.log({ data });
-    });
-  }, []);
-
   return {
     createProfile,
     profiles,

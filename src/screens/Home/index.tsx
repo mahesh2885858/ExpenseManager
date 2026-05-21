@@ -32,8 +32,13 @@ const Home = () => {
   const { t } = useTranslation();
   const { colors } = theme;
   const styles = createStyles(colors, insets);
-  const { fetchWallets, fetchCategories, fetchRecents, fetchBudgets } =
-    useFetchRecords();
+  const {
+    fetchWallets,
+    fetchCategories,
+    fetchRecents,
+    fetchBudgets,
+    fetchProfiles,
+  } = useFetchRecords();
 
   const [summary, setSummary] = useState({ income: 0, expense: 0 });
   const [balance, setBalance] = useState(0);
@@ -69,8 +74,10 @@ const Home = () => {
         console.log({ e });
       }
     };
+    console.log({ selectedProfileId });
     load();
     fetchWallets();
+    fetchProfiles();
     fetchRecents();
     fetchCategories();
     fetchBudgets();
@@ -78,13 +85,17 @@ const Home = () => {
     selectedProfileId,
     fetchWallets,
     setBalance,
+    fetchProfiles,
     getBalance,
     getMonthlySummary,
     fetchCategories,
     fetchRecents,
     fetchBudgets,
   ]);
-
+  console.log({
+    selectedProfile,
+    selectedProfileId,
+  });
   return (
     <View style={[styles.container]}>
       {/* header section starts */}
