@@ -42,7 +42,6 @@ export const useRecentTransactions = () => {
             ...(profileId ? [profileId] : []),
           ],
         );
-        console.log({ profileId, t: result.rows });
         const rows = result.rows as unknown as TTransactionRow[];
         return rows.map(t => {
           const category = JSON.parse(t.category);
@@ -128,7 +127,6 @@ export const useRecentTransactions = () => {
           ...(profileId ? [profileId] : []),
         ],
       );
-      console.log({ result });
       return money.fromStored(Number(result.rows[0]?.balance ?? 0));
     },
     [],

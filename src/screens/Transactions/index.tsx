@@ -41,7 +41,6 @@ const Transactions = () => {
   const onDeletePress = useCallback(
     async (txn: TTransaction) => {
       await deleteTxn(txn.id);
-
       dismissAll();
       fetchRecents();
     },

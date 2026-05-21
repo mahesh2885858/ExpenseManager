@@ -59,7 +59,6 @@ const updateTransaction = async (
   id: string,
   transaction: Partial<TTransaction>,
 ) => {
-  console.log({ transaction });
   const entries = Object.entries(transaction).filter(entry => {
     const key = entry[0];
     const ignoredKeys = [
@@ -83,7 +82,6 @@ const updateTransaction = async (
   const values = entries.map(([key, value]) =>
     key === 'amount' ? money.toStored(value as number) : value,
   );
-  console.log({ values, setClause });
   await db.execute(
     `
     UPDATE transactions

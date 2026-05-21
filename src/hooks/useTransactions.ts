@@ -116,7 +116,6 @@ const useTransactions = (walletId?: string, search?: string) => {
       `,
         args,
       );
-      console.log({ result: result });
       const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
         const category = JSON.parse(row.category);
         const icon = JSON.parse(category.icon);
@@ -241,17 +240,6 @@ const useTransactions = (walletId?: string, search?: string) => {
   const addTransaction = useCallback(
     async (tx: TTransaction) => {
       console.log({ tx });
-      // 1. Optimistic UI update (only if it matches current list)
-      const shouldShow =
-        (!walletId || tx.wallet_id === walletId) &&
-        (!filters?.type || filters.type === tx.type);
-
-      if (shouldShow) {
-        // Insert at top (since default sort is date desc)
-        useTransactionsStore.setState(state => ({
-          transactions: [tx, ...state.transactions],
-        }));
-      }
 
       // 2. Persist to DB
       await txnRepo.create({
@@ -259,9 +247,9 @@ const useTransactions = (walletId?: string, search?: string) => {
       });
 
       // 3. Optional: refresh if strict consistency needed
-      // await loadInitial(); // uncomment if you want exact DB sync
+      await loadInitial(); // uncomment if you want exact DB sync
     },
-    [walletId, filters],
+    [loadInitial],
   );
 
   const updateTransaction = useCallback(

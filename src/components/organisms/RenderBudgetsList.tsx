@@ -13,7 +13,6 @@ type TProps = {
 const RenderBudgetList = (props: TProps) => {
   const { budgets } = props;
   const navigation = useNavigation();
-  console.log({ budgets });
   return (
     <FlashList
       data={budgets}
