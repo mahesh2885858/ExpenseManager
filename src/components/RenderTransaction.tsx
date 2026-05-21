@@ -66,7 +66,17 @@ const RenderTransaction = (props: {
               {props.item.category?.name ?? ''}
             </AppText.Regular>
           </View>
-          <AppText.Medium style={[styles.amount]}>
+          <AppText.Medium
+            style={[
+              styles.amount,
+              {
+                color:
+                  props.item.type === 'income'
+                    ? theme.colors.primary
+                    : theme.colors.onSurface,
+              },
+            ]}
+          >
             {getFormattedAmount(props.item.amount)}
           </AppText.Medium>
         </View>
