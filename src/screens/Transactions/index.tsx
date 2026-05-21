@@ -15,6 +15,7 @@ import useTransactions from '../../hooks/useTransactions';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import { TTransaction } from '../../types';
 import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
+import useFetchRecords from '../../hooks/useFetchRecords';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
@@ -25,6 +26,7 @@ const Transactions = () => {
     useState<null | TTransaction>(null);
 
   const { dismissAll } = useBottomSheetR();
+  const { fetchRecents } = useFetchRecords();
 
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
@@ -37,11 +39,13 @@ const Transactions = () => {
   }, []);
 
   const onDeletePress = useCallback(
-    (t: TTransaction) => {
-      deleteTxn(t.id);
+    async (txn: TTransaction) => {
+      await deleteTxn(txn.id);
+
       dismissAll();
+      fetchRecents();
     },
-    [dismissAll, deleteTxn],
+    [dismissAll, deleteTxn, fetchRecents],
   );
 
   useEffect(() => {

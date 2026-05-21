@@ -30,6 +30,22 @@ const useTransactions = (walletId?: string, search?: string) => {
   const deleteTransaction = useTransactionsStore(state => state.delete);
 
   const [transactions, setTransactions] = useState<TGroupedTransactions>([]);
+
+  const removeEmptyGroups = useCallback((txns: TGroupedTransactions) => {
+    const result: TGroupedTransactions = [];
+    txns.forEach((txn, i) => {
+      if (txn.type === 'txn') {
+        result.push(txn);
+      } else {
+        // check whether next item exist or not
+        if (!!txns[i + 1] && txns[i + 1].type === 'txn') {
+          result.push(txn);
+        }
+      }
+    });
+    return result;
+  }, []);
+
   const appendTransactionsFromDB = useCallback(
     (existing: TGroupedTransactions, txns: TTransaction[]) => {
       const groupedItems: TGroupedTransactions = [...existing];
@@ -265,6 +281,13 @@ const useTransactions = (walletId?: string, search?: string) => {
       try {
         await txnRepo.delete(id);
         deleteTransaction(id);
+        // Optimistic removal of txn
+        setTransactions(prev => {
+          const filtered = prev.filter(
+            t => t.type === 'header' || (t.type === 'txn' && t.item.id !== id),
+          );
+          return removeEmptyGroups(filtered);
+        });
       } catch (e) {
         console.log('Error while deleting the transaction: ', e);
         ToastAndroid.show(
