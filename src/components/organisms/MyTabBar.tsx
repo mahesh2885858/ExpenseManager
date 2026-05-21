@@ -89,7 +89,7 @@ function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
           if (route.name === 'CustomButton') {
             return (
-              <View style={[styles.navigationItem]}>
+              <View key={route.name} style={[styles.navigationItem]}>
                 <PressableWithFeedback
                   onPress={() => {
                     navigation.navigate('AddTransaction', {
