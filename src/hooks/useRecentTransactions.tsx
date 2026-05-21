@@ -100,9 +100,11 @@ export const useRecentTransactions = () => {
         COALESCE(SUM(balance), 0) as balance
       FROM (
 
-        SELECT init_balance as balance
-        FROM wallets
-        ${walletId ? 'WHERE id = ?' : ''}
+      SELECT init_balance as balance
+      FROM wallets
+      WHERE 1=1
+      ${walletId ? 'AND id = ?' : ''}
+      ${profileId ? 'AND profile_id = ?' : ''}
 
         UNION ALL
 
@@ -121,6 +123,7 @@ export const useRecentTransactions = () => {
       `,
         [
           ...(walletId ? [walletId] : []),
+          ...(profileId ? [profileId] : []),
           ...(walletId ? [walletId] : []),
           ...(profileId ? [profileId] : []),
         ],
