@@ -62,3 +62,13 @@ export type TSort =
 export type TTransactionRow = Omit<TTransaction, 'category'> & {
   category: string;
 };
+
+export type THeaderItem = {
+  type: 'header';
+  item: Date;
+};
+export type TTransactionItem = {
+  type: 'txn';
+  item: TTransaction;
+};
+export type TGroupedTransactions = Array<THeaderItem | TTransactionItem>;

@@ -5,17 +5,14 @@ import { db } from '../db';
 import { buildOrderBy, buildWhereClause } from '../db/helpers/transactions';
 import { txnRepo } from '../db/repositories/transactions.repo';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TTransaction, TTransactionRow } from '../types';
+import {
+  TGroupedTransactions,
+  TTransaction,
+  TTransactionItem,
+  TTransactionRow,
+} from '../types';
 import { money } from '../utils';
-type THeaderItem = {
-  type: 'header';
-  item: Date;
-};
-type TTransactionItem = {
-  type: 'txn';
-  item: TTransaction;
-};
-type TGroupedTransactions = Array<THeaderItem | TTransactionItem>;
+
 const LIMIT = 5;
 
 const useTransactions = (walletId?: string, search?: string) => {
@@ -27,9 +24,8 @@ const useTransactions = (walletId?: string, search?: string) => {
   const filters = useTransactionsStore(s => s.filters);
   const sort = useTransactionsStore(s => s.sort);
   const updateTxn = useTransactionsStore(state => state.updateTransaction);
-  const deleteTransaction = useTransactionsStore(state => state.delete);
-
-  const [transactions, setTransactions] = useState<TGroupedTransactions>([]);
+  const transactions = useTransactionsStore(state => state.transactions);
+  const setTransactions = useTransactionsStore(state => state.setTransactions);
 
   const removeEmptyGroups = useCallback((txns: TGroupedTransactions) => {
     const result: TGroupedTransactions = [];
@@ -130,7 +126,8 @@ const useTransactions = (walletId?: string, search?: string) => {
           category: { ...category, icon },
         };
       });
-      setTransactions(() => appendTransactionsFromDB([], rows));
+      const t = appendTransactionsFromDB([], rows);
+      setTransactions(t);
       console.log({ rows, LIMIT });
       if (rows.length < LIMIT) {
         setHasMore(false);
@@ -214,11 +211,8 @@ const useTransactions = (walletId?: string, search?: string) => {
         };
       });
       console.log({ cursor, rows });
-      setTransactions(prev => {
-        const t = appendTransactionsFromDB(prev, rows);
-        console.log({ t });
-        return t;
-      });
+      const t = appendTransactionsFromDB(transactions, rows);
+      setTransactions(t);
       if (rows.length < LIMIT) {
         setHasMore(false);
       }
@@ -233,6 +227,8 @@ const useTransactions = (walletId?: string, search?: string) => {
   }, [
     cursor,
     hasMore,
+    transactions,
+    setTransactions,
     appendTransactionsFromDB,
     isLoading,
     filters,
@@ -270,8 +266,12 @@ const useTransactions = (walletId?: string, search?: string) => {
 
   const updateTransaction = useCallback(
     async (txn: TTransaction) => {
-      await txnRepo.update(txn.id, { ...txn });
-      updateTxn(txn.id, txn);
+      try {
+        await txnRepo.update(txn.id, { ...txn });
+        updateTxn(txn.id, txn);
+      } catch (err) {
+        console.log('Error while updating transaction: ', err);
+      }
     },
     [updateTxn],
   );
@@ -280,14 +280,11 @@ const useTransactions = (walletId?: string, search?: string) => {
     async (id: string) => {
       try {
         await txnRepo.delete(id);
-        deleteTransaction(id);
         // Optimistic removal of txn
-        setTransactions(prev => {
-          const filtered = prev.filter(
-            t => t.type === 'header' || (t.type === 'txn' && t.item.id !== id),
-          );
-          return removeEmptyGroups(filtered);
-        });
+        const filtered = transactions.filter(
+          t => t.type === 'header' || (t.type === 'txn' && t.item.id !== id),
+        );
+        setTransactions(removeEmptyGroups(filtered));
       } catch (e) {
         console.log('Error while deleting the transaction: ', e);
         ToastAndroid.show(
@@ -296,7 +293,7 @@ const useTransactions = (walletId?: string, search?: string) => {
         );
       }
     },
-    [deleteTransaction],
+    [transactions, setTransactions, removeEmptyGroups],
   );
 
   return {

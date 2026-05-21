@@ -15,17 +15,16 @@ import {
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText from '../../components/molecules/AppText';
-import CommonHeader from '../../components/organisms/CommonHeader';
 import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
 import RenderTransactionList from '../../components/RenderTransactionList';
 import useFetchRecords from '../../hooks/useFetchRecords';
 import useHelpers from '../../hooks/useHelpers';
+import useProfiles from '../../hooks/useProfiles';
 import { useRecentTransactions } from '../../hooks/useRecentTransactions';
 import useBudgetStore from '../../stores/budgetStore';
 import useProfileStore from '../../stores/profileStore';
 import useTransactionsStore from '../../stores/transactionsStore';
 import { TBottomTabParamList } from '../../types';
-import useProfiles from '../../hooks/useProfiles';
 const Home = () => {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
