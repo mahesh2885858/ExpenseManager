@@ -74,7 +74,6 @@ const Home = () => {
         console.log({ e });
       }
     };
-    console.log({ selectedProfileId });
     load();
     fetchWallets();
     fetchProfiles();
@@ -92,10 +91,7 @@ const Home = () => {
     fetchRecents,
     fetchBudgets,
   ]);
-  console.log({
-    selectedProfile,
-    selectedProfileId,
-  });
+
   return (
     <View style={[styles.container]}>
       {/* header section starts */}

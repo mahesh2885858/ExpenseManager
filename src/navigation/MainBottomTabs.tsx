@@ -24,7 +24,7 @@ const tabBarIcon = (
 };
 
 const renderTabBar = (props: BottomTabBarProps) => <MyTabBar {...props} />;
-
+const CustomButtonScreen = () => null;
 const MainBottomTabs = () => {
   return (
     <BottomTab.Navigator
@@ -54,7 +54,7 @@ const MainBottomTabs = () => {
       />
       <BottomTab.Screen
         name="CustomButton"
-        component={() => null}
+        component={CustomButtonScreen}
         options={{
           tabBarIcon: props => tabBarIcon(props, 'history'),
           headerShown: false,
