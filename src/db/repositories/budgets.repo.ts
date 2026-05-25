@@ -295,10 +295,81 @@ const getBudgetTransactions = async ({
     wallet: JSON.parse(row.wallet),
   }));
 };
+
+const getById = async (id: string) => {
+  const result = await db.execute(
+    `
+    SELECT
+      b.*,
+
+      COALESCE(
+        json_group_array(
+          CASE
+            WHEN c.id IS NOT NULL THEN
+              json_object(
+                'id', c.id,
+                'name', c.name,
+                'icon', c.icon,
+                'type', c.type
+              )
+          END
+        ),
+        '[]'
+      ) as categories
+
+    FROM budgets b
+
+    LEFT JOIN budget_categories bc
+      ON bc.budget_id = b.id
+
+    LEFT JOIN categories c
+      ON c.id = bc.category_id
+
+    WHERE b.id = ?
+
+    GROUP BY b.id
+
+    ORDER BY b.created_at DESC
+    `,
+    [id],
+  );
+
+  const budgets = await Promise.all(
+    result.rows.map(async (row: any) => {
+      let categories = JSON.parse(row.categories);
+
+      categories = categories.map((cat: any) => ({
+        ...cat,
+        icon: JSON.parse(cat.icon),
+      }));
+
+      const { start, end } = getRangeForBudgetPeriod({
+        type: row.recurring_type,
+        range:
+          row.recurring_type === 'one-time'
+            ? { end: row.end_date, start: row.start_date }
+            : undefined,
+      });
+
+      const spent = await getBudgetSpent(row.id, start, end);
+
+      return {
+        ...row,
+        amount: money.fromStored(row.amount),
+        categories,
+        spent,
+        remaining: money.fromStored(row.amount) - spent,
+      };
+    }),
+  );
+
+  return budgets;
+};
 export const budgetRepo = {
   create: addBudget,
   getAll: getBudgets,
   update: updateBudget,
   delete: deleteBudget,
   getBudgetTransactions,
+  getById,
 };

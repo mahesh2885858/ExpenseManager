@@ -255,6 +255,7 @@ const useTransactions = (walletId?: string, search?: string) => {
   const updateTransaction = useCallback(
     async (txn: TTransaction) => {
       try {
+        console.log({ txn });
         await txnRepo.update(txn.id, { ...txn });
         updateTxn(txn.id, txn);
       } catch (err) {

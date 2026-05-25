@@ -21,6 +21,7 @@ import { budgetRepo } from '../../db/repositories/budgets.repo';
 import useBudgets from '../../hooks/useBudgets';
 import useHelpers from '../../hooks/useHelpers';
 import { TRootStackParamList, TTransaction } from '../../types';
+import useFetchRecords from '../../hooks/useFetchRecords';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -30,10 +31,13 @@ const BudgetDetails = () => {
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
   const { getFormattedAmount } = useHelpers();
+  const { fetchBudgets } = useFetchRecords();
   const { deleteABudget } = useBudgets();
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+
+  const [budget, setBudget] = useState(route.params.budget);
 
   const getProgressColor = (progress: number) => {
     if (progress <= 0.5) return colors.primary;
@@ -58,18 +62,17 @@ const BudgetDetails = () => {
 
   const deleteItem = useCallback(async () => {
     try {
-      deleteABudget(route.params.budget.id);
+      deleteABudget(budget.id);
       navigation.goBack();
     } catch (e) {
       console.log('Error while deleting budget: ', e);
     }
-  }, [route, deleteABudget, navigation]);
+  }, [budget, deleteABudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
-  const budget = route.params.budget;
   const budgetPeriodLabel = useMemo(() => {
     if (!budget) return 'No budget';
-    if (budget.recurring_type === 'one time') {
+    if (budget.recurring_type === 'one-time') {
       return (
         format(budget.start_date, dateFormatString) +
         ' - ' +
@@ -85,19 +88,39 @@ const BudgetDetails = () => {
 
   const [transactions, setTransactions] = useState<TTransaction[]>([]);
 
-  useEffect(() => {
-    const fetch = async () => {
-      const data = await budgetRepo.getBudgetTransactions({
-        budgetId: budget.id,
-        recurring_type: budget.recurring_type,
-        start_date: budget.start_date,
-        end_date: budget.end_date,
-      });
-      console.log({ data });
-      setTransactions(data);
-    };
-    fetch();
+  const fetchTransactionsForThisBudget = useCallback(async () => {
+    const data = await budgetRepo.getBudgetTransactions({
+      budgetId: budget.id,
+      recurring_type: budget.recurring_type,
+      start_date: budget.start_date,
+      end_date: budget.end_date,
+    });
+
+    setTransactions(data);
   }, [budget]);
+
+  const fetchBudgetDetails = useCallback(async () => {
+    try {
+      const id = budget.id;
+      const budgetDetails = await budgetRepo.getById(id);
+      setBudget(budgetDetails[0]);
+    } catch (err) {
+      console.log('Error while fetching budget details: ', err);
+    }
+  }, [budget.id]);
+
+  const onItemDelete = useCallback(
+    (id: string) => {
+      fetchTransactionsForThisBudget();
+      fetchBudgetDetails();
+      fetchBudgets();
+    },
+    [fetchTransactionsForThisBudget, fetchBudgets, fetchBudgetDetails],
+  );
+
+  useEffect(() => {
+    fetchTransactionsForThisBudget();
+  }, [fetchTransactionsForThisBudget]);
 
   return (
     <View style={[styles.container, { marginTop: top }]}>
@@ -214,7 +237,10 @@ const BudgetDetails = () => {
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactionList transactions={transactions} />
+        <RenderTransactionList
+          onDeleteCallback={onItemDelete}
+          transactions={transactions}
+        />
       </View>
       {/*Transactions for this budget ends*/}
     </View>

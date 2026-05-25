@@ -164,7 +164,9 @@ export const useTransactionForm = ({
         attachments: form.attachments,
         description: form.description,
       };
-
+      if (updated.wallet) {
+        delete updated.wallet;
+      }
       await updateTransaction(updated);
     } else {
       await addTransaction({

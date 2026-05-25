@@ -17,10 +17,12 @@ import RenderTransaction from './RenderTransaction';
 const RenderTransactionList = ({
   transactions,
   scrollDisabled = false,
+  onDeleteCallback = undefined,
 }: {
   transactions: TTransaction[];
   renderSeeAll?: boolean;
   scrollDisabled?: boolean;
+  onDeleteCallback?: (id: string) => void;
 }) => {
   const theme = useAppTheme();
   const [selectedTransaction, setSelectedTransaction] =
@@ -45,8 +47,11 @@ const RenderTransactionList = ({
       deleteTxn(t.id);
       dismissAll();
       fetchRecents();
+      if (onDeleteCallback) {
+        onDeleteCallback(t.id);
+      }
     },
-    [dismissAll, fetchRecents, deleteTxn],
+    [dismissAll, onDeleteCallback, fetchRecents, deleteTxn],
   );
 
   useEffect(() => {
