@@ -16,6 +16,7 @@ import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import { TTransaction } from '../../types';
 import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
 import useFetchRecords from '../../hooks/useFetchRecords';
+import EmptyTransactionsComponent from '../../components/organisms/EmptyTransactionsComponent';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
@@ -67,6 +68,7 @@ const Transactions = () => {
           contentContainerStyle={{
             paddingHorizontal: spacing.md,
           }}
+          ListEmptyComponent={EmptyTransactionsComponent}
           keyExtractor={item =>
             item.type === 'header' ? item.item.toISOString() : item.item.id
           }
