@@ -53,7 +53,7 @@ const WelcomeScreen = () => {
             {t('common.getStarted')}
           </AppText.SemiBold>
         </PressableWithFeedback>
-        <PressableWithFeedback>
+        <PressableWithFeedback hidden>
           <AppText.Regular style={[styles.alreadyHaveDataText]}>
             {t('common.alreadyHaveData')}
           </AppText.Regular>
