@@ -109,6 +109,14 @@ const Home = () => {
           </AppText.Bold>
           <Icon source={'menu-down'} size={40} color={colors.onSurface} />
         </PressableWithFeedback>
+        <PressableWithFeedback
+          onPress={() => {
+            navigation.navigate('Settings');
+          }}
+          style={[styles.headerLeft]}
+        >
+          <Icon source={'cog'} size={spacing.xl} color={colors.onSurface} />
+        </PressableWithFeedback>
       </View>
       {/*header section ends*/}
       <ScrollView
@@ -308,6 +316,9 @@ const createStyles = (colors: AppTheme['colors'], insets: EdgeInsets) =>
     },
     header: {
       paddingHorizontal: spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     headerLeft: {
       maxWidth: 250,
