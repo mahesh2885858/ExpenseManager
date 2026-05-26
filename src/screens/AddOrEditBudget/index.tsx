@@ -3,6 +3,7 @@ import { FlashList } from '@shopify/flash-list';
 import { roundValue, uCFirst } from 'commonutil-core';
 import { format } from 'date-fns';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-paper';
@@ -11,7 +12,6 @@ import {
   CalendarDate,
   RangeChange,
 } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 import {
   AppTheme,
@@ -22,30 +22,34 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import AppText from '../../components/molecules/AppText';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import AmountInputBoard from '../../components/organisms/AmountInputBoard';
 import BudgetPeriodSelectionModal from '../../components/organisms/BudgetPeriodSelection';
 import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useBudgets from '../../hooks/useBudgets';
 import useCategories from '../../hooks/useCategories';
-import useTransactions from '../../hooks/useTransactions';
-import useBudgetStore from '../../stores/budgetStore';
+import useHelpers from '../../hooks/useHelpers';
+import useProfileStore from '../../stores/profileStore';
 import {
-  TBudget,
-  TBudgetPeriod,
+  TBudgetPayload,
   TBudgetPeriods,
   TRootStackParamList,
 } from '../../types';
+import { getCurrentUTCTimeStamp } from '../../utils';
 
 const dateFormatString = 'do MMM yyyy';
 const AddOrEditBudget = () => {
   const { colors } = useAppTheme();
+  const profile_id = useProfileStore(state => state.selectedProfileId);
+  const { t } = useTranslation();
+  const { addNewBudget } = useBudgets();
   const styles = createStyles(colors);
-  const { top } = useSafeAreaInsets();
   const route = useRoute<RouteProp<TRootStackParamList, 'AddOrEditBudget'>>();
-  const { getFormattedAmount } = useTransactions();
+  const { getFormattedAmount, showErrorToast } = useHelpers();
   const navigation = useNavigation();
   const { categories } = useCategories();
-  const addBudget = useBudgetStore(state => state.addBudget);
 
   const [name, setName] = useState('');
   const [selectedCatIds, setSelectedCatIds] = useState<string[]>([]);
@@ -59,6 +63,7 @@ const AddOrEditBudget = () => {
     end: undefined,
   });
   const [openDatePicker, setOpenDatePicker] = useState(false);
+  const [renderCategoryList, setRenderCategoryList] = useState(false);
 
   const [errors, setErrors] = useState({
     name: '',
@@ -69,14 +74,13 @@ const AddOrEditBudget = () => {
 
   const periodInfo: Record<TBudgetPeriods, string> = useMemo(
     () => ({
-      'one time': '',
+      'one-time': '',
       monthly: 'Starts 1st of the month',
       weekly: 'Strats on every Monday',
       yearly: 'Starts on 1st January of year',
     }),
     [],
   );
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
   const {
     btmShtRef: amtShtRef,
     handlePresent: amtShtPresent,
@@ -96,7 +100,9 @@ const AddOrEditBudget = () => {
   const onCatSelected = useCallback(
     (id: string) => {
       removeError('category');
-      setSelectedCatIds(p => Array.from(new Set([...p, id])));
+      setSelectedCatIds(p =>
+        p.find(cat => cat === id) ? p.filter(cat => cat !== id) : [...p, id],
+      );
     },
     [removeError],
   );
@@ -131,7 +137,7 @@ const AddOrEditBudget = () => {
       err.amount = 'Amount can not be empty';
     }
     if (
-      budgetPeriod === 'one time' &&
+      budgetPeriod === 'one-time' &&
       (!customRange.end || !customRange.start)
     ) {
       err.period = 'Both start and end date is required for one time budget';
@@ -158,53 +164,61 @@ const AddOrEditBudget = () => {
     [removeError],
   );
 
-  const addNew = useCallback(() => {
+  const addNew = useCallback(async () => {
     const id = uuid();
     const amount = roundValue(parseFloat(budgetAmount), 2);
-    let period: TBudgetPeriod = {} as TBudgetPeriod;
-    if (budgetPeriod === 'one time' && customRange.start && customRange.end) {
-      period = {
-        type: 'one time',
-        range: {
-          start: customRange.start,
-          end: customRange.end,
-        },
-      };
+    let recurring_type: TBudgetPeriods;
+    let start_date: number;
+    let end_date: number | null = null;
+    if (budgetPeriod === 'one-time' && customRange.start && customRange.end) {
+      recurring_type = 'one-time';
+      start_date = customRange.start.getTime();
+      end_date = customRange.end.getTime();
     } else {
-      period.type = budgetPeriod;
+      recurring_type = budgetPeriod;
+      start_date = getCurrentUTCTimeStamp();
     }
-    const budget: TBudget = {
+    const budget: TBudgetPayload = {
       id,
       amount,
-      categoryIds: selectedCatIds,
-      createdAt: new Date().toISOString(),
+      category_ids: selectedCatIds,
       name,
-      period,
-      spent: 0,
+      recurring_type,
+      start_date,
+      end_date,
+      profile_id,
     };
-    addBudget(budget);
+    await addNewBudget(budget);
   }, [
     budgetAmount,
     name,
+    addNewBudget,
     selectedCatIds,
     budgetPeriod,
     customRange,
-    addBudget,
+    profile_id,
   ]);
 
-  const onSave = useCallback(() => {
-    if (validateInputData()) {
-      addNew();
-      navigation.goBack();
+  const onSave = useCallback(async () => {
+    try {
+      if (validateInputData()) {
+        await addNew();
+        navigation.goBack();
+      }
+    } catch (e) {
+      console.log('Error while adding budget: ', e);
+      showErrorToast(e);
     }
-  }, [validateInputData, addNew, navigation]);
+  }, [validateInputData, showErrorToast, addNew, navigation]);
 
   const heading = useMemo(() => {
-    return route.params.mode === 'new' ? 'Create Budget' : 'Update Budget';
-  }, [route.params]);
+    return route.params.mode === 'new'
+      ? t('budget.createBudget')
+      : t('budget.updateBudget');
+  }, [route.params, t]);
 
   const periodInfoText = useMemo(() => {
-    if (budgetPeriod === 'one time') {
+    if (budgetPeriod === 'one-time') {
       if (!customRange.end && !customRange.start) {
         return 'Select start and end dates';
       } else if (customRange.end && !customRange.start) {
@@ -228,7 +242,7 @@ const AddOrEditBudget = () => {
   }, [periodInfo, budgetPeriod, customRange]);
 
   return (
-    <View style={[styles.container, { marginTop: top }]}>
+    <ScreenWrapper style={[styles.container]}>
       {/*header starts*/}
       <View style={[styles.header]}>
         <PressableWithFeedback onPress={navigation.goBack}>
@@ -238,17 +252,19 @@ const AddOrEditBudget = () => {
             color={colors.onBackground}
           />
         </PressableWithFeedback>
-        <Text style={[styles.headerText]}>{heading}</Text>
+        <AppText.Bold style={[styles.headerText]}>{heading}</AppText.Bold>
       </View>
       {/*header ends*/}
 
       {/*Budget name starts*/}
       <View>
-        <Text style={[styles.selectCatText]}>Budget Name</Text>
+        <AppText.Medium style={[styles.selectCatText]}>
+          {t('budget.budgetName')}
+        </AppText.Medium>
         <TextInput
           value={name}
           onChangeText={onNameChange}
-          placeholder="Choose a name for this budget"
+          placeholder={t('budget.budgetNamePlaceholder')}
           placeholderTextColor={colors.onSurfaceDisabled}
           style={[styles.budgetNameInput]}
         />
@@ -259,9 +275,11 @@ const AddOrEditBudget = () => {
       {/*Category selections starts*/}
       <View>
         <View style={[styles.categorySelectionBox]}>
-          <Text style={[styles.selectCatText]}>Select Category</Text>
+          <AppText.Medium style={[styles.selectCatText]}>
+            {t('budget.selectCat')}
+          </AppText.Medium>
           <PressableWithFeedback
-            onPress={handlePresent}
+            onPress={() => setRenderCategoryList(true)}
             style={[styles.addCatBox]}
           >
             {selectedCatIds.length > 0 ? (
@@ -277,10 +295,10 @@ const AddOrEditBudget = () => {
                         onPress={() => onCatRemove(item)}
                         style={[styles.selectedCatChip]}
                       >
-                        <Text style={[styles.selectedChipText]}>
+                        <AppText.Regular style={[styles.selectedChipText]}>
                           {categories.find(cat => cat.id === item)?.name ??
                             'unknown'}
-                        </Text>
+                        </AppText.Regular>
                         <Icon
                           source={'close'}
                           size={textSize.sm}
@@ -292,9 +310,9 @@ const AddOrEditBudget = () => {
                 />
               </View>
             ) : (
-              <Text style={[gs.fullFlex, styles.addCatText]}>
-                Add a category
-              </Text>
+              <AppText.Regular style={[gs.fullFlex, styles.addCatText]}>
+                {t('budget.addCat')}
+              </AppText.Regular>
             )}
             <Icon
               source={'plus'}
@@ -304,7 +322,9 @@ const AddOrEditBudget = () => {
           </PressableWithFeedback>
         </View>
         {errors.category && (
-          <Text style={[styles.errorText]}>{errors.category}</Text>
+          <AppText.Regular style={[styles.errorText]}>
+            {errors.category}
+          </AppText.Regular>
         )}
       </View>
       {/*Category selections ends*/}
@@ -312,18 +332,22 @@ const AddOrEditBudget = () => {
       {/*Budget Amount starts*/}
       <View>
         <View style={[styles.budgetAmtBox]}>
-          <Text style={[styles.selectCatText]}>Set Budget Amount</Text>
+          <AppText.Medium style={[styles.selectCatText]}>
+            {t('budget.setBudgetAmt')}
+          </AppText.Medium>
           <PressableWithFeedback
             onPress={amtShtPresent}
             style={[styles.addCatBox]}
           >
-            <Text style={[styles.budgetAmtText]}>
+            <AppText.Regular style={[styles.budgetAmtText]}>
               {getFormattedAmount(budgetAmount)}
-            </Text>
+            </AppText.Regular>
           </PressableWithFeedback>
         </View>
         {errors.amount && (
-          <Text style={[styles.errorText]}>{errors.amount}</Text>
+          <AppText.Regular style={[styles.errorText]}>
+            {errors.amount}
+          </AppText.Regular>
         )}
       </View>
       {/*Budget Amount ends*/}
@@ -331,45 +355,55 @@ const AddOrEditBudget = () => {
       {/*Budget Period starts*/}
       <View>
         <View style={[styles.budgetAmtBox]}>
-          <Text style={[styles.selectCatText]}>Budget Period</Text>
+          <AppText.Medium style={[styles.selectCatText]}>
+            {t('budget.budgetPeriod')}
+          </AppText.Medium>
           <PressableWithFeedback
             onPress={periodShtPresent}
             style={[styles.addCatBox]}
           >
-            <Text style={[styles.budgetPeriodText]}>
+            <AppText.Regular style={[styles.budgetPeriodText]}>
               {uCFirst(budgetPeriod)}
-            </Text>
-            {budgetPeriod === 'one time' ? (
+            </AppText.Regular>
+            {budgetPeriod === 'one-time' ? (
               <PressableWithFeedback
                 onPress={() => setOpenDatePicker(true)}
                 style={[styles.customDateBox]}
               >
-                <Text style={[styles.periodTextInfo, styles.customDateText]}>
+                <AppText.Regular
+                  style={[styles.periodTextInfo, styles.customDateText]}
+                >
                   {periodInfoText}
-                </Text>
+                </AppText.Regular>
               </PressableWithFeedback>
             ) : (
-              <Text style={[styles.periodTextInfo]}>{periodInfoText}</Text>
+              <AppText.Regular style={[styles.periodTextInfo]}>
+                {periodInfoText}
+              </AppText.Regular>
             )}
           </PressableWithFeedback>
         </View>
         {errors.period && (
-          <Text style={[styles.errorText]}>{errors.period}</Text>
+          <AppText.Regular style={[styles.errorText]}>
+            {errors.period}
+          </AppText.Regular>
         )}
       </View>
       {/*Budget Period ends*/}
 
       <PressableWithFeedback onPress={onSave} style={[styles.saveButton]}>
-        <Text style={[styles.saveButtonText]}>
-          {route.params.mode === 'new' ? 'Create' : 'Save'}
-        </Text>
+        <AppText.Medium style={[styles.saveButtonText]}>
+          {route.params.mode === 'new' ? t('common.create') : t('common.save')}
+        </AppText.Medium>
       </PressableWithFeedback>
 
       {/*All modals used*/}
       <CategorySelectionModal
-        handleSheetChanges={handleSheetChange}
-        ref={btmShtRef}
+        onClose={() => setRenderCategoryList(false)}
         selectCategory={onCatSelected}
+        visible={renderCategoryList}
+        allowMultiple={true}
+        selectedCategories={selectedCatIds}
       />
       <AmountInputBoard
         ref={amtShtRef}
@@ -399,14 +433,14 @@ const AddOrEditBudget = () => {
         onConfirm={onConfirmRange}
         saveLabel="Save"
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 export default AddOrEditBudget;
 const createStyles = (colors: AppTheme['colors']) => {
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       paddingHorizontal: spacing.md,
       flex: 1,
     },
@@ -414,7 +448,7 @@ const createStyles = (colors: AppTheme['colors']) => {
       paddingTop: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: spacing.xs,
+      marginBottom: spacing.sm,
       gap: spacing.sm,
     },
     headerText: {
@@ -424,13 +458,14 @@ const createStyles = (colors: AppTheme['colors']) => {
       color: colors.onBackground,
     },
     budgetNameInput: {
-      backgroundColor: colors.surfaceVariant,
+      backgroundColor: colors.surfaceContainer,
       color: colors.onSurfaceVariant,
       fontSize: textSize.md,
       padding: spacing.sm,
       paddingVertical: spacing.md,
       marginTop: spacing.sm,
       borderRadius: borderRadius.sm,
+      fontFamily: 'Inter-Regular',
     },
     categorySelectionBox: {
       marginTop: spacing.md,
@@ -438,14 +473,14 @@ const createStyles = (colors: AppTheme['colors']) => {
     selectCatText: {
       fontSize: textSize.md,
       fontWeight: 500,
-      color: colors.onBackground,
+      color: colors.onSurface,
     },
     addCatBox: {
       flexDirection: 'row',
       alignItems: 'center',
       padding: spacing.sm,
       paddingVertical: spacing.md,
-      backgroundColor: colors.surfaceVariant,
+      backgroundColor: colors.surfaceContainer,
       marginTop: spacing.sm,
       borderRadius: borderRadius.sm,
     },

@@ -1,256 +1,299 @@
-import {
-  isAfter,
-  isBefore,
-  isThisMonth,
-  isThisWeek,
-  isThisYear,
-  isToday,
-} from 'date-fns';
-import { useCallback, useMemo, useState } from 'react';
+import { isSameDay } from 'date-fns/fp';
+import { useCallback, useState } from 'react';
+import { ToastAndroid } from 'react-native';
+import { db } from '../db';
+import { buildOrderBy, buildWhereClause } from '../db/helpers/transactions';
+import { txnRepo } from '../db/repositories/transactions.repo';
 import useTransactionsStore from '../stores/transactionsStore';
-import { TFilters, TSort, TTransaction } from '../types';
-import { formatAmount } from '../utils';
-import useWalletStore from '../stores/walletsStore';
-import useUIStore from '../stores/uiStore';
-import useBudgets from './useBudgets';
+import {
+  TGroupedTransactions,
+  TTransaction,
+  TTransactionItem,
+  TTransactionRow,
+} from '../types';
+import { money } from '../utils';
 
-const useTransactions = (props?: { filter?: TFilters; sort?: TSort }) => {
-  const addTransaction = useTransactionsStore(state => state.addTransaction);
-  const deSelectTransaction = useTransactionsStore(
-    state => state.deSelectTransaction,
-  );
-  const currency = useWalletStore(state => state.currency);
-  const numberFormat = useUIStore(state => state.numberFormat);
-  const filters = props?.filter ?? undefined;
-  const sort = props?.sort ?? undefined;
+const LIMIT = 5;
 
-  const removeTransaction = useTransactionsStore(state => state.requestDelete);
-  const undoDelete = useTransactionsStore(state => state.undoDelete);
-  const pendingDelete = useTransactionsStore(state => state.pendingDelete);
+const useTransactions = (walletId?: string, search?: string) => {
+  const [cursor, setCursor] = useState<TTransaction | null>(null);
 
-  const updateTransaction = useTransactionsStore(
-    state => state.updateTransaction,
-  );
+  const [hasMore, setHasMore] = useState(true);
 
-  const [search, setSearch] = useState('');
-  const transactionsIds = useTransactionsStore(state => state.transactionsIds);
-  const transactionsByIds = useTransactionsStore(
-    state => state.transactionsByIds,
-  );
-  const { updateBudgetSpentForTransaction, updateBudgetForTransactionUpdate } =
-    useBudgets();
+  const [isLoading, setLoading] = useState(false);
+  const filters = useTransactionsStore(s => s.filters);
+  const sort = useTransactionsStore(s => s.sort);
+  const updateTxn = useTransactionsStore(state => state.updateTransaction);
+  const transactions = useTransactionsStore(state => state.transactions);
+  const setTransactions = useTransactionsStore(state => state.setTransactions);
 
-  const matchesAcc = useCallback(
-    (t: TTransaction) => {
-      if (!filters || !filters.accId) return true;
-      return t.walletId === filters.accId;
-    },
-    [filters],
-  );
+  const removeEmptyGroups = useCallback((txns: TGroupedTransactions) => {
+    const result: TGroupedTransactions = [];
+    txns.forEach((txn, i) => {
+      if (txn.type === 'txn') {
+        result.push(txn);
+      } else {
+        // check whether next item exist or not
+        if (!!txns[i + 1] && txns[i + 1].type === 'txn') {
+          result.push(txn);
+        }
+      }
+    });
+    return result;
+  }, []);
 
-  const matchesType = useCallback(
-    (t: TTransaction) => {
-      if (!filters || !filters.type) return true;
-      return t.type === filters.type;
-    },
-    [filters],
-  );
+  const appendTransactionsFromDB = useCallback(
+    (existing: TGroupedTransactions, txns: TTransaction[]) => {
+      const groupedItems: TGroupedTransactions = [...existing];
 
-  const matchesSearch = useCallback(
-    (t: TTransaction) => {
-      if (!search.trim()) return true;
-      return (
-        t.amount.toString().includes(search) ||
-        t.description?.toLowerCase().includes(search.toLowerCase())
-      );
-    },
-    [search],
-  );
+      let currentDate: Date | null = null;
 
-  const matchesDate = useCallback(
-    (t: TTransaction) => {
-      if (!filters || !filters.date) return true;
+      // If transactions already exist, initialize with last rendered txn date
+      if (existing.length > 0) {
+        const lastTxn = existing[existing.length - 1] as TTransactionItem;
 
-      if (filters.date.isToday) return isToday(t.transactionDate);
-      if (filters.date.isThisWeek) return isThisWeek(t.transactionDate);
-      if (filters.date.isThisMonth) return isThisMonth(t.transactionDate);
-      if (filters.date.isThisYear) return isThisYear(t.transactionDate);
-
-      if (filters.date.range?.[0] && filters.date.range?.[1]) {
-        const start = filters.date.range[0];
-        const end = filters.date.range[1];
-        return (
-          !isBefore(t.transactionDate, start) &&
-          !isAfter(t.transactionDate, end)
-        );
+        currentDate = new Date(lastTxn.item.transaction_date);
       }
 
-      return true;
-    },
-    [filters],
-  );
+      txns.forEach(t => {
+        const tDate = new Date(t.transaction_date);
 
-  const matchesCategory = useCallback(
-    (t: TTransaction) => {
-      if (!filters || !filters.categoryId) return true;
-      return t.categoryIds.includes(filters.categoryId);
-    },
-    [filters],
-  );
+        const transformedTxn = {
+          ...t,
+          amount: t.amount,
+        };
 
-  const filteredTransactions = useMemo(() => {
-    if (!transactionsByIds) return [];
-    let filtered = transactionsIds;
+        const shouldCreateHeader =
+          !currentDate || !isSameDay(tDate, currentDate);
 
-    if (filters) {
-      filtered = transactionsIds.filter(id => {
-        const t = transactionsByIds[id];
-        return (
-          t &&
-          matchesType(t) &&
-          matchesDate(t) &&
-          matchesSearch(t) &&
-          matchesCategory(t) &&
-          matchesAcc(t)
-        );
+        if (shouldCreateHeader) {
+          currentDate = tDate;
+
+          groupedItems.push({
+            type: 'header',
+            item: currentDate,
+          });
+        }
+
+        groupedItems.push({
+          type: 'txn',
+          item: transformedTxn,
+        });
       });
+
+      return groupedItems;
+    },
+    [],
+  );
+
+  const loadInitial = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const { clause, args } = buildWhereClause(filters, search, walletId);
+      const orderBy = buildOrderBy(sort);
+
+      const result = await db.execute(
+        `
+      SELECT
+        t.*,
+
+        json_object(
+          'id', c.id,
+          'name', c.name,
+          'icon', c.icon
+        ) as category
+
+      FROM transactions t
+
+      LEFT JOIN categories c
+        ON c.id = t.category_id
+
+      ${clause}
+      ${orderBy}
+
+      LIMIT ${LIMIT}
+      `,
+        args,
+      );
+      const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
+        const category = JSON.parse(row.category);
+        const icon = JSON.parse(category.icon);
+        return {
+          ...row,
+          amount: money.fromStored(row.amount),
+          category: { ...category, icon },
+        };
+      });
+      const t = appendTransactionsFromDB([], rows);
+      setTransactions(t);
+      console.log({ rows, LIMIT });
+      if (rows.length < LIMIT) {
+        setHasMore(false);
+      }
+      setCursor(rows[rows.length - 1]);
+    } catch (e) {
+      console.log({ e });
+    } finally {
+      setLoading(false);
     }
-
-    switch (sort) {
-      case 'dateNewFirst':
-      case undefined:
-        filtered.sort((a, b) => {
-          return (
-            new Date(transactionsByIds[b].transactionDate).getTime() -
-            new Date(transactionsByIds[a].transactionDate).getTime()
-          );
-        });
-
-        break;
-      case 'dateOldFirst':
-        filtered.sort((a, b) => {
-          return (
-            new Date(transactionsByIds[a].transactionDate).getTime() -
-            new Date(transactionsByIds[b].transactionDate).getTime()
-          );
-        });
-        break;
-
-      case 'amountHighFirst':
-        filtered.sort((a, b) => {
-          return transactionsByIds[b].amount - transactionsByIds[a].amount;
-        });
-        break;
-      case 'amountLowFirst':
-        filtered.sort((a, b) => {
-          return transactionsByIds[a].amount - transactionsByIds[b].amount;
-        });
-        break;
-
-      default:
-        filtered.sort((a, b) => {
-          return (
-            new Date(transactionsByIds[b].transactionDate).getTime() -
-            new Date(transactionsByIds[a].transactionDate).getTime()
-          );
-        });
-        break;
-    }
-    return filtered;
   }, [
-    matchesType,
-    matchesDate,
-    matchesSearch,
-    matchesCategory,
-    matchesAcc,
     filters,
     sort,
-    transactionsByIds,
-    transactionsIds,
+    walletId,
+    setLoading,
+    appendTransactionsFromDB,
+    setTransactions,
+    search,
+  ]);
+  const loadMore = useCallback(async () => {
+    try {
+      if (!cursor || !hasMore || isLoading) return;
+
+      setLoading(true);
+
+      const { clause, args } = buildWhereClause(
+        { ...filters, date: null },
+        search,
+        walletId,
+      );
+      const orderBy = buildOrderBy(sort);
+      const cursorClause = clause
+        ? `AND (
+            t.transaction_date < ?
+            OR (
+              t.transaction_date = ?
+              AND t.id < ?
+            )
+          )`
+        : `WHERE (
+            t.transaction_date < ?
+            OR (
+              t.transaction_date = ?
+              AND t.id < ?
+            )
+          )`;
+
+      const result = await db.execute(
+        `
+        SELECT
+          t.*,
+
+          json_object(
+            'id', c.id,
+            'name', c.name,
+            'icon', c.icon,
+            'type', c.type
+          ) as category
+
+        FROM transactions t
+
+        LEFT JOIN categories c
+          ON c.id = t.category_id
+
+        ${clause}
+        ${cursorClause}
+
+        ${orderBy}
+
+        LIMIT ${LIMIT}
+        `,
+        [...args, cursor.transaction_date, cursor.transaction_date, cursor.id],
+      );
+      const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
+        const category = JSON.parse(row.category);
+        const icon = JSON.parse(category.icon);
+        return {
+          ...row,
+          amount: money.fromStored(row.amount),
+          category: { ...category, icon },
+        };
+      });
+      console.log({ cursor, rows });
+      const t = appendTransactionsFromDB(transactions, rows);
+      setTransactions(t);
+      if (rows.length < LIMIT) {
+        setHasMore(false);
+      }
+      if (rows.length > 0) {
+        setCursor(rows[rows.length - 1]);
+      }
+    } catch (er) {
+      console.log({ er });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    cursor,
+    hasMore,
+    transactions,
+    setTransactions,
+    appendTransactionsFromDB,
+    isLoading,
+    filters,
+    sort,
+    search,
+    setLoading,
+    walletId,
   ]);
 
-  const deleteTransaction = useCallback(
-    (transactionId: string) => {
-      if (!transactionsByIds) return;
-      const t = transactionsByIds[transactionId];
-      updateBudgetSpentForTransaction(t, 'delete');
-      removeTransaction(t);
-      deSelectTransaction(transactionId);
+  const addTransaction = useCallback(
+    async (tx: TTransaction) => {
+      console.log({ tx });
+
+      // 2. Persist to DB
+      await txnRepo.create({
+        ...tx,
+      });
+
+      // 3. Optional: refresh if strict consistency needed
+      await loadInitial(); // uncomment if you want exact DB sync
     },
-    [
-      removeTransaction,
-      deSelectTransaction,
-      transactionsByIds,
-      updateBudgetSpentForTransaction,
-    ],
+    [loadInitial],
   );
 
-  const totalIncome = useMemo(() => {
-    if (!transactionsByIds) return 0;
-    return filteredTransactions.reduce((prev, curr) => {
-      if (transactionsByIds[curr].type === 'expense') {
-        return prev;
-      } else {
-        return prev + transactionsByIds[curr].amount;
+  const updateTransaction = useCallback(
+    async (txn: TTransaction) => {
+      try {
+        console.log({ txn });
+        await txnRepo.update(txn.id, { ...txn });
+        updateTxn(txn.id, txn);
+      } catch (err) {
+        console.log('Error while updating transaction: ', err);
       }
-    }, 0);
-  }, [filteredTransactions, transactionsByIds]);
+    },
+    [updateTxn],
+  );
 
-  const totalExpenses = useMemo(() => {
-    if (!transactionsByIds) return 0;
-
-    return filteredTransactions.reduce((prev, curr) => {
-      if (transactionsByIds[curr].type === 'expense') {
-        return prev + transactionsByIds[curr].amount;
-      } else {
-        return prev;
+  const deleteTxn = useCallback(
+    async (id: string) => {
+      try {
+        await txnRepo.delete(id);
+        // Optimistic removal of txn
+        const filtered = transactions.filter(
+          t => t.type === 'header' || (t.type === 'txn' && t.item.id !== id),
+        );
+        setTransactions(removeEmptyGroups(filtered));
+      } catch (e) {
+        console.log('Error while deleting the transaction: ', e);
+        ToastAndroid.show(
+          e instanceof Error ? e.message : 'Error while deleting transaction',
+          2000,
+        );
       }
-    }, 0);
-  }, [transactionsByIds, filteredTransactions]);
-
-  const addNewTransaction = (transaction: TTransaction) => {
-    addTransaction(transaction);
-    updateBudgetSpentForTransaction(transaction);
-  };
-
-  const getFormattedAmount = useCallback(
-    (amount: number | string, keepCurrencySymbol = true) => {
-      return formatAmount(
-        amount,
-        currency.symbol,
-        numberFormat === 'lakhs' ? 'indian' : 'international',
-        keepCurrencySymbol,
-      );
     },
-    [currency, numberFormat],
+    [transactions, setTransactions, removeEmptyGroups],
   );
-
-  const updateATransaction = useCallback(
-    (id: string, updated: TTransaction, original: TTransaction) => {
-      updateBudgetForTransactionUpdate(updated, original);
-      updateTransaction(id, updated);
-    },
-    [updateTransaction, updateBudgetForTransactionUpdate],
-  );
-
-  const undoTransactionDelete = useCallback(() => {
-    if (!pendingDelete) return;
-    undoDelete();
-    updateBudgetSpentForTransaction(pendingDelete);
-  }, [undoDelete, pendingDelete, updateBudgetSpentForTransaction]);
 
   return {
-    totalExpenses,
-    totalIncome,
-    filteredTransactions,
-    search,
-    setSearch,
-    addNewTransaction,
-    updateATransaction,
-    deleteTransaction,
-    getFormattedAmount,
-    transactionsByIds,
-    undoTransactionDelete,
+    transactions,
+    loadInitial,
+    loadMore,
+    refresh: loadInitial,
+    addTransaction,
+    updateTransaction,
+    deleteTxn,
+    hasMore,
   };
 };
 

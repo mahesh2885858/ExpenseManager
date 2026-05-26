@@ -9,7 +9,7 @@ type TUIStore = {
 };
 
 type TUIStoreActions = {
-  setThem: (theme: TTheme) => void;
+  setTheme: (theme: TTheme) => void;
   setNumberFormat: (format: TNumberFormat) => void;
 };
 
@@ -20,7 +20,7 @@ const useUIStore = create<PositionStore>()(
     set => ({
       theme: 'system',
       numberFormat: 'lakhs',
-      setThem(theme) {
+      setTheme(theme) {
         set(() => ({
           theme,
         }));

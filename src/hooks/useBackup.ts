@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import * as ScopedStorage from 'react-native-scoped-storage';
 import { APP_NAME_EXPORT_DATA, BACKUP_VERSION } from '../common';
+import useBudgetStore from '../stores/budgetStore';
 import useCategoriesStore from '../stores/categoriesStore';
 import useSettingsStore from '../stores/settingsStore';
 import useTransactionsStore from '../stores/transactionsStore';
@@ -17,10 +18,8 @@ import {
   TWallet,
 } from '../types';
 import { getValidData } from '../utils/validateImportedData';
-import useWallets from './useAccounts';
 import useCategories from './useCategories';
-import useBudgets from './useBudgets';
-import useBudgetStore from '../stores/budgetStore';
+import useWallets from './useWallets';
 
 const useBackup = () => {
   const { wallets } = useWallets();
@@ -171,7 +170,7 @@ const useBackup = () => {
         const accountIds = new Set(validData.wallets?.map(a => a.id));
 
         validData.transactions = validData.transactions?.filter(t => {
-          if (!accountIds.has(t.walletId)) {
+          if (!accountIds.has(t.wallet_id)) {
             itemsSkipped.transactions += 1;
             return false;
           }

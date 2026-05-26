@@ -9,14 +9,14 @@ ExpenseManager is a mobile application that allows users to manage their account
 ## Screenshots
 
 <p align="center">
-<img src="assets/images/screenshots/homeScreen.jpg" width="30%">
-<img src="assets/images/screenshots/transactions.jpg" width="30%">
-<img src="assets/images/screenshots/addExpense.jpg" width="30%">
+<img src="assets/images/screenshots/Welcome_screen.jpg" width="30%">
+<img src="assets/images/screenshots/Wallet_setup.jpg" width="30%">
+<img src="assets/images/screenshots/Currency_picker.jpg" width="30%">
 <p>
 <p align="center">
-<img src="assets/images/screenshots/Filters.jpg" width="30%">
-<img src="assets/images/screenshots/settings.jpg" width="30%">
-<img src="assets/images/screenshots/graphMonthly.jpg" width="30%">
+<img src="assets/images/screenshots/HomeScreen_two.jpg" width="30%">
+<img src="assets/images/screenshots/Amount_input.jpg" width="30%">
+<img src="assets/images/screenshots/Budget_screen.jpg" width="30%">
 <p>
 
 ## Features

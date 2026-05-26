@@ -14,7 +14,8 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import useUIStore from '../../stores/uiStore';
 import { TNumberFormat } from '../../types';
 import { formatAmount } from '../../utils';
-import useWallets from '../../hooks/useAccounts';
+import useWallets from '../../hooks/useWallets';
+import AppText from '../../components/molecules/AppText';
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
 const AnimatedView = createAnimatedComponent(View);
@@ -89,14 +90,8 @@ const NumberFormat = (props: Props) => {
           source={'numeric'}
           size={textSize.xl}
         />
-        <View
-          style={[
-            {
-              gap: spacing.sm,
-            },
-          ]}
-        >
-          <Text
+        <View>
+          <AppText.Regular
             style={[
               styles.settingTitle,
               {
@@ -105,8 +100,8 @@ const NumberFormat = (props: Props) => {
             ]}
           >
             Number format
-          </Text>
-          <Text
+          </AppText.Regular>
+          <AppText.Regular
             style={[
               styles.settingDesc,
               {
@@ -115,7 +110,7 @@ const NumberFormat = (props: Props) => {
             ]}
           >
             {uCFirst(numberFormat)}
-          </Text>
+          </AppText.Regular>
         </View>
       </View>
       <View style={[styles.themeOptContainer]}>
@@ -195,7 +190,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    marginTop: spacing.lg,
+    marginTop: spacing.lg + 5,
     position: 'relative',
   },
   highlightBox: {

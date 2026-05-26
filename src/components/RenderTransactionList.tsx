@@ -1,0 +1,124 @@
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
+import { FlashList } from '@shopify/flash-list';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { Snackbar } from 'react-native-paper';
+import { spacing, useAppTheme } from '../../theme';
+import useBottomSheetModal from '../hooks/useBottomSheetModal';
+import useFetchRecords from '../hooks/useFetchRecords';
+import useTransactions from '../hooks/useTransactions';
+import TransactionDetailsSheet from '../screens/TransactionDetails/TransactionDetailsSheet';
+import useTransactionsStore from '../stores/transactionsStore';
+import { TTransaction } from '../types';
+import AppText from './molecules/AppText';
+import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
+import RenderTransaction from './RenderTransaction';
+
+const RenderTransactionList = ({
+  transactions,
+  scrollDisabled = false,
+  onDeleteCallback = undefined,
+}: {
+  transactions: TTransaction[];
+  renderSeeAll?: boolean;
+  scrollDisabled?: boolean;
+  onDeleteCallback?: (id: string) => void;
+}) => {
+  const theme = useAppTheme();
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<null | TTransaction>(null);
+  const { fetchRecents } = useFetchRecords();
+  const { dismissAll } = useBottomSheetR();
+  const { deleteTxn } = useTransactions();
+  const pendingDelete = useTransactionsStore(state => state.pendingDelete);
+  // const confirmDelete = useTransactionsStore(state => state.confirmDelete);
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
+    () => {
+      setSelectedTransaction(null);
+    },
+  );
+
+  const onItemPress = useCallback((t: TTransaction) => {
+    setSelectedTransaction(t);
+  }, []);
+
+  const onDeletePress = useCallback(
+    (t: TTransaction) => {
+      deleteTxn(t.id);
+      dismissAll();
+      fetchRecents();
+      if (onDeleteCallback) {
+        onDeleteCallback(t.id);
+      }
+    },
+    [dismissAll, onDeleteCallback, fetchRecents, deleteTxn],
+  );
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      handlePresent();
+    }
+  }, [selectedTransaction, handlePresent]);
+  return (
+    <>
+      <FlashList
+        scrollEnabled={!scrollDisabled}
+        contentContainerStyle={styles.container}
+        ListEmptyComponent={EmptyTransactionsComponent}
+        data={transactions}
+        showsVerticalScrollIndicator={false}
+        renderItem={props => (
+          <RenderTransaction onItemPress={onItemPress} item={props.item} />
+        )}
+        keyExtractor={item => item.id}
+      />
+      <TransactionDetailsSheet
+        handleSheetChanges={handleSheetChange}
+        ref={btmShtRef}
+        selectedTransaction={selectedTransaction}
+        onDeletePress={onDeletePress}
+      />
+      <Snackbar
+        duration={1500}
+        action={{
+          label: 'undo',
+          onPress: () => {
+            // undoTransactionDelete();
+          },
+          textColor: theme.colors.onSurfaceVariant,
+        }}
+        style={[
+          styles.snackBar,
+          { backgroundColor: theme.colors.surfaceVariant },
+        ]}
+        onDismiss={() => {
+          // confirmDelete();
+        }}
+        visible={!!pendingDelete}
+      >
+        <AppText.Regular
+          style={[
+            {
+              color: theme.colors.onSurfaceVariant,
+            },
+          ]}
+        >
+          Transaction deleted
+        </AppText.Regular>
+      </Snackbar>
+    </>
+  );
+};
+
+export default RenderTransactionList;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 100,
+    paddingTop: spacing.sm,
+  },
+  snackBar: {
+    bottom: 60,
+    zIndex: 1000,
+  },
+});

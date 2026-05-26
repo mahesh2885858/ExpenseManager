@@ -23,6 +23,7 @@ type TWalletStoreActions = {
   selectWallet: (id: string) => void;
   setDefaultWalletId: (id: string | null) => void;
   importWallets: (wallets: TWallet[]) => void;
+  setWallets: (wallets: TWallet[]) => void;
   setSelectedWalletId: (id: string | null) => void;
   setCurrency: (cur: TCurrency) => void;
 };
@@ -85,10 +86,22 @@ const useWalletStore = create<PositionStore>()(
       setCurrency: cur => {
         set({ currency: cur });
       },
+      setWallets: wallets => {
+        set({ wallets });
+      },
     }),
     {
       name: 'wallet-storage',
       storage: createJSONStorage(zustandStorage),
+      partialize(state) {
+        return {
+          isInitialSetupDone: state.isInitialSetupDone,
+          currency: state.currency,
+          defaultWalletId: state.defaultWalletId,
+          selectedWalletId: state.selectedWalletId,
+          userName: state.userName,
+        };
+      },
       version: 1,
     },
   ),

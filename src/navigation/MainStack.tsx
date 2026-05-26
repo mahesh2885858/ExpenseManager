@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import InitialAccountAmountSetup from '../screens/InitialSetup/InitialAccountAmountSetup';
-import InitialAccountNameSetup from '../screens/InitialSetup/InitialAccountNameSetup';
+import WalletSetup from '../screens/InitialSetup/WalletSetup';
+import WelcomeScreen from '../screens/InitialSetup/WelcomeScreen';
 import useWalletStore from '../stores/walletsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
@@ -15,26 +15,36 @@ import ManageCategories from '../screens/ManageCategories';
 import TransactionSort from '../screens/TransactionSort';
 import BudgetDetails from '../screens/BudgetDetails';
 import AddOrEditBudget from '../screens/AddOrEditBudget';
+import AddCategory from '../screens/AddCategory';
+import ProfileSetup from '../screens/InitialSetup/ProfileSetup';
+import useProfileStore from '../stores/profileStore';
+import SelectProfile from '../screens/SelectProfile';
 const Stack = createNativeStackNavigator<TRootStackParamList>();
 
 const MainStack = () => {
   const isInitialSetupDone = useWalletStore(state => state.isInitialSetupDone);
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
   return (
     <Stack.Navigator>
       {!isInitialSetupDone ? (
         <>
           <Stack.Screen
-            name="NameInput"
+            name="Welcome"
             options={{ headerShown: false }}
-            component={InitialAccountNameSetup}
+            component={WelcomeScreen}
           />
           <Stack.Screen
-            name="AmountInput"
+            name="ProfileSetup"
             options={{ headerShown: false }}
-            component={InitialAccountAmountSetup}
+            component={ProfileSetup}
+          />
+          <Stack.Screen
+            name="WalletSetup"
+            options={{ headerShown: false }}
+            component={WalletSetup}
           />
         </>
-      ) : (
+      ) : selectedProfileId ? (
         <>
           <Stack.Screen
             name="MainBottomTabs"
@@ -118,7 +128,31 @@ const MainStack = () => {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="AddCategory"
+            component={AddCategory}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="SelectProfile"
+            component={SelectProfile}
+            options={{
+              headerShown: false,
+              presentation: 'fullScreenModal',
+            }}
+          />
         </>
+      ) : (
+        <Stack.Screen
+          name="SelectProfile"
+          component={SelectProfile}
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+          }}
+        />
       )}
     </Stack.Navigator>
   );

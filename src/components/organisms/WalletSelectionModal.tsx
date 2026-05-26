@@ -7,7 +7,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Icon, RadioButton } from 'react-native-paper';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
@@ -15,7 +15,9 @@ import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useWalletStore from '../../stores/walletsStore';
 import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import CreateNewAccount from './CreateNewAccount';
+import AppText from '../molecules/AppText';
+import CreateNewWallet from './CreateNewWallet';
+import { useTranslation } from 'react-i18next';
 
 type TProps = {
   ref: any;
@@ -32,7 +34,7 @@ const WalletSelectionModal = (props: TProps) => {
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
   const setDefaultWalletId = useWalletStore(state => state.setDefaultWalletId);
   const defaultWalletId = useWalletStore(state => state.defaultWalletId);
-
+  const { t } = useTranslation();
   const {
     btmShtRef: newWalletBtmSheet,
     handlePresent: handlePresentNewWalletBtmSheet,
@@ -62,13 +64,12 @@ const WalletSelectionModal = (props: TProps) => {
             gs.itemsCenter,
             {
               marginBottom: spacing.md,
-              marginTop: spacing.md,
+              marginTop: spacing.xs,
             },
           ]}
         >
-          <Text
+          <AppText.Bold
             style={[
-              gs.fontBold,
               gs.fullFlex,
               {
                 fontSize: textSize.lg,
@@ -76,8 +77,8 @@ const WalletSelectionModal = (props: TProps) => {
               },
             ]}
           >
-            Select Wallet
-          </Text>
+            {t('wallets.select')}
+          </AppText.Bold>
           <PressableWithFeedback
             style={[
               {
@@ -86,19 +87,14 @@ const WalletSelectionModal = (props: TProps) => {
             ]}
             onPress={handlePresentNewWalletBtmSheet}
           >
-            <Icon
-              source={'plus'}
-              size={textSize.xxxl}
-              color={colors.onTertiaryContainer}
-            />
+            <Icon source={'plus'} size={textSize.xxxl} color={colors.primary} />
           </PressableWithFeedback>
         </View>
         <FlashList
           ListEmptyComponent={
             <View style={[gs.fullFlex, gs.centerItems]}>
-              <Text
+              <AppText.Bold
                 style={[
-                  gs.fontBold,
                   gs.centerText,
                   {
                     color: colors.onSurfaceDisabled,
@@ -108,8 +104,8 @@ const WalletSelectionModal = (props: TProps) => {
                   },
                 ]}
               >
-                No wallets yet. Start by creating one.
-              </Text>
+                {t('wallets.emptyList')}
+              </AppText.Bold>
             </View>
           }
           style={[styles.listStyle]}
@@ -144,7 +140,7 @@ const WalletSelectionModal = (props: TProps) => {
                   color={colors.inversePrimary}
                   value={item.name}
                 />
-                <Text
+                <AppText.Regular
                   style={[
                     gs.fullFlex,
                     {
@@ -154,7 +150,7 @@ const WalletSelectionModal = (props: TProps) => {
                   ]}
                 >
                   {item.name}
-                </Text>
+                </AppText.Regular>
                 <PressableWithFeedback
                   onPress={() => setDefaultWalletId(item.id)}
                   style={[
@@ -168,13 +164,13 @@ const WalletSelectionModal = (props: TProps) => {
                     color={colors.primary}
                   />
                   {isDefault && (
-                    <Text
+                    <AppText.Regular
                       style={[
                         { fontSize: textSize.xs, color: colors.onBackground },
                       ]}
                     >
                       Default
-                    </Text>
+                    </AppText.Regular>
                   )}
                 </PressableWithFeedback>
               </PressableWithFeedback>
@@ -182,7 +178,7 @@ const WalletSelectionModal = (props: TProps) => {
           }}
         />
       </View>
-      <CreateNewAccount
+      <CreateNewWallet
         handleSheetChanges={handleNewWalletSheetChanges}
         ref={newWalletBtmSheet}
       />

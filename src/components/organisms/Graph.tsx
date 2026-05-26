@@ -46,7 +46,7 @@ const Graph = (props: TProps) => {
         const dates = getDatesOfWeek(props.selectedRange[0]);
         const data = dates.map(date => {
           const dataForThisDay = props.data.filter(d =>
-            isSameDay(d.transactionDate, date),
+            isSameDay(d.transaction_date, date),
           );
           const expense = getNetForGivenTransactions(
             dataForThisDay.filter(d => d.type === 'expense'),
@@ -114,8 +114,8 @@ const Graph = (props: TProps) => {
           const end = week[1];
           const trnsForWeek = props.data.filter(tr => {
             return (
-              !isBefore(tr.transactionDate, start) &&
-              !isAfter(tr.transactionDate, end)
+              !isBefore(tr.transaction_date, start) &&
+              !isAfter(tr.transaction_date, end)
             );
           });
           const expense = trnsForWeek.filter(d => d.type === 'expense');
@@ -185,8 +185,8 @@ const Graph = (props: TProps) => {
           const end = month[1];
           const trnsForMonth = props.data.filter(tr => {
             return (
-              !isBefore(tr.transactionDate, start) &&
-              !isAfter(tr.transactionDate, end)
+              !isBefore(tr.transaction_date, start) &&
+              !isAfter(tr.transaction_date, end)
             );
           });
           const expense = trnsForMonth.filter(d => d.type === 'expense');

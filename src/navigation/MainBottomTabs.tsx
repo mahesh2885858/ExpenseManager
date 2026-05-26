@@ -9,6 +9,7 @@ import Reports from '../screens/Reports';
 import Transactions from '../screens/Transactions';
 import { TBottomTabParamList } from '../types';
 import Budget from '../screens/Budgets';
+import Home from '../screens/Home';
 const BottomTab = createBottomTabNavigator<TBottomTabParamList>();
 
 const tabBarIcon = (
@@ -23,7 +24,7 @@ const tabBarIcon = (
 };
 
 const renderTabBar = (props: BottomTabBarProps) => <MyTabBar {...props} />;
-
+const CustomButtonScreen = () => null;
 const MainBottomTabs = () => {
   return (
     <BottomTab.Navigator
@@ -36,8 +37,24 @@ const MainBottomTabs = () => {
       }}
     >
       <BottomTab.Screen
+        name="Home"
+        component={Home}
+        options={{
+          tabBarIcon: props => tabBarIcon(props, 'history'),
+          headerShown: false,
+        }}
+      />
+      <BottomTab.Screen
         name="Transactions"
         component={Transactions}
+        options={{
+          tabBarIcon: props => tabBarIcon(props, 'history'),
+          headerShown: false,
+        }}
+      />
+      <BottomTab.Screen
+        name="CustomButton"
+        component={CustomButtonScreen}
         options={{
           tabBarIcon: props => tabBarIcon(props, 'history'),
           headerShown: false,

@@ -1,7 +1,10 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useCallback, useMemo, useState } from 'react';
+import { roundValue, uCFirst } from 'commonutil-core';
+import { format } from 'date-fns';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, ProgressBar } from 'react-native-paper';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppTheme,
@@ -12,14 +15,13 @@ import {
 } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import RenderTransactions from '../../components/RenderTransactions';
-import useTransactions from '../../hooks/useTransactions';
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
-import useBudgetStore from '../../stores/budgetStore';
-import { TRootStackParamList } from '../../types';
-import { roundValue, uCFirst } from 'commonutil-core';
-import { format } from 'date-fns';
+import AppText from '../../components/molecules/AppText';
+import RenderTransactionList from '../../components/RenderTransactionList';
+import { budgetRepo } from '../../db/repositories/budgets.repo';
 import useBudgets from '../../hooks/useBudgets';
+import useHelpers from '../../hooks/useHelpers';
+import { TRootStackParamList, TTransaction } from '../../types';
+import useFetchRecords from '../../hooks/useFetchRecords';
 
 const dateFormatString = 'MMM dd, yyyy';
 
@@ -28,16 +30,18 @@ const BudgetDetails = () => {
   const route = useRoute<RouteProp<TRootStackParamList, 'BudgetDetails'>>();
   const styles = createStyles(colors);
   const { top } = useSafeAreaInsets();
-  const { getFormattedAmount } = useTransactions();
-  const { getTransactionIdsForBudget, getBudgetById } = useBudgets();
-  const removeBudget = useBudgetStore(state => state.removeBudget);
+  const { getFormattedAmount } = useHelpers();
+  const { fetchBudgets } = useFetchRecords();
+  const { deleteABudget } = useBudgets();
   const navigation = useNavigation();
   const animHeight = useSharedValue(0);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
+  const [budget, setBudget] = useState(route.params.budget);
+
   const getProgressColor = (progress: number) => {
-    if (progress <= 0.5) return colors.success;
-    if (progress <= 0.8) return colors.primary;
+    if (progress <= 0.5) return colors.primary;
+    if (progress <= 0.8) return colors.secondary;
     return colors.error;
   };
 
@@ -56,29 +60,67 @@ const BudgetDetails = () => {
     setIsDeleteAlertOpen(false);
   }, [animHeight]);
 
-  const deleteItem = useCallback(() => {
-    removeBudget(route.params.budget.id);
-    navigation.goBack();
-  }, [route, removeBudget, navigation]);
+  const deleteItem = useCallback(async () => {
+    try {
+      deleteABudget(budget.id);
+      navigation.goBack();
+    } catch (e) {
+      console.log('Error while deleting budget: ', e);
+    }
+  }, [budget, deleteABudget, navigation]);
 
   const budgetName = route.params.budget.name ?? 'Unknown';
-  const budget = getBudgetById(route.params.budget.id);
   const budgetPeriodLabel = useMemo(() => {
     if (!budget) return 'No budget';
-    if (budget.period.type === 'one time') {
+    if (budget.recurring_type === 'one-time') {
       return (
-        format(budget.period.range.start, dateFormatString) +
+        format(budget.start_date, dateFormatString) +
         ' - ' +
-        format(budget.period.range.end, dateFormatString)
+        format(budget.end_date, dateFormatString)
       );
     } else {
-      return uCFirst(budget.period.type);
+      return uCFirst(budget.recurring_type);
     }
   }, [budget]);
 
-  const progress = budget ? budget.spent / budget.amount : 0;
+  const progress =
+    (budget.spent === undefined ? 0 : budget.spent) / budget.amount;
 
-  const transactionIds = budget ? getTransactionIdsForBudget(budget.id) : [];
+  const [transactions, setTransactions] = useState<TTransaction[]>([]);
+
+  const fetchTransactionsForThisBudget = useCallback(async () => {
+    const data = await budgetRepo.getBudgetTransactions({
+      budgetId: budget.id,
+      recurring_type: budget.recurring_type,
+      start_date: budget.start_date,
+      end_date: budget.end_date,
+    });
+
+    setTransactions(data);
+  }, [budget]);
+
+  const fetchBudgetDetails = useCallback(async () => {
+    try {
+      const id = budget.id;
+      const budgetDetails = await budgetRepo.getById(id);
+      setBudget(budgetDetails[0]);
+    } catch (err) {
+      console.log('Error while fetching budget details: ', err);
+    }
+  }, [budget.id]);
+
+  const onItemDelete = useCallback(
+    (id: string) => {
+      fetchTransactionsForThisBudget();
+      fetchBudgetDetails();
+      fetchBudgets();
+    },
+    [fetchTransactionsForThisBudget, fetchBudgets, fetchBudgetDetails],
+  );
+
+  useEffect(() => {
+    fetchTransactionsForThisBudget();
+  }, [fetchTransactionsForThisBudget]);
 
   return (
     <View style={[styles.container, { marginTop: top }]}>
@@ -91,7 +133,7 @@ const BudgetDetails = () => {
             color={colors.onBackground}
           />
         </PressableWithFeedback>
-        <Text style={[styles.headerText]}>{budgetName}</Text>
+        <AppText.Bold style={[styles.headerText]}>{budgetName}</AppText.Bold>
         <PressableWithFeedback onPress={expand}>
           <Icon
             source={isDeleteAlertOpen ? 'close' : 'delete'}
@@ -111,22 +153,28 @@ const BudgetDetails = () => {
           },
         ]}
       >
-        <Text style={[styles.deleteBoxText]}>This can not be undone.</Text>
-        <Text style={[styles.deleteBoxText]}>
+        <AppText.Regular style={[styles.deleteBoxText]}>
+          This can not be undone.
+        </AppText.Regular>
+        <AppText.Regular style={[styles.deleteBoxText]}>
           Are you sure you want to delete this budget?
-        </Text>
+        </AppText.Regular>
         <View style={[styles.deleteBtnBox]}>
           <PressableWithFeedback
             onPress={collapse}
             style={[styles.deleteBtn, styles.cancelBtn]}
           >
-            <Text style={[styles.cancelBtnText]}>Cancel</Text>
+            <AppText.Regular style={[styles.cancelBtnText]}>
+              Cancel
+            </AppText.Regular>
           </PressableWithFeedback>
           <PressableWithFeedback
             onPress={deleteItem}
             style={[styles.deleteBtn, styles.dltBtn]}
           >
-            <Text style={[styles.dltBtnText]}>Delete</Text>
+            <AppText.Regular style={[styles.dltBtnText]}>
+              Delete
+            </AppText.Regular>
           </PressableWithFeedback>
         </View>
       </Animated.View>
@@ -153,35 +201,46 @@ const BudgetDetails = () => {
         />
         <View style={[styles.budgetBottomRow]}>
           <View style={[styles.budgetRemaining]}>
-            <Text style={[styles.budgetRemainText]}>
+            <AppText.Regular style={[styles.budgetRemainText]}>
               {getFormattedAmount(budget.spent)}
-            </Text>
-            <Text style={[styles.budgetRemainTextPrep]}>Spent</Text>
+            </AppText.Regular>
+            <AppText.Regular style={[styles.budgetRemainTextPrep]}>
+              Spent
+            </AppText.Regular>
           </View>
-          <Text style={[styles.budgetSpentPercentage]}>
+          <AppText.Regular style={[styles.budgetSpentPercentage]}>
             {roundValue(progress * 100)}%
-          </Text>
+          </AppText.Regular>
         </View>
       </View>
       <View style={[styles.budgetCard]}>
         <View style={[styles.budgetBottomRow]}>
           <View style={[styles.budgetRemaining]}>
-            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+            <AppText.Regular
+              style={[styles.budgetRemainText, styles.mutedText]}
+            >
               Budget Period -
-            </Text>
-            <Text style={[styles.budgetRemainText, styles.mutedText]}>
+            </AppText.Regular>
+            <AppText.Regular
+              style={[styles.budgetRemainText, styles.mutedText]}
+            >
               {budgetPeriodLabel}
-            </Text>
+            </AppText.Regular>
           </View>
         </View>
       </View>
       <View style={[styles.budgetCard]}>
-        <Text style={[styles.spendingText]}>Spendings</Text>
+        <AppText.Regular style={[styles.spendingText]}>
+          Spendings
+        </AppText.Regular>
       </View>
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactions transactions={transactionIds} />
+        <RenderTransactionList
+          onDeleteCallback={onItemDelete}
+          transactions={transactions}
+        />
       </View>
       {/*Transactions for this budget ends*/}
     </View>
@@ -228,10 +287,10 @@ const createStyles = (colors: AppTheme['colors']) => {
       borderRadius: borderRadius.sm,
     },
     cancelBtn: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.secondary,
     },
     cancelBtnText: {
-      color: colors.onPrimary,
+      color: colors.onSecondary,
       fontSize: textSize.md,
     },
     dltBtn: {

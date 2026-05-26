@@ -1,613 +1,125 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Badge, Icon } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import { FlashList } from '@shopify/flash-list';
+import { format } from 'date-fns';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
+import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CommonHeader from '../../components/organisms/CommonHeader';
-import WalletSelectionModal from '../../components/organisms/WalletSelectionModal';
-import RenderTransactions from '../../components/RenderTransactions';
-import useWallets from '../../hooks/useAccounts';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import useCategories from '../../hooks/useCategories';
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
+
+import HeaderText from '../../components/atoms/HeaderText';
+import AppText from '../../components/molecules/AppText';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
+import RenderTransaction from '../../components/RenderTransaction';
 import useTransactions from '../../hooks/useTransactions';
-import useTransactionsStore from '../../stores/transactionsStore';
-import { TTypeFilter } from '../../types';
-import { getDateFilterText } from '../../utils';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import { TTransaction } from '../../types';
+import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
+import useFetchRecords from '../../hooks/useFetchRecords';
+import EmptyTransactionsComponent from '../../components/organisms/EmptyTransactionsComponent';
 
 const Transactions = () => {
-  const { top } = useSafeAreaInsets();
-  const theme = useAppTheme();
-  const { colors } = theme;
-  const filters = useTransactionsStore(state => state.filters);
-  const setFilters = useTransactionsStore(state => state.setFilters);
-  const selectedSort = useTransactionsStore(state => state.sort);
-  const onSortChange = useTransactionsStore(state => state.setSort);
-  const transactionByIds = useTransactionsStore(
-    state => state.transactionsByIds,
-  );
-  const [search, setSearch] = useState('');
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+  const { t } = useTranslation();
+  const { loadInitial, transactions, loadMore, deleteTxn } = useTransactions();
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<null | TTransaction>(null);
 
-  const {
-    selectedWallet: selectedAccount,
-    setSelectedWalletId: setSelectedAccountId,
-    getIncomeExpenseForWallet: getIncomeExpenseForAcc,
-  } = useWallets();
+  const { dismissAll } = useBottomSheetR();
+  const { fetchRecents } = useFetchRecords();
 
-  const {
-    totalExpenses,
-    totalIncome,
-
-    filteredTransactions,
-    getFormattedAmount,
-  } = useTransactions({
-    filter: { ...filters, accId: selectedAccount?.id },
-    sort: selectedSort,
-  });
-
-  const navigation = useNavigation();
-
-  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
-
-  const { categories } = useCategories();
-
-  const accountName = useMemo(() => {
-    return selectedAccount?.name ?? 'None';
-  }, [selectedAccount]);
-
-  const accountBalance = useMemo(() => {
-    return getIncomeExpenseForAcc(selectedAccount?.id ?? '').balance;
-  }, [selectedAccount, getIncomeExpenseForAcc]);
-
-  const navigateToFilters = useCallback(() => {
-    navigation.navigate('TransactionFilters');
-  }, [navigation]);
-
-  const transactionsToRender = useMemo(() => {
-    if (!transactionByIds) return [];
-    return search.trim().length === 0
-      ? filteredTransactions
-      : filteredTransactions.filter(
-          t =>
-            transactionByIds[t].amount.toString().includes(search) ||
-            transactionByIds[t].description
-              ?.toLowerCase()
-              .includes(search.toLowerCase()),
-        );
-  }, [filteredTransactions, search, transactionByIds]);
-
-  const dateFilterText = useMemo(() => {
-    if (filters.date) {
-      return getDateFilterText(filters.date);
-    } else return 'This Month';
-  }, [filters]);
-
-  const categoryFilterText = useMemo(() => {
-    if (filters.categoryId) {
-      return categories.find(cat => cat.id === filters.categoryId)?.name ?? '';
-    } else return '';
-  }, [filters, categories]);
-
-  const typeFilterText = useMemo(() => {
-    return filters.type === 'income'
-      ? 'Income'
-      : filters.type === 'expense'
-      ? 'Expense'
-      : '';
-  }, [filters]);
-
-  const resetTypeFilter = useCallback(() => {
-    setFilters({
-      type: null,
-    });
-  }, [setFilters]);
-
-  const resetCategoryFilter = useCallback(() => {
-    setFilters({
-      categoryId: null,
-    });
-  }, [setFilters]);
-
-  const isExpenseFilterOn = useMemo(() => {
-    return filters.type === 'expense';
-  }, [filters]);
-
-  const isIncomeFilterOn = useMemo(() => {
-    return filters.type === 'income';
-  }, [filters]);
-
-  const toggleTypeFilter = useCallback(
-    (type: TTypeFilter) => {
-      if (type === filters.type) {
-        setFilters({ type: null });
-      } else {
-        setFilters({
-          type: type,
-        });
-      }
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
+    () => {
+      setSelectedTransaction(null);
     },
-    [setFilters, filters],
   );
 
-  const isAnyFilterApplied = useMemo(() => {
-    const { date, type, categoryId } = filters;
-    return (!!date && !date.isThisMonth) || !!type || !!categoryId;
-  }, [filters]);
+  const onItemPress = useCallback((txn: TTransaction) => {
+    setSelectedTransaction(txn);
+  }, []);
 
-  const isSortApplied = useMemo(() => {
-    return selectedSort && selectedSort !== 'dateNewFirst';
-  }, [selectedSort]);
+  const onDeletePress = useCallback(
+    async (txn: TTransaction) => {
+      await deleteTxn(txn.id);
+      dismissAll();
+      fetchRecents();
+    },
+    [dismissAll, deleteTxn, fetchRecents],
+  );
 
-  const navigateToSort = useCallback(() => {
-    navigation.navigate('TransactionSort');
-  }, [navigation]);
+  useEffect(() => {
+    loadInitial();
+  }, [loadInitial]);
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      handlePresent();
+    }
+  }, [selectedTransaction, handlePresent]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: top + 5,
-        },
-      ]}
-    >
-      {/* header section */}
-      <CommonHeader />
-
-      {/* active filters section */}
-      <View
-        style={[
-          gs.flexRow,
-          {
-            paddingHorizontal: spacing.md,
-            marginTop: spacing.xs,
-            gap: spacing.sm,
-          },
-        ]}
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
+    <ScreenWrapper style={[gs.fullFlex]}>
+      <View style={[styles.header]}>
+        <HeaderText header={t('txns.title')} />
+      </View>
+      <View style={[styles.listContainer]}>
+        <FlashList
           contentContainerStyle={{
-            gap: spacing.sm,
-          }}
-        >
-          <PressableWithFeedback
-            onPress={() => navigation.navigate('TransactionFilters')}
-            style={[
-              gs.flexRow,
-              gs.itemsCenter,
-              {
-                borderRadius: borderRadius.pill,
-                backgroundColor: colors.surfaceVariant,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
-                gap: spacing.sm,
-              },
-            ]}
-          >
-            <Icon
-              source={'calendar-range'}
-              color={colors.onSurfaceVariant}
-              size={textSize.md}
-            />
-            <Text style={[{ color: colors.onSurfaceVariant }]}>
-              {dateFilterText}
-            </Text>
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            onPress={resetTypeFilter}
-            hidden={typeFilterText.length <= 0}
-            style={[
-              gs.flexRow,
-              gs.itemsCenter,
-              {
-                borderRadius: borderRadius.pill,
-                backgroundColor: colors.surfaceVariant,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
-                gap: spacing.sm,
-              },
-            ]}
-          >
-            <Icon
-              source={'calendar-range'}
-              color={colors.onSurfaceVariant}
-              size={textSize.md}
-            />
-            <Text style={[{ color: colors.onSurfaceVariant }]}>
-              {typeFilterText}
-            </Text>
-            <Icon
-              source={'close'}
-              color={colors.onSurfaceVariant}
-              size={textSize.md}
-            />
-          </PressableWithFeedback>
-          <PressableWithFeedback
-            onPress={resetCategoryFilter}
-            hidden={categoryFilterText.length <= 0}
-            style={[
-              gs.flexRow,
-              gs.itemsCenter,
-              {
-                borderRadius: borderRadius.pill,
-                backgroundColor: colors.surfaceVariant,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
-                gap: spacing.sm,
-              },
-            ]}
-          >
-            <Icon
-              source={'calendar-range'}
-              color={colors.onSurfaceVariant}
-              size={textSize.md}
-            />
-            <Text style={[{ color: colors.onSurfaceVariant }]}>
-              {categoryFilterText}
-            </Text>
-            <Icon
-              source={'close'}
-              color={colors.onSurfaceVariant}
-              size={textSize.md}
-            />
-          </PressableWithFeedback>
-        </ScrollView>
-      </View>
-
-      {/* summary */}
-      <View
-        style={[
-          styles.summary,
-          {
-            backgroundColor: colors.surfaceVariant,
-            marginTop: spacing.md,
-          },
-        ]}
-      >
-        <View
-          style={[
-            gs.flexRow,
-            gs.justifyBetween,
-            {
-              marginTop: spacing.sm,
-            },
-          ]}
-        >
-          <View>
-            <Text
-              style={[
-                styles.balanceTitle,
-                {
-                  color: colors.onSurfaceVariant,
-                },
-              ]}
-            >
-              Your Balance
-            </Text>
-            <View>
-              <Text
-                style={[
-                  styles.balanceText,
-                  {
-                    color: colors.onSurfaceVariant,
-                  },
-                ]}
-              >
-                {getFormattedAmount(accountBalance)}
-              </Text>
-            </View>
-          </View>
-          <PressableWithFeedback
-            onPress={handlePresent}
-            style={[
-              styles.account,
-              {
-                backgroundColor: colors.surface,
-                gap: spacing.xs,
-              },
-            ]}
-          >
-            <Icon
-              source={'wallet-bifold'}
-              size={textSize.md}
-              color={colors.onSurface}
-            />
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={[
-                gs.fullFlex,
-                {
-                  color: colors.onSurface,
-                },
-              ]}
-            >
-              {accountName}
-            </Text>
-            <Icon
-              source={'chevron-down'}
-              size={textSize.md}
-              color={colors.onSurface}
-            />
-          </PressableWithFeedback>
-        </View>
-      </View>
-      <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
-        <PressableWithFeedback
-          disabled={isExpenseFilterOn}
-          onPress={() => toggleTypeFilter('income')}
-          style={[
-            gs.fullFlex,
-            styles.tType,
-            {
-              backgroundColor: colors.surfaceVariant,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              {
-                color: colors.onSurface,
-              },
-            ]}
-          >
-            Income
-          </Text>
-          <Text
-            style={[
-              styles.amountText,
-
-              {
-                color: colors.success,
-                fontSize: textSize.md,
-              },
-            ]}
-          >
-            {isExpenseFilterOn ? '-' : getFormattedAmount(totalIncome)}
-          </Text>
-        </PressableWithFeedback>
-        <PressableWithFeedback
-          onPress={() => toggleTypeFilter('expense')}
-          disabled={isIncomeFilterOn}
-          style={[
-            gs.fullFlex,
-            styles.tType,
-            {
-              backgroundColor: colors.surfaceVariant,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              {
-                color: colors.onSurface,
-              },
-            ]}
-          >
-            Expense
-          </Text>
-          <Text
-            style={[
-              styles.amountText,
-              {
-                color: colors.error,
-                fontSize: textSize.md,
-              },
-            ]}
-          >
-            {isIncomeFilterOn ? '-' : getFormattedAmount(totalExpenses)}
-          </Text>
-        </PressableWithFeedback>
-      </View>
-      {/* summary */}
-
-      {/* search and filter section */}
-      <View
-        style={[
-          styles.searchAndFilter,
-          {
             paddingHorizontal: spacing.md,
-            marginTop: spacing.md,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.search,
-            gs.borderOne,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.outlineVariant,
-            },
-          ]}
-        >
-          <Icon source={'magnify'} size={textSize.lg} />
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholderTextColor={colors.onSurfaceVariant}
-            style={[
-              styles.searchInput,
-              {
-                backgroundColor: colors.surface,
-
-                color: colors.onSurface,
-              },
-            ]}
-            placeholder="Search transactions"
-          />
-        </View>
-        <PressableWithFeedback
-          onPress={navigateToFilters}
-          style={[
-            styles.filter,
-            gs.borderOne,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.outlineVariant,
-            },
-          ]}
-        >
-          <Icon source="filter" size={textSize.md} color={colors.onSurface} />
-          {isAnyFilterApplied && <Badge style={styles.filterBadge} size={10} />}
-          {/* <Text style={[{ color: colors.inverseSurface }]}>Filter</Text> */}
-        </PressableWithFeedback>
-        <PressableWithFeedback
-          onPress={
-            isSortApplied
-              ? () => {
-                  onSortChange('dateNewFirst');
-                }
-              : navigateToSort
+          }}
+          ListEmptyComponent={EmptyTransactionsComponent}
+          keyExtractor={item =>
+            item.type === 'header' ? item.item.toISOString() : item.item.id
           }
-          style={[
-            styles.filter,
-            gs.borderOne,
-            {
-              backgroundColor: isSortApplied
-                ? colors.primaryContainer
-                : colors.surface,
-              borderColor: colors.outlineVariant,
-            },
-          ]}
-        >
-          <Icon
-            source="sort"
-            size={textSize.md}
-            color={isSortApplied ? colors.onPrimaryContainer : colors.onSurface}
-          />
-        </PressableWithFeedback>
+          getItemType={item => {
+            // To achieve better performance, specify the type based on the item
+            return item.type === 'header' ? 'sectionHeader' : 'row';
+          }}
+          data={transactions}
+          renderItem={({ item }) => {
+            if (item.type === 'header')
+              return (
+                <AppText.Medium style={[styles.sectionHeaderText]}>
+                  {format(item.item, 'MMM - do')}
+                </AppText.Medium>
+              );
+            return (
+              <RenderTransaction item={item.item} onItemPress={onItemPress} />
+            );
+          }}
+          onEndReached={() => {
+            loadMore();
+          }}
+          onEndReachedThreshold={0.2}
+        />
       </View>
-
-      {/* transactions section */}
-      <View
-        style={[
-          gs.fullFlex,
-          {
-            paddingHorizontal: spacing.lg,
-          },
-        ]}
-      >
-        <View style={[gs.fullFlex]}>
-          <RenderTransactions transactions={transactionsToRender} />
-        </View>
-      </View>
-
-      <WalletSelectionModal
+      <TransactionDetailsSheet
         handleSheetChanges={handleSheetChange}
-        onWalletChange={id => setSelectedAccountId(id)}
         ref={btmShtRef}
-        selectedWalletId={selectedAccount?.id ?? ''}
+        selectedTransaction={selectedTransaction}
+        onDeletePress={onDeletePress}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 
 export default Transactions;
 
-const styles = StyleSheet.create({
-  container: {
-    // paddingBottom: 200,
-    flex: 1,
-  },
-  avatar: {
-    height: 45,
-    width: 45,
-  },
-  account: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    maxHeight: 35,
-    width: '40%',
-    elevation: 3,
-  },
-  totalBalance: {
-    width: '100%',
-    marginTop: -10,
-  },
-  amountText: {
-    fontWeight: '700',
-  },
-  ieBox: {
-    flex: 1,
-    paddingLeft: spacing.lg,
-    gap: spacing.xs,
-  },
-  ieBanner: {
-    fontWeight: 'semibold',
-  },
-  summary: {
-    marginHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    paddingBottom: spacing.md,
-    gap: spacing.md,
-  },
-  summaryText: {
-    fontSize: textSize.lg,
-  },
-  tTypeBox: {
-    borderRadius: borderRadius.md,
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.md,
-  },
-  tType: {
-    paddingLeft: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    gap: spacing.xs,
-  },
-  searchAndFilter: {
-    flexDirection: 'row',
-    overflow: 'hidden',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  text: {
-    fontSize: textSize.md,
-    fontWeight: '600',
-  },
-  search: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.pill,
-  },
-  filterBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-  },
-  searchInput: {
-    flex: 1,
-    width: '100%',
-    paddingRight: spacing.lg,
-    borderRadius: borderRadius.pill,
-  },
-  filter: {
-    padding: spacing.sm,
-    borderRadius: borderRadius.pill,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    position: 'relative',
-  },
-  balanceTitle: {
-    fontSize: textSize.sm,
-  },
-  balanceText: {
-    fontSize: textSize.lg,
-    fontWeight: 'bold',
-  },
-});
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    header: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    listContainer: {
+      flex: 1,
+      marginBottom: 100,
+    },
+    sectionHeaderText: {
+      fontSize: textSize.md,
+      color: colors.onBackground,
+      opacity: 0.5,
+      marginBottom: spacing.xs,
+    },
+  });

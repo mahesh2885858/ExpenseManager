@@ -1,4 +1,5 @@
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
+import { TCategory } from './categories';
 
 export type TTransactionType = 'income' | 'expense';
 
@@ -13,15 +14,17 @@ export type TTransactionsIds = string[];
 
 export type TTransaction = {
   id: string;
-  walletId: string; // ID associated with wallet to which this transaction is added
+  wallet_id: string; // ID associated with wallet to which this transaction is added
   type: TTransactionType; // Only either income or expense
   amount: number;
-  createdAt: string; // ISO string format - when the transaction record created
-  transactionDate: string; // ISO string format - when the transaction took place
-  categoryIds: string[]; // Category IDs (initially single category per transaction)
+  created_at: number; //  when the transaction record created
+  transaction_date: number; // when the transaction took place
+  category_id: string; // Category IDs (initially single category per transaction)
+  category?: TCategory;
   description?: string; // Optional field
   attachments?: TAttachment[]; // Array of attachments (images and PDFs)
   isSelected?: boolean;
+  profileId: string;
 };
 
 export type TTransactionByIds = Record<string, TTransaction> | null;
@@ -55,3 +58,17 @@ export type TSort =
   | 'dateOldFirst'
   | 'amountHighFirst'
   | 'amountLowFirst';
+
+export type TTransactionRow = Omit<TTransaction, 'category'> & {
+  category: string;
+};
+
+export type THeaderItem = {
+  type: 'header';
+  item: Date;
+};
+export type TTransactionItem = {
+  type: 'txn';
+  item: TTransaction;
+};
+export type TGroupedTransactions = Array<THeaderItem | TTransactionItem>;

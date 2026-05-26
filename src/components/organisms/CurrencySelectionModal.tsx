@@ -9,13 +9,21 @@ import {
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 import { currencies, gs } from '../../common';
+import useWalletStore from '../../stores/walletsStore';
 import { TCurrency } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
-import useWalletStore from '../../stores/walletsStore';
+import AppText from '../molecules/AppText';
 
 type TProps = {
   ref: any;
@@ -28,6 +36,8 @@ const BottomCBackdrop = (props: BottomSheetBackdropProps) => {
 
 const CurrencySelectionModal = (props: TProps) => {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
+  const styles = createStyles(colors);
 
   const BottomSheetScrollable = useBottomSheetScrollableCreator();
   const { dismissAll } = useBottomSheetModal();
@@ -48,12 +58,17 @@ const CurrencySelectionModal = (props: TProps) => {
     return currenciesToRender.sort((a, b) => a.name.localeCompare(b.name));
   }, [currenciesToRender]);
 
+  const currencyItemBgStyles = (isSelected = false) => ({
+    borderBottomColor: isSelected ? 'transparent' : colors.onSurfaceDisabled,
+    backgroundColor: isSelected ? colors.primary : 'transparent',
+  });
+
   return (
     <BottomSheetModal
       stackBehavior="push"
       backdropComponent={pr => BottomCBackdrop(pr)}
       backgroundStyle={{
-        backgroundColor: colors.inverseOnSurface,
+        backgroundColor: colors.surfaceContainerLow,
       }}
       ref={props.ref}
       onChange={props.handleSheetChanges}
@@ -63,18 +78,9 @@ const CurrencySelectionModal = (props: TProps) => {
         <View style={[styles.content]}>
           <View>
             <View style={[gs.flexRow, gs.itemsCenter]}>
-              <Text
-                style={[
-                  gs.fontBold,
-                  gs.fullFlex,
-                  {
-                    fontSize: textSize.lg,
-                    color: colors.onBackground,
-                  },
-                ]}
-              >
-                Select Currency
-              </Text>
+              <AppText.Bold style={[styles.headerText]}>
+                {t('currencyList.select')}
+              </AppText.Bold>
             </View>
             {currencies.length > 5 && (
               <View style={[{ marginTop: spacing.sm }]}>
@@ -86,7 +92,7 @@ const CurrencySelectionModal = (props: TProps) => {
                   style={[
                     styles.searchInput,
                     {
-                      color: colors.onBackground,
+                      color: colors.onSurfaceVariant,
                       borderColor: colors.outlineVariant,
                     },
                   ]}
@@ -102,7 +108,6 @@ const CurrencySelectionModal = (props: TProps) => {
               contentContainerStyle={[styles.listContainer]}
               renderItem={({ item }: { item: TCurrency }) => {
                 const isSelected = item.code === currency.code;
-
                 return (
                   <PressableWithFeedback
                     onPress={() => {
@@ -113,30 +118,28 @@ const CurrencySelectionModal = (props: TProps) => {
                       gs.flexRow,
                       gs.itemsCenter,
                       styles.item,
-                      {
-                        borderColor: isSelected
-                          ? colors.onPrimaryContainer
-                          : colors.onSurfaceDisabled,
-                      },
+                      currencyItemBgStyles(isSelected),
                     ]}
                     key={item.code}
                   >
-                    <Text
+                    <AppText.Regular
                       style={[
                         gs.fullFlex,
                         {
-                          color: colors.onSurface,
+                          color: isSelected
+                            ? colors.onPrimary
+                            : colors.onSurface,
                           fontSize: textSize.md,
                         },
                       ]}
                     >
                       {item.name} ({item.symbol})
-                    </Text>
+                    </AppText.Regular>
                     {isSelected && (
                       <Icon
                         source={'check'}
                         size={textSize.md}
-                        color={colors.onPrimaryContainer}
+                        color={colors.onPrimary}
                       />
                     )}
                   </PressableWithFeedback>
@@ -152,43 +155,48 @@ const CurrencySelectionModal = (props: TProps) => {
 
 export default CurrencySelectionModal;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-  },
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.md,
+    },
 
-  headerText: {
-    fontSize: textSize.lg,
-  },
+    headerText: {
+      fontSize: textSize.lg,
+      color: colors.onSurface,
+      flex: 1,
+    },
 
-  categoryText: {
-    fontSize: textSize.lg,
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.sm,
-  },
-  listContainer: {
-    marginTop: spacing.md,
-    paddingBottom: 100,
-  },
-  item: {
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-  },
-  manageText: {
-    fontWeight: '600',
-  },
-  list: {
-    maxHeight: 500,
-    paddingBottom: 30,
-  },
-});
+    categoryText: {
+      fontSize: textSize.lg,
+    },
+    searchInput: {
+      borderWidth: 1,
+      borderRadius: borderRadius.md,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surfaceContainerHighest,
+    },
+    listContainer: {
+      marginTop: spacing.md,
+      paddingBottom: 100,
+    },
+    item: {
+      borderBottomWidth: 1,
+      marginBottom: spacing.md,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderBottomColor: colors.onSurfaceDisabled,
+      borderRadius: borderRadius.sm,
+    },
+    manageText: {
+      fontWeight: '600',
+    },
+    list: {
+      maxHeight: 500,
+      paddingBottom: 30,
+    },
+  });
