@@ -99,7 +99,7 @@ const TransactionDetailsSheet = (props: TProps) => {
               <Icon
                 source={'pencil'}
                 size={textSize.xl}
-                color={colors.onPrimaryContainer}
+                color={colors.onSurfaceVariant}
               />
             </PressableWithFeedback>
           </View>
