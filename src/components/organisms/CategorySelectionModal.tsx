@@ -80,7 +80,7 @@ const CategorySelectionModal = (props: Props) => {
           <View style={[styles.btnContainer]}>
             <PressableWithFeedback onPress={goToAddCategory}>
               <View style={styles.addBtn}>
-                <Icon source="plus" size={20} color={colors.inversePrimary} />
+                <Icon source="plus" size={20} color={colors.primary} />
                 <AppText.Bold style={styles.addText}>
                   {t('common.new')}
                 </AppText.Bold>
@@ -188,7 +188,7 @@ const createStyles = (colors: AppTheme['colors']) =>
     },
 
     addText: {
-      color: colors.inversePrimary,
+      color: colors.primary,
       fontSize: textSize.md,
     },
 
