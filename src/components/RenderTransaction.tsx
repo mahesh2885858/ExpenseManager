@@ -73,7 +73,7 @@ const RenderTransaction = (props: {
                 color:
                   props.item.type === 'income'
                     ? theme.colors.primary
-                    : theme.colors.onSurface,
+                    : theme.colors.error,
               },
             ]}
           >
