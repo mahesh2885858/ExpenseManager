@@ -1,6 +1,9 @@
+import { useNavigation } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import {
   AppTheme,
   borderRadius,
@@ -8,16 +11,13 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
-import ScreenWrapper from '../../components/molecules/ScreenWrapper';
-import AppText from '../../components/molecules/AppText';
-import useProfileStore from '../../stores/profileStore';
-import { FlashList } from '@shopify/flash-list';
-import useFetchRecords from '../../hooks/useFetchRecords';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import withOpacity from '../../utils/withOpacity';
-import { Icon } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import AppText from '../../components/molecules/AppText';
+import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import CreateProfileModal from '../../components/organisms/CreateProfileModal';
+import useFetchRecords from '../../hooks/useFetchRecords';
+import useProfileStore from '../../stores/profileStore';
+import withOpacity from '../../utils/withOpacity';
 
 const SelectProfile = () => {
   const { colors } = useAppTheme();
@@ -123,6 +123,7 @@ const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     header: {
       paddingHorizontal: spacing.md,
+      marginTop: spacing.sm,
     },
     headerTitle: {
       color: colors.onSurface,
@@ -135,7 +136,7 @@ const createStyles = (colors: AppTheme['colors']) =>
     },
     listContainer: {
       paddingHorizontal: spacing.md,
-      marginTop: spacing.md,
+      marginTop: spacing.lg,
       flex: 1,
     },
     listTitle: {

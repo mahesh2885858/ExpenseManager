@@ -94,6 +94,7 @@ export default {
   },
   txnDetails: {
     amount: 'Amount',
+    desc: 'Description',
   },
   wallets: {
     select: 'Select Wallet',

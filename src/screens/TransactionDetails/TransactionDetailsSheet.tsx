@@ -99,7 +99,7 @@ const TransactionDetailsSheet = (props: TProps) => {
               <Icon
                 source={'pencil'}
                 size={textSize.xl}
-                color={colors.onPrimaryContainer}
+                color={colors.onSurfaceVariant}
               />
             </PressableWithFeedback>
           </View>
@@ -226,7 +226,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                 },
               ]}
             >
-              <Text
+              <AppText.Regular
                 style={[
                   styles.dimText,
                   {
@@ -235,9 +235,9 @@ const TransactionDetailsSheet = (props: TProps) => {
                   },
                 ]}
               >
-                Description
-              </Text>
-              <Text
+                {t('txnDetails.desc')}
+              </AppText.Regular>
+              <AppText.Regular
                 style={[
                   {
                     color: colors.onBackground,
@@ -246,7 +246,7 @@ const TransactionDetailsSheet = (props: TProps) => {
                 ]}
               >
                 {props.selectedTransaction?.description ?? ''}
-              </Text>
+              </AppText.Regular>
             </View>
           )}
       </BottomSheetView>
