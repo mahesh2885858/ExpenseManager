@@ -103,4 +103,8 @@ export default {
   txns: {
     title: 'Transactions',
   },
+  filters: {
+    filters: 'Filters',
+    reset: 'Reset',
+  },
 };

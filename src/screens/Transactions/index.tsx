@@ -17,6 +17,9 @@ import { TTransaction } from '../../types';
 import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
 import useFetchRecords from '../../hooks/useFetchRecords';
 import EmptyTransactionsComponent from '../../components/organisms/EmptyTransactionsComponent';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
+import { Icon } from 'react-native-paper';
+import TransactionFilters from '../TransactionFilters';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
@@ -25,7 +28,7 @@ const Transactions = () => {
   const { loadInitial, transactions, loadMore, deleteTxn } = useTransactions();
   const [selectedTransaction, setSelectedTransaction] =
     useState<null | TTransaction>(null);
-
+  const [renderFilters, setRenderFilters] = useState(false);
   const { dismissAll } = useBottomSheetR();
   const { fetchRecents } = useFetchRecords();
 
@@ -62,6 +65,17 @@ const Transactions = () => {
     <ScreenWrapper style={[gs.fullFlex]}>
       <View style={[styles.header]}>
         <HeaderText header={t('txns.title')} />
+        <PressableWithFeedback
+          onPress={() => {
+            setRenderFilters(true);
+          }}
+        >
+          <Icon
+            source={'filter'}
+            size={textSize.xxl}
+            color={colors.onSurface}
+          />
+        </PressableWithFeedback>
       </View>
       <View style={[styles.listContainer]}>
         <FlashList
@@ -100,6 +114,10 @@ const Transactions = () => {
         selectedTransaction={selectedTransaction}
         onDeletePress={onDeletePress}
       />
+      <TransactionFilters
+        visible={renderFilters}
+        onClose={() => setRenderFilters(false)}
+      />
     </ScreenWrapper>
   );
 };
@@ -111,6 +129,9 @@ const createStyles = (colors: AppTheme['colors']) =>
     header: {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     listContainer: {
       flex: 1,
