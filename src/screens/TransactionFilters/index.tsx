@@ -29,6 +29,8 @@ import AppText from '../../components/molecules/AppText';
 import withOpacity from '../../utils/withOpacity';
 import { useTranslation } from 'react-i18next';
 import { getDateFilterText } from '../../utils';
+import { TDateFilter, TTypeFilter } from '../../types';
+import { setDate } from 'date-fns/fp';
 
 type TProps = {
   visible: boolean;
@@ -47,13 +49,14 @@ const TransactionFilters = (props: TProps) => {
     'This year',
     'Range',
   ] as const;
-  const dateFilter = useTransactionsStore(state => state.filters.date);
-  const typeFilter = useTransactionsStore(state => state.filters.type);
+  const [dateFilter, setDateFilter] = useState<TDateFilter>({
+    isThisMonth: true,
+  });
+  const [txnType, setTxnType] = useState<TTypeFilter | null>(null);
   const categoryFilter = useTransactionsStore(
     state => state.filters.categoryId,
   );
   const setFilters = useTransactionsStore(state => state.setFilters);
-  const resetFilters = useTransactionsStore(state => state.resetFilters);
   const { categories } = useCategories();
 
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
@@ -63,11 +66,9 @@ const TransactionFilters = (props: TProps) => {
 
   const isAnyFilterApplied = useMemo(() => {
     return (
-      (!!dateFilter && !dateFilter.isThisMonth) ||
-      !!typeFilter ||
-      !!categoryFilter
+      (!!dateFilter && !dateFilter.isThisMonth) || !!txnType || !!categoryFilter
     );
-  }, [dateFilter, typeFilter, categoryFilter]);
+  }, [dateFilter, txnType, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
     if (!dateFilter) return 'This month';
@@ -86,76 +87,55 @@ const TransactionFilters = (props: TProps) => {
   }, [selectedFilter, dateFilter]);
 
   const selectedType = useMemo(() => {
-    if (!typeFilter) return 'All';
-    return typeFilter === 'expense' ? 'Expense' : 'Income';
-  }, [typeFilter]);
+    if (!txnType) return 'All';
+    return txnType === 'expense' ? 'Expense' : 'Income';
+  }, [txnType]);
 
-  const setDateFilter = useCallback(
+  const setDateFilterLocal = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
       switch (item) {
         case 'This quarter':
-          setFilters({
-            date: {
-              isThisQuarter: true,
-            },
-          });
+          setDateFilter({ isThisQuarter: true });
           break;
         case 'This week':
-          setFilters({
-            date: {
-              isThisWeek: true,
-            },
-          });
+          setDateFilter({ isThisWeek: true });
+
           break;
         case 'This month':
-          setFilters({
-            date: {
-              isThisMonth: true,
-            },
-          });
+          setDateFilter({ isThisMonth: true });
+
           break;
         case 'This year':
-          setFilters({
-            date: {
-              isThisYear: true,
-            },
-          });
+          setDateFilter({ isThisYear: true });
+
           break;
         case 'Range':
-          setFilters({
-            date: {
-              range: givenRange,
-            },
-          });
+          setDateFilter({ range: givenRange });
+
           break;
 
         default:
-          setFilters({
-            date: null,
-          });
+          setDateFilter({ isThisMonth: true });
+
           break;
       }
     },
-    [setFilters],
+    [setDateFilter],
   );
 
   const setTypeFilter = (type: string) => {
     switch (type) {
       case 'Income':
-        setFilters({
-          type: 'income',
-        });
+        setTxnType('income');
         break;
       case 'Expense':
-        setFilters({
-          type: 'expense',
-        });
+        setTxnType('expense');
+
         break;
 
       default:
-        setFilters({
-          type: null,
-        });
+        setTxnType(null);
+
         break;
     }
   };
@@ -183,9 +163,9 @@ const TransactionFilters = (props: TProps) => {
         setRenderSnack(true);
         return;
       }
-      setDateFilter('Range', [startDate, endDate]);
+      setDateFilterLocal('Range', [startDate, endDate]);
     },
-    [setRenderCustomDatePicker, setDateFilter],
+    [setRenderCustomDatePicker, setDateFilterLocal],
   );
 
   useFocusEffect(
@@ -203,6 +183,26 @@ const TransactionFilters = (props: TProps) => {
     }, [renderSnack]),
   );
 
+  const applyFilters = useCallback(() => {
+    setFilters({
+      date: dateFilter,
+      type: txnType,
+    });
+  }, [dateFilter, txnType, setFilters]);
+
+  const resetFilters = useCallback(() => {
+    setDateFilter({
+      isThisMonth: true,
+    });
+    setTxnType(null);
+    setFilters({
+      date: {
+        isThisMonth: true,
+      },
+      type: null,
+    });
+  }, [setFilters]);
+
   return (
     <Modal
       visible={props.visible}
@@ -216,7 +216,10 @@ const TransactionFilters = (props: TProps) => {
             <AppText.Bold style={[styles.title]}>
               {t('filters.filters')}
             </AppText.Bold>
-            <PressableWithFeedback style={[styles.reset]}>
+            <PressableWithFeedback
+              onPress={resetFilters}
+              style={[styles.reset]}
+            >
               <AppText.Regular style={[styles.title]}>
                 {t('filters.reset')}
               </AppText.Regular>
@@ -252,7 +255,7 @@ const TransactionFilters = (props: TProps) => {
             </PressableWithFeedback>
             <View style={[styles.datePillContainer]}>
               <PressableWithFeedback
-                onPress={() => setDateFilter('This week')}
+                onPress={() => setDateFilterLocal('This week')}
                 style={[
                   styles.datePill,
                   dateFilter.isThisWeek && styles.datePillSelected,
@@ -268,7 +271,7 @@ const TransactionFilters = (props: TProps) => {
                 </AppText>
               </PressableWithFeedback>
               <PressableWithFeedback
-                onPress={() => setDateFilter('This month')}
+                onPress={() => setDateFilterLocal('This month')}
                 style={[
                   styles.datePill,
                   dateFilter.isThisMonth && styles.datePillSelected,
@@ -284,7 +287,7 @@ const TransactionFilters = (props: TProps) => {
                 </AppText>
               </PressableWithFeedback>
               <PressableWithFeedback
-                onPress={() => setDateFilter('This quarter')}
+                onPress={() => setDateFilterLocal('This quarter')}
                 style={[
                   styles.datePill,
                   dateFilter.isThisQuarter && styles.datePillSelected,
@@ -300,7 +303,7 @@ const TransactionFilters = (props: TProps) => {
                 </AppText>
               </PressableWithFeedback>
               <PressableWithFeedback
-                onPress={() => setDateFilter('This year')}
+                onPress={() => setDateFilterLocal('This year')}
                 style={[
                   styles.datePill,
                   dateFilter.isThisYear && styles.datePillSelected,
@@ -336,13 +339,13 @@ const TransactionFilters = (props: TProps) => {
                 onPress={() => setTypeFilter('Income')}
                 style={[
                   styles.txnTypeBtn,
-                  typeFilter === 'income' && styles.txnTypeBtnSelected,
+                  txnType === 'income' && styles.txnTypeBtnSelected,
                 ]}
               >
                 <AppText
                   style={[
                     styles.txnTypeText,
-                    typeFilter === 'income' && styles.txnTypeSelectedText,
+                    txnType === 'income' && styles.txnTypeSelectedText,
                   ]}
                 >
                   {t('common.income')}
@@ -352,13 +355,13 @@ const TransactionFilters = (props: TProps) => {
                 onPress={() => setTypeFilter('Expense')}
                 style={[
                   styles.txnTypeBtn,
-                  typeFilter === 'expense' && styles.txnTypeBtnSelected,
+                  txnType === 'expense' && styles.txnTypeBtnSelected,
                 ]}
               >
                 <AppText
                   style={[
                     styles.txnTypeText,
-                    typeFilter === 'expense' && styles.txnTypeSelectedText,
+                    txnType === 'expense' && styles.txnTypeSelectedText,
                   ]}
                 >
                   {t('common.expense')}
@@ -368,13 +371,13 @@ const TransactionFilters = (props: TProps) => {
                 onPress={() => setTypeFilter('Both')}
                 style={[
                   styles.txnTypeBtn,
-                  !typeFilter && styles.txnTypeBtnSelected,
+                  !txnType && styles.txnTypeBtnSelected,
                 ]}
               >
                 <AppText
                   style={[
                     styles.txnTypeText,
-                    !typeFilter && styles.txnTypeSelectedText,
+                    !txnType && styles.txnTypeSelectedText,
                   ]}
                 >
                   {t('common.both')}
@@ -394,7 +397,10 @@ const TransactionFilters = (props: TProps) => {
                 {t('common.cancel')}
               </AppText>
             </PressableWithFeedback>
-            <PressableWithFeedback style={[styles.button]}>
+            <PressableWithFeedback
+              onPress={applyFilters}
+              style={[styles.button]}
+            >
               <AppText>{t('filters.applyFilters')}</AppText>
             </PressableWithFeedback>
           </View>

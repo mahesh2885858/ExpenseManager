@@ -5,7 +5,7 @@ export const getDateFilterText = (filter: TDateFilter) => {
   if (filter.isThisMonth) return 'This Month';
   if (filter.isThisWeek) return 'This Week';
   if (filter.isThisYear) return 'This Year';
-  if (filter.isToday) return 'Today';
+  if (filter.isThisQuarter) return 'This Quarter';
   if (filter.range && filter.range.length === 2) {
     return (
       format(filter.range[0] ?? new Date(), 'dd MMM yyyy') +
