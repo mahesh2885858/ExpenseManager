@@ -28,6 +28,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import AppText from '../../components/molecules/AppText';
 import withOpacity from '../../utils/withOpacity';
 import { useTranslation } from 'react-i18next';
+import { getDateFilterText } from '../../utils';
 
 type TProps = {
   visible: boolean;
@@ -46,7 +47,6 @@ const TransactionFilters = (props: TProps) => {
     'This year',
     'Range',
   ] as const;
-  const transactionType = ['Income', 'Expense', 'All'];
   const dateFilter = useTransactionsStore(state => state.filters.date);
   const typeFilter = useTransactionsStore(state => state.filters.type);
   const categoryFilter = useTransactionsStore(
@@ -73,7 +73,7 @@ const TransactionFilters = (props: TProps) => {
     if (!dateFilter) return 'This month';
     if (dateFilter.isThisWeek) return 'This week';
     if (dateFilter.isThisMonth) return 'This month';
-    if (dateFilter.isToday) return 'Today';
+    if (dateFilter.isThisQuarter) return 'This quarter';
     if (dateFilter.isThisYear) return 'This year';
     if (dateFilter.range) return 'Range';
     return 'This month';
@@ -93,10 +93,10 @@ const TransactionFilters = (props: TProps) => {
   const setDateFilter = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
       switch (item) {
-        case 'Today':
+        case 'This quarter':
           setFilters({
             date: {
-              isToday: true,
+              isThisQuarter: true,
             },
           });
           break;
@@ -241,7 +241,9 @@ const TransactionFilters = (props: TProps) => {
               </AppText.Medium>
             </View>
             <PressableWithFeedback style={[styles.dateBox]}>
-              <AppText style={[styles.selectedDateText]}>10th Feb</AppText>
+              <AppText style={[styles.selectedDateText]}>
+                {getDateFilterText(dateFilter)}
+              </AppText>
               <Icon
                 source={'chevron-down'}
                 color={colors.onSurface}
@@ -250,26 +252,66 @@ const TransactionFilters = (props: TProps) => {
             </PressableWithFeedback>
             <View style={[styles.datePillContainer]}>
               <PressableWithFeedback
-                style={[styles.datePill, styles.datePillSelected]}
+                onPress={() => setDateFilter('This week')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisWeek && styles.datePillSelected,
+                ]}
               >
                 <AppText
-                  style={[styles.datePillText, styles.datePillTextSelected]}
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisWeek && styles.datePillTextSelected,
+                  ]}
                 >
                   {t('filters.thisWeek')}
                 </AppText>
               </PressableWithFeedback>
-              <PressableWithFeedback style={[styles.datePill]}>
-                <AppText style={[styles.datePillText]}>
+              <PressableWithFeedback
+                onPress={() => setDateFilter('This month')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisMonth && styles.datePillSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisMonth && styles.datePillTextSelected,
+                  ]}
+                >
                   {t('filters.thisMonth')}
                 </AppText>
               </PressableWithFeedback>
-              <PressableWithFeedback style={[styles.datePill]}>
-                <AppText style={[styles.datePillText]}>
+              <PressableWithFeedback
+                onPress={() => setDateFilter('This quarter')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisQuarter && styles.datePillSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisQuarter && styles.datePillTextSelected,
+                  ]}
+                >
                   {t('filters.thisQuarter')}
                 </AppText>
               </PressableWithFeedback>
-              <PressableWithFeedback style={[styles.datePill]}>
-                <AppText style={[styles.datePillText]}>
+              <PressableWithFeedback
+                onPress={() => setDateFilter('This year')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisYear && styles.datePillSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisYear && styles.datePillTextSelected,
+                  ]}
+                >
                   {t('filters.thisYear')}
                 </AppText>
               </PressableWithFeedback>
@@ -291,21 +333,50 @@ const TransactionFilters = (props: TProps) => {
             </View>
             <View style={[styles.txnBtnContainer]}>
               <PressableWithFeedback
-                style={[styles.txnTypeBtn, styles.txnTypeBtnSelected]}
+                onPress={() => setTypeFilter('Income')}
+                style={[
+                  styles.txnTypeBtn,
+                  typeFilter === 'income' && styles.txnTypeBtnSelected,
+                ]}
               >
                 <AppText
-                  style={[styles.txnTypeText, styles.txnTypeSelectedText]}
+                  style={[
+                    styles.txnTypeText,
+                    typeFilter === 'income' && styles.txnTypeSelectedText,
+                  ]}
                 >
                   {t('common.income')}
                 </AppText>
               </PressableWithFeedback>
-              <PressableWithFeedback style={[styles.txnTypeBtn]}>
-                <AppText style={[styles.txnTypeText]}>
+              <PressableWithFeedback
+                onPress={() => setTypeFilter('Expense')}
+                style={[
+                  styles.txnTypeBtn,
+                  typeFilter === 'expense' && styles.txnTypeBtnSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.txnTypeText,
+                    typeFilter === 'expense' && styles.txnTypeSelectedText,
+                  ]}
+                >
                   {t('common.expense')}
                 </AppText>
               </PressableWithFeedback>
-              <PressableWithFeedback style={[styles.txnTypeBtn]}>
-                <AppText style={[styles.txnTypeText]}>
+              <PressableWithFeedback
+                onPress={() => setTypeFilter('Both')}
+                style={[
+                  styles.txnTypeBtn,
+                  !typeFilter && styles.txnTypeBtnSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.txnTypeText,
+                    !typeFilter && styles.txnTypeSelectedText,
+                  ]}
+                >
                   {t('common.both')}
                 </AppText>
               </PressableWithFeedback>
@@ -315,7 +386,10 @@ const TransactionFilters = (props: TProps) => {
 
           {/*Buttons starts*/}
           <View style={[styles.buttonContainer]}>
-            <PressableWithFeedback style={[styles.button, styles.cancel]}>
+            <PressableWithFeedback
+              onPress={props.onClose}
+              style={[styles.button, styles.cancel]}
+            >
               <AppText style={[styles.cancelText]}>
                 {t('common.cancel')}
               </AppText>

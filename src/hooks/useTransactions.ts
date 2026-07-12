@@ -2,7 +2,10 @@ import { isSameDay } from 'date-fns/fp';
 import { useCallback, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import { db } from '../db';
-import { buildOrderBy, buildWhereClause } from '../db/helpers/transactions';
+import {
+  buildOrderBy,
+  buildWhereClauseForTxns,
+} from '../db/helpers/transactions';
 import { txnRepo } from '../db/repositories/transactions.repo';
 import useTransactionsStore from '../stores/transactionsStore';
 import {
@@ -89,8 +92,13 @@ const useTransactions = (walletId?: string, search?: string) => {
   const loadInitial = useCallback(async () => {
     try {
       setLoading(true);
-
-      const { clause, args } = buildWhereClause(filters, search, walletId);
+      console.log({ filters });
+      const { clause, args } = buildWhereClauseForTxns(
+        filters,
+        search,
+        walletId,
+      );
+      console.log({ clause, args });
       const orderBy = buildOrderBy(sort);
 
       const result = await db.execute(
@@ -152,7 +160,7 @@ const useTransactions = (walletId?: string, search?: string) => {
 
       setLoading(true);
 
-      const { clause, args } = buildWhereClause(
+      const { clause, args } = buildWhereClauseForTxns(
         { ...filters, date: null },
         search,
         walletId,

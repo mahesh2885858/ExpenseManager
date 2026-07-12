@@ -1,5 +1,13 @@
-import { endOfMonth, startOfMonth } from 'date-fns';
+import {
+  endOfMonth,
+  endOfQuarter,
+  endOfWeek,
+  startOfMonth,
+  startOfQuarter,
+  startOfWeek,
+} from 'date-fns';
 import { TFilters, TSort } from '../../types';
+import { endOfYear, startOfYear } from 'date-fns/fp';
 
 export const getStartOfMonth = () => {
   return startOfMonth(new Date()).getTime();
@@ -9,7 +17,7 @@ export const getStartOfNextMonth = () => {
   return endOfMonth(new Date()).getTime();
 };
 
-export const buildWhereClause = (
+export const buildWhereClauseForTxns = (
   filters?: TFilters,
   search?: string,
   walletId?: string,
@@ -17,29 +25,48 @@ export const buildWhereClause = (
   const where: string[] = [];
   const args: any[] = [];
 
-  // Month filter (default)
-  if (filters?.date?.isThisMonth) {
-    where.push('transaction_date >= ? AND transaction_date < ?');
+  // Default: This Month
+  // Date filters
+  if (filters?.date?.isThisWeek) {
+    where.push('t.transaction_date >= ? AND t.transaction_date < ?');
+    args.push(
+      startOfWeek(new Date()).getTime(),
+      endOfWeek(new Date()).getTime(),
+    );
+  } else if (filters?.date?.isThisMonth) {
+    where.push('t.transaction_date >= ? AND t.transaction_date < ?');
     args.push(getStartOfMonth(), getStartOfNextMonth());
+  } else if (filters?.date?.isThisQuarter) {
+    where.push('t.transaction_date >= ? AND t.transaction_date < ?');
+    args.push(
+      startOfQuarter(new Date()).getTime(),
+      endOfQuarter(new Date()).getTime(),
+    );
+  } else if (filters?.date?.isThisYear) {
+    where.push('t.transaction_date >= ? AND t.transaction_date < ?');
+    args.push(
+      startOfYear(new Date()).getTime(),
+      endOfYear(new Date()).getTime(),
+    );
   }
 
   if (walletId) {
-    where.push('wallet_id = ?');
+    where.push('t.wallet_id = ?');
     args.push(walletId);
   }
 
   if (filters?.type) {
-    where.push('type = ?');
+    where.push('t.type = ?');
     args.push(filters.type);
   }
 
   if (filters?.categoryId) {
-    where.push('categoryIds LIKE ?');
-    args.push(`%${filters.categoryId}%`);
+    where.push('t.category_id = ?');
+    args.push(filters.categoryId);
   }
 
   if (search) {
-    where.push('(description LIKE ? OR amount LIKE ?)');
+    where.push('t.description LIKE ?');
     args.push(`%${search}%`, `%${search}%`);
   }
 
