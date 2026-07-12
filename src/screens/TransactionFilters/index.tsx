@@ -229,8 +229,102 @@ const TransactionFilters = (props: TProps) => {
           </View>
 
           {/*Date range starts*/}
-          <View></View>
+          <View style={[styles.dateContainer]}>
+            <View style={[styles.filterTitle]}>
+              <Icon
+                source={'clock'}
+                size={textSize.lg}
+                color={colors.onSurface}
+              />
+              <AppText.Medium style={[styles.dateText]}>
+                {t('filters.dateRange')}
+              </AppText.Medium>
+            </View>
+            <PressableWithFeedback style={[styles.dateBox]}>
+              <AppText style={[styles.selectedDateText]}>10th Feb</AppText>
+              <Icon
+                source={'chevron-down'}
+                color={colors.onSurface}
+                size={textSize.lg}
+              />
+            </PressableWithFeedback>
+            <View style={[styles.datePillContainer]}>
+              <PressableWithFeedback
+                style={[styles.datePill, styles.datePillSelected]}
+              >
+                <AppText
+                  style={[styles.datePillText, styles.datePillTextSelected]}
+                >
+                  {t('filters.thisWeek')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback style={[styles.datePill]}>
+                <AppText style={[styles.datePillText]}>
+                  {t('filters.thisMonth')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback style={[styles.datePill]}>
+                <AppText style={[styles.datePillText]}>
+                  {t('filters.thisQuarter')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback style={[styles.datePill]}>
+                <AppText style={[styles.datePillText]}>
+                  {t('filters.thisYear')}
+                </AppText>
+              </PressableWithFeedback>
+            </View>
+          </View>
           {/*Date range ends*/}
+
+          {/*Txn type starts*/}
+          <View style={[styles.txnTypeContainer]}>
+            <View style={[styles.filterTitle]}>
+              <Icon
+                source={'tag'}
+                size={textSize.lg}
+                color={colors.onSurface}
+              />
+              <AppText.Medium style={[styles.dateText]}>
+                {t('filters.type')}
+              </AppText.Medium>
+            </View>
+            <View style={[styles.txnBtnContainer]}>
+              <PressableWithFeedback
+                style={[styles.txnTypeBtn, styles.txnTypeBtnSelected]}
+              >
+                <AppText
+                  style={[styles.txnTypeText, styles.txnTypeSelectedText]}
+                >
+                  {t('common.income')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback style={[styles.txnTypeBtn]}>
+                <AppText style={[styles.txnTypeText]}>
+                  {t('common.expense')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback style={[styles.txnTypeBtn]}>
+                <AppText style={[styles.txnTypeText]}>
+                  {t('common.both')}
+                </AppText>
+              </PressableWithFeedback>
+            </View>
+          </View>
+          {/*Txn type ends*/}
+
+          {/*Buttons starts*/}
+          <View style={[styles.buttonContainer]}>
+            <PressableWithFeedback style={[styles.button, styles.cancel]}>
+              <AppText style={[styles.cancelText]}>
+                {t('common.cancel')}
+              </AppText>
+            </PressableWithFeedback>
+            <PressableWithFeedback style={[styles.button]}>
+              <AppText>{t('filters.applyFilters')}</AppText>
+            </PressableWithFeedback>
+          </View>
+          {/*Buttons ends*/}
         </View>
       </View>
     </Modal>
@@ -243,27 +337,23 @@ const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      flexDirection: 'row',
+      justifyContent: 'flex-end',
     },
+
     filtersBox: {
-      alignSelf: 'flex-end',
+      width: '100%',
+      minHeight: 200,
       backgroundColor: colors.surfaceContainerHigh,
-      flex: 1,
-      paddingHorizontal: spacing.md,
       borderTopLeftRadius: borderRadius.lg,
       borderTopRightRadius: borderRadius.lg,
       paddingTop: spacing.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      // justifyContent: 'space-between',
-      marginBottom: spacing.lg,
+      paddingHorizontal: spacing.md,
     },
     titleBox: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       marginBottom: spacing.lg,
-      flex: 1,
     },
     title: {
       color: colors.onSurface,
@@ -273,5 +363,104 @@ const createStyles = (colors: AppTheme['colors']) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.sm,
+    },
+    dateContainer: {
+      gap: spacing.sm,
+    },
+    filterTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    dateText: {
+      color: colors.onSurface,
+      fontSize: textSize.md,
+    },
+    dateBox: {
+      borderColor: colors.outline,
+      borderWidth: 1,
+      borderRadius: borderRadius.md,
+      padding: spacing.xs,
+      paddingHorizontal: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    selectedDateText: {
+      color: colors.onSurface,
+      fontSize: textSize.md,
+      flex: 1,
+    },
+    datePillContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    datePill: {
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm1,
+      paddingVertical: spacing.xs,
+      backgroundColor: colors.surfaceContainer,
+    },
+    datePillSelected: {
+      backgroundColor: colors.onSurface,
+    },
+    datePillText: {
+      color: colors.onSurface,
+      fontSize: textSize.xs,
+    },
+    datePillTextSelected: {
+      color: colors.surface,
+    },
+    txnTypeContainer: {
+      gap: spacing.sm,
+      marginTop: spacing.md,
+    },
+    txnBtnContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    txnTypeBtn: {
+      flex: 1,
+      backgroundColor: colors.surfaceContainer,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm1,
+      paddingVertical: spacing.xs,
+    },
+    txnTypeBtnSelected: {
+      backgroundColor: colors.inverseSurface,
+    },
+    txnTypeText: {
+      fontSize: textSize.md,
+      color: colors.onSurface,
+    },
+
+    txnTypeSelectedText: {
+      color: colors.inverseOnSurface,
+    },
+
+    buttonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: spacing.md,
+      gap: spacing.sm,
+      paddingRight: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    button: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      backgroundColor: colors.primary,
+      width: '50%',
+      borderRadius: borderRadius.md,
+    },
+    cancel: {
+      backgroundColor: colors.surfaceBright,
+    },
+    cancelText: {
+      color: colors.onSurface,
     },
   });
