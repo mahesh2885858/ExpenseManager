@@ -243,7 +243,12 @@ const TransactionFilters = (props: TProps) => {
                 {t('filters.dateRange')}
               </AppText.Medium>
             </View>
-            <PressableWithFeedback style={[styles.dateBox]}>
+            <PressableWithFeedback
+              onPress={() => {
+                setRenderCustomDatePicker(true);
+              }}
+              style={[styles.dateBox]}
+            >
               <AppText style={[styles.selectedDateText]}>
                 {getDateFilterText(dateFilter)}
               </AppText>
@@ -407,6 +412,23 @@ const TransactionFilters = (props: TProps) => {
           {/*Buttons ends*/}
         </View>
       </View>
+
+      {renderCustomDatePicker && (
+        <DatePickerModal
+          startDate={range ? range[0] : undefined}
+          label="Select Custom date range"
+          animationType="fade"
+          presentationStyle="pageSheet"
+          locale="en"
+          mode="range"
+          visible={renderCustomDatePicker}
+          endDate={range ? range[0] : undefined}
+          onConfirm={onConfirm}
+          onDismiss={() => {
+            setRenderCustomDatePicker(false);
+          }}
+        />
+      )}
     </Modal>
   );
 };
