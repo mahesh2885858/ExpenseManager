@@ -67,7 +67,7 @@ export const buildWhereClauseForTxns = (
 
   if (search) {
     where.push('t.description LIKE ?');
-    args.push(`%${search}%`, `%${search}%`);
+    args.push(`%${search}%`);
   }
 
   return {

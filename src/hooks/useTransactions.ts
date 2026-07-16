@@ -161,7 +161,7 @@ const useTransactions = (walletId?: string, search?: string) => {
       setLoading(true);
 
       const { clause, args } = buildWhereClauseForTxns(
-        { ...filters, date: null },
+        { ...filters },
         search,
         walletId,
       );
@@ -181,31 +181,39 @@ const useTransactions = (walletId?: string, search?: string) => {
               AND t.id < ?
             )
           )`;
+      const combinedClause=`
+      SELECT
+        t.*,
 
+        json_object(
+          'id', c.id,
+          'name', c.name,
+          'icon', c.icon,
+          'type', c.type
+        ) as category
+
+      FROM transactions t
+
+      LEFT JOIN categories c
+        ON c.id = t.category_id
+
+      ${clause}
+      ${cursorClause}
+
+      ${orderBy}
+
+      LIMIT ${LIMIT}
+      `
+      console.log({
+        combinedClause,
+
+        args:[
+         ...args, cursor.transaction_date, cursor.transaction_date, cursor.id
+        ],
+        filters
+      })
       const result = await db.execute(
-        `
-        SELECT
-          t.*,
-
-          json_object(
-            'id', c.id,
-            'name', c.name,
-            'icon', c.icon,
-            'type', c.type
-          ) as category
-
-        FROM transactions t
-
-        LEFT JOIN categories c
-          ON c.id = t.category_id
-
-        ${clause}
-        ${cursorClause}
-
-        ${orderBy}
-
-        LIMIT ${LIMIT}
-        `,
+       combinedClause ,
         [...args, cursor.transaction_date, cursor.transaction_date, cursor.id],
       );
       const rows = (result.rows as unknown as TTransactionRow[]).map(row => {

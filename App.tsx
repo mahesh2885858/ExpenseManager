@@ -9,6 +9,7 @@ import { CombinedDarkTheme, CombinedDefaultTheme } from './theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { gs } from './src/common';
 import { initDB } from './src/db/init';
+import { seedDummyData } from './src/db/seed';
 const App = () => {
   const theme = useUIStore(state => state.theme);
   const systemTheme = useColorScheme();
@@ -22,6 +23,7 @@ const App = () => {
 
   useEffect(() => {
     initDB()
+
   },[])
   return (
     <SafeAreaProvider>
