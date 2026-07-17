@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
-import { format } from 'date-fns';
+import { format, isThisYear } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -95,7 +95,7 @@ const Transactions = () => {
             if (item.type === 'header')
               return (
                 <AppText.Medium style={[styles.sectionHeaderText]}>
-                  {format(item.item, 'MMM - do')}
+                  {isThisYear(item.item)? format(item.item, 'MMM - do'):format(item.item, 'yyyy - MMM - do')}
                 </AppText.Medium>
               );
             return (
