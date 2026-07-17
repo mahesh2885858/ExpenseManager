@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { format, isThisYear } from 'date-fns';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
@@ -20,6 +20,7 @@ import EmptyTransactionsComponent from '../../components/organisms/EmptyTransact
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import { Icon } from 'react-native-paper';
 import TransactionFilters from '../TransactionFilters';
+import useTransactionsStore from '../../stores/transactionsStore';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
@@ -31,7 +32,7 @@ const Transactions = () => {
   const [renderFilters, setRenderFilters] = useState(false);
   const { dismissAll } = useBottomSheetR();
   const { fetchRecents } = useFetchRecords();
-
+const filters = useTransactionsStore(state=>state.filters)
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
       setSelectedTransaction(null);
@@ -50,6 +51,12 @@ const Transactions = () => {
     },
     [dismissAll, deleteTxn, fetchRecents],
   );
+
+  const isAnyFilterApplied = useMemo(() => {
+    return (
+      (!!filters.date && !filters.date.isThisMonth) || !!filters.type
+    );
+  }, [filters]);
 
   useEffect(() => {
     loadInitial();
@@ -70,6 +77,9 @@ const Transactions = () => {
             setRenderFilters(true);
           }}
         >
+          {isAnyFilterApplied&&<View
+            style={styles.activeFilterDot}
+          />}
           <Icon
             source={'filter'}
             size={textSize.xxl}
@@ -136,6 +146,15 @@ const createStyles = (colors: AppTheme['colors']) =>
     listContainer: {
       flex: 1,
       marginBottom: 100,
+    },
+    activeFilterDot: {
+      height: 10,
+      width: 10,
+      borderRadius: 100,
+      backgroundColor:colors.primary,
+      position: "absolute",
+      zIndex: 100,
+      right:0
     },
     sectionHeaderText: {
       fontSize: textSize.md,
