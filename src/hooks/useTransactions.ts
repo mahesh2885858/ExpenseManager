@@ -1,5 +1,5 @@
 import { isSameDay } from 'date-fns/fp';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import { db } from '../db';
 import {
@@ -301,6 +301,16 @@ const useTransactions = (walletId?: string, search?: string) => {
     [transactions, setTransactions, removeEmptyGroups],
   );
 
+  const reset = useCallback(() => {
+    setHasMore(true)
+    setTransactions([])
+  }, [setTransactions])
+
+  // whenever a filter is changes we need set hasMore to true again and empty transactions array
+  // to fetch new data for updated filters.
+  useEffect(() => {
+    reset()
+  },[filters,reset])
   return {
     transactions,
     loadInitial,
