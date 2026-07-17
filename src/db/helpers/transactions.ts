@@ -48,6 +48,12 @@ export const buildWhereClauseForTxns = (
       startOfYear(new Date()).getTime(),
       endOfYear(new Date()).getTime(),
     );
+  } else if (filters?.date.range?.length) {
+    where.push('t.transaction_date >= ? AND t.transaction_date < ?');
+    args.push(
+      filters.date.range[0]?.getTime(),
+       filters.date.range[1]?.getTime(),
+    );
   }
 
   if (walletId) {
