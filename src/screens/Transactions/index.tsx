@@ -176,8 +176,9 @@ const createStyles = (colors: AppTheme['colors']) =>
     },
     sectionHeaderText: {
       fontSize: textSize.md,
-
       marginBottom: spacing.xs,
+      color: colors.onBackground,
+      opacity: 0.8,
     },
     currentFilter: {
       flexDirection: 'row',
