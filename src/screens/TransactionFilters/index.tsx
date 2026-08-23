@@ -188,7 +188,8 @@ const TransactionFilters = (props: TProps) => {
       date: dateFilter,
       type: txnType,
     });
-  }, [dateFilter, txnType, setFilters]);
+    props.onClose();
+  }, [dateFilter, txnType, setFilters, props]);
 
   const resetFilters = useCallback(() => {
     setDateFilter({
@@ -405,6 +406,7 @@ const TransactionFilters = (props: TProps) => {
             <PressableWithFeedback
               onPress={applyFilters}
               style={[styles.button]}
+              disabled={!isAnyFilterApplied}
             >
               <AppText>{t('filters.applyFilters')}</AppText>
             </PressableWithFeedback>
