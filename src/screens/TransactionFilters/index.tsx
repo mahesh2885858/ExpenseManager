@@ -211,8 +211,19 @@ const TransactionFilters = (props: TProps) => {
       animationType="slide"
       backdropColor={withOpacity(colors.surface, 0.15)}
     >
-      <View style={[styles.container]}>
-        <View style={[styles.filtersBox]}>
+      <View
+        onTouchStart={e => {
+          e.stopPropagation();
+          props.onClose();
+        }}
+        style={[styles.container]}
+      >
+        <View
+          onTouchStart={e => {
+            e.stopPropagation();
+          }}
+          style={[styles.filtersBox]}
+        >
           <View style={[styles.titleBox]}>
             <AppText.Bold style={[styles.title]}>
               {t('filters.filters')}
