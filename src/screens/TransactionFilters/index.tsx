@@ -1,14 +1,8 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Icon, Snackbar } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import { Modal, StyleSheet, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import {
@@ -18,19 +12,14 @@ import {
   textSize,
   useAppTheme,
 } from '../../../theme';
-import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import AppText from '../../components/molecules/AppText';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import AppText from '../../components/molecules/AppText';
-import withOpacity from '../../utils/withOpacity';
-import { useTranslation } from 'react-i18next';
-import { getDateFilterText } from '../../utils';
 import { TDateFilter, TTypeFilter } from '../../types';
-import { setDate } from 'date-fns/fp';
+import { getDateFilterText } from '../../utils';
+import withOpacity from '../../utils/withOpacity';
 
 type TProps = {
   visible: boolean;
@@ -42,13 +31,7 @@ const TransactionFilters = (props: TProps) => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const styles = createStyles(colors);
-  const filters = [
-    'This month',
-    'This week',
-    'Today',
-    'This year',
-    'Range',
-  ] as const;
+
   const [dateFilter, setDateFilter] = useState<TDateFilter>({
     isThisMonth: true,
   });
@@ -57,6 +40,7 @@ const TransactionFilters = (props: TProps) => {
     state => state.filters.categoryId,
   );
   const setFilters = useTransactionsStore(state => state.setFilters);
+  const filters = useTransactionsStore(state => state.filters);
   const { categories } = useCategories();
 
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
