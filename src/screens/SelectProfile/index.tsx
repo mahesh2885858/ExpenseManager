@@ -62,6 +62,7 @@ const SelectProfile = () => {
           {t('profileSetup.yourProfiles')}
         </AppText.Regular>
         <FlashList
+        showsVerticalScrollIndicator={false}
           data={profiles}
           keyExtractor={item => item.id}
           renderItem={({ item }) => {
@@ -174,6 +175,7 @@ const createStyles = (colors: AppTheme['colors']) =>
       borderWidth: 1,
       borderRadius: borderRadius.md,
       marginTop: spacing.md,
+      marginBottom: spacing.xl,
     },
     addNewText: {
       fontSize: textSize.md,

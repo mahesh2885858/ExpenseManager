@@ -1,37 +1,46 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Icon, Snackbar } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import { Modal, StyleSheet, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { CalendarDate } from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { gs } from '../../common';
+import {
+  AppTheme,
+  borderRadius,
+  spacing,
+  textSize,
+  useAppTheme,
+} from '../../../theme';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import CategorySelectionModal from '../../components/organisms/CategorySelectionModal';
+import AppText from '../../components/molecules/AppText';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useCategories from '../../hooks/useCategories';
 import useTransactionsStore from '../../stores/transactionsStore';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { TDateFilter, TTypeFilter } from '../../types';
+import { getDateFilterText } from '../../utils';
+import withOpacity from '../../utils/withOpacity';
 
-const TransactionFilters = () => {
+type TProps = {
+  visible: boolean;
+  onClose: () => void;
+};
+
+const TransactionFilters = (props: TProps) => {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation();
-  const filters = [
-    'This month',
-    'This week',
-    'Today',
-    'This year',
-    'Range',
-  ] as const;
-  const transactionType = ['Income', 'Expense', 'All'];
-  const dateFilter = useTransactionsStore(state => state.filters.date);
-  const typeFilter = useTransactionsStore(state => state.filters.type);
+  const styles = createStyles(colors);
+
+  const [dateFilter, setDateFilter] = useState<TDateFilter>({
+    isThisMonth: true,
+  });
+  const [txnType, setTxnType] = useState<TTypeFilter | null>(null);
   const categoryFilter = useTransactionsStore(
     state => state.filters.categoryId,
   );
   const setFilters = useTransactionsStore(state => state.setFilters);
-  const resetFilters = useTransactionsStore(state => state.resetFilters);
+  const filters = useTransactionsStore(state => state.filters);
   const { categories } = useCategories();
 
   const [renderCustomDatePicker, setRenderCustomDatePicker] = useState(false);
@@ -41,17 +50,15 @@ const TransactionFilters = () => {
 
   const isAnyFilterApplied = useMemo(() => {
     return (
-      (!!dateFilter && !dateFilter.isThisMonth) ||
-      !!typeFilter ||
-      !!categoryFilter
+      (!!dateFilter && !dateFilter.isThisMonth) || !!txnType || !!categoryFilter
     );
-  }, [dateFilter, typeFilter, categoryFilter]);
+  }, [dateFilter, txnType, categoryFilter]);
 
   const selectedFilter = useMemo(() => {
     if (!dateFilter) return 'This month';
     if (dateFilter.isThisWeek) return 'This week';
     if (dateFilter.isThisMonth) return 'This month';
-    if (dateFilter.isToday) return 'Today';
+    if (dateFilter.isThisQuarter) return 'This quarter';
     if (dateFilter.isThisYear) return 'This year';
     if (dateFilter.range) return 'Range';
     return 'This month';
@@ -64,76 +71,55 @@ const TransactionFilters = () => {
   }, [selectedFilter, dateFilter]);
 
   const selectedType = useMemo(() => {
-    if (!typeFilter) return 'All';
-    return typeFilter === 'expense' ? 'Expense' : 'Income';
-  }, [typeFilter]);
+    if (!txnType) return 'All';
+    return txnType === 'expense' ? 'Expense' : 'Income';
+  }, [txnType]);
 
-  const setDateFilter = useCallback(
+  const setDateFilterLocal = useCallback(
     (item: string, givenRange?: CalendarDate[]) => {
       switch (item) {
-        case 'Today':
-          setFilters({
-            date: {
-              isToday: true,
-            },
-          });
+        case 'This quarter':
+          setDateFilter({ isThisQuarter: true });
           break;
         case 'This week':
-          setFilters({
-            date: {
-              isThisWeek: true,
-            },
-          });
+          setDateFilter({ isThisWeek: true });
+
           break;
         case 'This month':
-          setFilters({
-            date: {
-              isThisMonth: true,
-            },
-          });
+          setDateFilter({ isThisMonth: true });
+
           break;
         case 'This year':
-          setFilters({
-            date: {
-              isThisYear: true,
-            },
-          });
+          setDateFilter({ isThisYear: true });
+
           break;
         case 'Range':
-          setFilters({
-            date: {
-              range: givenRange,
-            },
-          });
+          setDateFilter({ range: givenRange });
+
           break;
 
         default:
-          setFilters({
-            date: null,
-          });
+          setDateFilter({ isThisMonth: true });
+
           break;
       }
     },
-    [setFilters],
+    [setDateFilter],
   );
 
   const setTypeFilter = (type: string) => {
     switch (type) {
       case 'Income':
-        setFilters({
-          type: 'income',
-        });
+        setTxnType('income');
         break;
       case 'Expense':
-        setFilters({
-          type: 'expense',
-        });
+        setTxnType('expense');
+
         break;
 
       default:
-        setFilters({
-          type: null,
-        });
+        setTxnType(null);
+
         break;
     }
   };
@@ -161,9 +147,9 @@ const TransactionFilters = () => {
         setRenderSnack(true);
         return;
       }
-      setDateFilter('Range', [startDate, endDate]);
+      setDateFilterLocal('Range', [startDate, endDate]);
     },
-    [setRenderCustomDatePicker, setDateFilter],
+    [setRenderCustomDatePicker, setDateFilterLocal],
   );
 
   useFocusEffect(
@@ -181,323 +167,399 @@ const TransactionFilters = () => {
     }, [renderSnack]),
   );
 
+  const applyFilters = useCallback(() => {
+    setFilters({
+      date: dateFilter,
+      type: txnType,
+    });
+    props.onClose();
+  }, [dateFilter, txnType, setFilters, props]);
+
+  const resetFilters = useCallback(() => {
+    setDateFilter({
+      isThisMonth: true,
+    });
+    setTxnType(null);
+    setFilters({
+      date: {
+        isThisMonth: true,
+      },
+      type: null,
+    });
+  }, [setFilters]);
+
   return (
-    <GestureHandlerRootView>
-      <BottomSheetModalProvider>
-        <KeyboardAvoidingView
-          style={[
-            gs.centerItems,
-            gs.fullFlex,
-            {
-              backgroundColor: colors.backdrop,
-            },
-          ]}
+    <Modal
+      visible={props.visible}
+      onRequestClose={props.onClose}
+      animationType="slide"
+      backdropColor={withOpacity(colors.surface, 0.15)}
+    >
+      <View
+        onTouchStart={e => {
+          e.stopPropagation();
+          props.onClose();
+        }}
+        style={[styles.container]}
+      >
+        <View
+          onTouchStart={e => {
+            e.stopPropagation();
+          }}
+          style={[styles.filtersBox]}
         >
-          <View
-            style={[
-              styles.filterBox,
-              {
-                backgroundColor: colors.background,
-              },
-            ]}
-          >
-            <View
-              style={[
-                gs.flexRow,
-                gs.itemsCenter,
-                gs.justifyBetween,
+          <View style={[styles.titleBox]}>
+            <AppText.Bold style={[styles.title]}>
+              {t('filters.filters')}
+            </AppText.Bold>
+            <PressableWithFeedback
+              onPress={resetFilters}
+              style={[styles.reset]}
+            >
+              <AppText.Regular style={[styles.title]}>
+                {t('filters.reset')}
+              </AppText.Regular>
+              <Icon
+                size={textSize.lg}
+                color={colors.onSurfaceVariant}
+                source={'reload'}
+              />
+            </PressableWithFeedback>
+          </View>
 
-                {
-                  paddingHorizontal: spacing.sm,
-                  paddingTop: spacing.sm,
-                },
-              ]}
+          {/*Date range starts*/}
+          <View style={[styles.dateContainer]}>
+            <View style={[styles.filterTitle]}>
+              <Icon
+                source={'clock'}
+                size={textSize.lg}
+                color={colors.onSurface}
+              />
+              <AppText.Medium style={[styles.dateText]}>
+                {t('filters.dateRange')}
+              </AppText.Medium>
+            </View>
+            <PressableWithFeedback
+              onPress={() => {
+                setRenderCustomDatePicker(true);
+              }}
+              style={[styles.dateBox]}
             >
-              <Text
-                style={[
-                  {
-                    color: colors.onBackground,
-                    fontSize: textSize.lg,
-                  },
-                ]}
-              >
-                Filters
-              </Text>
+              <AppText style={[styles.selectedDateText]}>
+                {getDateFilterText(dateFilter)}
+              </AppText>
+              <Icon
+                source={'chevron-down'}
+                color={colors.onSurface}
+                size={textSize.lg}
+              />
+            </PressableWithFeedback>
+            <View style={[styles.datePillContainer]}>
               <PressableWithFeedback
-                onPress={() => {
-                  navigation.goBack();
-                }}
-                style={{
-                  paddingVertical: spacing.sm,
-                }}
-              >
-                <Icon source={'close'} size={textSize.lg} />
-              </PressableWithFeedback>
-            </View>
-            {/* date filters */}
-            <View
-              style={[
-                styles.dateFilter,
-                gs.flexRow,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                },
-              ]}
-            >
-              {filters.map(item => {
-                const isSelected = selectedFilter === item;
-                const isRange = item === 'Range';
-                return (
-                  <PressableWithFeedback
-                    onPress={() => {
-                      if (isRange) {
-                        setRenderCustomDatePicker(true);
-                      } else {
-                        setDateFilter(item);
-                      }
-                    }}
-                    style={[
-                      styles.filterItem,
-                      {
-                        borderColor: isSelected
-                          ? colors.secondaryContainer
-                          : colors.onSecondaryContainer,
-                        backgroundColor: isSelected
-                          ? colors.secondaryContainer
-                          : colors.surface,
-                      },
-                    ]}
-                    key={item}
-                  >
-                    <Text
-                      style={{
-                        color: colors.onPrimaryContainer,
-                        fontSize: textSize.sm,
-                      }}
-                    >
-                      {item}
-                    </Text>
-                  </PressableWithFeedback>
-                );
-              })}
-            </View>
-            {/* transaction type filters */}
-            <View
-              style={[
-                styles.dateFilter,
-                gs.flexRow,
-                {
-                  borderColor: colors.onSurfaceDisabled,
-                },
-              ]}
-            >
-              {transactionType.map(item => {
-                const isSelected = selectedType === item;
-                return (
-                  <PressableWithFeedback
-                    onPress={() => setTypeFilter(item)}
-                    style={[
-                      styles.filterItem,
-                      {
-                        borderColor: isSelected
-                          ? colors.secondaryContainer
-                          : colors.onSecondaryContainer,
-                        backgroundColor: isSelected
-                          ? colors.secondaryContainer
-                          : colors.surface,
-                      },
-                    ]}
-                    key={item}
-                  >
-                    <Text
-                      style={{
-                        color: colors.onPrimaryContainer,
-                        fontSize: textSize.sm,
-                      }}
-                    >
-                      {item}
-                    </Text>
-                  </PressableWithFeedback>
-                );
-              })}
-            </View>
-            {/* category filter */}
-            <View
-              style={[
-                gs.flexRow,
-                gs.itemsCenter,
-                {
-                  gap: spacing.sm,
-                },
-              ]}
-            >
-              <View
+                onPress={() => setDateFilterLocal('This week')}
                 style={[
-                  styles.categoryBox,
-                  gs.fullFlex,
-
-                  {
-                    borderColor: colors.onPrimaryContainer,
-                  },
+                  styles.datePill,
+                  dateFilter.isThisWeek && styles.datePillSelected,
                 ]}
               >
-                <PressableWithFeedback
-                  onPress={() => handlePresent()}
-                  style={[gs.flexRow, gs.justifyBetween, gs.itemsCenter]}
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisWeek && styles.datePillTextSelected,
+                  ]}
                 >
-                  <Text
-                    style={[
-                      {
-                        color: colors.onPrimaryContainer,
-                      },
-                    ]}
-                  >
-                    {categoryFilter === null
-                      ? 'All'
-                      : categories.filter(c => c.id === categoryFilter)[0]
-                          ?.name ?? ''}
-                  </Text>
-                  <Icon source={'chevron-down'} size={spacing.md} />
-                </PressableWithFeedback>
-              </View>
-              <PressableWithFeedback
-                onPress={resetCategoryFilter}
-                hidden={categoryFilter === null}
-              >
-                <Icon source={'restart'} size={textSize.xl} />
-              </PressableWithFeedback>
-            </View>
-            <View style={[gs.flexRow, gs.centerItems, styles.filterButtonBox]}>
-              <PressableWithFeedback
-                hidden={!isAnyFilterApplied}
-                style={[
-                  styles.filterButton,
-                  {
-                    backgroundColor: colors.secondaryContainer,
-                  },
-                ]}
-                onPress={resetFilters}
-              >
-                <Text
-                  style={{
-                    fontSize: textSize.md,
-                    color: colors.onSecondaryContainer,
-                  }}
-                >
-                  Reset
-                </Text>
+                  {t('filters.thisWeek')}
+                </AppText>
               </PressableWithFeedback>
               <PressableWithFeedback
-                onPress={navigation.goBack}
+                onPress={() => setDateFilterLocal('This month')}
                 style={[
-                  styles.filterButton,
-                  {
-                    backgroundColor: colors.secondaryContainer,
-                  },
+                  styles.datePill,
+                  dateFilter.isThisMonth && styles.datePillSelected,
                 ]}
               >
-                <Text
-                  style={{
-                    fontSize: textSize.md,
-                    color: colors.onSecondaryContainer,
-                  }}
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisMonth && styles.datePillTextSelected,
+                  ]}
                 >
-                  Done
-                </Text>
+                  {t('filters.thisMonth')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => setDateFilterLocal('This quarter')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisQuarter && styles.datePillSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisQuarter && styles.datePillTextSelected,
+                  ]}
+                >
+                  {t('filters.thisQuarter')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => setDateFilterLocal('This year')}
+                style={[
+                  styles.datePill,
+                  dateFilter.isThisYear && styles.datePillSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.datePillText,
+                    dateFilter.isThisYear && styles.datePillTextSelected,
+                  ]}
+                >
+                  {t('filters.thisYear')}
+                </AppText>
               </PressableWithFeedback>
             </View>
           </View>
-          {renderCustomDatePicker && (
-            <DatePickerModal
-              startDate={range ? range[0] : undefined}
-              label="Select Custom date range"
-              animationType="fade"
-              presentationStyle="pageSheet"
-              locale="en"
-              mode="range"
-              visible={renderCustomDatePicker}
-              endDate={range ? range[0] : undefined}
-              onConfirm={onConfirm}
-              onDismiss={() => {
-                setRenderCustomDatePicker(false);
-              }}
-            />
-          )}
+          {/*Date range ends*/}
 
-          <CategorySelectionModal
-            handleSheetChanges={handleSheetChange}
-            ref={btmShtRef}
-            selectCategory={id => {
-              setCatFilter(id);
-            }}
-            selectedCategory={categoryFilter}
-            forFilter
-          />
-          <Snackbar
-            visible={renderSnack}
-            onDismiss={() => {
-              setRenderSnack(false);
-            }}
-          >
-            <Text>Please select both start and end date.</Text>
-          </Snackbar>
-        </KeyboardAvoidingView>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+          {/*Txn type starts*/}
+          <View style={[styles.txnTypeContainer]}>
+            <View style={[styles.filterTitle]}>
+              <Icon
+                source={'tag'}
+                size={textSize.lg}
+                color={colors.onSurface}
+              />
+              <AppText.Medium style={[styles.dateText]}>
+                {t('filters.type')}
+              </AppText.Medium>
+            </View>
+            <View style={[styles.txnBtnContainer]}>
+              <PressableWithFeedback
+                onPress={() => setTypeFilter('Income')}
+                style={[
+                  styles.txnTypeBtn,
+                  txnType === 'income' && styles.txnTypeBtnSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.txnTypeText,
+                    txnType === 'income' && styles.txnTypeSelectedText,
+                  ]}
+                >
+                  {t('common.income')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => setTypeFilter('Expense')}
+                style={[
+                  styles.txnTypeBtn,
+                  txnType === 'expense' && styles.txnTypeBtnSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.txnTypeText,
+                    txnType === 'expense' && styles.txnTypeSelectedText,
+                  ]}
+                >
+                  {t('common.expense')}
+                </AppText>
+              </PressableWithFeedback>
+              <PressableWithFeedback
+                onPress={() => setTypeFilter('Both')}
+                style={[
+                  styles.txnTypeBtn,
+                  !txnType && styles.txnTypeBtnSelected,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.txnTypeText,
+                    !txnType && styles.txnTypeSelectedText,
+                  ]}
+                >
+                  {t('common.both')}
+                </AppText>
+              </PressableWithFeedback>
+            </View>
+          </View>
+          {/*Txn type ends*/}
+
+          {/*Buttons starts*/}
+          <View style={[styles.buttonContainer]}>
+            <PressableWithFeedback
+              onPress={props.onClose}
+              style={[styles.button, styles.cancel]}
+            >
+              <AppText style={[styles.cancelText]}>
+                {t('common.cancel')}
+              </AppText>
+            </PressableWithFeedback>
+            <PressableWithFeedback
+              onPress={applyFilters}
+              style={[styles.button]}
+              disabled={!isAnyFilterApplied}
+            >
+              <AppText>{t('filters.applyFilters')}</AppText>
+            </PressableWithFeedback>
+          </View>
+          {/*Buttons ends*/}
+        </View>
+      </View>
+
+      {renderCustomDatePicker && (
+        <DatePickerModal
+          startDate={range ? range[0] : undefined}
+          label="Select Custom date range"
+          animationType="fade"
+          presentationStyle="pageSheet"
+          locale="en"
+          mode="range"
+          visible={renderCustomDatePicker}
+          endDate={range ? range[0] : undefined}
+          onConfirm={onConfirm}
+          onDismiss={() => {
+            setRenderCustomDatePicker(false);
+          }}
+        />
+      )}
+    </Modal>
   );
 };
 
 export default TransactionFilters;
 
-const styles = StyleSheet.create({
-  filterBox: {
-    position: 'absolute',
-    bottom: 0,
-    height: 400,
-    width: '96%',
-    borderTopEndRadius: borderRadius.xxl,
-    borderTopStartRadius: borderRadius.xxl,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  dateFilter: {
-    gap: spacing.sm,
-    flexWrap: 'wrap',
-    overflow: 'hidden',
-    borderBottomWidth: 0,
-    padding: spacing.sm,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-  },
-  filterItem: {
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.pill,
-  },
-  dropdown: {
-    padding: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-  },
-  dropdownText: {
-    fontSize: textSize.sm,
-  },
-  categoryBox: {
-    marginVertical: spacing.sm,
-    marginHorizontal: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-  },
-  filterButtonBox: {
-    gap: spacing.md,
-  },
-  filterButton: {
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.lg,
-  },
-});
+const createStyles = (colors: AppTheme['colors']) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+
+    filtersBox: {
+      width: '100%',
+      minHeight: 200,
+      backgroundColor: colors.surfaceContainerHigh,
+      borderTopLeftRadius: borderRadius.lg,
+      borderTopRightRadius: borderRadius.lg,
+      paddingTop: spacing.md,
+      paddingHorizontal: spacing.md,
+    },
+    titleBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.lg,
+    },
+    title: {
+      color: colors.onSurface,
+      fontSize: textSize.md,
+    },
+    reset: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    dateContainer: {
+      gap: spacing.sm,
+    },
+    filterTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    dateText: {
+      color: colors.onSurface,
+      fontSize: textSize.md,
+    },
+    dateBox: {
+      borderColor: colors.outline,
+      borderWidth: 1,
+      borderRadius: borderRadius.md,
+      padding: spacing.xs,
+      paddingHorizontal: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    selectedDateText: {
+      color: colors.onSurface,
+      fontSize: textSize.md,
+      flex: 1,
+    },
+    datePillContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    datePill: {
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm1,
+      paddingVertical: spacing.xs,
+      backgroundColor: colors.surfaceContainer,
+    },
+    datePillSelected: {
+      backgroundColor: colors.onSurface,
+    },
+    datePillText: {
+      color: colors.onSurface,
+      fontSize: textSize.xs,
+    },
+    datePillTextSelected: {
+      color: colors.surface,
+    },
+    txnTypeContainer: {
+      gap: spacing.sm,
+      marginTop: spacing.md,
+    },
+    txnBtnContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    txnTypeBtn: {
+      flex: 1,
+      backgroundColor: colors.surfaceContainer,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm1,
+      paddingVertical: spacing.xs,
+    },
+    txnTypeBtnSelected: {
+      backgroundColor: colors.inverseSurface,
+    },
+    txnTypeText: {
+      fontSize: textSize.md,
+      color: colors.onSurface,
+    },
+
+    txnTypeSelectedText: {
+      color: colors.inverseOnSurface,
+    },
+
+    buttonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: spacing.md,
+      gap: spacing.sm,
+      paddingRight: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    button: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      backgroundColor: colors.primary,
+      width: '50%',
+      borderRadius: borderRadius.md,
+    },
+    cancel: {
+      backgroundColor: colors.surfaceBright,
+    },
+    cancelText: {
+      color: colors.onSurface,
+    },
+  });

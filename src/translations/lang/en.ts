@@ -30,6 +30,7 @@ export default {
     unknownCat: 'Unknown category',
     wallet: 'Wallet',
     cancel: 'Cancel',
+    both: 'Both',
   },
   profileSetup: {
     title: 'Setup Profile',
@@ -102,5 +103,17 @@ export default {
   },
   txns: {
     title: 'Transactions',
+    currentFilter: 'Current Filter',
+  },
+  filters: {
+    filters: 'Filters',
+    reset: 'Reset',
+    dateRange: 'Date Range',
+    applyFilters: 'Apply Filters',
+    thisWeek: 'This Week',
+    thisMonth: 'This Month',
+    thisQuarter: 'This Quarter',
+    thisYear: 'This Year',
+    type: 'Type',
   },
 };

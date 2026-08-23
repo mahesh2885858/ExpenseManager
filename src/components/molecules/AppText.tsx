@@ -1,4 +1,3 @@
-import { JSX } from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
 
 export const fontsMap = {
@@ -11,30 +10,31 @@ export const fontsMap = {
   Bold: 'Inter-Bold',
 } as const;
 
-const AppTextBase = (weight: keyof typeof fontsMap) => {
-  return ({ children, style, ...rest }: TextProps) => {
-    return (
-      <Text
-        style={[
-          {
-            fontFamily: fontsMap[weight],
-          } as TextStyle,
-          style,
-        ]}
-        {...rest}
-      >
-        {children}
-      </Text>
-    );
-  };
+type FontWeight = keyof typeof fontsMap;
+
+const AppTextBase = (weight: FontWeight) => {
+  return ({ children, style, ...rest }: TextProps) => (
+    <Text
+      style={[
+        {
+          fontFamily: fontsMap[weight],
+        } as TextStyle,
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
+    </Text>
+  );
 };
 
-const AppText: Record<
-  keyof typeof fontsMap,
-  ({ children, ...rest }: TextProps) => JSX.Element
-> = {} as any;
+type AppTextComponent = ReturnType<typeof AppTextBase> & {
+  [K in FontWeight]: ReturnType<typeof AppTextBase>;
+};
 
-(Object.keys(fontsMap) as Array<keyof typeof fontsMap>).forEach(key => {
+const AppText = AppTextBase('Regular') as AppTextComponent;
+
+(Object.keys(fontsMap) as FontWeight[]).forEach(key => {
   AppText[key] = AppTextBase(key);
 });
 

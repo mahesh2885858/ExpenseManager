@@ -14,6 +14,7 @@ import MaterialTheme from './material-theme.json';
 export const spacing = {
   xs: 4,
   sm: 8,
+  sm1: 12,
   md: 16,
   lg: 24,
   xl: 30,

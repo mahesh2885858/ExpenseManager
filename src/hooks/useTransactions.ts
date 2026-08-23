@@ -1,8 +1,11 @@
 import { isSameDay } from 'date-fns/fp';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ToastAndroid } from 'react-native';
 import { db } from '../db';
-import { buildOrderBy, buildWhereClause } from '../db/helpers/transactions';
+import {
+  buildOrderBy,
+  buildWhereClauseForTxns,
+} from '../db/helpers/transactions';
 import { txnRepo } from '../db/repositories/transactions.repo';
 import useTransactionsStore from '../stores/transactionsStore';
 import {
@@ -89,8 +92,13 @@ const useTransactions = (walletId?: string, search?: string) => {
   const loadInitial = useCallback(async () => {
     try {
       setLoading(true);
-
-      const { clause, args } = buildWhereClause(filters, search, walletId);
+      console.log({ filters });
+      const { clause, args } = buildWhereClauseForTxns(
+        filters,
+        search,
+        walletId,
+      );
+      console.log({ clause, args });
       const orderBy = buildOrderBy(sort);
 
       const result = await db.execute(
@@ -152,8 +160,8 @@ const useTransactions = (walletId?: string, search?: string) => {
 
       setLoading(true);
 
-      const { clause, args } = buildWhereClause(
-        { ...filters, date: null },
+      const { clause, args } = buildWhereClauseForTxns(
+        { ...filters },
         search,
         walletId,
       );
@@ -173,31 +181,39 @@ const useTransactions = (walletId?: string, search?: string) => {
               AND t.id < ?
             )
           )`;
+      const combinedClause=`
+      SELECT
+        t.*,
 
+        json_object(
+          'id', c.id,
+          'name', c.name,
+          'icon', c.icon,
+          'type', c.type
+        ) as category
+
+      FROM transactions t
+
+      LEFT JOIN categories c
+        ON c.id = t.category_id
+
+      ${clause}
+      ${cursorClause}
+
+      ${orderBy}
+
+      LIMIT ${LIMIT}
+      `
+      console.log({
+        combinedClause,
+
+        args:[
+         ...args, cursor.transaction_date, cursor.transaction_date, cursor.id
+        ],
+        filters
+      })
       const result = await db.execute(
-        `
-        SELECT
-          t.*,
-
-          json_object(
-            'id', c.id,
-            'name', c.name,
-            'icon', c.icon,
-            'type', c.type
-          ) as category
-
-        FROM transactions t
-
-        LEFT JOIN categories c
-          ON c.id = t.category_id
-
-        ${clause}
-        ${cursorClause}
-
-        ${orderBy}
-
-        LIMIT ${LIMIT}
-        `,
+       combinedClause ,
         [...args, cursor.transaction_date, cursor.transaction_date, cursor.id],
       );
       const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
@@ -285,6 +301,16 @@ const useTransactions = (walletId?: string, search?: string) => {
     [transactions, setTransactions, removeEmptyGroups],
   );
 
+  const reset = useCallback(() => {
+    setHasMore(true)
+    setTransactions([])
+  }, [setTransactions])
+
+  // whenever a filter is changes we need set hasMore to true again and empty transactions array
+  // to fetch new data for updated filters.
+  useEffect(() => {
+    reset()
+  },[filters,reset])
   return {
     transactions,
     loadInitial,

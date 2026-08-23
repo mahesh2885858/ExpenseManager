@@ -7,3 +7,7 @@ export const generateRecordId = () => {
 export const getCurrentUTCTimeStamp = () => {
   return Date.now();
 };
+
+export const  getRandomInt=(min:number, max:number) =>{
+  return Math.floor(Math.random() * (max - min)) + min;
+}

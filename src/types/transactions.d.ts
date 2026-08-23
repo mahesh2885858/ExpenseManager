@@ -34,18 +34,17 @@ export type TFilterTypes = 'date' | 'type' | 'category';
 export type TSelectedTransactionIds = Set<string>;
 
 export type TDateFilter = {
-  isToday?: boolean;
+  isThisQuarter?: boolean;
   isThisWeek?: boolean;
   isThisMonth?: boolean;
   isThisYear?: boolean;
-
   range?: CalendarDate[];
 };
 
 export type TTypeFilter = 'income' | 'expense';
 
 export type TFilters = {
-  date: TDateFilter | null;
+  date: TDateFilter;
   type: TTypeFilter | null;
   categoryId?: null | string;
   accId?: null | string;

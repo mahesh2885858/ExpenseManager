@@ -68,15 +68,6 @@ const MainStack = () => {
             }}
           />
           <Stack.Screen
-            name="TransactionFilters"
-            component={TransactionFilters}
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
             name="TransactionSort"
             component={TransactionSort}
             options={{
