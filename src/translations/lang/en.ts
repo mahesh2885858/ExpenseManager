@@ -103,6 +103,7 @@ export default {
   },
   txns: {
     title: 'Transactions',
+    currentFilter: 'Current Filter',
   },
   filters: {
     filters: 'Filters',

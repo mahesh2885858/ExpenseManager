@@ -1,3 +1,4 @@
+import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import { format, isThisYear } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -5,22 +6,22 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
-import { useBottomSheetModal as useBottomSheetR } from '@gorhom/bottom-sheet';
 
+import { Icon } from 'react-native-paper';
 import HeaderText from '../../components/atoms/HeaderText';
+import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText from '../../components/molecules/AppText';
 import ScreenWrapper from '../../components/molecules/ScreenWrapper';
-import RenderTransaction from '../../components/RenderTransaction';
-import useTransactions from '../../hooks/useTransactions';
-import useBottomSheetModal from '../../hooks/useBottomSheetModal';
-import { TTransaction } from '../../types';
-import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
-import useFetchRecords from '../../hooks/useFetchRecords';
 import EmptyTransactionsComponent from '../../components/organisms/EmptyTransactionsComponent';
-import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import { Icon } from 'react-native-paper';
-import TransactionFilters from '../TransactionFilters';
+import RenderTransaction from '../../components/RenderTransaction';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
+import useFetchRecords from '../../hooks/useFetchRecords';
+import useTransactions from '../../hooks/useTransactions';
 import useTransactionsStore from '../../stores/transactionsStore';
+import { TTransaction } from '../../types';
+import { getDateFilterText } from '../../utils';
+import TransactionDetailsSheet from '../TransactionDetails/TransactionDetailsSheet';
+import TransactionFilters from '../TransactionFilters';
 
 const Transactions = () => {
   const { colors } = useAppTheme();
@@ -32,7 +33,7 @@ const Transactions = () => {
   const [renderFilters, setRenderFilters] = useState(false);
   const { dismissAll } = useBottomSheetR();
   const { fetchRecents } = useFetchRecords();
-const filters = useTransactionsStore(state=>state.filters)
+  const filters = useTransactionsStore(state => state.filters);
   const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal(
     () => {
       setSelectedTransaction(null);
@@ -53,9 +54,7 @@ const filters = useTransactionsStore(state=>state.filters)
   );
 
   const isAnyFilterApplied = useMemo(() => {
-    return (
-      (!!filters.date && !filters.date.isThisMonth) || !!filters.type
-    );
+    return (!!filters.date && !filters.date.isThisMonth) || !!filters.type;
   }, [filters]);
 
   useEffect(() => {
@@ -77,15 +76,32 @@ const filters = useTransactionsStore(state=>state.filters)
             setRenderFilters(true);
           }}
         >
-          {isAnyFilterApplied&&<View
-            style={styles.activeFilterDot}
-          />}
+          {isAnyFilterApplied && <View style={styles.activeFilterDot} />}
           <Icon
             source={'filter'}
             size={textSize.xxl}
             color={colors.onSurface}
           />
         </PressableWithFeedback>
+      </View>
+      <View>
+        <View style={[styles.currentFilter]}>
+          <AppText
+            style={{
+              color: colors.onBackground,
+              opacity: 0.5,
+            }}
+          >
+            {t('txns.currentFilter')}:
+          </AppText>
+          <AppText.SemiBold
+            style={{
+              color: colors.onBackground,
+            }}
+          >
+            {getDateFilterText(filters.date)}
+          </AppText.SemiBold>
+        </View>
       </View>
       <View style={[styles.listContainer]}>
         <FlashList
@@ -105,7 +121,9 @@ const filters = useTransactionsStore(state=>state.filters)
             if (item.type === 'header')
               return (
                 <AppText.Medium style={[styles.sectionHeaderText]}>
-                  {isThisYear(item.item)? format(item.item, 'MMM - do'):format(item.item, 'yyyy - MMM - do')}
+                  {isThisYear(item.item)
+                    ? format(item.item, 'MMM - do')
+                    : format(item.item, 'yyyy - MMM - do')}
                 </AppText.Medium>
               );
             return (
@@ -151,15 +169,21 @@ const createStyles = (colors: AppTheme['colors']) =>
       height: 10,
       width: 10,
       borderRadius: 100,
-      backgroundColor:colors.primary,
-      position: "absolute",
+      backgroundColor: colors.primary,
+      position: 'absolute',
       zIndex: 100,
-      right:0
+      right: 0,
     },
     sectionHeaderText: {
       fontSize: textSize.md,
-      color: colors.onBackground,
-      opacity: 0.5,
+
       marginBottom: spacing.xs,
+    },
+    currentFilter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
     },
   });
