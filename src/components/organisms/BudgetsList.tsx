@@ -4,13 +4,13 @@ import { gs } from '../../common';
 import { TBudget } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
 import EmptyBudgetComponent from './EmptyBudgetsComponent';
-import RenderBudget from './RenderBudget';
+import BudgetItem from './BudgetItem';
 
 type TProps = {
   budgets: TBudget[];
 };
 
-const RenderBudgetList = (props: TProps) => {
+const BudgetsList = (props: TProps) => {
   const { budgets } = props;
   const navigation = useNavigation();
   return (
@@ -29,11 +29,11 @@ const RenderBudgetList = (props: TProps) => {
             }}
             key={budget.id}
           >
-            <RenderBudget budget={budget} />
+            <BudgetItem budget={budget} />
           </PressableWithFeedback>
         );
       }}
     />
   );
 };
-export default RenderBudgetList;
+export default BudgetsList;

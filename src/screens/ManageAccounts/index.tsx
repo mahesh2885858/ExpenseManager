@@ -10,7 +10,7 @@ import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import CreateNewWallet from '../../components/organisms/CreateNewWallet';
-import RenderAccountCard from '../../components/organisms/RenderAccountCard';
+import AccountCard from '../../components/organisms/AccountCard';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 import useWalletStore from '../../stores/walletsStore';
@@ -80,7 +80,7 @@ const ManageAccounts = () => {
               extraData={focusedId}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
-                <RenderAccountCard
+                <AccountCard
                   isFocused={focusedId === item.id}
                   changeFocusId={changeFocusId}
                   item={item}

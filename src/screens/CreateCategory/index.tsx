@@ -19,7 +19,7 @@ import CategoryIconSelector from '../../components/organisms/CategoryIconSelecto
 import useCategories from '../../hooks/useCategories';
 import { TCategoryType, TRootStackParamList } from '../../types';
 
-const AddCategory = () => {
+const CreateCategory = () => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { t } = useTranslation();
@@ -185,7 +185,7 @@ const AddCategory = () => {
   );
 };
 
-export default AddCategory;
+export default CreateCategory;
 const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
     header: {

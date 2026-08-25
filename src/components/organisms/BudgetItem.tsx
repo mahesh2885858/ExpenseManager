@@ -15,7 +15,7 @@ import { roundValue } from 'commonutil-core';
 type TProps = {
   budget: TBudget;
 };
-const RenderBudget = (props: TProps) => {
+const BudgetItem = (props: TProps) => {
   const { colors } = useAppTheme();
   console.log({ props });
   const { getFormattedAmount } = useHelpers();
@@ -61,7 +61,7 @@ const RenderBudget = (props: TProps) => {
   );
 };
 
-export default RenderBudget;
+export default BudgetItem;
 
 const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({

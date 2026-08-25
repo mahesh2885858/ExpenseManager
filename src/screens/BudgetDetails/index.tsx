@@ -16,7 +16,7 @@ import {
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText from '../../components/molecules/AppText';
-import RenderTransactionList from '../../components/RenderTransactionList';
+import TransactionsList from '../../components/TransactionsList';
 import { budgetRepo } from '../../db/repositories/budgets.repo';
 import useBudgets from '../../hooks/useBudgets';
 import useHelpers from '../../hooks/useHelpers';
@@ -237,7 +237,7 @@ const BudgetDetails = () => {
       {/*Budget details ends*/}
       {/*Transactions for this budget starts*/}
       <View style={[gs.fullFlex]}>
-        <RenderTransactionList
+        <TransactionsList
           onDeleteCallback={onItemDelete}
           transactions={transactions}
         />

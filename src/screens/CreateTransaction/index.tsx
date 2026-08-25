@@ -39,7 +39,7 @@ import useProfileStore from '../../stores/profileStore';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
-const AddTransaction = () => {
+const CreateTransaction = () => {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const { top } = useSafeAreaInsets();
@@ -468,7 +468,7 @@ const AddTransaction = () => {
     </KeyboardAvoidingView>
   );
 };
-export default AddTransaction;
+export default CreateTransaction;
 
 const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({

@@ -15,8 +15,8 @@ import {
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
 import AppText from '../../components/molecules/AppText';
-import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
-import RenderTransactionList from '../../components/RenderTransactionList';
+import BudgetsList from '../../components/organisms/BudgetsList';
+import TransactionsList from '../../components/TransactionsList';
 import useFetchRecords from '../../hooks/useFetchRecords';
 import useHelpers from '../../hooks/useHelpers';
 import useProfiles from '../../hooks/useProfiles';
@@ -238,7 +238,7 @@ const Home = () => {
               />
             </PressableWithFeedback>
           </View>
-          <RenderBudgetList budgets={budgets} />
+          <BudgetsList budgets={budgets} />
         </View>
         {/*Budget ends*/}
 
@@ -293,7 +293,7 @@ const Home = () => {
             </PressableWithFeedback>
           </View>
           <View style={[gs.fullFlex]}>
-            <RenderTransactionList
+            <TransactionsList
               scrollDisabled={true} // since we are rendering upto 10 transactions it should be fine to disable flashlist's virtualization
               transactions={recents}
             />

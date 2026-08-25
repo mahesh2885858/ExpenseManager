@@ -16,7 +16,7 @@ import Card from './atoms/Card';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 import AppText from './molecules/AppText';
 
-const RenderTransaction = (props: {
+const TransactionItem = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
@@ -85,7 +85,7 @@ const RenderTransaction = (props: {
   );
 };
 
-export default RenderTransaction;
+export default TransactionItem;
 
 const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({
