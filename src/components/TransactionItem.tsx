@@ -15,8 +15,9 @@ import withOpacity from '../utils/withOpacity';
 import Card from './atoms/Card';
 import PressableWithFeedback from './atoms/PressableWithFeedback';
 import AppText from './molecules/AppText';
+import { getMaxText } from 'commonutil-core';
 
-const RenderTransaction = (props: {
+const TransactionItem = (props: {
   item: TTransaction;
   onItemPress: (t: TTransaction) => void;
 }) => {
@@ -55,16 +56,19 @@ const RenderTransaction = (props: {
             <AppText.Regular style={[styles.catName]}>
               {props.item.category?.name ?? ''}
             </AppText.Regular>
-            <AppText.Regular
-              style={[
-                {
-                  color: theme.colors.onSurfaceVariant,
-                  fontSize: textSize.xs,
-                },
-              ]}
-            >
-              {props.item.category?.name ?? ''}
-            </AppText.Regular>
+            {props.item.description && (
+              <AppText.Regular
+                style={[
+                  {
+                    color: theme.colors.onSurfaceVariant,
+                    fontSize: textSize.xs,
+                  },
+                ]}
+              >
+                {getMaxText(props.item.description.replaceAll('\n', ' '), 15) ??
+                  ''}
+              </AppText.Regular>
+            )}
           </View>
           <AppText.Medium
             style={[
@@ -85,7 +89,7 @@ const RenderTransaction = (props: {
   );
 };
 
-export default RenderTransaction;
+export default TransactionItem;
 
 const createStyles = (colors: AppTheme['colors']) =>
   StyleSheet.create({

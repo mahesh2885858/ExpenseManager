@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import {
@@ -8,31 +8,40 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
-import { DEFAULT_CATEGORY_ID, gs } from '../../common';
+import { gs } from '../../common';
+import useWallets from '../../hooks/useWallets';
+import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useTransactions from '../../hooks/useTransactions';
-import useCategoriesStore from '../../stores/categoriesStore';
-import { TCategorySummary } from '../../types';
+import { TWallet } from '../../types';
 import PressableWithFeedback from '../atoms/PressableWithFeedback';
+import CreateNewWallet from './CreateNewWallet';
 
 type TProps = {
-  item: TCategorySummary;
+  item: TWallet;
   isFocused?: boolean;
   changeFocusId: (id: string) => void;
 };
 
 const AnimatedPressable = createAnimatedComponent(PressableWithFeedback);
-const cardHeightCollapsed = 120;
-const cardHeightExpanded = 180;
+const cardHeightCollapsed = 130;
+const cardHeightExpanded = 200;
 const cardHeightDeleteExpanded = 330;
 
-const RenderCategoryCard = (props: TProps) => {
+const AccountCard = (props: TProps) => {
   const { item } = props;
   const { colors } = useAppTheme();
   const animH = useSharedValue(cardHeightCollapsed);
   const [openDelDesc, setOpenDelDesc] = useState(false);
+  const {
+    getIncomeExpenseForWallet: getIncomeExpenseForAcc,
+    deleteWallet: deleteAcc,
+  } = useWallets();
   const navigation = useNavigation();
-  const deleteCat = useCategoriesStore(state => state.removeCategory);
   const { getFormattedAmount } = useTransactions({});
+  const { btmShtRef, handlePresent, handleSheetChange } = useBottomSheetModal();
+  const totals = useMemo(() => {
+    return getIncomeExpenseForAcc(props.item.id);
+  }, [getIncomeExpenseForAcc, props.item.id]);
 
   useEffect(() => {
     if (props.isFocused) {
@@ -56,9 +65,7 @@ const RenderCategoryCard = (props: TProps) => {
 
   return (
     <AnimatedPressable
-      onPress={() => {
-        props.changeFocusId(props.isFocused ? '' : item.id);
-      }}
+      onPress={() => props.changeFocusId(props.isFocused ? '' : item.id)}
       style={[
         styles.container,
         {
@@ -67,20 +74,28 @@ const RenderCategoryCard = (props: TProps) => {
         },
       ]}
     >
-      <View style={[gs.flexRow]}>
+      <Text
+        style={[
+          styles.text,
+          {
+            color: colors.onBackground,
+          },
+        ]}
+      >
+        {item.name}
+      </Text>
+      <View>
         <Text
           style={[
-            gs.fullFlex,
             styles.text,
             {
               color: colors.onBackground,
             },
           ]}
         >
-          {item.name}
+          Balance: {getFormattedAmount(totals.balance)}
         </Text>
       </View>
-
       <View style={[styles.tTypeBox, gs.flexRow, gs.itemsCenter]}>
         <View
           style={[
@@ -109,7 +124,7 @@ const RenderCategoryCard = (props: TProps) => {
               },
             ]}
           >
-            {getFormattedAmount(item.income ?? 0)}
+            {getFormattedAmount(totals.income ?? 0)}
           </Text>
         </View>
         <View
@@ -139,16 +154,13 @@ const RenderCategoryCard = (props: TProps) => {
               },
             ]}
           >
-            {getFormattedAmount(item.expense ?? 0)}
+            {getFormattedAmount(totals.expense ?? 0)}
           </Text>
         </View>
       </View>
       <View style={[styles.actionBox]}>
         <PressableWithFeedback
-          hidden={props.item.id === DEFAULT_CATEGORY_ID}
-          onPress={() => {
-            setOpenDelDesc(true);
-          }}
+          onPress={() => setOpenDelDesc(true)}
           feedbackColor={colors.background}
           style={[styles.action]}
         >
@@ -157,11 +169,7 @@ const RenderCategoryCard = (props: TProps) => {
         <PressableWithFeedback
           feedbackColor={colors.background}
           style={[styles.action]}
-          onPress={() =>
-            navigation.navigate('AddCategory', {
-              category: props.item,
-            })
-          }
+          onPress={handlePresent}
         >
           <Icon source={'pencil'} size={textSize.xl} />
         </PressableWithFeedback>
@@ -171,7 +179,7 @@ const RenderCategoryCard = (props: TProps) => {
           onPress={() => {
             navigation.navigate('FilteredTransactions', {
               id: props.item.id,
-              type: 'category',
+              type: 'account',
             });
           }}
         >
@@ -191,11 +199,12 @@ const RenderCategoryCard = (props: TProps) => {
             },
           ]}
         >
-          Are you sure you want to delete?
+          Deleting this wallet will also delete all transactions associated with
+          this wallet. Are you sure you want to continue?
         </Text>
         <View style={[gs.flexRow, styles.btnContainer]}>
           <PressableWithFeedback
-            onPress={() => deleteCat(props.item.id)}
+            onPress={() => deleteAcc(props.item.id)}
             style={[
               {
                 backgroundColor: colors.errorContainer,
@@ -240,11 +249,16 @@ const RenderCategoryCard = (props: TProps) => {
           </PressableWithFeedback>
         </View>
       </View>
+      <CreateNewWallet
+        accToEdit={props.item}
+        handleSheetChanges={handleSheetChange}
+        ref={btmShtRef}
+      />
     </AnimatedPressable>
   );
 };
 
-export default RenderCategoryCard;
+export default AccountCard;
 
 const styles = StyleSheet.create({
   container: {
@@ -252,6 +266,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: spacing.sm,
+    // height: cardHeightCollapsed,
     overflow: 'hidden',
   },
   text: {
@@ -262,7 +277,7 @@ const styles = StyleSheet.create({
   tTypeBox: {
     borderRadius: borderRadius.md,
     gap: spacing.md,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   tType: {
     paddingLeft: spacing.md,

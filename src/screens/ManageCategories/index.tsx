@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import RenderCategoryCard from '../../components/organisms/RenderCategoryCard';
+import CategoryCard from '../../components/organisms/CategoryCard';
 import useCategories from '../../hooks/useCategories';
 import useGetKeyboardHeight from '../../hooks/useGetKeyboardHeight';
 
@@ -77,7 +77,7 @@ const ManageCategories = () => {
               extraData={focusedId}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
-                <RenderCategoryCard
+                <CategoryCard
                   isFocused={focusedId === item.id}
                   changeFocusId={changeFocusId}
                   item={item}

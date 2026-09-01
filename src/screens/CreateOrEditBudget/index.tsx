@@ -40,7 +40,7 @@ import {
 import { getCurrentUTCTimeStamp } from '../../utils';
 
 const dateFormatString = 'do MMM yyyy';
-const AddOrEditBudget = () => {
+const CreateOrEditBudget = () => {
   const { colors } = useAppTheme();
   const profile_id = useProfileStore(state => state.selectedProfileId);
   const { t } = useTranslation();
@@ -436,7 +436,7 @@ const AddOrEditBudget = () => {
     </ScreenWrapper>
   );
 };
-export default AddOrEditBudget;
+export default CreateOrEditBudget;
 const createStyles = (colors: AppTheme['colors']) => {
   const styles = StyleSheet.create({
     container: {

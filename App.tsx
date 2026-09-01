@@ -22,9 +22,8 @@ const App = () => {
   }, [theme, systemTheme]);
 
   useEffect(() => {
-    initDB()
-
-  },[])
+    initDB();
+  }, []);
   return (
     <SafeAreaProvider>
       <PaperProvider

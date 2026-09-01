@@ -13,7 +13,7 @@ import PressableWithFeedback from '../../components/atoms/PressableWithFeedback'
 import AppText from '../../components/molecules/AppText';
 import ScreenWrapper from '../../components/molecules/ScreenWrapper';
 import EmptyTransactionsComponent from '../../components/organisms/EmptyTransactionsComponent';
-import RenderTransaction from '../../components/RenderTransaction';
+import TransactionItem from '../../components/TransactionItem';
 import useBottomSheetModal from '../../hooks/useBottomSheetModal';
 import useFetchRecords from '../../hooks/useFetchRecords';
 import useTransactions from '../../hooks/useTransactions';
@@ -127,7 +127,7 @@ const Transactions = () => {
                 </AppText.Medium>
               );
             return (
-              <RenderTransaction item={item.item} onItemPress={onItemPress} />
+              <TransactionItem item={item.item} onItemPress={onItemPress} />
             );
           }}
           onEndReached={() => {

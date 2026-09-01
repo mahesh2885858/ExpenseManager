@@ -5,7 +5,7 @@ import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppTheme, spacing, textSize, useAppTheme } from '../../../theme';
 import PressableWithFeedback from '../../components/atoms/PressableWithFeedback';
-import RenderBudgetList from '../../components/organisms/RenderBudgetsList';
+import BudgetsList from '../../components/organisms/BudgetsList';
 import useBudgetStore from '../../stores/budgetStore';
 
 const Budget = () => {
@@ -34,7 +34,7 @@ const Budget = () => {
       </View>
       {/*header ends*/}
       {/*BudgetCard starts*/}
-      <RenderBudgetList budgets={budgets} />
+      <BudgetsList budgets={budgets} />
       {/*BudgetCard ends*/}
     </View>
   );

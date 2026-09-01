@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, spacing, textSize, useAppTheme } from '../../../theme';
 import { gs } from '../../common';
 import CommonHeader from '../../components/organisms/CommonHeader';
-import RenderTransactionList from '../../components/RenderTransactionList';
+import TransactionsList from '../../components/TransactionsList';
 import useTransactions from '../../hooks/useTransactions';
 import { TFilters, TRootStackParamList } from '../../types';
 import useWallets from '../../hooks/useWallets';
@@ -186,7 +186,7 @@ const FilteredTransactions = () => {
               No transactions yet!!
             </Text>
           ) : (
-            <RenderTransactionList transactions={filteredTransactions} />
+            <TransactionsList transactions={filteredTransactions} />
           )}
         </View>
       </View>

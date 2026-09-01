@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",
+    "@notifee/react-native": "^9.1.8",
     "@op-engineering/op-sqlite": "^15.2.12",
     "@react-native-vector-icons/material-design-icons": "^12.3.0",
     "@react-native/new-app-screen": "0.81.1",

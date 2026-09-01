@@ -12,9 +12,9 @@ import useTransactionsStore from '../stores/transactionsStore';
 import { TTransaction } from '../types';
 import AppText from './molecules/AppText';
 import EmptyTransactionsComponent from './organisms/EmptyTransactionsComponent';
-import RenderTransaction from './RenderTransaction';
+import TransactionItem from './TransactionItem';
 
-const RenderTransactionList = ({
+const TransactionsList = ({
   transactions,
   scrollDisabled = false,
   onDeleteCallback = undefined,
@@ -68,7 +68,7 @@ const RenderTransactionList = ({
         data={transactions}
         showsVerticalScrollIndicator={false}
         renderItem={props => (
-          <RenderTransaction onItemPress={onItemPress} item={props.item} />
+          <TransactionItem onItemPress={onItemPress} item={props.item} />
         )}
         keyExtractor={item => item.id}
       />
@@ -110,7 +110,7 @@ const RenderTransactionList = ({
   );
 };
 
-export default RenderTransactionList;
+export default TransactionsList;
 
 const styles = StyleSheet.create({
   container: {

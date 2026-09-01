@@ -5,7 +5,7 @@ import WelcomeScreen from '../screens/InitialSetup/WelcomeScreen';
 import useWalletStore from '../stores/walletsStore';
 import { TRootStackParamList } from '../types';
 import MainBottomTabs from './MainBottomTabs';
-import AddTransaction from '../screens/AddTransaction';
+import CreateTransaction from '../screens/CreateTransaction';
 import TransactionDetails from '../screens/TransactionDetails';
 import TransactionFilters from '../screens/TransactionFilters';
 import ManageAccounts from '../screens/ManageAccounts';
@@ -14,8 +14,8 @@ import FilteredTransactions from '../screens/FilteredTransactions';
 import ManageCategories from '../screens/ManageCategories';
 import TransactionSort from '../screens/TransactionSort';
 import BudgetDetails from '../screens/BudgetDetails';
-import AddOrEditBudget from '../screens/AddOrEditBudget';
-import AddCategory from '../screens/AddCategory';
+import CreateOrEditBudget from '../screens/CreateOrEditBudget';
+import CreateCategory from '../screens/CreateCategory';
 import ProfileSetup from '../screens/InitialSetup/ProfileSetup';
 import useProfileStore from '../stores/profileStore';
 import SelectProfile from '../screens/SelectProfile';
@@ -55,7 +55,7 @@ const MainStack = () => {
           />
           <Stack.Screen
             name="AddTransaction"
-            component={AddTransaction}
+            component={CreateTransaction}
             options={{
               headerShown: false,
             }}
@@ -114,14 +114,14 @@ const MainStack = () => {
           />
           <Stack.Screen
             name="AddOrEditBudget"
-            component={AddOrEditBudget}
+            component={CreateOrEditBudget}
             options={{
               headerShown: false,
             }}
           />
           <Stack.Screen
             name="AddCategory"
-            component={AddCategory}
+            component={CreateCategory}
             options={{
               headerShown: false,
             }}

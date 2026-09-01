@@ -1,6 +1,10 @@
 import { CATEGORY_ICONS } from '../common';
 import { TCategory, TTransaction, TWallet } from '../types';
-import { generateRecordId, getCurrentUTCTimeStamp, getRandomInt } from '../utils';
+import {
+  generateRecordId,
+  getCurrentUTCTimeStamp,
+  getRandomInt,
+} from '../utils';
 import { catRepo } from './repositories/categories.repo';
 import { profileRepository } from './repositories/profiles.repo';
 import { txnRepo } from './repositories/transactions.repo';
@@ -24,7 +28,7 @@ const seedPrfoiles = [
 ];
 
 const seedProfileData = async () => {
-  console.log("seeding profiles data....")
+  console.log('seeding profiles data....');
 
   for (const { createdAt, id, name } of seedPrfoiles) {
     await profileRepository.create({
@@ -57,7 +61,7 @@ const seedWallets: TWallet[] = [
 ];
 
 const seedWalletsData = async () => {
-  console.log("seeding wallets data....")
+  console.log('seeding wallets data....');
   for (const { id, initBalance, name, profileId } of seedWallets) {
     await walletRepo.create({
       id,
@@ -114,7 +118,7 @@ const categories: (Omit<TCategory, 'icon'> & { icon: string })[] = [
 ];
 
 const seedCategoryData = async () => {
-  console.log('categories are being seeded...')
+  console.log('categories are being seeded...');
   for (const { icon, id, name, type } of categories) {
     await catRepo.create({
       icon,
@@ -127,7 +131,7 @@ const seedCategoryData = async () => {
 };
 
 const seedTransactionsData = async () => {
-  console.log('transactions are being seeded...')
+  console.log('transactions are being seeded...');
 
   const generateRandomDate = () => {
     return new Date(
@@ -149,7 +153,7 @@ const seedTransactionsData = async () => {
       type: ['income', 'expense'][getRandomInt(0, 2)],
       wallet_id: seedWallets[getRandomInt(0, seedWallets.length)].id,
     };
- const t=   await txnRepo.create({
+    const t = await txnRepo.create({
       amount: item.amount,
       category_id: item.category_id,
       created_at: item.created_at,
@@ -158,21 +162,18 @@ const seedTransactionsData = async () => {
       transaction_date: item.transaction_date,
       type: item.type,
       wallet_id: item.wallet_id,
-
-    })
-  console.log({t})
+    });
+    console.log({ t });
   }
-}
-
+};
 
 export const seedDummyData = async () => {
   try {
-
- await seedProfileData()
- await seedWalletsData()
- await seedCategoryData()
- await seedTransactionsData()
+    await seedProfileData();
+    await seedWalletsData();
+    await seedCategoryData();
+    await seedTransactionsData();
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
-}
+};
