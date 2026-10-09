@@ -15,6 +15,8 @@ import {
   TTransactionRow,
 } from '../types';
 import { money } from '../utils';
+import { useRecentTransactions } from './useRecentTransactions';
+import useProfileStore from '../stores/profileStore';
 
 const LIMIT = 5;
 
@@ -29,6 +31,10 @@ const useTransactions = (walletId?: string, search?: string) => {
   const updateTxn = useTransactionsStore(state => state.updateTransaction);
   const transactions = useTransactionsStore(state => state.transactions);
   const setTransactions = useTransactionsStore(state => state.setTransactions);
+  const summary = useTransactionsStore(state => state.summary);
+  const setSummary = useTransactionsStore(state => state.setSummary);
+  const { getMonthlySummary, getBalance } = useRecentTransactions();
+  const selectedProfileId = useProfileStore(state => state.selectedProfileId);
 
   const removeEmptyGroups = useCallback((txns: TGroupedTransactions) => {
     const result: TGroupedTransactions = [];
@@ -181,7 +187,7 @@ const useTransactions = (walletId?: string, search?: string) => {
               AND t.id < ?
             )
           )`;
-      const combinedClause=`
+      const combinedClause = `
       SELECT
         t.*,
 
@@ -203,19 +209,24 @@ const useTransactions = (walletId?: string, search?: string) => {
       ${orderBy}
 
       LIMIT ${LIMIT}
-      `
+      `;
       console.log({
         combinedClause,
 
-        args:[
-         ...args, cursor.transaction_date, cursor.transaction_date, cursor.id
+        args: [
+          ...args,
+          cursor.transaction_date,
+          cursor.transaction_date,
+          cursor.id,
         ],
-        filters
-      })
-      const result = await db.execute(
-       combinedClause ,
-        [...args, cursor.transaction_date, cursor.transaction_date, cursor.id],
-      );
+        filters,
+      });
+      const result = await db.execute(combinedClause, [
+        ...args,
+        cursor.transaction_date,
+        cursor.transaction_date,
+        cursor.id,
+      ]);
       const rows = (result.rows as unknown as TTransactionRow[]).map(row => {
         const category = JSON.parse(row.category);
         const icon = JSON.parse(category.icon);
@@ -290,6 +301,13 @@ const useTransactions = (walletId?: string, search?: string) => {
           t => t.type === 'header' || (t.type === 'txn' && t.item.id !== id),
         );
         setTransactions(removeEmptyGroups(filtered));
+        // Fetch summary again
+        const incomeAndExpense = await getMonthlySummary(selectedProfileId);
+        const balance = await getBalance(selectedProfileId);
+        setSummary({
+          ...incomeAndExpense,
+          balance,
+        });
       } catch (e) {
         console.log('Error while deleting the transaction: ', e);
         ToastAndroid.show(
@@ -298,19 +316,26 @@ const useTransactions = (walletId?: string, search?: string) => {
         );
       }
     },
-    [transactions, setTransactions, removeEmptyGroups],
+    [
+      transactions,
+      selectedProfileId,
+      getMonthlySummary,
+      getBalance,
+      setTransactions,
+      removeEmptyGroups,
+    ],
   );
 
   const reset = useCallback(() => {
-    setHasMore(true)
-    setTransactions([])
-  }, [setTransactions])
+    setHasMore(true);
+    setTransactions([]);
+  }, [setTransactions]);
 
   // whenever a filter is changes we need set hasMore to true again and empty transactions array
   // to fetch new data for updated filters.
   useEffect(() => {
-    reset()
-  },[filters,reset])
+    reset();
+  }, [filters, reset]);
   return {
     transactions,
     loadInitial,

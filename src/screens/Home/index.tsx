@@ -40,8 +40,8 @@ const Home = () => {
     fetchProfiles,
   } = useFetchRecords();
 
-  const [summary, setSummary] = useState({ income: 0, expense: 0 });
-  const [balance, setBalance] = useState(0);
+  const summary = useTransactionsStore(state => state.summary);
+  const setSummary = useTransactionsStore(state => state.setSummary);
   const { getMonthlySummary, getBalance } = useRecentTransactions();
   const recents = useTransactionsStore(state => state.recents);
   const { getFormattedAmount } = useHelpers();
@@ -62,18 +62,20 @@ const Home = () => {
     navigation.navigate('SelectProfile');
   }, [navigation]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const sum = await getMonthlySummary(selectedProfileId);
-        const bal = await getBalance(selectedProfileId);
+  const load = useCallback(async () => {
+    try {
+      const incomeAndExpense = await getMonthlySummary(selectedProfileId);
+      const bal = await getBalance(selectedProfileId);
 
-        setSummary(sum as unknown as typeof summary);
-        setBalance(bal);
-      } catch (e) {
-        console.log({ e });
-      }
-    };
+      setSummary({
+        ...incomeAndExpense,
+        balance: bal,
+      });
+    } catch (e) {
+      console.log({ e });
+    }
+  }, [getBalance, getMonthlySummary, selectedProfileId, setSummary]);
+  useEffect(() => {
     load();
     fetchWallets();
     fetchProfiles();
@@ -82,8 +84,8 @@ const Home = () => {
     fetchBudgets();
   }, [
     selectedProfileId,
+    load,
     fetchWallets,
-    setBalance,
     fetchProfiles,
     getBalance,
     getMonthlySummary,
@@ -131,7 +133,7 @@ const Home = () => {
           <AppText.Bold
             style={[{ fontSize: textSize.lg, color: colors.onSurface }]}
           >
-            {getFormattedAmount(balance)}
+            {getFormattedAmount(summary.balance)}
           </AppText.Bold>
           <View
             style={[
