@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -36,6 +36,7 @@ import { useTransactionForm } from '../../hooks/useTransactionForm';
 import useTransactions from '../../hooks/useTransactions';
 import useWallets from '../../hooks/useWallets';
 import useProfileStore from '../../stores/profileStore';
+import useFetchRecords from '../../hooks/useFetchRecords';
 const DATE_FORMAT = 'dd MMM yyyy';
 const ICON_SIZE = 24;
 
@@ -51,7 +52,7 @@ const CreateTransaction = () => {
   const { wallets, defaultWalletId } = useWallets();
 
   const { getFormattedAmount } = useHelpers();
-
+  const { fetchWallets, fetchCategories } = useFetchRecords();
   const { addTransaction, updateTransaction } = useTransactions();
 
   const selectedProfileId = useProfileStore(state => state.selectedProfileId);
@@ -111,6 +112,10 @@ const CreateTransaction = () => {
       borderWidth: hasError ? 1 : 0,
     };
   }, [colors, errorFields]);
+  useEffect(() => {
+    fetchWallets();
+    fetchCategories();
+  }, [fetchWallets, fetchCategories]);
 
   return (
     <KeyboardAvoidingView
