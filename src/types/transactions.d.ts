@@ -71,3 +71,9 @@ export type TTransactionItem = {
   item: TTransaction;
 };
 export type TGroupedTransactions = Array<THeaderItem | TTransactionItem>;
+
+export type TSummary = {
+  balance: number;
+  income: number;
+  expense: number;
+};
